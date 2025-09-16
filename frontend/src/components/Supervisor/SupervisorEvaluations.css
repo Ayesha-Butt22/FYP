@@ -18,13 +18,28 @@
   color: #01337a !important;
 }
 
-.rubric-table {
-  margin-bottom: 16px;
-  max-width: 650px;
+/* ENHANCED TABLE */
+.rubric-table.enhanced-table {
+  margin-bottom: 18px;
+  max-width: 700px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 5px #01337a13;
+  background: #f8fafc;
+}
+.rubric-table.enhanced-table .MuiTableCell-root {
+  padding: 13px 10px !important;
+  font-size: 16px !important;
+}
+.rubric-table.enhanced-table .MuiTableRow-root {
+  height: 50px !important;
 }
 
 .table-header {
   font-weight: 800 !important;
+  background: #f1f5fa !important;
+  font-size: 16px !important;
+  color: #01337a !important;
 }
 
 .marks-input {
@@ -66,7 +81,8 @@
 
 .evaluated-chip {
   font-weight: 700 !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 4px !important;
+  font-size: 1rem !important;
 }
 
 .submit-evaluation-btn {
@@ -79,20 +95,54 @@
 .evaluation-table-paper {
   padding: 24px;
   border-radius: 18px;
+  margin-top: 20px;
 }
 
 .all-evals-title {
   font-weight: 700 !important;
   color: #01337a !important;
   margin-bottom: 16px !important;
-}
-
-.hourglass-icon {
-  margin-bottom: -5px !important;
-  color: #2563eb !important;
-  margin-right: 4px;
+  display: block;
 }
 
 .all-evals-table {
   width: 100%;
+}
+
+/* IMPROVED CHIP SPACING & SIZE IN TABLE */
+.evaluation-chip {
+  font-size: 0.93rem !important;
+  min-width: 44px !important;
+  height: 28px !important;
+  padding: 0 8px !important;
+  margin-right: 5px !important;
+  vertical-align: middle;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.evaluation-chip.percent-chip {
+  min-width: 52px !important;
+}
+
+/* Add vertical spacing to table rows */
+.all-evals-table .MuiTableRow-root {
+  height: 46px !important;
+}
+
+/* Add a little space around each Chip in the table cell */
+.all-evals-table .MuiTableCell-root {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+/* PieChart wrapper for proper visibility */
+.rubric-piechart-wrap {
+  min-width: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 10px;
 }

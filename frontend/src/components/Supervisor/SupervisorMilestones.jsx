@@ -58,13 +58,14 @@ const STATUS = {
 };
 
 export default function SupervisorMilestones() {
-  const [expanded, setExpanded] = useState({});
+  // Only one expanded: setExpanded to group name or null
+  const [expanded, setExpanded] = useState(null);
 
   return (
     <div className="milestone-dashboard-container">
       <DashboardSectionHeader>Milestones & Timeline</DashboardSectionHeader>
       <div className="milestone-groups-row">
-        {GROUPS.map((group, idx) => {
+        {GROUPS.map((group) => {
           const completed = group.milestones.filter(m => m.status === "completed").length;
           const pending = group.milestones.filter(m => m.status === "pending").length;
           const overdue = group.milestones.filter(m => m.status === "overdue").length;
@@ -119,12 +120,12 @@ export default function SupervisorMilestones() {
               <button
                 className="milestone-toggle-btn"
                 onClick={() =>
-                  setExpanded(exp => ({ ...exp, [group.group]: !exp[group.group] }))
+                  setExpanded(expanded === group.group ? null : group.group)
                 }
               >
-                {expanded[group.group] ? "Hide Timeline" : "Show Timeline"}
+                {expanded === group.group ? "Hide Timeline" : "Show Timeline"}
               </button>
-              {expanded[group.group] && (
+              {expanded === group.group && (
                 <div className="milestone-timeline-table-wrap">
                   <table className="milestone-timeline-table">
                     <thead>
@@ -135,7 +136,7 @@ export default function SupervisorMilestones() {
                       </tr>
                     </thead>
                     <tbody>
-                      {group.milestones.map((m, mIdx) => (
+                      {group.milestones.map((m) => (
                         <tr key={m.name}>
                           <td className="milestone-td">{m.name}</td>
                           <td className="milestone-td">{m.due}</td>

@@ -4,7 +4,7 @@ import {
   TextField, Table, TableHead, TableRow, TableCell, TableBody, LinearProgress, Tooltip, Chip, Divider
 } from "@mui/material";
 import { PieChart } from "@mui/x-charts";
-import { CheckCircle, HourglassTop } from "@mui/icons-material";
+import { CheckCircle } from "@mui/icons-material";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import "./SupervisorEvaluations.css";
 
@@ -21,7 +21,6 @@ const MILESTONES = [
   { id: "Final", name: "Final Report/Defense", weight: 0.5 }
 ];
 
-// Dummy rubrics per milestone
 const RUBRICS = {
   Proposal: [
     { name: "Problem Statement", maxMarks: 5 },
@@ -40,7 +39,6 @@ const RUBRICS = {
   ]
 };
 
-// Dummy evaluations for supervisor
 const DUMMY_EVALUATIONS = [
   {
     groupId: "G-101",
@@ -63,12 +61,22 @@ const DUMMY_EVALUATIONS = [
     percentage: 75,
     timestamp: "2025-09-14 11:00",
     supervisor: true
+  },
+  {
+    groupId: "G-103",
+    milestone: "Mid",
+    scores: [6, 6, 6],
+    feedback: ["", "", ""],
+    totalMarks: 18,
+    maxMarks: 25,
+    percentage: 72,
+    timestamp: "2025-09-16 13:35",
+    supervisor: true
   }
 ];
 
-// Main component
 export default function SupervisorEvaluations() {
-  // Selections & State
+  // State
   const [selectedGroup, setSelectedGroup] = useState("");
   const [selectedMilestone, setSelectedMilestone] = useState("");
   const [rubric, setRubric] = useState([]);
@@ -79,12 +87,10 @@ export default function SupervisorEvaluations() {
   const [formError, setFormError] = useState("");
   const [alreadyEvaluated, setAlreadyEvaluated] = useState(false);
 
-  // Load dummy evaluations (replace w/ API)
   useEffect(() => {
     setEvaluations(DUMMY_EVALUATIONS);
   }, []);
 
-  // Update rubric and reset inputs when milestone changes
   useEffect(() => {
     if (selectedMilestone) {
       setRubric(RUBRICS[selectedMilestone]);
@@ -97,7 +103,6 @@ export default function SupervisorEvaluations() {
     }
   }, [selectedMilestone]);
 
-  // Auto-check for double evaluation
   useEffect(() => {
     if (!selectedGroup || !selectedMilestone) {
       setAlreadyEvaluated(false);
@@ -109,12 +114,11 @@ export default function SupervisorEvaluations() {
     setAlreadyEvaluated(exists);
   }, [selectedGroup, selectedMilestone, evaluations]);
 
-  // Calculate total and percent
   const totalMarks = scores.reduce((sum, val) => sum + (Number(val) || 0), 0);
   const maxMarks = rubric.reduce((sum, item) => sum + item.maxMarks, 0);
   const percentage = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0;
+  const weightedPercent = Math.round(percentage * 0.5);
 
-  // Handle input
   const handleScoreChange = (idx, value) => {
     const v = Math.max(0, Math.min(Number(value), rubric[idx].maxMarks));
     setScores(scores.map((s, i) => (i === idx ? v : s)));
@@ -123,7 +127,6 @@ export default function SupervisorEvaluations() {
     setFeedback(feedback.map((f, i) => (i === idx ? value : f)));
   };
 
-  // Submit evaluation
   const handleSubmit = () => {
     if (!selectedGroup || !selectedMilestone) {
       setFormError("Please select a group and milestone.");
@@ -133,7 +136,6 @@ export default function SupervisorEvaluations() {
       setFormError("Enter valid marks for all criteria.");
       return;
     }
-    // Simulate backend save
     setEvaluations([
       ...evaluations,
       {
@@ -152,14 +154,10 @@ export default function SupervisorEvaluations() {
     setFormError("");
   };
 
-  // Reset form on new eval
   useEffect(() => {
     setSubmitted(false);
     setFormError("");
   }, [selectedGroup, selectedMilestone]);
-
-  // Supervisor's 50% weight calculation
-  const weightedPercent = Math.round(percentage * 0.5);
 
   return (
     <Box maxWidth={900} mx="auto" py={3}>
@@ -195,12 +193,12 @@ export default function SupervisorEvaluations() {
         <Divider className="evaluation-divider" />
 
         {/* Rubric marks input */}
-        {selectedGroup && selectedMilestone ? (
+        {(selectedGroup && selectedMilestone && !submitted && !alreadyEvaluated) ? (
           <>
             <Typography fontWeight={700} mb={1} className="rubric-title">
               Rubric for {selectedMilestone}
             </Typography>
-            <Table size="small" className="rubric-table">
+            <Table size="small" className="rubric-table enhanced-table">
               <TableHead>
                 <TableRow>
                   <TableCell className="table-header">Criteria</TableCell>
@@ -219,7 +217,6 @@ export default function SupervisorEvaluations() {
                         type="number"
                         size="small"
                         value={scores[idx]}
-                        disabled={submitted || alreadyEvaluated}
                         inputProps={{ min: 0, max: item.maxMarks, className: "marks-input" }}
                         onChange={e => handleScoreChange(idx, e.target.value)}
                       />
@@ -229,7 +226,6 @@ export default function SupervisorEvaluations() {
                         value={feedback[idx]}
                         onChange={e => handleFeedbackChange(idx, e.target.value)}
                         size="small"
-                        disabled={submitted || alreadyEvaluated}
                         placeholder="(optional)"
                         inputProps={{ maxLength: 80, className: "feedback-input" }}
                       />
@@ -241,7 +237,7 @@ export default function SupervisorEvaluations() {
 
             {/* Visuals */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="center" mb={1}>
-              <Box>
+              <Box sx={{ minWidth: 230 }}>
                 <Typography fontWeight={700} className="total-marks">
                   Total: {totalMarks}/{maxMarks} &nbsp;
                   <span className="total-percentage">({percentage}%)</span>
@@ -257,28 +253,53 @@ export default function SupervisorEvaluations() {
                   />
                 </Box>
               </Box>
-              <PieChart
-                series={[
-                  {
-                    data: [
-                      { id: 0, value: totalMarks, label: "Score", color: "#2563eb" },
-                      { id: 1, value: maxMarks - totalMarks, label: "Remaining", color: "#e5e7eb" }
-                    ],
-                    innerRadius: 35,
-                    outerRadius: 55,
-                    cx: 60, cy: 55
-                  }
-                ]}
-                width={120}
-                height={110}
-                slotProps={{
-                  legend: { hidden: true }
-                }}
-              />
+              {/* PieChart with more space and visible legend */}
+              <Box className="rubric-piechart-wrap">
+                <PieChart
+                  series={[
+                    {
+                      data: [
+                        { id: 0, value: totalMarks, label: "Score", color: "#2563eb" },
+                        { id: 1, value: maxMarks - totalMarks, label: "Remaining", color: "#e5e7eb" }
+                      ],
+                      innerRadius: 35,
+                      outerRadius: 55,
+                      cx: 80, cy: 60 // more right for legend
+                    }
+                  ]}
+                  width={180}
+                  height={120}
+                  slotProps={{
+                    legend: { hidden: false, position: "right" }
+                  }}
+                />
+              </Box>
             </Stack>
 
-            {/* Error, Already evaluated, Submit */}
+            {/* Error, Submit */}
             {formError && <Typography color="error" mb={1}>{formError}</Typography>}
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              className="submit-evaluation-btn"
+              onClick={handleSubmit}
+            >
+              Submit Evaluation
+            </Button>
+          </>
+        ) : (
+          <Typography color="#aaa" fontSize={15} my={3}>
+            {submitted || alreadyEvaluated
+              ? "Evaluation submitted for this group and milestone."
+              : "Select a group and milestone to fill evaluation."
+            }
+          </Typography>
+        )}
+
+        {/* Show Chips if already evaluated or just submitted */}
+        {(alreadyEvaluated || submitted) && (
+          <Stack direction="row" spacing={1} mt={2}>
             {alreadyEvaluated && (
               <Chip
                 icon={<CheckCircle />}
@@ -295,28 +316,14 @@ export default function SupervisorEvaluations() {
                 className="evaluated-chip"
               />
             )}
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              className="submit-evaluation-btn"
-              disabled={submitted || alreadyEvaluated}
-              onClick={handleSubmit}
-            >
-              Submit Evaluation
-            </Button>
-          </>
-        ) : (
-          <Typography color="#aaa" fontSize={15} my={3}>
-            Select a group and milestone to fill evaluation.
-          </Typography>
+          </Stack>
         )}
+
       </Paper>
 
       {/* All Supervisor Evaluations */}
       <Paper className="evaluation-table-paper">
         <Typography fontWeight={700} className="all-evals-title">
-          <HourglassTop className="hourglass-icon" />
           All Evaluations Given
         </Typography>
         <Table size="small" className="all-evals-table">
@@ -335,10 +342,20 @@ export default function SupervisorEvaluations() {
                 <TableCell>{GROUPS.find(g => g.id === ev.groupId)?.name || ev.groupId}</TableCell>
                 <TableCell>{ev.milestone}</TableCell>
                 <TableCell>
-                  <Chip label={`${ev.totalMarks}/${ev.maxMarks}`} color="info" size="small" />
+                  <Chip
+                    label={`${ev.totalMarks}/${ev.maxMarks}`}
+                    color="info"
+                    size="small"
+                    className="evaluation-chip"
+                  />
                 </TableCell>
                 <TableCell>
-                  <Chip label={`${ev.percentage}%`} color={ev.percentage >= 70 ? "success" : "warning"} size="small" />
+                  <Chip
+                    label={`${ev.percentage}%`}
+                    color={ev.percentage >= 70 ? "success" : "warning"}
+                    size="small"
+                    className="evaluation-chip percent-chip"
+                  />
                 </TableCell>
                 <TableCell>
                   <Tooltip title={ev.timestamp}>
