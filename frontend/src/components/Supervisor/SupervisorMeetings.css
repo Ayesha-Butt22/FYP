@@ -1,0 +1,90 @@
+/* --- Add Slot Button --- */
+.add-slot-btn {
+  margin-bottom: 16px !important;
+  border-radius: 100px !important;
+  font-weight: 700 !important;
+  padding: 6px 24px !important;
+  box-shadow: 0 3px 10px #2563eb18 !important;
+}
+
+/* --- Dialog --- */
+.dialog-title {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+}
+.dialog-icon {
+  margin-right: 6px;
+  color: #2563eb;
+}
+
+/* --- Summary Cards --- */
+.summary-card {
+  padding: 20px !important;
+  border-radius: 12px !important;
+  flex: 1;
+  text-align: center;
+}
+.summary-label {
+  font-weight: 600;
+}
+.summary-value {
+  font-weight: 900;
+  font-size: 26px;
+}
+.summary-card.total {
+  background: #e9fbf0;
+  color: #219653;
+}
+.summary-card.available {
+  background: #fff7de;
+  color: #b97b16;
+}
+.summary-card.booked {
+  background: #e5f0ff;
+  color: #2563eb;
+}
+
+/* --- Slots Section --- */
+.slots-paper {
+  padding: 24px !important;
+  margin-bottom: 24px !important;
+  border-radius: 16px !important;
+}
+.section-title {
+  font-weight: 700;
+  color: #01337a;
+  margin-bottom: 12px !important;
+  display: flex;
+  align-items: center;
+}
+.section-title.upcoming {
+  color: #2563eb;
+}
+.section-icon {
+  margin-right: 8px;
+  color: #01337a;
+}
+.section-icon.upcoming {
+  color: #2563eb;
+}
+.divider {
+  margin-bottom: 16px !important;
+}
+
+/* --- Table Rows --- */
+.slot-row.booked-row {
+  background: #f2fff7;
+}
+.no-slots {
+  color: #bbb;
+  text-align: center;
+}
+.no-meetings {
+  color: #aaa;
+  padding: 12px 0;
+  text-align: center;
+}
+.inline-icon {
+  margin-right: 4px;
+}

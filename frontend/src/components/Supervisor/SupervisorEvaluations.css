@@ -1,0 +1,98 @@
+.evaluation-form-paper {
+  padding: 24px;
+  border-radius: 18px;
+  margin-bottom: 32px;
+}
+
+.evaluation-form-control {
+  min-width: 180px !important;
+}
+
+.evaluation-divider {
+  margin-bottom: 24px !important;
+}
+
+.rubric-title {
+  font-weight: 700 !important;
+  margin-bottom: 8px !important;
+  color: #01337a !important;
+}
+
+.rubric-table {
+  margin-bottom: 16px;
+  max-width: 650px;
+}
+
+.table-header {
+  font-weight: 800 !important;
+}
+
+.marks-input {
+  width: 65px !important;
+}
+
+.feedback-input {
+  width: 170px !important;
+}
+
+.total-marks {
+  font-weight: 700 !important;
+  color: #2563eb !important;
+}
+
+.total-percentage {
+  color: #01337a !important;
+}
+
+.supervisor-weight {
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  color: #219653 !important;
+}
+
+.linear-progress-box {
+  width: 220px;
+  margin-top: 8px;
+}
+
+.custom-linear-progress {
+  height: 10px !important;
+  border-radius: 6px !important;
+  background: #e5e7eb !important;
+}
+.custom-linear-progress .MuiLinearProgress-bar {
+  background: #2563eb !important;
+}
+
+.evaluated-chip {
+  font-weight: 700 !important;
+  margin-bottom: 8px !important;
+}
+
+.submit-evaluation-btn {
+  font-weight: 700 !important;
+  padding-left: 32px !important;
+  padding-right: 32px !important;
+  margin-top: 8px !important;
+}
+
+.evaluation-table-paper {
+  padding: 24px;
+  border-radius: 18px;
+}
+
+.all-evals-title {
+  font-weight: 700 !important;
+  color: #01337a !important;
+  margin-bottom: 16px !important;
+}
+
+.hourglass-icon {
+  margin-bottom: -5px !important;
+  color: #2563eb !important;
+  margin-right: 4px;
+}
+
+.all-evals-table {
+  width: 100%;
+}

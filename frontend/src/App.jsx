@@ -1,23 +1,34 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import LandingPage from "./components/LandingPage";
 import RolesPage from "./components/RolesPage";
 import AuthPortal from "./components/AuthPortal";
-// import any other pages/components you need
-import LandingPage from "./components/LandingPage"; // <-- Make sure you have this component
+import SupervisorDashboard from "./components/Supervisor/SupervisorDashboard";
 
-function App() {
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  if (!token || role !== "supervisor") return <Navigate to="/auth?role=supervisor" replace />;
+  return children;
+}
+
+export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Show LandingPage at root (/) */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/roles" element={<RolesPage />} />
         <Route path="/auth" element={<AuthPortal />} />
-        {/* Add other routes here if needed */}
-        <Route path="*" element={<div>404 Not Found</div>} />
+        <Route
+          path="/dashboard/supervisor"
+          element={
+            <ProtectedRoute>
+              <SupervisorDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<div style={{ padding: 16, fontWeight: 700 }}>404 Not Found</div>} />
       </Routes>
     </Router>
   );
 }
-
-export default App;

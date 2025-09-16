@@ -1,0 +1,144 @@
+.whiteboard-container {
+  max-width: 1350px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+.group-stack {
+  flex-wrap: wrap;
+}
+
+.group-card {
+  padding: 20px;
+  border-radius: 12px !important;
+  min-width: 340px;
+  max-width: 415px;
+  flex: 1;
+  background: #f9fafe !important;
+}
+
+.group-title {
+  font-weight: 800 !important;
+  color: #2563eb !important;
+  font-size: 21px !important;
+  flex-grow: 1;
+}
+
+.quill-editor {
+  background: #fff;
+  border-radius: 7px;
+  min-height: 90px;
+}
+
+.error-text {
+  color: red;
+  margin-top: 6px;
+  font-weight: 600 !important;
+}
+
+.post-btn {
+  margin-top: 12px !important;
+  margin-bottom: 16px !important;
+  min-width: 120px !important;
+  font-weight: 700 !important;
+}
+
+.past-title {
+  font-weight: 700 !important;
+  color: #01337a !important;
+  font-size: 17px !important;
+  margin-bottom: 8px !important;
+}
+
+.no-notes {
+  color: #aaa;
+  font-size: 16px !important;
+  margin-bottom: 16px !important;
+}
+
+.note-card {
+  padding: 14px;
+  border-radius: 8px !important;
+  border-left: 5px solid #2563eb;
+}
+
+.note-date {
+  color: #64748b !important;
+  font-size: 13px !important;
+}
+
+.note-content {
+  font-size: 15px;
+}
+.whiteboard-container {
+  max-width: 1350px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+.group-stack {
+  flex-wrap: wrap;
+}
+
+.group-card {
+  padding: 20px;
+  border-radius: 12px !important;
+  min-width: 340px;
+  max-width: 415px;
+  flex: 1;
+  background: #f9fafe !important;
+}
+
+.group-title {
+  font-weight: 800 !important;
+  color: #2563eb !important;
+  font-size: 21px !important;
+  flex-grow: 1;
+}
+
+.quill-editor {
+  background: #fff;
+  border-radius: 7px;
+  min-height: 90px;
+}
+
+.error-text {
+  color: red;
+  margin-top: 6px;
+  font-weight: 600 !important;
+}
+
+.post-btn {
+  margin-top: 12px !important;
+  margin-bottom: 16px !important;
+  min-width: 120px !important;
+  font-weight: 700 !important;
+}
+
+.past-title {
+  font-weight: 700 !important;
+  color: #01337a !important;
+  font-size: 17px !important;
+  margin-bottom: 8px !important;
+}
+
+.no-notes {
+  color: #aaa;
+  font-size: 16px !important;
+  margin-bottom: 16px !important;
+}
+
+.note-card {
+  padding: 14px;
+  border-radius: 8px !important;
+  border-left: 5px solid #2563eb;
+}
+
+.note-date {
+  color: #64748b !important;
+  font-size: 13px !important;
+}
+
+.note-content {
+  font-size: 15px;
+}

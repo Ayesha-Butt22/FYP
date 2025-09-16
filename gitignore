@@ -1,0 +1,4 @@
+# ignore env files
+.env
+fyp-backend/.env
+frontend/.env

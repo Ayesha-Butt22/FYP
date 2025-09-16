@@ -1,0 +1,81 @@
+.report-header {
+  font-weight: 800;
+  color: #01337a;
+  margin-bottom: 32px;
+  letter-spacing: 0.5px;
+}
+.left-align {
+  text-align: left !important;
+  margin-left: 0 !important;
+}
+
+.reports-paper {
+  padding: 32px;
+  border-radius: 18px;
+  margin-bottom: 32px;
+}
+
+.reports-group-select {
+  min-width: 320px !important;
+  margin-bottom: 22px !important;
+}
+
+.reports-placeholder {
+  color: #aaa;
+  font-size: 1.08rem;
+  margin: 32px 0 12px 0;
+  text-align: center;
+}
+
+.report-summary {
+  margin-bottom: 18px;
+}
+
+.report-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #2563eb;
+  margin-bottom: 2px;
+}
+
+.report-members {
+  font-size: 1.07rem;
+  color: #64748b;
+  margin-bottom: 7px;
+}
+
+.report-progress-summary {
+  margin-bottom: 9px;
+}
+
+.report-total-score {
+  font-size: 1.08rem;
+  color: #219653;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.report-export-btns {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.export-btn {
+  font-weight: 700 !important;
+  letter-spacing: 0.2px;
+  font-size: 1.07rem !important;
+}
+
+.report-table {
+  margin-top: 10px;
+}
+
+.report-status-chip {
+  font-weight: 600 !important;
+}
+
+.feedback-missing {
+  color: #aaa;
+  font-style: italic;
+}

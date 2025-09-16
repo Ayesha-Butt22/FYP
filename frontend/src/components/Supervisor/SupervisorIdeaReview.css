@@ -1,0 +1,15 @@
+.review-table-box {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px 12px;
+  box-shadow: 0 2px 18px #01337a10;
+  overflow-x: auto;
+}
+.review-table-row {
+  background: #fff !important;
+}
+.review-table-collapse-cell {
+  padding: 0 !important;
+  border: 0 !important;
+  background: #f9fafb !important;
+}

@@ -67,7 +67,6 @@ function isValidOfficialEmail(email) {
   return /^[a-zA-Z]+@riphah\.edu\.pk$/.test(email);
 }
 function isValidAdminEmail(email) {
-  // only alphabets before @riphah.edu.pk
   return /^[a-zA-Z]+@riphah\.edu\.pk$/.test(email);
 }
 function isValidSapId(id) {
@@ -98,16 +97,12 @@ export default function AuthPortal() {
   // Validation logic for registration per role
   const validateRegister = data => {
     let errs = {};
-
-    // Fields presence
     const fields = roleFields[selectedRole] || [];
     for (const field of fields) {
       if (field.required && !data[field.name]) {
         errs[field.name] = `Please fill in the ${field.label}`;
       }
     }
-
-    // Email
     if (selectedRole === "student") {
       if (!isValidStudentEmail(data.email || "")) {
         errs.email = "Student email format must be 5 digits (e.g. 48288@students.riphah.edu.pk)";
@@ -121,28 +116,22 @@ export default function AuthPortal() {
         errs.email = "Admin email must be alphabets only (e.g. admin@riphah.edu.pk)";
       }
     }
-
-    // Student ID
     if (selectedRole === "student") {
       if (!isValidSapId(data.studentId || "")) {
         errs.studentId = "Student ID (SAP ID) must be exactly 5 digits.";
       } else {
-        // Make sure studentId matches first 5 digits of email
         const emailSapId = (data.email || "").split("@")[0];
         if (data.studentId !== emailSapId) {
           errs.studentId = "Student ID must match the first 5 digits of your email address.";
         }
       }
     }
-
-    // Password
     if (data.password && !isStrongPassword(data.password)) {
       errs.password = "Password must be at least 8 characters, include uppercase, lowercase, number, special character, and have no spaces.";
     }
     if (commonPasswords.includes((data.password || "").toLowerCase())) {
       errs.password = "Password is too common. Please choose a stronger password.";
     }
-    // Should not contain email or id
     if (
       selectedRole === "student" &&
       data.password &&
@@ -157,7 +146,6 @@ export default function AuthPortal() {
     ) {
       errs.password = "Password should not contain your email.";
     }
-    // Confirm password
     if (data.password !== data.confirmPassword) {
       errs.confirmPassword = "Passwords do not match.";
     }
@@ -198,9 +186,13 @@ export default function AuthPortal() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Login success! Welcome " + (data.user?.role || "user"));
-        // Optionally: localStorage.setItem('token', data.token);
-        // navigate("/dashboard");
+        // Set token and role in localStorage for protected route
+        localStorage.setItem('token', data.token || "demoToken");
+        localStorage.setItem('role', data.user?.role || "supervisor");
+        localStorage.setItem('name', data.user?.name || "Supervisor");
+        localStorage.setItem('specialization', data.user?.specialization || "");
+        // Now redirect to dashboard
+        navigate("/dashboard/supervisor");
       } else {
         alert("Error: " + (data.error || "Login failed"));
       }
@@ -327,7 +319,6 @@ export default function AuthPortal() {
               )}
             </h1>
             {selectedRole && registerInfo[selectedRole]}
-
             {(selectedRole && roleFields[selectedRole]) ? (
               roleFields[selectedRole].map(field => (
                 <div className="input-box" key={field.name}>
