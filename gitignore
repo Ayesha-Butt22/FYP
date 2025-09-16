@@ -2,3 +2,5 @@
 .env
 fyp-backend/.env
 frontend/.env
+fyp-backend/node_modules
+frontend/node_modules
