@@ -2,8 +2,9 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./components/LandingPage";
 import RolesPage from "./components/RolesPage";
-import AuthPortal from "./components/AuthPortal";
+import Auth from "./components/Auth/Auth";
 import SupervisorDashboard from "./components/Supervisor/SupervisorDashboard";
+import ToastContainer from "./components/ToastService/ToastContainer.jsx";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -14,11 +15,13 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   return (
+      <>
+          <ToastContainer />
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/roles" element={<RolesPage />} />
-        <Route path="/auth" element={<AuthPortal />} />
+        <Route path="/auth" element={<Auth />} />
         <Route
           path="/dashboard/supervisor"
           element={
@@ -30,5 +33,6 @@ export default function App() {
         <Route path="*" element={<div style={{ padding: 16, fontWeight: 700 }}>404 Not Found</div>} />
       </Routes>
     </Router>
+      </>
   );
 }

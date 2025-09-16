@@ -94,7 +94,7 @@ export default function AuthPortal() {
     if (selectedRole) setMode("register");
   }, [selectedRole]);
 
-  // Validation logic for registration per role
+
   const validateRegister = data => {
     let errs = {};
     const fields = roleFields[selectedRole] || [];
@@ -152,7 +152,7 @@ export default function AuthPortal() {
     return errs;
   };
 
-  // Validation logic for login per role
+
   const validateLogin = data => {
     let errs = {};
     if (!data.email) errs.email = "Please enter your email.";
@@ -305,7 +305,6 @@ export default function AuthPortal() {
         </form>
       </div>
 
-      {/* Register Form (Role-Based) */}
       <div className="form-box register">
         <div className="register-content">
           <form onSubmit={handleRegister} noValidate>
@@ -400,7 +399,6 @@ export default function AuthPortal() {
         </div>
       </div>
 
-      {/* Toggle Box */}
       <div className="toggle-box">
         <div className="toggle-panel toggle-left">
           <h1>Hello, Welcome!</h1>
