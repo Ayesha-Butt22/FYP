@@ -65,10 +65,10 @@
   padding: 34px 30px 28px 30px;
   display: flex;
   flex-direction: column;
-  align-items: center;      
+  align-items: center;
   margin-bottom: 12px;
   font-family: inherit;
-  text-align: center;       
+  text-align: center;
 }
 
 .group-icon {
@@ -97,7 +97,7 @@
 .group-title {
   font-size: 1.19rem;
   font-weight: 800;
-  color: #01337a !important;   
+  color: #01337a !important;
   margin-bottom: 25px;
   text-align: center;
   min-height: 38px;
