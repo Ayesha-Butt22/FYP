@@ -125,7 +125,7 @@ export default function SupervisorMeetings() {
 
   return (
     <Box maxWidth={950} mx="auto" py={3}>
-      <DashboardSectionHeader>Meetings</DashboardSectionHeader>
+      <DashboardSectionHeader style={{ marginLeft: "-120px" ,  marginBottom: "50px", marginTop: "-20px"}}>Meetings</DashboardSectionHeader>
 
       {/* Add Slot Button */}
       <Button

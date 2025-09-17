@@ -161,7 +161,8 @@ export default function SupervisorEvaluations() {
 
   return (
     <Box maxWidth={900} mx="auto" py={3}>
-      <DashboardSectionHeader>
+      <DashboardSectionHeader style={{ marginLeft: "-150px" , marginBottom: "50px", marginTop: "-20px"
+ }}>
         Evaluation & Rubrics
       </DashboardSectionHeader>
 
@@ -253,7 +254,7 @@ export default function SupervisorEvaluations() {
                   />
                 </Box>
               </Box>
-              {/* PieChart with more space and visible legend */}
+              
               <Box className="rubric-piechart-wrap">
                 <PieChart
                   series={[
@@ -264,7 +265,7 @@ export default function SupervisorEvaluations() {
                       ],
                       innerRadius: 35,
                       outerRadius: 55,
-                      cx: 80, cy: 60 // more right for legend
+                      cx: 80, cy: 60 
                     }
                   ]}
                   width={180}
@@ -297,7 +298,7 @@ export default function SupervisorEvaluations() {
           </Typography>
         )}
 
-        {/* Show Chips if already evaluated or just submitted */}
+        
         {(alreadyEvaluated || submitted) && (
           <Stack direction="row" spacing={1} mt={2}>
             {alreadyEvaluated && (
@@ -321,7 +322,7 @@ export default function SupervisorEvaluations() {
 
       </Paper>
 
-      {/* All Supervisor Evaluations */}
+    
       <Paper className="evaluation-table-paper">
         <Typography fontWeight={700} className="all-evals-title">
           All Evaluations Given

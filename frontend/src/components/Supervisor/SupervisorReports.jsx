@@ -8,9 +8,9 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import "./SupervisorReports.css";
-import DashboardSectionHeader from "./DashboardSectionHeader"; // ✅ custom heading
+import DashboardSectionHeader from "./DashboardSectionHeader";
 
-// Dummy data for demonstration
+// Dummy data 
 const GROUPS = [
   {
     id: "G-101",
@@ -106,7 +106,7 @@ export default function SupervisorReports() {
   return (
     <Box maxWidth={900} mx="auto" py={3}>
       {/* ✅ Reusable Section Header */}
-      <DashboardSectionHeader>
+      <DashboardSectionHeader style={{ marginLeft: "-150px" , marginBottom: "50px", marginTop: "-20px"}}>
        Evaluation Report
       </DashboardSectionHeader>
 

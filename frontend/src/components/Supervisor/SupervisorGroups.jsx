@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import DashboardSectionHeader from "./DashboardSectionHeader";
 import { FaUsers, FaArrowRight, FaTimes } from "react-icons/fa";
 import DonutChart from "./DonutChart";
 import "./SupervisorGroups.css";
@@ -72,10 +73,15 @@ export default function SupervisorGroups() {
 
   return (
     <div className="page-container">
-      <h2 className="groups-heading">My Groups</h2>
+      <DashboardSectionHeader style={{ marginLeft: "239px" , marginBottom: "50px", marginTop: "-5px"
+ }}>
+        My Groups
+      </DashboardSectionHeader>
+
       <div className="section-desc">
         Here you can view all the FYP groups assigned to you. Click "View Group Details" to see team members, program, milestones, and progress analytics.
       </div>
+
       <div className="group-cards-row">
         {assignedGroups.map(group => (
           <div className="group-card" key={group.groupId}>
@@ -88,6 +94,7 @@ export default function SupervisorGroups() {
           </div>
         ))}
       </div>
+
       {/* Modal for group details */}
       {selectedGroup && (
         <div className="modal-overlay">
@@ -95,28 +102,48 @@ export default function SupervisorGroups() {
             <button className="modal-close" aria-label="Close" onClick={() => setSelectedGroup(null)}>
               <FaTimes />
             </button>
-            <h3 className="modal-title">{selectedGroup.title}</h3>
-            <div className="modal-row"><b>Group Number:</b> {selectedGroup.groupNo}</div>
-            <div className="modal-row"><b>Group ID:</b> {selectedGroup.groupId}</div>
-            <div className="modal-row"><b>Program:</b> {selectedGroup.program}</div>
-            <div className="modal-row">
-              <b>Proposal/Idea Status:</b>
-              <span className={`status-badge status-${selectedGroup.proposalStatus.toLowerCase()}`}>
-                {selectedGroup.proposalStatus}
-              </span>
-            </div>
-            <div className="progress-section">
-              <div className="progress-text">
-                Progress:&nbsp;
-                <span style={{color:"#15803d"}}>{
-                  selectedGroup.milestonesTotal && selectedGroup.milestonesCompleted
-                  ? Math.round((selectedGroup.milestonesCompleted / selectedGroup.milestonesTotal) * 100)
-                  : selectedGroup.progress || 0
-                }%</span>
-                &nbsp;({selectedGroup.milestonesCompleted} of {selectedGroup.milestonesTotal} milestones)
+            {/* Title */}
+            <div className="modal-title">{selectedGroup.title}</div>
+            
+            {/* Details Form */}
+            <div className="group-details-form">
+              <div className="group-detail-row">
+                <span className="group-detail-label">Group Number:</span>
+                <span className="group-detail-value">{selectedGroup.groupNo}</span>
+              </div>
+              <div className="group-detail-row">
+                <span className="group-detail-label">Group ID:</span>
+                <span className="group-detail-value">{selectedGroup.groupId}</span>
+              </div>
+              <div className="group-detail-row">
+                <span className="group-detail-label">Program:</span>
+                <span className="group-detail-value">{selectedGroup.program}</span>
+              </div>
+              <div className="group-detail-row">
+                <span className="group-detail-label">Proposal/Idea Status:</span>
+                <span
+                  className={`status-badge status-${selectedGroup.proposalStatus.toLowerCase()}`}
+                >
+                  {selectedGroup.proposalStatus}
+                </span>
+              </div>
+
+              {/* Progress */}
+              <div className="progress-row">
+                <span>
+                  <b>Progress: </b>
+                  <span style={{ color: "#15803d", fontWeight: 700 }}>
+                    {selectedGroup.milestonesTotal && selectedGroup.milestonesCompleted
+                      ? Math.round((selectedGroup.milestonesCompleted / selectedGroup.milestonesTotal) * 100)
+                      : selectedGroup.progress || 0
+                    }%
+                  </span>
+                  &nbsp;({selectedGroup.milestonesCompleted} of {selectedGroup.milestonesTotal} milestones)
+                </span>
               </div>
               <div className="progress-bar-bg">
-                <div className="progress-bar-fill"
+                <div
+                  className="progress-bar-fill"
                   style={{
                     width: `${
                       selectedGroup.milestonesTotal && selectedGroup.milestonesCompleted
@@ -127,7 +154,11 @@ export default function SupervisorGroups() {
                 />
               </div>
             </div>
-            <div className="modal-label">Group Members:</div>
+
+            {/* Members Table */}
+            <div className="modal-label" style={{ fontWeight: 700, color: "#01337a", margin: "8px 0 5px 0" }}>
+              Group Members:
+            </div>
             <table className="member-table">
               <thead>
                 <tr>
@@ -144,6 +175,7 @@ export default function SupervisorGroups() {
                 ))}
               </tbody>
             </table>
+
             {/* Donut Analytics Panel */}
             <div className="analytics-card">
               <h3 className="chart-title">Progress Tracking</h3>

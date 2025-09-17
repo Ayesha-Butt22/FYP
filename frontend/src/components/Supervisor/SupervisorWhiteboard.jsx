@@ -91,7 +91,7 @@ export default function SupervisorWhiteboard() {
 
   return (
     <Box className="whiteboard-container">
-      <DashboardSectionHeader>Supervisor Whiteboard</DashboardSectionHeader>
+      <DashboardSectionHeader style={{ marginLeft: "70px" , marginBottom: "50px", marginTop: "-20px"}}>Whiteboard</DashboardSectionHeader>
       <Stack direction="row" spacing={3} justifyContent="center" alignItems="flex-start" className="group-stack">
         {GROUPS.map(group => (
           <Paper elevation={3} key={group.id} className="group-card">

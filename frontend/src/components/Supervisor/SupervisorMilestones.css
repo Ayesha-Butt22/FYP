@@ -4,22 +4,28 @@
   padding: 0 0 30px 0;
 }
 
-/* Use grid to avoid equal-height problem and allow cards to grow only as needed */
+
+
+
 .milestone-groups-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 32px;
-  align-items: start;
+  align-items: start; 
+  margin-top: 30px;  
 }
 
+/* Card design */
 .milestone-group-card {
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 24px #01337a14;
   padding: 34px 36px 26px 36px;
   width: 100%;
-  max-width: 400px;
-  margin-bottom: 28px;
+  max-width: 100%;
+  margin-bottom: 0;
   position: relative;
   box-sizing: border-box;
 }
@@ -38,7 +44,7 @@
 }
 
 .milestone-card-title {
-  color: #2563eb;
+  color: #01337a;
   font-weight: 700;
   font-size: 17px;
   margin-bottom: 7px;
@@ -52,7 +58,7 @@
 }
 
 .milestone-template-link {
-  color: #2563eb;
+  color: #01337a;
   text-decoration: underline;
   font-weight: 700;
   font-size: 14px;
@@ -78,7 +84,7 @@
 }
 
 .milestone-toggle-btn {
-  background: #2563eb;
+  background: #01337a;
   color: #fff;
   border: none;
   border-radius: 9px;
@@ -92,7 +98,7 @@
   transition: background 0.18s, color 0.19s, transform 0.17s;
 }
 .milestone-toggle-btn:hover {
-  background: #fbc73d;
+  background: white;
   color: #01337a;
   transform: scale(1.045) translateY(-1.5px);
 }
@@ -102,6 +108,18 @@
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 1px 5px #01337a13;
+  animation: expandFade 0.3s ease; /* smooth expand effect */
+}
+
+@keyframes expandFade {
+  from {
+    opacity: 0;
+    transform: scaleY(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
 }
 
 .milestone-timeline-table {
@@ -146,7 +164,7 @@
   color: #22c55e;
 }
 .milestone-status-pending {
-  color: #2563eb;
+  color: #01337a;
 }
 .milestone-status-overdue {
   color: #ef4444;

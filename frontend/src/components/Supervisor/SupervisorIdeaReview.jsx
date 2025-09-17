@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import {
   Box, Table, TableHead, TableBody, TableRow, TableCell,
-  Collapse, IconButton, Chip, Tooltip, Stack, Avatar, Divider, TextField, Button, Radio, Typography
+  Collapse, IconButton, Chip, Tooltip, Stack, Divider, TextField, Button, Radio, Typography,
 } from "@mui/material";
 import {
   GroupOutlined, ExpandMore, ExpandLess,
   CheckCircleOutline, HourglassEmptyOutlined, CancelOutlined,
-  ThumbUpAlt, ThumbDownAlt, WarningAmber
+  ThumbUpAlt, ThumbDownAlt, WarningAmber,
 } from "@mui/icons-material";
-import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
+import DashboardSectionHeader from "./DashboardSectionHeader";
 import "./SupervisorIdeaReview.css";
 
-// Dummy data
 const DUMMY_IDEAS = [
   {
     ideaId: "G-101",
@@ -29,8 +28,8 @@ const DUMMY_IDEAS = [
     ],
     feedback: {
       severity: "✅",
-      comment: "Well written, project approved."
-    }
+      comment: "Well written, project approved.",
+    },
   },
   {
     ideaId: "G-102",
@@ -46,7 +45,7 @@ const DUMMY_IDEAS = [
       { name: "Madiha Sumbal", sapId: "2021005" },
       { name: "Saad Farooq", sapId: "2021006" },
     ],
-    feedback: null
+    feedback: null,
   },
   {
     ideaId: "G-103",
@@ -64,8 +63,8 @@ const DUMMY_IDEAS = [
     ],
     feedback: {
       severity: "❌",
-      comment: "Methodology vague. Please clarify how anomalies will be detected."
-    }
+      comment: "Methodology vague. Please clarify how anomalies will be detected.",
+    },
   },
 ];
 
@@ -74,23 +73,23 @@ const STATUS = {
     label: "Approved",
     icon: <CheckCircleOutline style={{ color: "#219653" }} />,
     chipStyle: {
-      backgroundColor: "#e9fbf0", color: "#219653", border: "1.5px solid #b7eccb", fontWeight: 700
-    }
+      backgroundColor: "#e9fbf0", color: "#219653", border: "1.5px solid #b7eccb", fontWeight: 700,
+    },
   },
   pending: {
     label: "Pending",
     icon: <HourglassEmptyOutlined style={{ color: "#f2994a" }} />,
     chipStyle: {
-      backgroundColor: "#fff7de", color: "#b97b16", border: "1.5px solid #ffe6b2", fontWeight: 700
-    }
+      backgroundColor: "#fff7de", color: "#b97b16", border: "1.5px solid #ffe6b2", fontWeight: 700,
+    },
   },
   rejected: {
     label: "Rejected",
     icon: <CancelOutlined style={{ color: "#e74c3c" }} />,
     chipStyle: {
-      backgroundColor: "#ffeaea", color: "#e74c3c", border: "1.5px solid #ffb7b7", fontWeight: 700
-    }
-  }
+      backgroundColor: "#ffeaea", color: "#e74c3c", border: "1.5px solid #ffb7b7", fontWeight: 700,
+    },
+  },
 };
 
 const FEEDBACK_OPTIONS = [
@@ -98,26 +97,26 @@ const FEEDBACK_OPTIONS = [
     value: "❌",
     label: "Major Issue",
     color: "#e74c3c",
-    icon: <CancelOutlined sx={{ color: "#e74c3c", fontSize: 23, mr: 1 }} />
+    icon: <CancelOutlined sx={{ color: "#e74c3c", fontSize: 23, mr: 1 }} />,
   },
   {
     value: "⚠️",
     label: "Minor Fix",
     color: "#f2994a",
-    icon: <WarningAmber sx={{ color: "#f2994a", fontSize: 23, mr: 1 }} />
+    icon: <WarningAmber sx={{ color: "#f2994a", fontSize: 23, mr: 1 }} />,
   },
   {
     value: "✅",
     label: "Approved",
     color: "#219653",
-    icon: <CheckCircleOutline sx={{ color: "#219653", fontSize: 23, mr: 1 }} />
-  }
+    icon: <CheckCircleOutline sx={{ color: "#219653", fontSize: 23, mr: 1 }} />,
+  },
 ];
 
 const FEEDBACK_ICON_ONLY = {
   "❌": <CancelOutlined sx={{ color: "#e74c3c", fontSize: 23, mr: 1 }} />,
   "✅": <CheckCircleOutline sx={{ color: "#219653", fontSize: 23, mr: 1 }} />,
-  "⚠️": <WarningAmber sx={{ color: "#f2994a", fontSize: 23, mr: 1 }} />
+  "⚠️": <WarningAmber sx={{ color: "#f2994a", fontSize: 23, mr: 1 }} />,
 };
 
 export default function SupervisorIdeaReview() {
@@ -130,11 +129,13 @@ export default function SupervisorIdeaReview() {
     fontSize: 17,
     color: "#01337a",
     borderBottom: "2.5px solid #e5e7eb",
-    background: "#f4f6fa"
+    background: "#f4f6fa",
+    fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
   };
   const tdStyle = {
     fontSize: 15,
-    color: "#22223b"
+    color: "#22223b",
+    fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
   };
 
   const handleReview = (ideaId, status) => {
@@ -147,8 +148,8 @@ export default function SupervisorIdeaReview() {
               status,
               feedback: {
                 severity: fb.severity,
-                comment: fb.comment
-              }
+                comment: fb.comment,
+              },
             }
           : idea
       )
@@ -157,41 +158,51 @@ export default function SupervisorIdeaReview() {
   };
 
   return (
-    <Box maxWidth={1060} mx="auto" my={4}>
-      <DashboardSectionHeader>FYP Idea & Proposal Review</DashboardSectionHeader>
+    <Box maxWidth={1500} mx="auto" my={4}>
+      <DashboardSectionHeader style={{ marginLeft: "150px" , marginBottom: "50px", marginTop: "-5px"
+ }}>
+        FYP Idea & Proposal Review
+      </DashboardSectionHeader>
       <Box className="review-table-box">
         <Table>
           <TableHead>
             <TableRow>
               <TableCell sx={thStyle}>
-                <GroupOutlined sx={{verticalAlign:"middle", color:"#2563eb", mr:1}} />
+                <GroupOutlined sx={{ verticalAlign: "middle", color: "#2563eb", mr: 1 }} />
                 Group
               </TableCell>
               <TableCell sx={thStyle}>Title</TableCell>
               <TableCell sx={thStyle}>Status</TableCell>
-              <TableCell sx={thStyle} align="center">Action</TableCell>
+              <TableCell sx={thStyle} align="center">
+                Action
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {ideas.map(idea => {
+            {ideas.map((idea, idx) => {
               const isExpanded = expanded[idea.ideaId];
               const status = STATUS[idea.status];
               return (
                 <React.Fragment key={idea.ideaId}>
                   <TableRow hover className="review-table-row">
                     <TableCell sx={tdStyle}>
-                      <Stack direction="row" gap={1} alignItems="center">
-                        <Avatar sx={{ width: 30, height: 30, bgcolor: "#2563eb", fontWeight:700, fontSize:17 }}>
-                          {idea.groupName.split(" ")[1]}
-                        </Avatar>
+                      <Stack direction="row" gap={1.5} alignItems="center">
+                        <Typography className="group-number-badge">{idx + 1}</Typography>
                         <Typography fontWeight={700}>{idea.groupName}</Typography>
                       </Stack>
                     </TableCell>
                     <TableCell sx={tdStyle}>
                       <Tooltip title={idea.title}>
-                        <Typography fontWeight={600} color="#01337a" sx={{
-                          maxWidth:170, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"
-                        }}>
+                        <Typography
+                          fontWeight={600}
+                          color="#01337a"
+                          sx={{
+                            maxWidth: 170,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
                           {idea.title}
                         </Typography>
                       </Tooltip>
@@ -201,8 +212,15 @@ export default function SupervisorIdeaReview() {
                         icon={status.icon}
                         label={status.label}
                         sx={{
-                          px: 1.5, ...status.chipStyle, borderRadius: 25, fontWeight: 700,
-                          fontSize: 15, height: 32, minWidth: 120, justifyContent: "left"
+                          px: 1.5,
+                          ...status.chipStyle,
+                          borderRadius: 25,
+                          fontWeight: 700,
+                          fontSize: 15,
+                          height: 32,
+                          minWidth: 120,
+                          justifyContent: "left",
+                          fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
                         }}
                       />
                     </TableCell>
@@ -210,7 +228,10 @@ export default function SupervisorIdeaReview() {
                       <IconButton
                         color="primary"
                         onClick={() =>
-                          setExpanded(exp => ({ ...exp, [idea.ideaId]: !exp[idea.ideaId] }))
+                          setExpanded(exp => ({
+                            ...exp,
+                            [idea.ideaId]: !exp[idea.ideaId],
+                          }))
                         }
                         aria-label={isExpanded ? "Hide Details" : "Show Details"}
                       >
@@ -221,127 +242,138 @@ export default function SupervisorIdeaReview() {
                   <TableRow>
                     <TableCell colSpan={4} className="review-table-collapse-cell">
                       <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                        <Box p={3} borderBottom="2px solid #e5e7eb" borderRadius={2}>
-                          <Stack spacing={1.3} direction={{ xs: "column", md: "row" }} divider={<Divider orientation="vertical" flexItem />}>
-                            <Box>
-                              <Typography fontWeight={700} mb={0.5}>Abstract:</Typography>
-                              <Typography fontSize={15} mb={1}>{idea.abstract}</Typography>
-                              <Typography fontWeight={700} mb={0.5}>Methodology:</Typography>
-                              <Typography fontSize={15} mb={1}>{idea.methodology}</Typography>
-                              <Typography fontWeight={700} mb={0.5}>Tools:</Typography>
-                              <Typography fontSize={15} mb={1}>{idea.tools}</Typography>
-                              <Typography fontWeight={700} mb={0.5}>Domain:</Typography>
-                              <Typography fontSize={15}>{idea.domain}</Typography>
-                            </Box>
-                            <Box minWidth={220}>
-                              <Typography fontWeight={700} mb={0.5}>Members:</Typography>
-                              <Stack spacing={1} mt={1.5}>
-                                {idea.members.map((m, idx) => (
-                                  <Stack key={idx} direction="row" alignItems="center" gap={1}>
-                                    <Avatar sx={{
-                                      width: 26, height: 26, bgcolor: "#f4f6fa", color: "#01337a", fontSize: 15, fontWeight: 700
-                                    }}>{m.name[0]}</Avatar>
-                                    <Typography fontWeight={600} fontSize={15}>{m.name}</Typography>
-                                    <Typography color="#64748b" fontSize={14}>({m.sapId})</Typography>
-                                  </Stack>
-                                ))}
-                              </Stack>
-                            </Box>
-                          </Stack>
-                          <Divider sx={{ my: 2 }} />
-                          {idea.status === "pending" ? (
-                            <Box mt={1.5}>
-                              <Typography fontWeight={700} fontSize={15} mb={0.5}>Supervisor Feedback:</Typography>
-                              <Stack direction="row" spacing={2} mt={1}>
-                                {FEEDBACK_OPTIONS.map(opt => (
-                                  <Box key={opt.value} display="flex" alignItems="center">
-                                    <Radio
-                                      checked={feedback[idea.ideaId]?.severity === opt.value}
-                                      onChange={e =>
-                                        setFeedback(f => ({
-                                          ...f,
-                                          [idea.ideaId]: { ...f[idea.ideaId], severity: opt.value }
-                                        }))
-                                      }
-                                      value={opt.value}
+                        <Box className="idea-details-box">
+                          <Box className="idea-details-section">
+                            <div className="idea-detail-row">
+                              <span className="idea-detail-label">Abstract:</span>
+                              <span className="idea-detail-value">{idea.abstract}</span>
+                            </div>
+                            <div className="idea-detail-row">
+                              <span className="idea-detail-label">Methodology:</span>
+                              <span className="idea-detail-value">{idea.methodology}</span>
+                            </div>
+                            <div className="idea-detail-row">
+                              <span className="idea-detail-label">Tools:</span>
+                              <span className="idea-detail-value">{idea.tools}</span>
+                            </div>
+                            <div className="idea-detail-row">
+                              <span className="idea-detail-label">Domain:</span>
+                              <span className="idea-detail-value">{idea.domain}</span>
+                            </div>
+                          </Box>
+                          <Box className="members-section-align">
+                            <span className="idea-detail-label" style={{ marginBottom: 5 }}>Members:</span>
+                            {idea.members.map((m, midx) => (
+                              <div className="member-row-enhanced" key={midx}>
+                                <span className="member-name">{m.name}</span>
+                                <span className="member-sapid">({m.sapId})</span>
+                              </div>
+                            ))}
+                          </Box>
+                        </Box>
+                        <Divider sx={{ my: 1 }} />
+                        {idea.status === "pending" ? (
+                          <Box mt={1}>
+                            <Typography fontWeight={700} fontSize={15} mb={0.5}>
+                              Supervisor Feedback:
+                            </Typography>
+                            <Stack direction="row" spacing={2} mt={1}>
+                              {FEEDBACK_OPTIONS.map(opt => (
+                                <Box key={opt.value} display="flex" alignItems="center">
+                                  <Radio
+                                    checked={feedback[idea.ideaId]?.severity === opt.value}
+                                    onChange={e =>
+                                      setFeedback(f => ({
+                                        ...f,
+                                        [idea.ideaId]: {
+                                          ...f[idea.ideaId],
+                                          severity: opt.value,
+                                        },
+                                      }))
+                                    }
+                                    value={opt.value}
+                                    sx={{
+                                      color: opt.color,
+                                      "&.Mui-checked": { color: opt.color },
+                                    }}
+                                  />
+                                  <Box display="flex" alignItems="center" gap={0.5}>
+                                    {opt.icon}
+                                    <Typography
                                       sx={{
                                         color: opt.color,
-                                        '&.Mui-checked': { color: opt.color }
+                                        fontWeight: 600,
+                                        fontSize: 16,
                                       }}
-                                    />
-                                    <Box display="flex" alignItems="center" gap={0.5}>
-                                      {opt.icon}
-                                      <Typography sx={{
-                                        color: opt.color, fontWeight: 600, fontSize: 16
-                                      }}>
-                                        {opt.label}
-                                      </Typography>
-                                    </Box>
+                                    >
+                                      {opt.label}
+                                    </Typography>
                                   </Box>
-                                ))}
-                              </Stack>
-                              <TextField
-                                size="small"
-                                variant="outlined"
-                                placeholder="Write feedback for student..."
-                                fullWidth
-                                sx={{ my: 2, background: "#fff" }}
-                                value={feedback[idea.ideaId]?.comment || ""}
-                                onChange={e =>
-                                  setFeedback(f => ({
-                                    ...f,
-                                    [idea.ideaId]: { ...f[idea.ideaId], comment: e.target.value }
-                                  }))
+                                </Box>
+                              ))}
+                            </Stack>
+                            <TextField
+                              size="small"
+                              variant="outlined"
+                              placeholder="Write feedback for student..."
+                              fullWidth
+                              sx={{ my: 2, background: "#fff" }}
+                              value={feedback[idea.ideaId]?.comment || ""}
+                              onChange={e =>
+                                setFeedback(f => ({
+                                  ...f,
+                                  [idea.ideaId]: {
+                                    ...f[idea.ideaId],
+                                    comment: e.target.value,
+                                  },
+                                }))
+                              }
+                            />
+                            <Stack direction="row" gap={2}>
+                              <Button
+                                variant="contained"
+                                color="success"
+                                startIcon={<ThumbUpAlt />}
+                                disabled={
+                                  !feedback[idea.ideaId]?.comment ||
+                                  !feedback[idea.ideaId]?.severity
                                 }
-                              />
-                              <Stack direction="row" gap={2}>
-                                <Button
-                                  variant="contained"
-                                  color="success"
-                                  startIcon={<ThumbUpAlt />}
-                                  disabled={
-                                    !feedback[idea.ideaId]?.comment ||
-                                    !feedback[idea.ideaId]?.severity
-                                  }
-                                  onClick={() => handleReview(idea.ideaId, "approved")}
-                                >
-                                  Approve
-                                </Button>
-                                <Button
-                                  variant="contained"
-                                  color="error"
-                                  startIcon={<ThumbDownAlt />}
-                                  disabled={
-                                    !feedback[idea.ideaId]?.comment ||
-                                    !feedback[idea.ideaId]?.severity
-                                  }
-                                  onClick={() => handleReview(idea.ideaId, "rejected")}
-                                >
-                                  Reject
-                                </Button>
-                              </Stack>
-                            </Box>
-                          ) : (
-                            <Box mt={2} display="flex" alignItems="center" gap={1}>
-                              <b>Feedback:</b>
-                              {idea.feedback ? (
-                                <>
-                                  <span>
-                                    {FEEDBACK_ICON_ONLY[idea.feedback.severity]}
-                                  </span>
-                                  <span style={{ marginLeft: 6 }}>{idea.feedback.comment}</span>
-                                </>
-                              ) : (
-                                <span style={{ color: "#aaa" }}>No feedback</span>
-                              )}
-                            </Box>
-                          )}
-                        </Box>
+                                onClick={() => handleReview(idea.ideaId, "approved")}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                variant="contained"
+                                color="error"
+                                startIcon={<ThumbDownAlt />}
+                                disabled={
+                                  !feedback[idea.ideaId]?.comment ||
+                                  !feedback[idea.ideaId]?.severity
+                                }
+                                onClick={() => handleReview(idea.ideaId, "rejected")}
+                              >
+                                Reject
+                              </Button>
+                            </Stack>
+                          </Box>
+                        ) : (
+                          <div className="idea-feedback-row">
+                            <b>Feedback:</b>
+                            {idea.feedback ? (
+                              <>
+                                {FEEDBACK_ICON_ONLY[idea.feedback.severity]}
+                                <span>{idea.feedback.comment}</span>
+                              </>
+                            ) : (
+                              <span style={{ color: "#aaa" }}>No feedback</span>
+                            )}
+                          </div>
+                        )}
                       </Collapse>
                     </TableCell>
                   </TableRow>
                 </React.Fragment>
-              )
+              );
             })}
           </TableBody>
         </Table>

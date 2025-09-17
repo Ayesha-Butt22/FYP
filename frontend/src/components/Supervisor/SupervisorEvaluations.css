@@ -18,7 +18,7 @@
   color: #01337a !important;
 }
 
-/* ENHANCED TABLE */
+
 .rubric-table.enhanced-table {
   margin-bottom: 18px;
   max-width: 700px;
@@ -109,7 +109,7 @@
   width: 100%;
 }
 
-/* IMPROVED CHIP SPACING & SIZE IN TABLE */
+
 .evaluation-chip {
   font-size: 0.93rem !important;
   min-width: 44px !important;
@@ -126,18 +126,17 @@
   min-width: 52px !important;
 }
 
-/* Add vertical spacing to table rows */
+
 .all-evals-table .MuiTableRow-root {
   height: 46px !important;
 }
 
-/* Add a little space around each Chip in the table cell */
+
 .all-evals-table .MuiTableCell-root {
   padding-top: 12px !important;
   padding-bottom: 12px !important;
 }
 
-/* PieChart wrapper for proper visibility */
 .rubric-piechart-wrap {
   min-width: 170px;
   display: flex;

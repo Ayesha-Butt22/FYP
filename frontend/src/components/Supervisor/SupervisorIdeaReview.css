@@ -1,15 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
 .review-table-box {
   background: #fff;
   border-radius: 18px;
   padding: 20px 12px;
   box-shadow: 0 2px 18px #01337a10;
   overflow-x: auto;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
 }
 .review-table-row {
   background: #fff !important;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.1s;
+}
+.review-table-row:hover {
+  background: #f3f7fb !important;
 }
 .review-table-collapse-cell {
   padding: 0 !important;
   border: 0 !important;
   background: #f9fafb !important;
+  font-family: inherit;
+  text-align: left;
+}
+.section-desc {
+  font-family: inherit;
+  text-align: left;
+}
+
+
+.idea-details-box {
+  background: #f9fafb;
+  border-radius: 0;
+  padding: 16px 28px 10px 26px;
+  margin: 0;
+  box-shadow: none;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 15px;
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+}
+
+@media (max-width: 900px) {
+  .idea-details-box {
+    flex-direction: column;
+    padding: 10px 5px 8px 5px;
+  }
+}
+
+.idea-details-section {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.idea-detail-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+.idea-detail-label {
+  min-width: 88px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #01337a;
+  margin-right: 7px;
+}
+.idea-detail-value {
+  font-size: 14px;
+  color: #22223b;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+
+.members-section-align {
+  min-width: 170px;
+  margin-left: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 2px;
+  padding-right: 0;
+}
+@media (max-width: 900px) {
+  .members-section-align {
+    min-width: unset;
+    align-items: flex-start;
+    margin-left: 0;
+    padding-right: 0;
+  }
+}
+.member-row-enhanced {
+  margin-bottom: 2px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.member-name {
+  font-weight: 700;
+  color: #01337a;
+}
+.member-sapid {
+  color: #64748b;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.group-number-badge {
+  display: inline-block;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  text-align: center;
+  line-height: 28px;
+  margin-right: 4px;
+}
+
+.idea-feedback-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 8px;
+  margin-bottom: 2px;
 }

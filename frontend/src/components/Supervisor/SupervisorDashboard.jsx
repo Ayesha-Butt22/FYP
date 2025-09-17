@@ -34,8 +34,8 @@ const menu = [
   { label: "Meetings", icon: <CalendarMonthIcon /> },
   { label: "Evaluations", icon: <EmojiObjectsIcon /> },
   { label: "Reports", icon: <DescriptionIcon /> },
-  { label: "Analytics", icon: <BarChartIcon /> },       // <- Analytics before Archive
-  { label: "FYP Archive", icon: <LibraryBooksIcon /> }, // <- Archive always last
+  { label: "Analytics", icon: <BarChartIcon /> },
+  { label: "FYP Archive", icon: <LibraryBooksIcon /> },
 ];
 
 const supervisorInfo = {
@@ -54,8 +54,8 @@ const tabComponents = {
   "Meetings": <SupervisorMeetings />,
   "Evaluations": <SupervisorEvaluations />,
   "Reports": <SupervisorReports />,
-  "Analytics": <SupervisorAnalytics />,         // <- Analytics before Archive
-  "FYP Archive": <SupervisorArchive />,         // <- Archive always last
+  "Analytics": <SupervisorAnalytics />,
+  "FYP Archive": <SupervisorArchive />,
 };
 
 export default function SupervisorDashboard() {

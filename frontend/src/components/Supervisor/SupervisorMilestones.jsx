@@ -58,12 +58,12 @@ const STATUS = {
 };
 
 export default function SupervisorMilestones() {
-  // Only one expanded: setExpanded to group name or null
   const [expanded, setExpanded] = useState(null);
 
   return (
     <div className="milestone-dashboard-container">
-      <DashboardSectionHeader>Milestones & Timeline</DashboardSectionHeader>
+      <DashboardSectionHeader style={{ marginLeft: "101px" , marginBottom: "45px", marginTop: "-5px"
+ }}>Milestones & Timeline</DashboardSectionHeader>
       <div className="milestone-groups-row">
         {GROUPS.map((group) => {
           const completed = group.milestones.filter(m => m.status === "completed").length;
@@ -71,16 +71,22 @@ export default function SupervisorMilestones() {
           const overdue = group.milestones.filter(m => m.status === "overdue").length;
           const total = group.milestones.length;
           const percent = Math.round((completed / total) * 100);
+
           const doughnutData = {
             labels: ["Completed", "Pending", "Overdue"],
             datasets: [
               {
                 data: [completed, pending, overdue],
-                backgroundColor: [STATUS.completed.color, STATUS.pending.color, STATUS.overdue.color],
+                backgroundColor: [
+                  STATUS.completed.color,
+                  STATUS.pending.color,
+                  STATUS.overdue.col43eor
+                ],
                 borderWidth: 1
               }
             ]
           };
+
           return (
             <div className="milestone-group-card" key={group.group}>
               <div className="milestone-card-header">
@@ -117,6 +123,7 @@ export default function SupervisorMilestones() {
                   </div>
                 </div>
               </div>
+
               <button
                 className="milestone-toggle-btn"
                 onClick={() =>
@@ -125,6 +132,7 @@ export default function SupervisorMilestones() {
               >
                 {expanded === group.group ? "Hide Timeline" : "Show Timeline"}
               </button>
+
               {expanded === group.group && (
                 <div className="milestone-timeline-table-wrap">
                   <table className="milestone-timeline-table">
@@ -141,8 +149,12 @@ export default function SupervisorMilestones() {
                           <td className="milestone-td">{m.name}</td>
                           <td className="milestone-td">{m.due}</td>
                           <td className="milestone-td">
-                            <span className={`milestone-status milestone-status-${m.status}`}>
-                              <span className="milestone-status-icon">{STATUS[m.status].icon}</span>
+                            <span
+                              className={`milestone-status milestone-status-${m.status}`}
+                            >
+                              <span className="milestone-status-icon">
+                                {STATUS[m.status].icon}
+                              </span>
                               {STATUS[m.status].text}
                             </span>
                           </td>

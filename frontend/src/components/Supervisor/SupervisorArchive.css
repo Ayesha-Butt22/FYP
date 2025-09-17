@@ -1,27 +1,16 @@
-.archive-container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 40px 0;
-  min-height: 90vh;
-  background: linear-gradient(120deg, #f5fafd 60%, #e3e8ff 100%);
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
-.archive-paper {
-  padding: 40px;
-  border-radius: 16px;
+.archive-container {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 30px 0;
+  min-height: 90vh;
+  background: none; /* No color, no gradient, nothing */
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
 }
 
 .archive-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
   margin-bottom: 16px;
-}
-
-.archive-avatar {
-  background-color: #1976d2 !important;
-  width: 56px !important;
-  height: 56px !important;
 }
 
 .search-input,
@@ -31,51 +20,61 @@
   min-width: 250px;
 }
 
-.archive-card {
-  margin-bottom: 16px;
-  border-radius: 16px !important;
-  box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.18s, box-shadow 0.18s;
-  overflow: hidden;
-  background: linear-gradient(120deg, #f8fafc 85%, #e3e8ff 110%);
+.archive-table-paper {
+  margin-top: 18px;
+  border-radius: 0;
+  overflow-x: auto;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 
-.archive-card:hover {
-  transform: translateY(-7px) scale(1.025);
-  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.15);
+.archive-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+  background: none;
 }
 
-.card-banner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background-color: #1976d2;
+.archive-th {
+  background: #f5f5f8;
+  color: #01337a;
+  font-size: 1.08rem;
+  font-weight: 800;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 14px 12px;
+  font-family: inherit;
+  letter-spacing: 0.04em;
 }
 
-.archive-date {
-  margin-left: auto !important;
-  background: #fff !important;
-  color: #1976d2 !important;
-  font-weight: 600 !important;
-  font-size: 14px !important;
-  border-radius: 8px !important;
+.archive-td {
+  background: none;
+  font-size: 1.01rem;
+  color: #22223b;
+  padding: 13px 12px;
+  border-bottom: 1.4px solid #e5e7eb;
+  vertical-align: top;
+  font-family: inherit;
 }
 
-.card-description {
-  min-height: 48px;
-  font-weight: 500;
-  font-size: 16px;
+.archive-table-row:hover {
+  background: #f5faff !important;
+  transition: background 0.18s;
 }
 
 .tech-chip {
   font-weight: 600 !important;
   font-size: 13px !important;
-  background: #f5f5f5 !important;
+  background: #f4f8fd !important;
+  color: #1976d2 !important;
+  border-radius: 5px !important;
+  border: 1px solid #dde9fa !important;
+  margin-right: 3px;
 }
 
-.tag-chip {
-  font-weight: 600 !important;
-  font-size: 13px !important;
-  border-radius: 4px !important;
+@media (max-width: 900px) {
+  .archive-table {
+    min-width: 540px;
+    font-size: 0.92rem;
+  }
 }

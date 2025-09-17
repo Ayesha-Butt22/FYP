@@ -5,9 +5,20 @@
   font-weight: 700 !important;
   padding: 6px 24px !important;
   box-shadow: 0 3px 10px #2563eb18 !important;
+  background-color: #01337a !important; 
+  color: #fff !important;               
+  border: 1px solid #2563eb !important; 
+  transition: all 0.3s ease !important; 
+  margin-bottom: 28px !important;
 }
 
-/* --- Dialog --- */
+.add-slot-btn:hover {
+  background-color: #fff !important;   
+  color: #01337a!important;            
+  border: 1px solid #01337a!important;
+}
+
+
 .dialog-title {
   display: flex;
   align-items: center;
@@ -15,7 +26,7 @@
 }
 .dialog-icon {
   margin-right: 6px;
-  color: #2563eb;
+  color: #01337a;
 }
 
 /* --- Summary Cards --- */
@@ -42,7 +53,7 @@
 }
 .summary-card.booked {
   background: #e5f0ff;
-  color: #2563eb;
+  color: #01337a;
 }
 
 /* --- Slots Section --- */
@@ -59,14 +70,14 @@
   align-items: center;
 }
 .section-title.upcoming {
-  color: #2563eb;
+  color: #01337a;
 }
 .section-icon {
   margin-right: 8px;
   color: #01337a;
 }
 .section-icon.upcoming {
-  color: #2563eb;
+  color: #01337a;
 }
 .divider {
   margin-bottom: 16px !important;
