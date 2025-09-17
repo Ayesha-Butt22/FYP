@@ -1,5 +1,6 @@
 import React from "react";
 import { FaUsers, FaClipboardCheck, FaCalendarCheck, FaStar, FaArrowRight } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import "./OverviewSupervisor.css";
 
 // Dummy Data
@@ -15,6 +16,8 @@ const progress = [
 ];
 
 export default function OverviewSupervisor() {
+  const navigate = useNavigate();
+
   return (
     <div className="overview-container">
       <div className="welcome-banner">
@@ -28,9 +31,24 @@ export default function OverviewSupervisor() {
           <span style={{ marginLeft: 18 }}>Date: {new Date().toLocaleDateString()}</span>
         </div>
         <div className="quick-links">
-          <a className="quick-link-btn" href="#review"><FaClipboardCheck /> Review Proposals <FaArrowRight /></a>
-          <a className="quick-link-btn" href="#meeting"><FaCalendarCheck /> Schedule Meeting <FaArrowRight /></a>
-          <a className="quick-link-btn" href="#groups"><FaUsers /> My Groups <FaArrowRight /></a>
+          <button
+            className="quick-link-btn"
+            onClick={() => navigate("/review")}
+          >
+            <FaClipboardCheck /> Review Proposals <FaArrowRight />
+          </button>
+          <button
+            className="quick-link-btn"
+            onClick={() => navigate("/meeting")}
+          >
+            <FaCalendarCheck /> Schedule Meeting <FaArrowRight />
+          </button>
+          <button
+            className="quick-link-btn"
+            onClick={() => navigate("/groups")}
+          >
+            <FaUsers /> My Groups <FaArrowRight />
+          </button>
         </div>
       </div>
 

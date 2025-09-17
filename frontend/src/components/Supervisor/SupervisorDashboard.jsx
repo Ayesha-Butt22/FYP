@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import DashboardLayout from "../DashboardLayout";
 import {
   Dashboard as DashboardIcon,
@@ -45,23 +45,26 @@ const supervisorInfo = {
   subtitle: localStorage.getItem("specialization") || "",
 };
 
-const tabComponents = {
-  "Overview": <OverviewSupervisor />,
-  "My Groups": <SupervisorGroups />,
-  "Idea & Proposal Review": <SupervisorIdeaReview />,
-  "Milestones": <SupervisorMilestones />,
-  "Whiteboard": <SupervisorWhiteboard />,
-  "Meetings": <SupervisorMeetings />,
-  "Evaluations": <SupervisorEvaluations />,
-  "Reports": <SupervisorReports />,
-  "Analytics": <SupervisorAnalytics />,
-  "FYP Archive": <SupervisorArchive />,
-};
-
 export default function SupervisorDashboard() {
+  const [activeTab, setActiveTab] = useState("Overview");
+
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/auth?role=supervisor";
+  };
+
+  // Pass setActiveTab to OverviewSupervisor
+  const tabComponents = {
+    "Overview": <OverviewSupervisor onTabChange={setActiveTab} />,
+    "Idea & Proposal Review": <SupervisorIdeaReview />,
+    "My Groups": <SupervisorGroups />,
+    "Milestones": <SupervisorMilestones />,
+    "Whiteboard": <SupervisorWhiteboard />,
+    "Meetings": <SupervisorMeetings />,
+    "Evaluations": <SupervisorEvaluations />,
+    "Reports": <SupervisorReports />,
+    "Analytics": <SupervisorAnalytics />,
+    "FYP Archive": <SupervisorArchive />,
   };
 
   return (
@@ -71,6 +74,8 @@ export default function SupervisorDashboard() {
       roleInfo={supervisorInfo}
       tabComponents={tabComponents}
       defaultTab="Overview"
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
       onLogout={handleLogout}
       profileIcon={<SupervisorNotices />}
     />
