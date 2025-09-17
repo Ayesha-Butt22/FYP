@@ -98,7 +98,7 @@ const BgWrapper = styled.div`
 
 const GlassNav = styled.nav`
   width: 100vw;
-  padding: 32px 0 0 0;
+  padding: 32px 0 20px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;

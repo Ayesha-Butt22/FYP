@@ -33,9 +33,8 @@ export default function DashboardLayout({
   defaultTab = "",
   onLogout,
   profileIcon, // NEW
-  children
+  children, activeTab, setActiveTab,
 }) {
-  const [activeTab, setActiveTab] = useState(defaultTab || menu[0]?.label || "");
 
   const displayName = localStorage.getItem("name") || roleInfo.name || "User";
   const displaySubtitle =

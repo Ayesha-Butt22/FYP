@@ -15,7 +15,7 @@ const progress = [
   { label: "Evaluations Done", percent: 25, color: "#16a34a" },
 ];
 
-export default function OverviewSupervisor() {
+export default function OverviewSupervisor({ onTabChange }) {
   const navigate = useNavigate();
 
   return (
@@ -33,19 +33,19 @@ export default function OverviewSupervisor() {
         <div className="quick-links">
           <button
             className="quick-link-btn"
-            onClick={() => navigate("/review")}
+            onClick={() => onTabChange("Idea & Proposal Review")}
           >
             <FaClipboardCheck /> Review Proposals <FaArrowRight />
           </button>
           <button
             className="quick-link-btn"
-            onClick={() => navigate("/meeting")}
+            onClick={() => onTabChange("Meetings")}
           >
             <FaCalendarCheck /> Schedule Meeting <FaArrowRight />
           </button>
           <button
             className="quick-link-btn"
-            onClick={() => navigate("/groups")}
+            onClick={() => onTabChange("My Groups")}
           >
             <FaUsers /> My Groups <FaArrowRight />
           </button>
