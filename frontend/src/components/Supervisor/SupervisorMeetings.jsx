@@ -124,8 +124,10 @@ export default function SupervisorMeetings() {
       : { label: "Available", color: "warning", icon: <AccessTime fontSize="small" />, variant: "outlined" };
 
   return (
-    <Box maxWidth={950} mx="auto" py={3}>
-      <DashboardSectionHeader style={{ marginLeft: "-120px" ,  marginBottom: "50px", marginTop: "-20px"}}>Meetings</DashboardSectionHeader>
+    <Box width="100%" >
+      <DashboardSectionHeader style={{ marginBottom: "40px", marginTop: "-10px", marginLeft: "239px" }}>
+        Meetings
+      </DashboardSectionHeader>
 
       {/* Add Slot Button */}
       <Button
@@ -181,7 +183,7 @@ export default function SupervisorMeetings() {
           All Slots
         </Typography>
         <Divider className="divider" />
-        <Table size="small">
+        <Table size="small" className="full-table">
           <TableHead>
             <TableRow>
               <TableCell><CalendarToday fontSize="small" className="inline-icon" />Date</TableCell>
@@ -232,7 +234,7 @@ export default function SupervisorMeetings() {
         {upcomingMeetings.length === 0 ? (
           <Typography className="no-meetings">No upcoming meetings.</Typography>
         ) : (
-          <Table size="small">
+          <Table size="small" className="full-table">
             <TableHead>
               <TableRow>
                 <TableCell>Date</TableCell>

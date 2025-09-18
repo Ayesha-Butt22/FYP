@@ -160,12 +160,12 @@ export default function SupervisorEvaluations() {
   }, [selectedGroup, selectedMilestone]);
 
   return (
-    <Box maxWidth={900} mx="auto" py={3}>
-      <DashboardSectionHeader style={{ marginLeft: "-150px" , marginBottom: "50px", marginTop: "-20px"
- }}>
+    <Box maxWidth="100%" mx="auto" py={3} px={0}>
+      <DashboardSectionHeader style={{ marginLeft: "10px" , marginBottom: "50px", marginTop: "-28px" }}>
         Evaluation & Rubrics
       </DashboardSectionHeader>
 
+      {/* Evaluation Form */}
       <Paper className="evaluation-form-paper">
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2}>
           <FormControl className="evaluation-form-control">
@@ -193,7 +193,7 @@ export default function SupervisorEvaluations() {
         </Stack>
         <Divider className="evaluation-divider" />
 
-        {/* Rubric marks input */}
+        {/* Rubric Table */}
         {(selectedGroup && selectedMilestone && !submitted && !alreadyEvaluated) ? (
           <>
             <Typography fontWeight={700} mb={1} className="rubric-title">
@@ -236,7 +236,7 @@ export default function SupervisorEvaluations() {
               </TableBody>
             </Table>
 
-            {/* Visuals */}
+            {/* Total + Chart */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="center" mb={1}>
               <Box sx={{ minWidth: 230 }}>
                 <Typography fontWeight={700} className="total-marks">
@@ -277,7 +277,6 @@ export default function SupervisorEvaluations() {
               </Box>
             </Stack>
 
-            {/* Error, Submit */}
             {formError && <Typography color="error" mb={1}>{formError}</Typography>}
             <Button
               variant="contained"
@@ -298,7 +297,6 @@ export default function SupervisorEvaluations() {
           </Typography>
         )}
 
-        
         {(alreadyEvaluated || submitted) && (
           <Stack direction="row" spacing={1} mt={2}>
             {alreadyEvaluated && (
@@ -322,7 +320,7 @@ export default function SupervisorEvaluations() {
 
       </Paper>
 
-    
+      {/* All Evaluations */}
       <Paper className="evaluation-table-paper">
         <Typography fontWeight={700} className="all-evals-title">
           All Evaluations Given
