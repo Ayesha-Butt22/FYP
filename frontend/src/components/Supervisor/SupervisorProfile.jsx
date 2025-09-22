@@ -73,7 +73,7 @@ export default function SupervisorProfile({ supervisorInfo }) {
         marginTop: "-20px",
         paddingTop: "32px"
       }}>
-        <DashboardSectionHeader sx={{ marginLeft: 17, marginBottom: "40px", marginTop: "-20px", color: mainBlue }}>
+        <DashboardSectionHeader style={{marginBottom: "40px", marginTop: "20px" }}>
           Profile
         </DashboardSectionHeader>
         <div style={{
