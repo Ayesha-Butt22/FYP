@@ -22,6 +22,7 @@
 }
 
 .milestone-card-header {
+  height: 170px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -43,7 +44,7 @@
 
 .milestone-card-department,
 .milestone-card-members {
-  font-size: 15px;
+  font-size: 16px;
   color: #64748b;
   margin-bottom: 6px;
 }

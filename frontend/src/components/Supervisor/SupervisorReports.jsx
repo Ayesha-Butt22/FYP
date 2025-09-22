@@ -123,110 +123,113 @@ export default function SupervisorReports() {
   };
 
   return (
-    <Box maxWidth={1000} mx="auto" py={3}>
-      <DashboardSectionHeader>Evaluation Report</DashboardSectionHeader>
+      <Box mx="auto" py={3} mr={0} ml={0} pt={0}>
+        <DashboardSectionHeader>Evaluation Report</DashboardSectionHeader>
 
-      <Paper className="reports-paper">
-        {/* Group selector */}
-        <FormControl className="reports-group-select">
-          <InputLabel>Select Group</InputLabel>
-          <Select
-            value={selectedGroup}
-            label="Select Group"
-            onChange={(e) => setSelectedGroup(e.target.value)}
-            size="small"
-          >
-            {GROUPS.map((g) => (
-              <MenuItem key={g.id} value={g.id}>
-                {g.id} - {g.title}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <div className="section-desc">
+          Here you can see preview evaluation & rubrics. Select "Particular Group" to view and respected group record will be displayed </div>
 
-        {/* If no group is selected */}
-        {!group ? (
-          <Typography color="#aaa" className="reports-placeholder">
-            Select a group to view its report.
-          </Typography>
-        ) : (
-          <div>
-            {/* Report Summary */}
-            <div className="report-summary">
-              <Typography className="report-title">
-                {group.id} - {group.title}
+        <Paper className="reports-paper">
+
+          <FormControl className="reports-group-select">
+            <InputLabel>Select Group</InputLabel>
+            <Select
+                value={selectedGroup}
+                label="Select Group"
+                onChange={(e) => setSelectedGroup(e.target.value)}
+                size="small"
+            >
+              {GROUPS.map((g) => (
+                  <MenuItem key={g.id} value={g.id}>
+                    {g.id} - {g.title}
+                  </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* If no group is selected */}
+          {!group ? (
+              <Typography color="#aaa" className="reports-placeholder">
+                Select a group to view its report.
               </Typography>
-              <Typography className="report-members">
-                <b>Members:</b> {group.members.join(", ")}
-              </Typography>
-              <Stack direction="row" spacing={1} className="report-progress-summary">
-                <Chip label={`Completed: ${completed}`} color="success" />
-                <Chip label={`In Progress: ${inProgress}`} color="info" />
-                <Chip label={`Pending: ${pending}`} color="warning" />
-                <Chip label={`Total: ${total}`} color="default" />
-                <Chip label={`Progress: ${percent}%`} color="primary" />
-              </Stack>
-              <Typography className="report-total-score">
-                <b>Total Score:</b> {groupScore}/{groupMax}
-              </Typography>
-            </div>
+          ) : (
+              <div>
+                {/* Report Summary */}
+                <div className="report-summary">
+                  <Typography className="report-title">
+                    {group.id} - {group.title}
+                  </Typography>
+                  <Typography className="report-members">
+                    <b>Members:</b> {group.members.join(", ")}
+                  </Typography>
+                  <Stack direction="row" spacing={1} className="report-progress-summary">
+                    <Chip label={`Completed: ${completed}`} color="success"/>
+                    <Chip label={`In Progress: ${inProgress}`} color="info"/>
+                    <Chip label={`Pending: ${pending}`} color="warning"/>
+                    <Chip label={`Total: ${total}`} color="default"/>
+                    <Chip label={`Progress: ${percent}%`} color="primary"/>
+                  </Stack>
+                  <Typography className="report-total-score">
+                    <b>Total Score:</b> {groupScore}/{groupMax}
+                  </Typography>
+                </div>
 
-            {/* Export Buttons */}
-            <div className="report-export-btns">
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<PictureAsPdf />}
-                onClick={handleExportPDF}
-                className="export-btn"
-              >
-                Export PDF
-              </Button>
-              <Button
-                variant="outlined"
-                color="success"
-                startIcon={<TableView />}
-                onClick={handleExportExcel}
-                className="export-btn"
-              >
-                Export Excel
-              </Button>
-            </div>
+                {/* Export Buttons */}
+                <div className="report-export-btns">
+                  <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<PictureAsPdf/>}
+                      onClick={handleExportPDF}
+                      className="export-btn"
+                  >
+                    Export PDF
+                  </Button>
+                  <Button
+                      variant="outlined"
+                      color="success"
+                      startIcon={<TableView/>}
+                      onClick={handleExportExcel}
+                      className="export-btn"
+                  >
+                    Export Excel
+                  </Button>
+                </div>
 
-            {/* Milestones Table */}
-            <Table className="report-table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Milestone</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Score</TableCell>
-                  <TableCell>Max</TableCell>
-                  <TableCell>Feedback/Evaluation</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {group.milestones.map((m, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell>{m.name}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={m.status}
-                        color={statusColor(m.status)}
-                        className="report-status-chip"
-                      />
-                    </TableCell>
-                    <TableCell>{m.score}</TableCell>
-                    <TableCell>{m.max}</TableCell>
-                    <TableCell>
-                      {m.feedback || <span className="feedback-missing">-</span>}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </Paper>
-    </Box>
+                {/* Milestones Table */}
+                <Table className="report-table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Milestone</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Score</TableCell>
+                      <TableCell>Max</TableCell>
+                      <TableCell>Feedback/Evaluation</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {group.milestones.map((m, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell>{m.name}</TableCell>
+                          <TableCell>
+                            <Chip
+                                label={m.status}
+                                color={statusColor(m.status)}
+                                className="report-status-chip"
+                            />
+                          </TableCell>
+                          <TableCell>{m.score}</TableCell>
+                          <TableCell>{m.max}</TableCell>
+                          <TableCell>
+                            {m.feedback || <span className="feedback-missing">-</span>}
+                          </TableCell>
+                        </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+          )}
+        </Paper>
+      </Box>
   );
 }

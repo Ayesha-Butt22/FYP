@@ -65,9 +65,9 @@
   border-radius: 20px;
   box-shadow: 0 8px 32px #2563eb1b;
   background: #f8fbff;
-  padding: 20px;
-  margin: 0 auto;
-  max-width: 700px;
+  /*padding: 20px;*/
+  /*margin: 0 auto;*/
+  /*max-width: 700px;*/
 }
 
 .bar-title {
@@ -79,6 +79,6 @@
 
 .bar-inner-box {
   width: 100%;
-  max-width: 550px;
-  margin: 0 auto;
+  max-width: 100%;
+  /*margin: 0 auto;*/
 }

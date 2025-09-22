@@ -91,18 +91,20 @@ export default function SupervisorWhiteboard() {
 
   return (
     <Box>
-      {/* ✅ Whiteboard heading left */}
       <Box textAlign="left" mb={2}>
         <DashboardSectionHeader>Whiteboard</DashboardSectionHeader>
-      </Box>
+        <div className="section-desc">
+          Here you can post all the FYP groups notes. Click "Post Note" to send that  group a note or message,
+          and you can view your old notes below.
+        </div>
 
-      {/* ✅ Group boxes center aligned */}
+      </Box>
       <Stack
-        direction="row"
-        spacing={3}
-        justifyContent="center"
-        alignItems="flex-start"
-        className="group-stack"
+          direction="row"
+          spacing={3}
+          justifyContent="center"
+          alignItems="flex-start"
+          className="group-stack"
       >
         {GROUPS.map((group) => (
           <Paper elevation={3} key={group.id} className="group-card">
@@ -194,7 +196,6 @@ export default function SupervisorWhiteboard() {
         ))}
       </Stack>
 
-      {/* ✅ Export button center aligned */}
       <Stack direction="row" justifyContent="center" mt={3}>
         <Button
           variant="outlined"

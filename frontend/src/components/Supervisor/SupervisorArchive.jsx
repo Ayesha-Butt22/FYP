@@ -1,4 +1,3 @@
-// components/SupervisorArchive.jsx
 import React, { useState } from "react";
 import {
   Box,
@@ -62,114 +61,119 @@ export default function SupervisorArchive() {
   });
 
   return (
-    <Box>
-      <DashboardSectionHeader>FYP Archive</DashboardSectionHeader>
+      <Box>
+        <DashboardSectionHeader>FYP Archive</DashboardSectionHeader>
 
-      <Box className="archive-container">
-        <Stack spacing={0.5} mb={3}>
-          <p style={{ color: "#555", fontSize: 18, margin: 0 }}>
-            Search completed FYP projects by title, technology, or keyword.
-          </p>
-          <b style={{ color: "#444" }}>All records are read-only.</b>
-        </Stack>
+        <div className="section-desc">
+          Here you can preview groups records. search functionality can be used to search records by project name, and
+          it also provides description and technologies used.
+        </div>
 
-        {/* Search Fields */}
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          mb={3}
-          alignItems="center"
-        >
-          <TextField
-            label="Search by Title/Keyword"
-            variant="outlined"
-            size="medium"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="search-input"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="primary" />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            label="Technology (optional)"
-            variant="outlined"
-            size="medium"
-            value={tech}
-            onChange={(e) => setTech(e.target.value)}
-            className="tech-input"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <CodeIcon color="action" />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Stack>
+        <Box className="archive-container">
+          <Stack spacing={0.5} mb={3}>
+            <p style={{color: "#555", fontSize: 18, margin: 0}}>
+              Search completed FYP projects by title, technology, or keyword.
+            </p>
+            <b style={{color: "#444"}}>All records are read-only.</b>
+          </Stack>
 
-        {/* Table */}
-        <Table className="archive-table">
-          <TableHead>
-            <TableRow>
-              <TableCell className="archive-th">Project Name</TableCell>
-              <TableCell className="archive-th">Description</TableCell>
-              <TableCell className="archive-th">Technology</TableCell>
-              <TableCell className="archive-th">Supervised By</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filtered.length === 0 ? (
+          {/* Search Fields */}
+          <Stack
+              direction={{xs: "column", sm: "row"}}
+              spacing={2}
+              mb={3}
+              alignItems="center"
+          >
+            <TextField
+                label="Search by Title/Keyword"
+                variant="outlined"
+                size="medium"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="search-input"
+                InputProps={{
+                  startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon color="primary"/>
+                      </InputAdornment>
+                  ),
+                }}
+            />
+            <TextField
+                label="Technology (optional)"
+                variant="outlined"
+                size="medium"
+                value={tech}
+                onChange={(e) => setTech(e.target.value)}
+                className="tech-input"
+                InputProps={{
+                  startAdornment: (
+                      <InputAdornment position="start">
+                        <CodeIcon color="action"/>
+                      </InputAdornment>
+                  ),
+                }}
+            />
+          </Stack>
+
+          {/* Table */}
+          <Table className="archive-table">
+            <TableHead>
               <TableRow>
-                <TableCell
-                  colSpan={4}
-                  align="center"
-                  style={{
-                    color: "#888",
-                    fontSize: 20,
-                    padding: "48px 0",
-                  }}
-                >
-                  No projects found.
-                </TableCell>
+                <TableCell className="archive-th">Project Name</TableCell>
+                <TableCell className="archive-th">Description</TableCell>
+                <TableCell className="archive-th">Technology</TableCell>
+                <TableCell className="archive-th">Supervised By</TableCell>
               </TableRow>
-            ) : (
-              filtered.map((proj) => (
-                <TableRow key={proj.projectId} className="archive-table-row">
-                  <TableCell
-                    className="archive-td"
-                    style={{ fontWeight: 700, color: "#01337a" }}
-                  >
-                    {proj.title}
-                  </TableCell>
-                  <TableCell className="archive-td">{proj.description}</TableCell>
-                  <TableCell className="archive-td">
-                    <Stack direction="row" spacing={1}>
-                      {proj.technologies.map((t) => (
-                        <Tooltip title={t} key={t}>
-                          <Chip
-                            icon={<CodeIcon fontSize="small" />}
-                            label={t}
-                            size="small"
-                            className="tech-chip"
-                          />
-                        </Tooltip>
-                      ))}
-                    </Stack>
-                  </TableCell>
-                  <TableCell className="archive-td">
-                    {proj.supervisor}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                        colSpan={4}
+                        align="center"
+                        style={{
+                          color: "#888",
+                          fontSize: 20,
+                          padding: "48px 0",
+                        }}
+                    >
+                      No projects found.
+                    </TableCell>
+                  </TableRow>
+              ) : (
+                  filtered.map((proj) => (
+                      <TableRow key={proj.projectId} className="archive-table-row">
+                        <TableCell
+                            className="archive-td"
+                            style={{fontWeight: 700, color: "#01337a"}}
+                        >
+                          {proj.title}
+                        </TableCell>
+                        <TableCell className="archive-td">{proj.description}</TableCell>
+                        <TableCell className="archive-td">
+                          <Stack direction="row" spacing={1}>
+                            {proj.technologies.map((t) => (
+                                <Tooltip title={t} key={t}>
+                                  <Chip
+                                      icon={<CodeIcon fontSize="small"/>}
+                                      label={t}
+                                      size="small"
+                                      className="tech-chip"
+                                  />
+                                </Tooltip>
+                            ))}
+                          </Stack>
+                        </TableCell>
+                        <TableCell className="archive-td">
+                          {proj.supervisor}
+                        </TableCell>
+                      </TableRow>
+                  ))
+              )}
+            </TableBody>
+          </Table>
+        </Box>
       </Box>
-    </Box>
   );
 }

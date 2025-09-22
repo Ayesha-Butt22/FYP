@@ -38,9 +38,9 @@
   font-size: 1.08rem;
   color: #64748b;
   margin-bottom: 30px;
-  max-width: 600px;
+  max-width: 650px;
   text-align: left;
-  margin-left: 245px;
+  margin-left: 0;
   font-family: inherit;
   margin-top: 0;
 }
@@ -48,11 +48,10 @@
 .group-cards-row {
   display: flex;
   gap: 36px;
-  margin: 0 auto 40px auto;
-  justify-content: flex-start;
+  margin: 0 0 40px 0;
+  justify-content: left;
+  align-items: start;
   flex-wrap: wrap;
-  max-width: 1300px;
-  padding-left: 50px;
 }
 
 .group-card {

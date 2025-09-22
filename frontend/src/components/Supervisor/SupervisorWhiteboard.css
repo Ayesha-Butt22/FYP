@@ -1,7 +1,8 @@
 .whiteboard-container {
-  max-width: 1350px;
-  margin: 0 auto;
-  padding: 24px 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 24px;
 }
 
 .group-stack {
@@ -9,12 +10,9 @@
 }
 
 .group-card {
-  padding: 20px;
-  border-radius: 12px !important;
-  min-width: 340px;
-  max-width: 415px;
-  flex: 1;
-  background: #f9fafe !important;
+  flex: 1 1 30%;
+  min-width: 300px;
+  max-width: none;
 }
 
 .group-title {

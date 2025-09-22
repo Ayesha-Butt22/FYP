@@ -143,44 +143,49 @@ export default function SupervisorAnalytics() {
   });
 
   return (
-    <Box>
-      <DashboardSectionHeader>Analytics</DashboardSectionHeader>
+      <Box>
+        <DashboardSectionHeader>Analytics</DashboardSectionHeader>
 
-      <div className="analytics-container">
-        <Grid container spacing={2}>{groupLineCharts}</Grid>
+        <div className="section-desc">
+          Here you can see overall analysis. How particular groups are performing in certain milestones and
+          the pictorial graph to view the groups performance comparison
+        </div>
 
-        <Box className="bar-chart-box">
-          <Card className="bar-card">
-            <CardContent>
-              <Typography
-                variant="h6"
-                color="primary"
-                fontWeight={900}
-                className="bar-title"
-              >
-                Group Performance Comparison
-              </Typography>
-              <Box className="bar-inner-box">
-                <Bar
-                  data={barData}
-                  options={{
-                    responsive: true,
-                    plugins: { legend: { display: false }, title: { display: false } },
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: { stepSize: 20, font: { size: 11 } },
-                      },
-                    },
-                  }}
-                  height={110}
-                />
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-      </div>
-    </Box>
+        <div className="analytics-container">
+          <Grid container spacing={9}>{groupLineCharts}</Grid>
+
+          <Box className="bar-chart-box">
+            <Card className="bar-card">
+              <CardContent>
+                <Typography
+                    variant="h6"
+                    color="primary"
+                    fontWeight={900}
+                    className="bar-title"
+                >
+                  Group Performance Comparison
+                </Typography>
+                <Box className="bar-inner-box">
+                  <Bar
+                      data={barData}
+                      options={{
+                        responsive: true,
+                        plugins: {legend: {display: false}, title: {display: false}},
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {stepSize: 20, font: {size: 11}},
+                          },
+                        },
+                      }}
+                      height={110}
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        </div>
+      </Box>
   );
 }
