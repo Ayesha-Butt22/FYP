@@ -154,230 +154,253 @@ export default function SupervisorIdeaReview() {
           : idea
       )
     );
-    setFeedback(f => ({ ...f, [ideaId]: { severity: "", comment: "" } }));
+    // remove feedback entry after submitting
+    setFeedback(f => {
+      const copy = { ...f };
+      delete copy[ideaId];
+      return copy;
+    });
   };
 
   return (
-    <Box maxWidth={1500} mx="auto" my={4}>
-      <DashboardSectionHeader style={{ marginLeft: "150px" , marginBottom: "50px", marginTop: "-5px"
- }}>
+    <>
+      <DashboardSectionHeader>
         FYP Idea & Proposal Review
       </DashboardSectionHeader>
-      <Box className="review-table-box">
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={thStyle}>
-                <GroupOutlined sx={{ verticalAlign: "middle", color: "#2563eb", mr: 1 }} />
-                Group
-              </TableCell>
-              <TableCell sx={thStyle}>Title</TableCell>
-              <TableCell sx={thStyle}>Status</TableCell>
-              <TableCell sx={thStyle} align="center">
-                Action
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {ideas.map((idea, idx) => {
-              const isExpanded = expanded[idea.ideaId];
-              const status = STATUS[idea.status];
-              return (
-                <React.Fragment key={idea.ideaId}>
-                  <TableRow hover className="review-table-row">
-                    <TableCell sx={tdStyle}>
-                      <Stack direction="row" gap={1.5} alignItems="center">
-                        <Typography className="group-number-badge">{idx + 1}</Typography>
-                        <Typography fontWeight={700}>{idea.groupName}</Typography>
-                      </Stack>
-                    </TableCell>
-                    <TableCell sx={tdStyle}>
-                      <Tooltip title={idea.title}>
-                        <Typography
-                          fontWeight={600}
-                          color="#01337a"
+
+      <Box maxWidth={1500} mx="auto" my={4}>
+        <Box className="review-table-box">
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={thStyle}>
+                  <GroupOutlined sx={{ verticalAlign: "middle", color: "#2563eb", mr: 1 }} />
+                  Group
+                </TableCell>
+                <TableCell sx={thStyle}>Title</TableCell>
+                <TableCell sx={thStyle}>Status</TableCell>
+                <TableCell sx={thStyle} align="center">
+                  Action
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {ideas.map((idea, idx) => {
+                const isExpanded = expanded[idea.ideaId];
+                const status = STATUS[idea.status];
+                return (
+                  <React.Fragment key={idea.ideaId}>
+                    <TableRow
+                      hover
+                      className="review-table-row"
+                      sx={idea.status === "pending" ? { backgroundColor: "#fff9e6" } : {}}
+                    >
+                      <TableCell sx={tdStyle}>
+                        <Stack direction="row" gap={1.5} alignItems="center">
+                          <Typography className="group-number-badge">{idx + 1}</Typography>
+                          <Typography fontWeight={700}>{idea.groupName}</Typography>
+                        </Stack>
+                      </TableCell>
+                      <TableCell sx={tdStyle}>
+                        <Tooltip title={idea.title}>
+                          <Typography
+                            fontWeight={600}
+                            color="#01337a"
+                            sx={{
+                              maxWidth: 170,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              cursor: "pointer",
+                            }}
+                            onClick={() =>
+                              setExpanded(exp => ({
+                                ...exp,
+                                [idea.ideaId]: !exp[idea.ideaId],
+                              }))
+                            }
+                          >
+                            {idea.title}
+                          </Typography>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell sx={tdStyle}>
+                        <Chip
+                          icon={status.icon}
+                          label={status.label}
                           sx={{
-                            maxWidth: 170,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                            px: 1.5,
+                            ...status.chipStyle,
+                            borderRadius: 25,
+                            fontWeight: 700,
+                            fontSize: 15,
+                            height: 32,
+                            minWidth: 120,
+                            justifyContent: "left",
+                            fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
                           }}
+                        />
+                      </TableCell>
+                      <TableCell sx={tdStyle} align="center">
+                        <IconButton
+                          color="primary"
+                          onClick={() =>
+                            setExpanded(exp => ({
+                              ...exp,
+                              [idea.ideaId]: !exp[idea.ideaId],
+                            }))
+                          }
+                          aria-label={isExpanded ? "Hide Details" : "Show Details"}
                         >
-                          {idea.title}
-                        </Typography>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell sx={tdStyle}>
-                      <Chip
-                        icon={status.icon}
-                        label={status.label}
-                        sx={{
-                          px: 1.5,
-                          ...status.chipStyle,
-                          borderRadius: 25,
-                          fontWeight: 700,
-                          fontSize: 15,
-                          height: 32,
-                          minWidth: 120,
-                          justifyContent: "left",
-                          fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell sx={tdStyle} align="center">
-                      <IconButton
-                        color="primary"
-                        onClick={() =>
-                          setExpanded(exp => ({
-                            ...exp,
-                            [idea.ideaId]: !exp[idea.ideaId],
-                          }))
-                        }
-                        aria-label={isExpanded ? "Hide Details" : "Show Details"}
-                      >
-                        {isExpanded ? <ExpandLess /> : <ExpandMore />}
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell colSpan={4} className="review-table-collapse-cell">
-                      <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                        <Box className="idea-details-box">
-                          <Box className="idea-details-section">
-                            <div className="idea-detail-row">
-                              <span className="idea-detail-label">Abstract:</span>
-                              <span className="idea-detail-value">{idea.abstract}</span>
-                            </div>
-                            <div className="idea-detail-row">
-                              <span className="idea-detail-label">Methodology:</span>
-                              <span className="idea-detail-value">{idea.methodology}</span>
-                            </div>
-                            <div className="idea-detail-row">
-                              <span className="idea-detail-label">Tools:</span>
-                              <span className="idea-detail-value">{idea.tools}</span>
-                            </div>
-                            <div className="idea-detail-row">
-                              <span className="idea-detail-label">Domain:</span>
-                              <span className="idea-detail-value">{idea.domain}</span>
-                            </div>
-                          </Box>
-                          <Box className="members-section-align">
-                            <span className="idea-detail-label" style={{ marginBottom: 5 }}>Members:</span>
-                            {idea.members.map((m, midx) => (
-                              <div className="member-row-enhanced" key={midx}>
-                                <span className="member-name">{m.name}</span>
-                                <span className="member-sapid">({m.sapId})</span>
+                          {isExpanded ? <ExpandLess /> : <ExpandMore />}
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell colSpan={4} className="review-table-collapse-cell">
+                        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                          <Box className="idea-details-box">
+                            <Box className="idea-details-section">
+                              <div className="idea-detail-row">
+                                <span className="idea-detail-label">Abstract:</span>
+                                <span className="idea-detail-value">{idea.abstract}</span>
                               </div>
-                            ))}
+                              <div className="idea-detail-row">
+                                <span className="idea-detail-label">Methodology:</span>
+                                <span className="idea-detail-value">{idea.methodology}</span>
+                              </div>
+                              <div className="idea-detail-row">
+                                <span className="idea-detail-label">Tools:</span>
+                                <span className="idea-detail-value">{idea.tools}</span>
+                              </div>
+                              <div className="idea-detail-row">
+                                <span className="idea-detail-label">Domain:</span>
+                                <span className="idea-detail-value">{idea.domain}</span>
+                              </div>
+                            </Box>
+                            <Box className="members-section-align">
+                              <span className="idea-detail-label" style={{ marginBottom: 5 }}>Members:</span>
+                              {idea.members.map((m, midx) => (
+                                <div className="member-row-enhanced" key={midx}>
+                                  <span className="member-name">{m.name}</span>
+                                  <span className="member-sapid">({m.sapId})</span>
+                                </div>
+                              ))}
+                            </Box>
                           </Box>
-                        </Box>
-                        <Divider sx={{ my: 1 }} />
-                        {idea.status === "pending" ? (
-                          <Box mt={1}>
-                            <Typography fontWeight={700} fontSize={15} mb={0.5}>
-                              Supervisor Feedback:
-                            </Typography>
-                            <Stack direction="row" spacing={2} mt={1}>
-                              {FEEDBACK_OPTIONS.map(opt => (
-                                <Box key={opt.value} display="flex" alignItems="center">
-                                  <Radio
-                                    checked={feedback[idea.ideaId]?.severity === opt.value}
-                                    onChange={e =>
-                                      setFeedback(f => ({
-                                        ...f,
-                                        [idea.ideaId]: {
-                                          ...f[idea.ideaId],
-                                          severity: opt.value,
-                                        },
-                                      }))
-                                    }
-                                    value={opt.value}
-                                    sx={{
-                                      color: opt.color,
-                                      "&.Mui-checked": { color: opt.color },
-                                    }}
-                                  />
-                                  <Box display="flex" alignItems="center" gap={0.5}>
-                                    {opt.icon}
-                                    <Typography
+                          <Divider sx={{ my: 1 }} />
+
+                          {idea.status === "pending" ? (
+                            <Box mt={1}>
+                              <Typography fontWeight={700} fontSize={15} mb={0.5}>
+                                Supervisor Feedback:
+                              </Typography>
+                              <Stack direction="row" spacing={2} mt={1}>
+                                {FEEDBACK_OPTIONS.map(opt => (
+                                  <Box key={opt.value} display="flex" alignItems="center">
+                                    <Radio
+                                      checked={feedback[idea.ideaId]?.severity === opt.value}
+                                      onChange={() =>
+                                        setFeedback(f => ({
+                                          ...f,
+                                          [idea.ideaId]: {
+                                            ...f[idea.ideaId],
+                                            severity: opt.value,
+                                          },
+                                        }))
+                                      }
+                                      value={opt.value}
+                                      aria-label={opt.label}
                                       sx={{
                                         color: opt.color,
-                                        fontWeight: 600,
-                                        fontSize: 16,
+                                        "&.Mui-checked": { color: opt.color },
                                       }}
-                                    >
-                                      {opt.label}
-                                    </Typography>
+                                    />
+                                    <Box display="flex" alignItems="center" gap={0.5}>
+                                      {opt.icon}
+                                      <Typography
+                                        sx={{
+                                          color: opt.color,
+                                          fontWeight: 600,
+                                          fontSize: 16,
+                                        }}
+                                      >
+                                        {opt.label}
+                                      </Typography>
+                                    </Box>
                                   </Box>
-                                </Box>
-                              ))}
-                            </Stack>
-                            <TextField
-                              size="small"
-                              variant="outlined"
-                              placeholder="Write feedback for student..."
-                              fullWidth
-                              sx={{ my: 2, background: "#fff" }}
-                              value={feedback[idea.ideaId]?.comment || ""}
-                              onChange={e =>
-                                setFeedback(f => ({
-                                  ...f,
-                                  [idea.ideaId]: {
-                                    ...f[idea.ideaId],
-                                    comment: e.target.value,
-                                  },
-                                }))
-                              }
-                            />
-                            <Stack direction="row" gap={2}>
-                              <Button
-                                variant="contained"
-                                color="success"
-                                startIcon={<ThumbUpAlt />}
-                                disabled={
-                                  !feedback[idea.ideaId]?.comment ||
-                                  !feedback[idea.ideaId]?.severity
+                                ))}
+                              </Stack>
+                              <TextField
+                                size="small"
+                                variant="outlined"
+                                placeholder="Write feedback for student..."
+                                fullWidth
+                                multiline
+                                minRows={2}
+                                sx={{ my: 2, background: "#fff" }}
+                                value={feedback[idea.ideaId]?.comment || ""}
+                                onChange={e =>
+                                  setFeedback(f => ({
+                                    ...f,
+                                    [idea.ideaId]: {
+                                      ...f[idea.ideaId],
+                                      comment: e.target.value,
+                                    },
+                                  }))
                                 }
-                                onClick={() => handleReview(idea.ideaId, "approved")}
-                              >
-                                Approve
-                              </Button>
-                              <Button
-                                variant="contained"
-                                color="error"
-                                startIcon={<ThumbDownAlt />}
-                                disabled={
-                                  !feedback[idea.ideaId]?.comment ||
-                                  !feedback[idea.ideaId]?.severity
-                                }
-                                onClick={() => handleReview(idea.ideaId, "rejected")}
-                              >
-                                Reject
-                              </Button>
-                            </Stack>
-                          </Box>
-                        ) : (
-                          <div className="idea-feedback-row">
-                            <b>Feedback:</b>
-                            {idea.feedback ? (
-                              <>
-                                {FEEDBACK_ICON_ONLY[idea.feedback.severity]}
-                                <span>{idea.feedback.comment}</span>
-                              </>
-                            ) : (
-                              <span style={{ color: "#aaa" }}>No feedback</span>
-                            )}
-                          </div>
-                        )}
-                      </Collapse>
-                    </TableCell>
-                  </TableRow>
-                </React.Fragment>
-              );
-            })}
-          </TableBody>
-        </Table>
+                              />
+                              <Stack direction="row" gap={2}>
+                                <Button
+                                  variant="contained"
+                                  color="success"
+                                  startIcon={<ThumbUpAlt />}
+                                  disabled={
+                                    !feedback[idea.ideaId]?.comment ||
+                                    !feedback[idea.ideaId]?.severity
+                                  }
+                                  onClick={() => handleReview(idea.ideaId, "approved")}
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  color="error"
+                                  startIcon={<ThumbDownAlt />}
+                                  disabled={
+                                    !feedback[idea.ideaId]?.comment ||
+                                    !feedback[idea.ideaId]?.severity
+                                  }
+                                  onClick={() => handleReview(idea.ideaId, "rejected")}
+                                >
+                                  Reject
+                                </Button>
+                              </Stack>
+                            </Box>
+                          ) : (
+                            <div className="idea-feedback-row">
+                              <b>Feedback:</b>
+                              {idea.feedback ? (
+                                <>
+                                  {FEEDBACK_ICON_ONLY[idea.feedback.severity]}
+                                  <span>{idea.feedback.comment}</span>
+                                </>
+                              ) : (
+                                <span style={{ color: "#aaa" }}>No feedback</span>
+                              )}
+                            </div>
+                          )}
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 }

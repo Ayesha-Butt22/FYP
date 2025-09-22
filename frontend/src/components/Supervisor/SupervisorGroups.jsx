@@ -73,8 +73,8 @@ export default function SupervisorGroups() {
 
   return (
     <div className="page-container">
-      <DashboardSectionHeader style={{ marginLeft: "239px" , marginBottom: "50px", marginTop: "-5px"
- }}>
+      <DashboardSectionHeader 
+ >
         My Groups
       </DashboardSectionHeader>
 

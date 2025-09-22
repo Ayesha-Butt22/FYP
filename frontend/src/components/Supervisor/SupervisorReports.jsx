@@ -1,7 +1,21 @@
+// components/SupervisorReports.jsx
 import React, { useState } from "react";
 import {
-  Box, Paper, MenuItem, Select, FormControl, InputLabel, Table,
-  TableHead, TableRow, TableCell, TableBody, Button, Chip, Stack, Typography
+  Box,
+  Paper,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Button,
+  Chip,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { PictureAsPdf, TableView } from "@mui/icons-material";
 import jsPDF from "jspdf";
@@ -10,7 +24,7 @@ import * as XLSX from "xlsx";
 import "./SupervisorReports.css";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 
-// Dummy data 
+// Dummy data
 const GROUPS = [
   {
     id: "G-101",
@@ -21,8 +35,8 @@ const GROUPS = [
       { name: "SRS", status: "Completed", feedback: "Detailed doc.", score: 27, max: 30 },
       { name: "Design", status: "Pending", feedback: "", score: 0, max: 25 },
       { name: "Report", status: "In Progress", feedback: "Needs more detail.", score: 15, max: 25 },
-      { name: "Defense", status: "Pending", feedback: "", score: 0, max: 30 }
-    ]
+      { name: "Defense", status: "Pending", feedback: "", score: 0, max: 30 },
+    ],
   },
   {
     id: "G-102",
@@ -33,8 +47,8 @@ const GROUPS = [
       { name: "SRS", status: "Completed", feedback: "Well researched.", score: 28, max: 30 },
       { name: "Design", status: "Completed", feedback: "Good diagrams.", score: 22, max: 25 },
       { name: "Report", status: "Pending", feedback: "", score: 0, max: 25 },
-      { name: "Defense", status: "Pending", feedback: "", score: 0, max: 30 }
-    ]
+      { name: "Defense", status: "Pending", feedback: "", score: 0, max: 30 },
+    ],
   },
   {
     id: "G-103",
@@ -45,27 +59,30 @@ const GROUPS = [
       { name: "SRS", status: "Completed", feedback: "Covers all cases.", score: 25, max: 30 },
       { name: "Design", status: "Completed", feedback: "Nice architecture.", score: 21, max: 25 },
       { name: "Report", status: "Pending", feedback: "", score: 0, max: 25 },
-      { name: "Defense", status: "Pending", feedback: "", score: 0, max: 30 }
-    ]
-  }
+      { name: "Defense", status: "Pending", feedback: "", score: 0, max: 30 },
+    ],
+  },
 ];
 
 // Status color coding
-const statusColor = status =>
-  status === "Completed" ? "success"
-    : status === "In Progress" ? "info"
-    : status === "Pending" ? "warning"
+const statusColor = (status) =>
+  status === "Completed"
+    ? "success"
+    : status === "In Progress"
+    ? "info"
+    : status === "Pending"
+    ? "warning"
     : "default";
 
 export default function SupervisorReports() {
   const [selectedGroup, setSelectedGroup] = useState("");
 
-  const group = GROUPS.find(g => g.id === selectedGroup);
+  const group = GROUPS.find((g) => g.id === selectedGroup);
 
   // Progress summary calculation
-  const completed = group ? group.milestones.filter(m => m.status === "Completed").length : 0;
-  const inProgress = group ? group.milestones.filter(m => m.status === "In Progress").length : 0;
-  const pending = group ? group.milestones.filter(m => m.status === "Pending").length : 0;
+  const completed = group ? group.milestones.filter((m) => m.status === "Completed").length : 0;
+  const inProgress = group ? group.milestones.filter((m) => m.status === "In Progress").length : 0;
+  const pending = group ? group.milestones.filter((m) => m.status === "Pending").length : 0;
   const total = group ? group.milestones.length : 0;
   const percent = total ? Math.round((completed / total) * 100) : 0;
   const groupScore = group ? group.milestones.reduce((sum, m) => sum + m.score, 0) : 0;
@@ -82,7 +99,7 @@ export default function SupervisorReports() {
     autoTable(doc, {
       startY: 36,
       head: [["Milestone", "Status", "Score", "Max", "Feedback"]],
-      body: group.milestones.map(m => [m.name, m.status, m.score, m.max, m.feedback || "-"])
+      body: group.milestones.map((m) => [m.name, m.status, m.score, m.max, m.feedback || "-"]),
     });
     doc.text(`Total Score: ${groupScore}/${groupMax}`, 14, doc.lastAutoTable.finalY + 10);
     doc.save(`GroupReport_${group.id}.pdf`);
@@ -91,35 +108,35 @@ export default function SupervisorReports() {
   // Export to Excel
   const handleExportExcel = () => {
     if (!group) return;
-    const ws = XLSX.utils.json_to_sheet(group.milestones.map(m => ({
-      Milestone: m.name,
-      Status: m.status,
-      Score: m.score,
-      Max: m.max,
-      Feedback: m.feedback || "-"
-    })));
+    const ws = XLSX.utils.json_to_sheet(
+      group.milestones.map((m) => ({
+        Milestone: m.name,
+        Status: m.status,
+        Score: m.score,
+        Max: m.max,
+        Feedback: m.feedback || "-",
+      }))
+    );
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Report");
     XLSX.writeFile(wb, `GroupReport_${group.id}.xlsx`);
   };
 
   return (
-    <Box maxWidth={900} mx="auto" py={3}>
-      {/* ✅ Reusable Section Header */}
-      <DashboardSectionHeader style={{ marginLeft: "-150px" , marginBottom: "50px", marginTop: "-20px"}}>
-       Evaluation Report
-      </DashboardSectionHeader>
+    <Box maxWidth={1000} mx="auto" py={3}>
+      <DashboardSectionHeader>Evaluation Report</DashboardSectionHeader>
 
       <Paper className="reports-paper">
+        {/* Group selector */}
         <FormControl className="reports-group-select">
           <InputLabel>Select Group</InputLabel>
           <Select
             value={selectedGroup}
             label="Select Group"
-            onChange={e => setSelectedGroup(e.target.value)}
+            onChange={(e) => setSelectedGroup(e.target.value)}
             size="small"
           >
-            {GROUPS.map(g => (
+            {GROUPS.map((g) => (
               <MenuItem key={g.id} value={g.id}>
                 {g.id} - {g.title}
               </MenuItem>
@@ -127,12 +144,14 @@ export default function SupervisorReports() {
           </Select>
         </FormControl>
 
+        {/* If no group is selected */}
         {!group ? (
           <Typography color="#aaa" className="reports-placeholder">
             Select a group to view its report.
           </Typography>
         ) : (
-          <>
+          <div>
+            {/* Report Summary */}
             <div className="report-summary">
               <Typography className="report-title">
                 {group.id} - {group.title}
@@ -190,16 +209,22 @@ export default function SupervisorReports() {
                   <TableRow key={idx}>
                     <TableCell>{m.name}</TableCell>
                     <TableCell>
-                      <Chip label={m.status} color={statusColor(m.status)} className="report-status-chip" />
+                      <Chip
+                        label={m.status}
+                        color={statusColor(m.status)}
+                        className="report-status-chip"
+                      />
                     </TableCell>
                     <TableCell>{m.score}</TableCell>
                     <TableCell>{m.max}</TableCell>
-                    <TableCell>{m.feedback || <span className="feedback-missing">-</span>}</TableCell>
+                    <TableCell>
+                      {m.feedback || <span className="feedback-missing">-</span>}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </>
+          </div>
         )}
       </Paper>
     </Box>

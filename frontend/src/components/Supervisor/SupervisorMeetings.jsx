@@ -124,140 +124,200 @@ export default function SupervisorMeetings() {
       : { label: "Available", color: "warning", icon: <AccessTime fontSize="small" />, variant: "outlined" };
 
   return (
-    <Box width="100%" >
-      <DashboardSectionHeader style={{ marginBottom: "40px", marginTop: "-10px", marginLeft: "239px" }}>
-        Meetings
-      </DashboardSectionHeader>
+    <>
+      <DashboardSectionHeader>Meetings</DashboardSectionHeader>
 
-      {/* Add Slot Button */}
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<AddCircleOutline />}
-        className="add-slot-btn"
-        onClick={() => setOpenDialog(true)}
-      >
-        Add Available Slot
-      </Button>
+      <Box width="100%">
+        {/* Add Slot Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddCircleOutline />}
+          className="add-slot-btn"
+          onClick={() => setOpenDialog(true)}
+        >
+          Add Available Slot
+        </Button>
 
-      {/* Add Slot Dialog */}
-      <Dialog open={openDialog} TransitionComponent={Transition} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
-        <DialogTitle className="dialog-title">
-          <EventAvailable className="dialog-icon" />
-          Add New Meeting Slot
-        </DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} mt={1}>
-            <TextField label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} InputLabelProps={{ shrink: true }} fullWidth />
-            <TextField label="Time" type="time" value={time} onChange={(e) => setTime(e.target.value)} InputLabelProps={{ shrink: true }} fullWidth />
-            <TextField label="Duration (min)" type="number" value={duration} onChange={(e) => setDuration(e.target.value)} inputProps={{ min: 10, max: 120 }} fullWidth />
-            {formError && <Typography color="error">{formError}</Typography>}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="inherit">Cancel</Button>
-          <Button variant="contained" onClick={handleAddSlot}>Add Slot</Button>
-        </DialogActions>
-      </Dialog>
+        {/* Add Slot Dialog */}
+        <Dialog
+          open={openDialog}
+          TransitionComponent={Transition}
+          onClose={() => setOpenDialog(false)}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle className="dialog-title">
+            <EventAvailable className="dialog-icon" />
+            Add New Meeting Slot
+          </DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} mt={1}>
+              <TextField
+                label="Date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+              <TextField
+                label="Time"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+              <TextField
+                label="Duration (min)"
+                type="number"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                inputProps={{ min: 10, max: 120 }}
+                fullWidth
+              />
+              {formError && <Typography color="error">{formError}</Typography>}
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDialog(false)} color="inherit">
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={handleAddSlot}>
+              Add Slot
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-      {/* Slot Summary */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={4} justifyContent="center">
-        <Paper className="summary-card total">
-          <Typography className="summary-label">Total Slots</Typography>
-          <Typography className="summary-value">{slots.length}</Typography>
-        </Paper>
-        <Paper className="summary-card available">
-          <Typography className="summary-label">Available</Typography>
-          <Typography className="summary-value">{slots.filter((s) => !s.bookedBy).length}</Typography>
-        </Paper>
-        <Paper className="summary-card booked">
-          <Typography className="summary-label">Booked</Typography>
-          <Typography className="summary-value">{slots.filter((s) => !!s.bookedBy).length}</Typography>
-        </Paper>
-      </Stack>
+        {/* Slot Summary */}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          mb={4}
+          justifyContent="center"
+        >
+          <Paper className="summary-card total">
+            <Typography className="summary-label">Total Slots</Typography>
+            <Typography className="summary-value">{slots.length}</Typography>
+          </Paper>
+          <Paper className="summary-card available">
+            <Typography className="summary-label">Available</Typography>
+            <Typography className="summary-value">
+              {slots.filter((s) => !s.bookedBy).length}
+            </Typography>
+          </Paper>
+          <Paper className="summary-card booked">
+            <Typography className="summary-label">Booked</Typography>
+            <Typography className="summary-value">
+              {slots.filter((s) => !!s.bookedBy).length}
+            </Typography>
+          </Paper>
+        </Stack>
 
-      {/* All Slots */}
-      <Paper className="slots-paper">
-        <Typography className="section-title">
-          <EventBusy className="section-icon" />
-          All Slots
-        </Typography>
-        <Divider className="divider" />
-        <Table size="small" className="full-table">
-          <TableHead>
-            <TableRow>
-              <TableCell><CalendarToday fontSize="small" className="inline-icon" />Date</TableCell>
-              <TableCell>Time</TableCell>
-              <TableCell>Duration</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="center">Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedSlots.map((slot) => (
-              <TableRow key={slot.slotId} hover className={slot.bookedBy ? "slot-row booked-row" : "slot-row"}>
-                <TableCell>{formatDate(slot.date)}</TableCell>
-                <TableCell>{formatTime(slot.time)}</TableCell>
-                <TableCell>{slot.duration} min</TableCell>
-                <TableCell><Chip {...statusChipProps(slot.bookedBy)} /></TableCell>
-                <TableCell align="center">
-                  {!slot.bookedBy && (
-                    <Tooltip title="Delete Slot">
-                      <span>
-                        <IconButton onClick={() => handleDeleteSlot(slot.slotId)} color="error" size="small">
-                          <Delete />
-                        </IconButton>
-                      </span>
-                    </Tooltip>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-            {sortedSlots.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5}>
-                  <Typography className="no-slots">No slots available.</Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </Paper>
-
-      {/* Upcoming Meetings */}
-      <Paper className="slots-paper">
-        <Typography className="section-title upcoming">
-          <EventAvailable className="section-icon upcoming" />
-          Upcoming Meetings
-        </Typography>
-        <Divider className="divider" />
-        {upcomingMeetings.length === 0 ? (
-          <Typography className="no-meetings">No upcoming meetings.</Typography>
-        ) : (
+        {/* All Slots */}
+        <Paper className="slots-paper">
+          <Typography className="section-title">
+            <EventBusy className="section-icon" />
+            All Slots
+          </Typography>
+          <Divider className="divider" />
           <Table size="small" className="full-table">
             <TableHead>
               <TableRow>
-                <TableCell>Date</TableCell>
+                <TableCell>
+                  <CalendarToday fontSize="small" className="inline-icon" />
+                  Date
+                </TableCell>
                 <TableCell>Time</TableCell>
-                <TableCell>Group</TableCell>
                 <TableCell>Duration</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {upcomingMeetings.map((slot) => (
-                <TableRow key={slot.slotId}>
+              {sortedSlots.map((slot) => (
+                <TableRow
+                  key={slot.slotId}
+                  hover
+                  className={slot.bookedBy ? "slot-row booked-row" : "slot-row"}
+                >
                   <TableCell>{formatDate(slot.date)}</TableCell>
                   <TableCell>{formatTime(slot.time)}</TableCell>
-                  <TableCell>
-                    <Chip label={slot.bookedBy} color="success" icon={<GroupIcon fontSize="small" />} size="small" />
-                  </TableCell>
                   <TableCell>{slot.duration} min</TableCell>
+                  <TableCell>
+                    <Chip {...statusChipProps(slot.bookedBy)} />
+                  </TableCell>
+                  <TableCell align="center">
+                    {!slot.bookedBy && (
+                      <Tooltip title="Delete Slot">
+                        <span>
+                          <IconButton
+                            onClick={() => handleDeleteSlot(slot.slotId)}
+                            color="error"
+                            size="small"
+                          >
+                            <Delete />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
+              {sortedSlots.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <Typography className="no-slots">
+                      No slots available.
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
-        )}
-      </Paper>
-    </Box>
+        </Paper>
+
+        {/* Upcoming Meetings */}
+        <Paper className="slots-paper">
+          <Typography className="section-title upcoming">
+            <EventAvailable className="section-icon upcoming" />
+            Upcoming Meetings
+          </Typography>
+          <Divider className="divider" />
+          {upcomingMeetings.length === 0 ? (
+            <Typography className="no-meetings">No upcoming meetings.</Typography>
+          ) : (
+            <Table size="small" className="full-table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Time</TableCell>
+                  <TableCell>Group</TableCell>
+                  <TableCell>Duration</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {upcomingMeetings.map((slot) => (
+                  <TableRow key={slot.slotId}>
+                    <TableCell>{formatDate(slot.date)}</TableCell>
+                    <TableCell>{formatTime(slot.time)}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={slot.bookedBy}
+                        color="success"
+                        icon={<GroupIcon fontSize="small" />}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>{slot.duration} min</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </Paper>
+      </Box>
+    </>
   );
 }

@@ -19,6 +19,8 @@ export default function DashboardSectionHeader({ children, ...props }) {
         letterSpacing: "-1.5px", // tighter text spacing for style
         textAlign: "left", // left align text
         lineHeight: 1.15, // balanced line height for readability
+        marginTop:3,
+        marginBottom:3,
       
       }}
       {...props} // pass down other Typography props (e.g., onClick, id)

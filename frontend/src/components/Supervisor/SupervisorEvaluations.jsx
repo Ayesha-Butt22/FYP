@@ -161,7 +161,7 @@ export default function SupervisorEvaluations() {
 
   return (
     <Box maxWidth="100%" mx="auto" py={3} px={0}>
-      <DashboardSectionHeader style={{ marginLeft: "239px" , marginBottom: "50px", marginTop: "-36px" }}>
+      <DashboardSectionHeader>
         Evaluation & Rubrics
       </DashboardSectionHeader>
 

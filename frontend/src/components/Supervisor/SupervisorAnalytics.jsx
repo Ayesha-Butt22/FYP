@@ -1,3 +1,4 @@
+// components/SupervisorAnalytics.jsx
 import React from "react";
 import { Bar, Line } from "react-chartjs-2";
 import {
@@ -20,7 +21,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import DashboardSectionHeader from "./DashboardSectionHeader";
-import "./SupervisorAnalytics.css"; 
+import "./SupervisorAnalytics.css";
 
 ChartJS.register(
   BarElement,
@@ -61,6 +62,7 @@ const analyticsData = {
 export default function SupervisorAnalytics() {
   const isSmallScreen = useMediaQuery("(max-width:900px)");
 
+  // Bar chart for overall group progress
   const barData = {
     labels: analyticsData.groupProgress.map((g) => g.name),
     datasets: [
@@ -75,6 +77,7 @@ export default function SupervisorAnalytics() {
     ],
   };
 
+  // Line charts for milestones of each group
   const groupLineCharts = Object.entries(
     analyticsData.groupMilestones
   ).map(([groupName, milestones]) => {
@@ -100,7 +103,12 @@ export default function SupervisorAnalytics() {
       <Grid item xs={12} md={4} key={groupName}>
         <Card className="analytics-card">
           <CardContent className="analytics-card-content">
-            <Typography variant="h6" color="primary" fontWeight={900} className="group-title">
+            <Typography
+              variant="h6"
+              color="primary"
+              fontWeight={900}
+              className="group-title"
+            >
               {groupName}
             </Typography>
             <Box className="line-chart-box">
@@ -110,7 +118,11 @@ export default function SupervisorAnalytics() {
                   responsive: true,
                   plugins: { legend: { display: false }, title: { display: false } },
                   scales: {
-                    y: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 12 } } },
+                    y: {
+                      beginAtZero: true,
+                      max: 100,
+                      ticks: { stepSize: 20, font: { size: 12 } },
+                    },
                     x: { ticks: { font: { size: 13 } } },
                   },
                 }}
@@ -131,31 +143,44 @@ export default function SupervisorAnalytics() {
   });
 
   return (
-    <div className="analytics-container">
-      <DashboardSectionHeader style={{ marginLeft: "75px" , marginBottom: "50px", marginTop: "-20px"}}>Analytics</DashboardSectionHeader>
-      <Grid container spacing={2}>{groupLineCharts}</Grid>
-      <Box className="bar-chart-box">
-        <Card className="bar-card">
-          <CardContent>
-            <Typography variant="h6" color="primary" fontWeight={900} className="bar-title">
-              Group Performance Comparison
-            </Typography>
-            <Box className="bar-inner-box">
-              <Bar
-                data={barData}
-                options={{
-                  responsive: true,
-                  plugins: { legend: { display: false }, title: { display: false } },
-                  scales: {
-                    y: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 11 } } },
-                  },
-                }}
-                height={110}
-              />
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
-    </div>
+    <Box>
+      <DashboardSectionHeader>Analytics</DashboardSectionHeader>
+
+      <div className="analytics-container">
+        <Grid container spacing={2}>{groupLineCharts}</Grid>
+
+        <Box className="bar-chart-box">
+          <Card className="bar-card">
+            <CardContent>
+              <Typography
+                variant="h6"
+                color="primary"
+                fontWeight={900}
+                className="bar-title"
+              >
+                Group Performance Comparison
+              </Typography>
+              <Box className="bar-inner-box">
+                <Bar
+                  data={barData}
+                  options={{
+                    responsive: true,
+                    plugins: { legend: { display: false }, title: { display: false } },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { stepSize: 20, font: { size: 11 } },
+                      },
+                    },
+                  }}
+                  height={110}
+                />
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      </div>
+    </Box>
   );
 }

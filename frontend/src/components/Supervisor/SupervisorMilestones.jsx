@@ -62,8 +62,8 @@ export default function SupervisorMilestones() {
 
   return (
     <div className="milestone-dashboard-container">
-      <DashboardSectionHeader style={{ marginLeft: "101px" , marginBottom: "45px", marginTop: "-5px"
- }}>Milestones & Timeline</DashboardSectionHeader>
+      <DashboardSectionHeader>Milestones & Timeline</DashboardSectionHeader>
+
       <div className="milestone-groups-row">
         {GROUPS.map((group) => {
           const completed = group.milestones.filter(m => m.status === "completed").length;
@@ -80,7 +80,7 @@ export default function SupervisorMilestones() {
                 backgroundColor: [
                   STATUS.completed.color,
                   STATUS.pending.color,
-                  STATUS.overdue.col43eor
+                  STATUS.overdue.color   // ✅ fixed here
                 ],
                 borderWidth: 1
               }
@@ -108,6 +108,7 @@ export default function SupervisorMilestones() {
                     📂 {group.department} Templates
                   </a>
                 </div>
+
                 <div className="milestone-card-progress">
                   <div className="milestone-doughnut">
                     <Doughnut
