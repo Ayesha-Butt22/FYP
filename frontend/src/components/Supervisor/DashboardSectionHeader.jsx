@@ -5,7 +5,7 @@ import { Typography } from "@mui/material";
 // - Uses MUI Typography
 // - Pre-styled with custom font, color
 
-export default function DashboardSectionHeader({ children, sx = {}, ...props }) {
+export default function DashboardSectionHeader({ children, ...props }) {
   return (
     <Typography
       variant="h3" // semantic heading style
@@ -19,11 +19,11 @@ export default function DashboardSectionHeader({ children, sx = {}, ...props }) 
         letterSpacing: "-1.5px", // tighter text spacing for style
         textAlign: "left", // left align text
         lineHeight: 1.15, // balanced line height for readability
-        
+      
       }}
       {...props} // pass down other Typography props (e.g., onClick, id)
     >
-      {children} {/* heading text/content passed as children */}
+      {children}
     </Typography>
   );
 }

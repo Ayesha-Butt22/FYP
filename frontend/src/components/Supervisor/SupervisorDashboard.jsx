@@ -11,6 +11,7 @@ import {
   Campaign as CampaignIcon,
   LibraryBooks as LibraryBooksIcon,
   BarChart as BarChartIcon,
+  Person as PersonIcon,
 } from "@mui/icons-material";
 import capImg from "../../assets/cap.png";
 import OverviewSupervisor from "./OverviewSupervisor";
@@ -24,6 +25,7 @@ import SupervisorReports from "./SupervisorReports";
 import SupervisorArchive from "./SupervisorArchive";
 import SupervisorAnalytics from "./SupervisorAnalytics";
 import SupervisorNotices from "./SupervisorNotices";
+import SupervisorProfile from "./SupervisorProfile";
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
@@ -36,13 +38,15 @@ const menu = [
   { label: "Reports", icon: <DescriptionIcon /> },
   { label: "Analytics", icon: <BarChartIcon /> },
   { label: "FYP Archive", icon: <LibraryBooksIcon /> },
+  { label: "Profile", icon: <PersonIcon /> }, // Profile tab at end
 ];
 
 const supervisorInfo = {
   logo: capImg,
   title: "Auto-FYP",
   name: localStorage.getItem("name") || "Supervisor",
-  subtitle: localStorage.getItem("specialization") || "",
+  subtitle: localStorage.getItem("specialization") || "AI, ML, Software Engineering",
+  email: localStorage.getItem("email") || "supervisor@example.com",
 };
 
 export default function SupervisorDashboard() {
@@ -53,7 +57,6 @@ export default function SupervisorDashboard() {
     window.location.href = "/auth?role=supervisor";
   };
 
-  // Pass setActiveTab to OverviewSupervisor
   const tabComponents = {
     "Overview": <OverviewSupervisor onTabChange={setActiveTab} />,
     "Idea & Proposal Review": <SupervisorIdeaReview />,
@@ -65,6 +68,7 @@ export default function SupervisorDashboard() {
     "Reports": <SupervisorReports />,
     "Analytics": <SupervisorAnalytics />,
     "FYP Archive": <SupervisorArchive />,
+    "Profile": <SupervisorProfile supervisorInfo={supervisorInfo} />,
   };
 
   return (
