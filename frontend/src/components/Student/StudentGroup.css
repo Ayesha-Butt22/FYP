@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+.page-container {
+  width: 100%;
+  min-height: 100vh;
+  background: #f8faff;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  box-sizing: border-box;
+  animation: fadeInGroups 0.7s;
+  padding: 0 0 40px 0;
+  -webkit-animation: fadeInGroups 0.7s;
+}
+
+.group-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 3px 24px #01337a1b;
+  min-width: 320px;
+  max-width: 1100px;
+  flex: 1 1 320px;
+  padding: 54px 56px 52px 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: 18px;
+  font-family: inherit;
+  text-align: left;
+}
+
+.group-title {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #01337a !important;
+  margin-bottom: 28px;
+  text-align: left;
+  word-break: break-word;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: default;
+  letter-spacing: 0.7px;
+}
+
+.form-input {
+  font-size: 1.22rem;
+  border: 1.7px solid #dbeafe;
+  border-radius: 10px;
+  padding: 15px 18px;
+  outline: none;
+  background: #f8faff;
+  font-family: inherit;
+  transition: border 0.18s;
+  font-weight: 500;
+}
+
+.form-input:focus {
+  border: 1.7px solid #2563eb;
+  background: #fff;
+}
+
+.view-btn {
+  margin-top: auto;
+  padding: 16px 0;
+  border-radius: 12px;
+  border: none;
+  background: #01337a;
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.17rem;
+  cursor: pointer;
+  box-shadow: 0 2px 12px #01337a23;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 240px;
+  justify-content: center;
+  letter-spacing: 0.7px;
+  transition: background 0.18s, color 0.19s, transform 0.17s;
+  font-family: inherit;
+  text-align: center;
+}
+
+.view-btn:hover {
+  background: #fff;
+  color: #01337a;
+  transform: scale(1.045) translateY(-1.5px);
+}
+
+.save-group-btn-center {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.group-members-heading {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #01337a;
+  letter-spacing: 0.5px;
+  margin: 16px 0 36px 0;
+}
+
+th, td {
+  font-size: 1.15rem !important;
+}
+
+table {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Make the table a bit further down */
+.group-card table {
+  margin-top: 36px !important;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1100px) {
+  .group-card {
+    min-width: 94vw;
+    max-width: 99vw;
+    padding: 16px 8vw 22px 8vw;
+  }
+  .group-title {
+    font-size: 1.45rem;
+  }
+  th, td {
+    font-size: 1.08rem !important;
+  }
+  .form-input {
+    font-size: 1.05rem;
+    padding: 12px 8px;
+  }
+}
+
+@media (max-width: 700px) {
+  .group-card {
+    min-width: 99vw;
+    max-width: 99vw;
+    padding: 6vw 2vw 14vw 2vw;
+  }
+  .form-input {
+    font-size: 0.93rem;
+    padding: 9px 4px;
+  }
+  th, td {
+    font-size: 0.93rem !important;
+  }
+}

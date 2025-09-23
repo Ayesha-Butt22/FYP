@@ -5,18 +5,13 @@ import {
   GroupAdd as GroupAddIcon,
   PersonSearch as PersonSearchIcon,
   Assignment as AssignmentIcon,
-  // AutoAwesome as AutoAwesomeIcon, // REMOVED
   Description as DescriptionIcon,
-  Star as StarIcon,
   ListAlt as ListAltIcon,
-  Campaign as CampaignIcon,
   CalendarMonth as CalendarMonthIcon,
   Checklist as ChecklistIcon,
   Feedback as FeedbackIcon,
   Book as BookIcon,
   LibraryBooks as LibraryBooksIcon,
-  BarChart as BarChartIcon,
-  Person as PersonIcon,
 } from "@mui/icons-material";
 import capImg from "../../assets/cap.png";
 
@@ -26,44 +21,35 @@ import StudentGroup from "./StudentGroup";
 import StudentSupervisorSelection from "./StudentSupervisorSelection";
 import StudentIdeaProposal from "./StudentIdeaProposal";
 import StudentTemplates from "./StudentTemplates";
-// import StudentMilestones from "./StudentMilestones"; // REMOVED
 import StudentTasks from "./StudentTasks";
-import StudentWhiteboard from "./StudentWhiteboard";
 import StudentMeetings from "./StudentMeetings";
 import StudentChecklist from "./StudentChecklist";
-import StudentFeedback from "./StudentFeedback";
 import StudentJournal from "./StudentJournal";
 import StudentArchive from "./StudentArchive";
 import StudentReports from "./StudentReports";
-import StudentAnalytics from "./StudentAnalytics";
-import StudentProfile from "./StudentProfile"; // optional, if you want a profile tab
+import StudentNotices from "../Student/StudentNotices"; // <-- Notification bell
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
   { label: "My Group", icon: <GroupAddIcon /> },
   { label: "Supervisor Selection", icon: <PersonSearchIcon /> },
   { label: "Idea & Proposal", icon: <AssignmentIcon /> },
-  // { label: "AI Title Rewriter", icon: <AutoAwesomeIcon /> }, // REMOVED
   { label: "Templates", icon: <DescriptionIcon /> },
-  // { label: "Milestones", icon: <StarIcon /> }, // REMOVED
   { label: "Tasks", icon: <ListAltIcon /> },
-  { label: "Whiteboard", icon: <CampaignIcon /> },
   { label: "Meetings", icon: <CalendarMonthIcon /> },
   { label: "Checklist", icon: <ChecklistIcon /> },
-  { label: "Feedback/Evaluations", icon: <FeedbackIcon /> },
+  { label: "Evaluations", icon: <FeedbackIcon /> },
   { label: "Journal", icon: <BookIcon /> },
-  { label: "FYP Archive", icon: <LibraryBooksIcon /> },
   { label: "Reports", icon: <DescriptionIcon /> },
-  { label: "Analytics", icon: <BarChartIcon /> },
-  // { label: "Profile", icon: <PersonIcon /> }, // optional, enable if you want
+  { label: "FYP Archive", icon: <LibraryBooksIcon /> },
 ];
 
 const studentInfo = {
   logo: capImg,
   title: "Auto-FYP",
   name: localStorage.getItem("name") || "Student",
-  subtitle: localStorage.getItem("studentId") || "SAP ID",
-  email: localStorage.getItem("email") || "student@example.com",
+  // subtitle: "", // Do NOT set subtitle so SAP ID does not show in corner
+  // email: localStorage.getItem("email") || "", // (Optional)
 };
 
 export default function StudentDashboard() {
@@ -79,19 +65,14 @@ export default function StudentDashboard() {
     "My Group": <StudentGroup />,
     "Supervisor Selection": <StudentSupervisorSelection />,
     "Idea & Proposal": <StudentIdeaProposal />,
-    // "AI Title Rewriter": <StudentIdeaProposal aiOnly={true} />, // REMOVED
     "Templates": <StudentTemplates />,
-    // "Milestones": <StudentMilestones />, // REMOVED
     "Tasks": <StudentTasks />,
-    "Whiteboard": <StudentWhiteboard />,
     "Meetings": <StudentMeetings />,
     "Checklist": <StudentChecklist />,
-    "Feedback/Evaluations": <StudentFeedback />,
+    "Evaluations": <StudentJournal />,
     "Journal": <StudentJournal />,
-    "FYP Archive": <StudentArchive />,
     "Reports": <StudentReports />,
-    "Analytics": <StudentAnalytics />,
-    // "Profile": <StudentProfile studentInfo={studentInfo} />, // optional
+    "FYP Archive": <StudentArchive />,
   };
 
   return (
@@ -104,6 +85,7 @@ export default function StudentDashboard() {
       activeTab={activeTab}
       setActiveTab={setActiveTab}
       onLogout={handleLogout}
+      profileIcon={<StudentNotices />}  // <-- Notification bell in header
     />
   );
 }

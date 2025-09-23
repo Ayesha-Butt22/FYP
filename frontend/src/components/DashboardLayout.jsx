@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styled, { keyframes } from "styled-components";
 import { IconButton, Tooltip } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -32,13 +32,13 @@ export default function DashboardLayout({
   tabComponents,
   defaultTab = "",
   onLogout,
-  profileIcon, // NEW
+  profileIcon,
   children, activeTab, setActiveTab,
 }) {
-
+  // Only show name (no SAP ID)
   const displayName = localStorage.getItem("name") || roleInfo.name || "User";
-  const displaySubtitle =
-    localStorage.getItem("specialization") || roleInfo.subtitle || "";
+  // subtitle intentionally disabled
+  // const displaySubtitle = "";
 
   return (
     <DashboardLayoutStyled>
@@ -77,11 +77,10 @@ export default function DashboardLayout({
         <header className="dashboard-header">
           <h1 className="dashboard-title">{headerTitle}</h1>
           <div className="dashboard-profile">
-            {/* --- Replace the cap image with your custom icon (bell) --- */}
             {profileIcon}
             <div className="name-text">
               {displayName}
-              {displaySubtitle && <span>{displaySubtitle}</span>}
+              {/* No SAP ID/subtitle here */}
             </div>
           </div>
         </header>
