@@ -52,12 +52,13 @@ class AuthService {
     storeUserData(data) {
         const userInfo = {
             token: data.token || "demoToken",
-            role: data.user?.role || "supervisor",
-            name: data.user?.name || "Supervisor",
+            role: data.user?.role || "user",
+            name: data.user?.name || "null",
             specialization: data.user?.specialization || "",
             email: data.user?.email || "",
             department: data.user?.department || "",
-            studentId: data.user?.studentId || ""
+            studentId: data.user?.studentId || "",
+            mustChangePassword: data.user?.mustChangePassword || false,
         };
 
         Object.entries(userInfo).forEach(([key, value]) => {

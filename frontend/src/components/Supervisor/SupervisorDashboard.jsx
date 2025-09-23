@@ -54,7 +54,7 @@ export default function SupervisorDashboard() {
 
   const handleLogout = () => {
     localStorage.clear();
-    window.location.href = "/auth?role=supervisor";
+    window.location.href = "/auth";
   };
 
   const tabComponents = {

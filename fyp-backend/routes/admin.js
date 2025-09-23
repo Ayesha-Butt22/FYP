@@ -1,4 +1,3 @@
-// routes/admin.js
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { protect, isAdmin } = require('../middlewares/authMiddleware');
@@ -6,7 +5,6 @@ const adminController = require('../controllers/adminController');
 
 const router = express.Router();
 
-// middleware → common validator handler
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

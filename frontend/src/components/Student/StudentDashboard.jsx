@@ -71,7 +71,7 @@ export default function StudentDashboard() {
 
   const handleLogout = () => {
     localStorage.clear();
-    window.location.href = "/auth?role=student";
+    window.location.href = "/auth";
   };
 
   const tabComponents = {

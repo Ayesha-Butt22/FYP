@@ -6,12 +6,14 @@ import Auth from "./components/Auth/Auth";
 import SupervisorDashboard from "./components/Supervisor/SupervisorDashboard";
 import StudentDashboard from "./components/Student/StudentDashboard.jsx";
 import ToastContainer from "./components/ToastService/ToastContainer.jsx";
+import getUserInfoFromStorage from "./components/Auth/UserInfo.jsx";
+import ProtectedAuthRoute from "./components/Auth/ProtectedAuthRoute.jsx";
 
-// Updated ProtectedRoute component
 function ProtectedRoute({ children, allowedRole }) {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-  if (!token || role !== allowedRole) return <Navigate to={`/auth?role=${allowedRole}`} replace />;
+  const user = getUserInfoFromStorage();
+  const token = user.token;
+  const role = user.role;
+  if (!token || role !== allowedRole) return <Navigate to={`/auth`} replace />;
   return children;
 }
 
@@ -22,8 +24,12 @@ export default function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/roles" element={<RolesPage />} />
-          <Route path="/auth" element={<Auth />} />
+          {/*<Route path="/roles" element={<RolesPage />} />*/}
+          <Route path="/auth" element={
+              <ProtectedAuthRoute>
+                  <Auth />
+              </ProtectedAuthRoute>
+          } />
           <Route
             path="/dashboard/supervisor"
             element={

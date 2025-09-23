@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import logoImg from "../assets/logo.jpeg";
 import backgroundImg from "../assets/EDU3.png";
 import capImg from "../assets/cap.png";
+import getUserInfoFromStorage from "./Auth/UserInfo.jsx";
 
 // --- Global Styles ---
 const GlobalStyle = createGlobalStyle`
@@ -596,7 +597,35 @@ function HowItWorksSection() {
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [logedUser , setLogedUser] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const logedUser = getUserInfoFromStorage();
+    if (logedUser.email){
+    setLogedUser(logedUser);
+    }
+  }, []);
+
+  const goToDashboard = () => {
+    if (!logedUser) return;
+    switch (logedUser.role) {
+      case "student":
+        navigate("/dashboard/student");
+        break;
+      case "supervisor":
+        navigate("/dashboard/supervisor");
+        break;
+      case "admin":
+        navigate("/dashboard/admin");
+        break;
+      case "coordinator":
+        navigate("/dashboard/coordinator");
+        break;
+      default:
+        break;
+    }
+  };
 
   // --- Custom Cursor State ---
   const [cursor, setCursor] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
@@ -619,7 +648,7 @@ const LandingPage = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      navigate("/roles");
+      navigate("/auth");
     }, 1200);
   };
 
@@ -643,10 +672,18 @@ const LandingPage = () => {
             Auto-FYP
           </Logo>
           <NavLinks>
-            <Link to="/">Home</Link>
-            <Link to="/about">About Us</Link>
-            <Link to="/auth">Login</Link>
-            <Link to="/auth">Signup</Link>
+            {!logedUser ? (
+                <>
+                  <Link to="/">Home</Link>
+                  <Link to="/about">About Us</Link>
+                  <Link to="/auth">Login</Link>
+                  <Link to="/auth">Signup</Link>
+                </>
+            ) : (
+                <GetStartedButton onClick={goToDashboard}>
+                  Dashboard
+                </GetStartedButton>
+            )}
           </NavLinks>
         </GlassNav>
         <Main>
@@ -662,7 +699,7 @@ const LandingPage = () => {
               Take Control of Your Final Year Project—From Proposal to Evaluation
             </SubTitle>
             <GetStartedButton onClick={handleGetStarted} disabled={loading}>
-              Get Started
+              Login Now
             </GetStartedButton>
           </LeftContent>
         </Main>
