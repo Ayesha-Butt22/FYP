@@ -7,6 +7,9 @@ const userSchema = new mongoose.Schema({
   studentId: { type: String, unique: true, sparse: true },
   department: String,
   specialization: String,
-});
+  first_logic: { type: Boolean, default: false },
+  first_login: { type: Boolean, default: false },
+  mustChangePassword: { type: Boolean, default: false }
+}, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
