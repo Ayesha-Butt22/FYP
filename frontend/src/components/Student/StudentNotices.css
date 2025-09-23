@@ -1,0 +1,47 @@
+/* --- Icon Button for notifications --- */
+.notice-btn {
+  margin-left: 8px !important;
+}
+
+/* --- Dialog Title --- */
+.dialog-title {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.dialog-icon {
+  margin-right: 6px;
+  margin-bottom: -3px;
+  color: #1976d2;
+}
+
+/* --- Notice Item --- */
+.notice-item {
+  margin-bottom: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.notice-item.unread {
+  background: #e3f2fd;
+  border-left: 4px solid #1976d2;
+  box-shadow: 0 1px 6px #1976d21a;
+}
+
+/* --- Buttons --- */
+.mark-btn {
+  margin-right: 8px !important;
+  font-size: 0.75rem !important;
+  text-transform: none !important;
+}
+
+.attach-btn {
+  color: #1976d2 !important;
+}
+
+/* --- Chip --- */
+.notice-chip {
+  margin-left: 6px !important;
+}

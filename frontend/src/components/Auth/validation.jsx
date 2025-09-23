@@ -1,5 +1,5 @@
 
-
+//components/Auth/validation.jsx
 export const ROLE_FIELDS = {
     student: [
         { name: "email", label: "University Email", type: "email", required: true },
