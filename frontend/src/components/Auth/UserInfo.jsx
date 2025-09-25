@@ -1,3 +1,4 @@
+//components/Auth/UserInfo
 const getUserInfoFromStorage = () => ({
     token: localStorage.getItem("token") || "demoToken",
     role: localStorage.getItem("role") || "user",

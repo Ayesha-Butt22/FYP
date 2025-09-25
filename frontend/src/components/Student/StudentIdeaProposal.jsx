@@ -1,323 +1,313 @@
 import React, { useState } from "react";
 import {
-  Box, TextField, Button, Chip, Stack, Typography, Divider, Paper
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Stack,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemText,
+  Alert
 } from "@mui/material";
-import { CheckCircle, HourglassEmpty, Cancel, Edit, Autorenew } from "@mui/icons-material";
-import DashboardSectionHeader from "./DashboardSectionHeader";
+import DashboardSectionHeader from "../Student/DashboardSectionHeader";
 import "./StudentIdeaProposal.css";
 
-// Dummy data to simulate status flow and feedback
-const DUMMY_STATUS_FLOW = [
-  { key: "draft", label: "Draft", icon: <Edit />, color: "#64748b" },
-  { key: "supervisor-selection", label: "Supervisor Selection", icon: <Autorenew />, color: "#2563eb" },
-  { key: "supervisor-review", label: "Supervisor Review", icon: <HourglassEmpty />, color: "#f59e42" },
-  { key: "coordinator-review", label: "Coordinator", icon: <HourglassEmpty />, color: "#eab308" },
-  { key: "approved", label: "Approved", icon: <CheckCircle />, color: "#16a34a" },
-  { key: "rejected", label: "Rejected", icon: <Cancel />, color: "#e11d48" },
+// Supervisors list with new ML supervisor added
+const SUPERVISORS = [
+  { name: "Dr. AI Expert", expertise: ["AI", "Machine Learning", "Deep Learning"] },
+  { name: "Ms. Web Guru", expertise: ["React", "Node.js", "Web Development", "MERN", "MERN Stack"] },
+  { name: "Mr. Data Wizard", expertise: ["Data Science", "Python", "Pandas"] },
+  { name: "Ms. Cloud", expertise: ["AWS", "Azure", "Cloud"] },
+  // New ML supervisor
+  { name: "Dr. ML Specialist", expertise: ["Machine Learning", "ML", "Scikit-learn", "TensorFlow", "Deep Learning"] },
 ];
 
-// Helper for feedback chip color
-const feedbackColor = (from) =>
-  from === "supervisor"
-    ? { background: "#e0e7ff", color: "#3730a3" }
-    : { background: "#fef9c3", color: "#a16207" };
-
 export default function StudentIdeaProposal() {
-  // Main idea form state
-  const [idea, setIdea] = useState({
-    title: "",
-    abstract: "",
-    tools: "",
-    keywords: "",
-  });
-  // Status
-  const [status, setStatus] = useState("draft"); // one of flow keys
-  // Feedback from supervisor/coordinator
-  const [feedback, setFeedback] = useState([
-    // Example feedback objects:
-    // { from: "supervisor", comment: "Clarify tools.", severity: "minor" }
-    // { from: "coordinator", comment: "Well done.", severity: "approved" }
-  ]);
-  // For Title Rewriter (optional)
-  const [aiTitle, setAiTitle] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
+  const [title, setTitle] = useState("");
+  const [aiTitleSuggestions, setAiTitleSuggestions] = useState([]);
+  const [selectedTitle, setSelectedTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [tools, setTools] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
-  // Status step helper
-  const currentStepIdx = DUMMY_STATUS_FLOW.findIndex((s) => s.key === status);
+  // Supervisor selection & approval
+  const [supervisorDialog, setSupervisorDialog] = useState(false);
+  const [matchedSupervisors, setMatchedSupervisors] = useState([]);
+  const [selectedSupervisor, setSelectedSupervisor] = useState("");
+  const [statusDialog, setStatusDialog] = useState(false);
+  const [supervisorStatus, setSupervisorStatus] = useState(""); // "pending", "approved", "rejected"
+  const [supervisorSuggestion, setSupervisorSuggestion] = useState("");
 
-  // Handlers
-  const handleInput = (field, v) => setIdea({ ...idea, [field]: v });
-  const handleSubmit = () => {
-    // Post to backend here
-    setStatus("supervisor-selection");
+  // AI Project Title Suggestion only
+  const handleSuggestTitle = () => {
+    if (!title) return;
+    setAiTitleSuggestions([
+      title + " System",
+      "Automated " + title.charAt(0).toUpperCase() + title.slice(1),
+    ]);
+    setSelectedTitle("");
   };
 
-  // Simulate AI Title Rewriter (replace with real API call)
-  const handleRewrite = () => {
-    setAiLoading(true);
+  // When AI suggestion is clicked, update both selectedTitle and the Project Title input
+  const handleSelectTitle = (t) => {
+    setSelectedTitle(t);
+    setTitle(t); // This will fill the Project Title input as well
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
+  // Supervisor matching with fallback to all
+  const handleOpenSupervisorDialog = () => {
+    const techArr = (tools)
+      .split(/[\s,;]+/)
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+    let matches = SUPERVISORS.filter((sup) =>
+      sup.expertise.some((exp) =>
+        techArr.some(
+          (tool) =>
+            exp.toLowerCase().includes(tool) ||
+            tool.includes(exp.toLowerCase())
+        )
+      )
+    );
+    // If no matches, show all supervisors as a fallback
+    if (matches.length === 0) {
+      matches = SUPERVISORS;
+    }
+    setMatchedSupervisors(matches);
+    setSupervisorDialog(true);
+  };
+
+  const handleSendSupervisorRequest = (name) => {
+    setSelectedSupervisor(name);
+    setSupervisorDialog(false);
+    setSupervisorStatus("pending");
+    setStatusDialog(true);
+
     setTimeout(() => {
-      setAiTitle("Smart Automated Attendance Tracker System");
-      setAiLoading(false);
-    }, 1000);
+      // Both Dr. AI Expert and Dr. ML Specialist will approve for ML/AI/Deep Learning
+      if (name === "Dr. AI Expert" || name === "Dr. ML Specialist") {
+        setSupervisorStatus("approved");
+        setSupervisorSuggestion("");
+      } else {
+        setSupervisorStatus("rejected");
+        setSupervisorSuggestion(
+          "Your topic does not match my current research interests. Please clarify the use of specific technology in your project."
+        );
+      }
+    }, 1800);
   };
 
-  // For demo: simulate status transitions
-  const simulateSupervisorReview = () => {
-    setStatus("supervisor-review");
-    setFeedback([
-      { from: "supervisor", comment: "Abstract is good, but specify ML model.", severity: "minor" },
-    ]);
-  };
-  const simulateCoordinatorReview = () => {
-    setStatus("coordinator-review");
-    setFeedback([
-      ...feedback,
-      { from: "coordinator", comment: "Please attach project timeline.", severity: "minor" },
-    ]);
-  };
-  const simulateApproval = () => {
-    setStatus("approved");
-    setFeedback([
-      ...feedback,
-      { from: "coordinator", comment: "Idea approved! Good luck.", severity: "approved" },
-    ]);
-  };
-  const simulateRejection = () => {
-    setStatus("rejected");
-    setFeedback([
-      ...feedback,
-      { from: "coordinator", comment: "Project scope too broad. Narrow it down.", severity: "rejected" },
-    ]);
+  // Reset for editing proposal after rejection
+  const handleEditProposal = () => {
+    setSubmitted(false);
+    setSelectedSupervisor("");
+    setSupervisorStatus("");
+    setSupervisorSuggestion("");
+    setStatusDialog(false);
   };
 
   return (
     <>
-      <DashboardSectionHeader>Project Idea & Proposal</DashboardSectionHeader>
-      <Box sx={{ maxWidth: 900, margin: "0 auto" }}>
-        {/* Status Tracker */}
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 4, mt: 3 }}>
-          {DUMMY_STATUS_FLOW.map((s, idx) => (
-            <React.Fragment key={s.key}>
-              <Stack alignItems="center" spacing={0.7}>
-                <Chip
-                  icon={s.icon}
-                  label={s.label}
-                  sx={{
-                    bgcolor: idx < currentStepIdx
-                      ? "#e0e7ff"
-                      : idx === currentStepIdx
-                        ? s.color
-                        : "#f1f5f9",
-                    color: idx === currentStepIdx
-                      ? "#fff"
-                      : idx < currentStepIdx
-                        ? "#3730a3"
-                        : "#64748b",
-                    fontWeight: 900,
-                    fontSize: 16,
-                    px: 2,
-                    py: 1,
-                    height: 46,
-                    mb: 0.5,
-                  }}
-                />
-                {idx < DUMMY_STATUS_FLOW.length - 1 && (
-                  <div
-                    style={{
-                      width: 34,
-                      height: 6,
-                      background: idx < currentStepIdx ? "#2563eb" : "#cbd5e1",
-                      borderRadius: 3,
-                      margin: "0 2px",
-                    }}
-                  />
-                )}
-              </Stack>
-            </React.Fragment>
-          ))}
-        </Box>
-
-        {/* Feedback */}
-        {feedback.length > 0 && (
-          <Box sx={{ my: 2, textAlign: "center" }}>
-            {feedback.map((fb, i) => (
-              <Chip
-                key={i}
-                label={
-                  <span>
-                    <b>{fb.from === "supervisor" ? "Supervisor" : "Coordinator"}:</b> {fb.comment}
-                  </span>
-                }
-                sx={{
-                  ...feedbackColor(fb.from),
-                  fontWeight: 800,
-                  fontSize: 15,
-                  px: 1.7,
-                  my: 0.4,
-                  mr: 1.5,
-                }}
-              />
-            ))}
-          </Box>
-        )}
-
-        {/* Idea Form */}
-        {status === "draft" && (
-          <Paper sx={{ p: 4, mt: 3, borderRadius: 6, boxShadow: 2 }}>
-            <Typography fontWeight={900} fontSize={26} sx={{ color: "#01337a", mb: 2 }}>
-              Idea Proposal Form
-            </Typography>
-            <Stack spacing={3}>
+      <DashboardSectionHeader>Idea & Proposal</DashboardSectionHeader>
+      <div className="section-desc" style={{ marginBottom: 18 }}>
+        Here you can create your FYP group, propose your project, and add your team members. Get AI suggestions for your project title. Once submitted, you can select a supervisor and proceed with your FYP process.
+      </div>
+      <Box className="idea-proposal-container">
+        {!submitted ? (
+          <form onSubmit={handleSubmit}>
+            <Stack gap={3}>
+              {/* AI Title Rewriter */}
               <Box>
                 <TextField
                   label="Project Title"
-                  fullWidth
-                  value={idea.title}
-                  onChange={e => handleInput("title", e.target.value)}
-                  required
-                  InputProps={{
-                    endAdornment: (
-                      <Button
-                        variant="text"
-                        size="small"
-                        startIcon={<Autorenew />}
-                        onClick={handleRewrite}
-                        disabled={aiLoading}
-                        sx={{ ml: 2, fontWeight: 700, color: "#2563eb" }}
-                      >
-                        {aiLoading ? "Rewriting..." : "AI Suggest"}
-                      </Button>
-                    ),
+                  value={title}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    setAiTitleSuggestions([]);
+                    setSelectedTitle("");
                   }}
+                  fullWidth
+                  className="input"
                 />
-                {aiTitle && (
-                  <Typography sx={{ mt: 1, color: "#16a34a", fontWeight: 600 }}>
-                    AI Suggestion: "{aiTitle}"
-                  </Typography>
-                )}
-              </Box>
-              <TextField
-                label="Abstract"
-                multiline
-                minRows={3}
-                fullWidth
-                value={idea.abstract}
-                onChange={e => handleInput("abstract", e.target.value)}
-                required
-              />
-              <TextField
-                label="Tools / Technologies"
-                fullWidth
-                value={idea.tools}
-                onChange={e => handleInput("tools", e.target.value)}
-                placeholder="e.g. React, Node.js, Python"
-                required
-              />
-              <TextField
-                label="Keywords"
-                fullWidth
-                value={idea.keywords}
-                onChange={e => handleInput("keywords", e.target.value)}
-                placeholder="AI, Attendance, Web"
-                required
-              />
-              <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <Button
                   variant="contained"
-                  size="large"
-                  sx={{ px: 7, py: 1.2, fontWeight: 900, fontSize: 18, borderRadius: 3, bgcolor: "#2563eb" }}
-                  onClick={handleSubmit}
-                  disabled={
-                    !idea.title.trim() ||
-                    !idea.abstract.trim() ||
-                    !idea.tools.trim() ||
-                    !idea.keywords.trim()
-                  }
+                  className="ai-btn"
+                  onClick={handleSuggestTitle}
+                  disabled={!title}
+                  sx={{ mt: 1 }}
+                  type="button"
                 >
-                  Submit Idea
+                  Rewrite with AI
                 </Button>
+                {aiTitleSuggestions.length > 0 && (
+                  <Box className="ai-suggestions">
+                    <Typography sx={{ mt: 2, fontWeight: 700, color: "#01337a" }}>
+                      AI Suggestions:
+                    </Typography>
+                    <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                      {aiTitleSuggestions.map((sug) => (
+                        <Chip
+                          key={sug}
+                          label={sug}
+                          color={selectedTitle === sug ? "primary" : "default"}
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: "1.01rem",
+                            cursor: "pointer"
+                          }}
+                          onClick={() => handleSelectTitle(sug)}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
               </Box>
+              <Box>
+                <TextField
+                  label="Project Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  fullWidth
+                  multiline
+                  minRows={3}
+                  className="input"
+                />
+              </Box>
+              <Box>
+                <TextField
+                  label="Tools / Technologies"
+                  value={tools}
+                  onChange={(e) => setTools(e.target.value)}
+                  fullWidth
+                  className="input"
+                />
+              </Box>
+              <Button
+                type="submit"
+                variant="contained"
+                color="secondary"
+                className="submit-btn"
+                disabled={!selectedTitle && !title}
+                sx={{ color: "#fff" }}
+              >
+                Select Supervisor
+              </Button>
             </Stack>
-          </Paper>
-        )}
-
-        {/* Simulate status transitions for demo/testing */}
-        {status === "supervisor-selection" && (
-          <Box sx={{ textAlign: "center", mt: 8 }}>
-            <Typography fontWeight={800} fontSize={23} color="#2563eb">
-              Please select your supervisor to proceed.
-            </Typography>
-            <Button variant="outlined" sx={{ mt: 3, mr: 2 }} onClick={simulateSupervisorReview}>
-              Simulate Supervisor Review
+          </form>
+        ) : (
+          <Box textAlign="center" sx={{ mt: 5 }}>
+            <Button
+              variant="contained"
+              color="secondary"
+              className="select-supervisor-btn"
+              onClick={handleOpenSupervisorDialog}
+              sx={{ color: "#fff" }}
+            >
+              Select Supervisor
             </Button>
           </Box>
         )}
-        {status === "supervisor-review" && (
-          <Box sx={{ textAlign: "center", mt: 8 }}>
-            <Typography fontWeight={800} fontSize={23} color="#f59e42">
-              Supervisor is reviewing your proposal.
-            </Typography>
-            <Button variant="outlined" sx={{ mt: 3, mr: 2 }} onClick={simulateCoordinatorReview}>
-              Simulate Coordinator Review
-            </Button>
-          </Box>
-        )}
-        {status === "coordinator-review" && (
-          <Box sx={{ textAlign: "center", mt: 8 }}>
-            <Typography fontWeight={800} fontSize={23} color="#eab308">
-              Coordinator is reviewing your proposal.
-            </Typography>
-            <Button variant="contained" sx={{ mt: 3, mr: 2, bgcolor: "#16a34a" }} onClick={simulateApproval}>
-              Simulate Approval
-            </Button>
-            <Button variant="contained" sx={{ mt: 3, ml: 2, bgcolor: "#e11d48" }} onClick={simulateRejection}>
-              Simulate Rejection
-            </Button>
-          </Box>
-        )}
-        {status === "approved" && (
-          <Box sx={{ textAlign: "center", mt: 8 }}>
-            <Chip
-              icon={<CheckCircle />}
-              label="Your project proposal is approved! 🎉"
-              sx={{
-                bgcolor: "#e0fce0",
-                color: "#15803d",
-                fontWeight: 900,
-                fontSize: 18,
-                px: 3,
-                py: 2,
-                my: 2,
-              }}
-            />
-          </Box>
-        )}
-        {status === "rejected" && (
-          <Box sx={{ textAlign: "center", mt: 8 }}>
-            <Chip
-              icon={<Cancel />}
-              label="Your project proposal was rejected."
-              sx={{
-                bgcolor: "#fee2e2",
-                color: "#e11d48",
-                fontWeight: 900,
-                fontSize: 18,
-                px: 3,
-                py: 2,
-                my: 2,
-              }}
-            />
-            <Typography sx={{ mt: 2, color: "#e11d48", fontWeight: 600 }}>
-              Please review the feedback and resubmit with improvements.
-            </Typography>
-          </Box>
-        )}
-
-        <Divider sx={{ mt: 7, mb: 2 }} />
-        <Typography sx={{ color: "#64748b", fontSize: 15, textAlign: "center", mb: 2 }}>
-          Status flow: Fill proposal → Submit → Select Supervisor → Supervisor Review → Coordinator → Approved/Rejected
-        </Typography>
       </Box>
+
+      {/* Supervisor Selection Dialog */}
+      <Dialog
+        open={supervisorDialog}
+        onClose={() => setSupervisorDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Select Supervisor</DialogTitle>
+        <DialogContent>
+          {matchedSupervisors.length === 0 ? (
+            <Alert severity="info">
+              No supervisors found matching your technologies. Please
+              review your tools/technologies.
+            </Alert>
+          ) : (
+            <List>
+              {matchedSupervisors.map((sup) => (
+                <ListItem
+                  key={sup.name}
+                  button
+                  onClick={() => handleSendSupervisorRequest(sup.name)}
+                >
+                  <ListItemText
+                    primary={sup.name}
+                    secondary={"Expertise: " + sup.expertise.join(", ")}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSupervisorDialog(false)}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Status Dialog */}
+      <Dialog
+        open={statusDialog}
+        onClose={() => setStatusDialog(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          {supervisorStatus === "pending"
+            ? "Request Sent"
+            : supervisorStatus === "approved"
+            ? "Approved"
+            : supervisorStatus === "rejected"
+            ? "Rejected"
+            : ""}
+        </DialogTitle>
+        <DialogContent>
+          {supervisorStatus === "pending" && (
+            <Typography>
+              Your request to <b>{selectedSupervisor}</b> has been sent. Waiting for supervisor approval...
+            </Typography>
+          )}
+          {supervisorStatus === "approved" && (
+            <Typography color="success.main">
+              Your supervisor <b>{selectedSupervisor}</b> has approved your request.<br/>
+              You will be able to upload documents after approval.
+            </Typography>
+          )}
+          {supervisorStatus === "rejected" && (
+            <>
+              <Alert severity="error" sx={{ mb: 2 }}>
+                Your proposal was rejected by {selectedSupervisor}.
+              </Alert>
+              <Typography color="text.secondary" fontWeight={600}>
+                Reason / Suggestion:
+              </Typography>
+              <Typography color="error.main" sx={{ mb: 2 }}>
+                {supervisorSuggestion}
+              </Typography>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          {supervisorStatus === "rejected" ? (
+            <Button onClick={handleEditProposal}>Edit Proposal & Resubmit</Button>
+          ) : (
+            <Button onClick={() => setStatusDialog(false)}>Close</Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

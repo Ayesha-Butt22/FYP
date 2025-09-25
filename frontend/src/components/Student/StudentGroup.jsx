@@ -1,284 +1,364 @@
 import React, { useState } from "react";
+import AddIcon from "@mui/icons-material/Add";
+import {
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Alert,
+  useMediaQuery,
+  Stack,
+} from "@mui/material";
 import { toastService } from "../ToastService/ToastService";
-import DashboardSectionHeader from "../Student/DashboardSectionHeader"
+import ToastContainer from "../ToastService/ToastContainer";
+import DashboardSectionHeader from "../Student/DashboardSectionHeader"; 
 import "./StudentGroup.css";
 
-const MAX_MEMBERS = 3;
+// Demo: Map SAPID to Student Name (simulate a database)
+const sapidToName = {
+  "48288": "Ayesha Butt",
+  "12345": "Ali Raza",
+  "67890": "Sara Khan",
+  // Add more as needed
+};
+
+const getName = (sapid) => sapidToName[sapid] || "Name not found";
+const sapidToEmail = (sapid) =>
+  sapid ? `${sapid}@students.riphah.edu.pk` : "";
+
+const CURRENT_USER_SAPID = "48288"; // Simulate logged in user SAPID
 
 export default function StudentGroup() {
-  // Get user info from localStorage
-  const currentUser = {
-    name: localStorage.getItem("name") || "Ayesha",
-    studentId: localStorage.getItem("studentId") || "48288",
-    email: localStorage.getItem("email") || "48288@students.riphah.edu.pk"
-  };
+  const [group, setGroup] = useState(() => {
+    const g = localStorage.getItem("fyp_groupdata");
+    if (g) {
+      const parsed = JSON.parse(g);
+      if (parsed.members.some((m) => m.sapid === CURRENT_USER_SAPID)) {
+        return parsed;
+      }
+    }
+    return null;
+  });
 
-  // UI states
-  const [groupName, setGroupName] = useState("");
+  const isMobile = useMediaQuery("(max-width:900px)");
+  const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(1); // 1: number input, 2: member details
+  const [numMembers, setNumMembers] = useState(1);
   const [members, setMembers] = useState([
-    { name: currentUser.name, studentId: currentUser.studentId, email: currentUser.email, isLeader: true }
+    {
+      sapid: CURRENT_USER_SAPID,
+      email: sapidToEmail(CURRENT_USER_SAPID),
+      isLeader: true,
+    },
+    { sapid: "", email: "", isLeader: false },
+    { sapid: "", email: "", isLeader: false },
   ]);
-  const [creating, setCreating] = useState(false);
-  const [groupCreated, setGroupCreated] = useState(false);
+  const [error, setError] = useState("");
 
-  // Add new member row
-  const handleAddMember = () => {
-    if (members.length < MAX_MEMBERS)
-      setMembers([...members, { name: "", studentId: "", email: "", isLeader: false }]);
-  };
-
-  // Remove member row
-  const handleRemoveMember = idx => {
-    setMembers(members.filter((_m, i) => i !== idx));
-  };
-
-  // Change input for members
-  const handleMemberChange = (idx, field, value) => {
-    setMembers(members.map((m, i) => i === idx ? { ...m, [field]: value } : m));
-  };
-
-  // Validation
-  const canSave =
-    groupName.trim() &&
-    members.length >= 1 &&
-    members.slice(1).every(
-      m => m.name.trim() && m.studentId.trim() && m.email.trim()
-    );
-
-  // Save group (simulate backend)
-  const handleSubmit = e => {
+  const handleNumMembersSubmit = (e) => {
     e.preventDefault();
-    setCreating(true);
-    setTimeout(() => {
-      setCreating(false);
-      setGroupCreated(true);
-      toastService.success("Group Created Successfully!", 2200);
-    }, 900);
+    if (numMembers < 1 || numMembers > 3) {
+      setError("Members must be between 1 and 3.");
+      return;
+    }
+    setError("");
+    setStep(2);
+  };
+
+  const handleMemberChange = (i, value) => {
+    const newMembers = [...members];
+    newMembers[i].sapid = value;
+    newMembers[i].email = sapidToEmail(value);
+    setMembers(newMembers);
+  };
+
+  const handleCreateGroup = () => {
+    setError("");
+    for (let i = 0; i < numMembers; ++i) {
+      if (!members[i].sapid) {
+        setError("All SAP IDs must be filled.");
+        return;
+      }
+    }
+    const groupObj = {
+      members: members.slice(0, numMembers).map((m, i) => ({
+        ...m,
+        isLeader: i === 0,
+      })),
+      leader: members[0],
+    };
+    localStorage.setItem("fyp_groupdata", JSON.stringify(groupObj));
+    setGroup(groupObj);
+    setOpen(false);
+    setStep(1);
+    toastService.success("Group created successfully!");
+  };
+
+  const handleDeleteGroup = () => {
+    if (window.confirm("Are you sure you want to delete this group?")) {
+      localStorage.removeItem("fyp_groupdata");
+      setGroup(null);
+      setMembers([
+        {
+          sapid: CURRENT_USER_SAPID,
+          email: sapidToEmail(CURRENT_USER_SAPID),
+          isLeader: true,
+        },
+        { sapid: "", email: "", isLeader: false },
+        { sapid: "", email: "", isLeader: false },
+      ]);
+      toastService.success("Group deleted!");
+    }
   };
 
   return (
-    <>
-      {/* Heading sirf uper dikhayenge */}
-      <DashboardSectionHeader>My Group</DashboardSectionHeader>
+    <Box className="page-container">
+      <ToastContainer />
 
-      <div className="page-container" style={{display:"flex",justifyContent:"center",alignItems:"flex-start"}}>
-        <div className="group-card" style={{
-          width: 1090,
-          maxWidth: "99vw",
-          margin: "50px auto",
-          padding: "54px 56px 52px 56px",
-          background: "#fff"
-        }}>
-          {/* Show FORM if not created */}
-          {!groupCreated && (
-            <form onSubmit={handleSubmit} autoComplete="off">
-              <div className="group-title" style={{
-                fontSize:'2.1rem', fontWeight:900, marginBottom:28, textAlign:"left", marginLeft:8, letterSpacing:".7px"
-              }}>
-                Create Group
-              </div>
-              <div style={{
-                margin:"0 0 11px 0", textAlign:"left", fontWeight:"bold", color:"#01337a", marginLeft:8, fontSize:"1.2rem"
-              }}>
-                Group Name
-              </div>
-              <input
-                className="form-input"
-                style={{
-                  width:"100%",
-                  fontSize:"1.22rem",
-                  padding:"15px 18px",
-                  borderRadius:10,
-                  border:"1.7px solid #dbeafe",
-                  marginBottom:30,
-                  background:"#f8faff",
-                  fontWeight:500,
-                }}
-                placeholder="e.g. Smart Attendance"
-                value={groupName}
-                onChange={e => setGroupName(e.target.value)}
-                required
-              />
+     
+      
+        <DashboardSectionHeader>My Group</DashboardSectionHeader>
+      <div className="section-desc">
+  Here you can create your FYP group and add your team members. Once your group is created, you can view all team members and their details here.
+</div>
+      
 
-              <table style={{
-                width:"100%",
-                borderCollapse:"collapse",
-                marginBottom:24,
-                marginTop:36,
-                background:"#f8fafb",
-                borderRadius:13,
-                overflow:"hidden",
-                boxShadow:"0 1px 8px #01337a0c"
-              }}>
-                <thead>
-                  <tr style={{background:"#f4f6fa"}}>
-                    <th style={{textAlign:"left",color:"#01337a",fontWeight:900,fontSize:19,padding:"10px 8px", width:170}}>Group Members</th>
-                    <th style={{textAlign:"left",color:"#01337a",fontWeight:900,fontSize:19,padding:"10px 8px", width:230}}>Name</th>
-                    <th style={{textAlign:"left",color:"#01337a",fontWeight:900,fontSize:19,padding:"10px 8px", width:130}}>SAP ID</th>
-                    <th style={{textAlign:"left",color:"#01337a",fontWeight:900,fontSize:19,padding:"10px 8px", width:320}}>Email</th>
-                    <th style={{width:30}}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Member 1 - always current user */}
-                  <tr style={{background:"#e6f0ff"}}>
-                    <td style={{padding:"9px 8px",fontWeight:900,color:"#2563eb"}}>Leader (You)</td>
-                    <td style={{padding:"9px 6px",fontWeight:900, color:"#01337a"}}>{currentUser.name}</td>
-                    <td style={{padding:"9px 6px",fontWeight:700}}>{currentUser.studentId}</td>
-                    <td style={{padding:"9px 6px",fontWeight:700}}>{currentUser.email}</td>
-                    <td></td>
-                  </tr>
-                  {/* Other members */}
-                  {members.slice(1).map((m, idx) => (
-                    <tr key={idx+1} style={{background:"#f8fafc"}}>
-                      <td style={{padding:"8px 8px",fontWeight:700,color:"#01337a"}}>
-                        Member {idx+2}
-                      </td>
-                      <td style={{padding:"7px 6px"}}>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="Name"
-                          style={{width:180,fontSize:"1.15rem"}}
-                          value={m.name}
-                          onChange={e => handleMemberChange(idx+1, "name", e.target.value)}
-                          required
-                        />
-                      </td>
-                      <td style={{padding:"7px 6px"}}>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="SAP ID"
-                          style={{width:110,fontSize:"1.15rem"}}
-                          value={m.studentId}
-                          onChange={e => handleMemberChange(idx+1, "studentId", e.target.value)}
-                          required
-                        />
-                      </td>
-                      <td style={{padding:"7px 6px"}}>
-                        <input
-                          type="email"
-                          className="form-input"
-                          placeholder="Email"
-                          style={{width:260,fontSize:"1.15rem"}}
-                          value={m.email}
-                          onChange={e => handleMemberChange(idx+1, "email", e.target.value)}
-                          required
-                        />
-                      </td>
-                      <td style={{textAlign:"center"}}>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveMember(idx+1)}
-                          style={{
-                            border:"none",
-                            background:"none",
-                            color:"#f43f5e",
-                            fontSize:"1.33rem",
-                            fontWeight:900,
-                            cursor:"pointer",
-                            padding:0
-                          }}
-                          title="Remove"
-                        >×</button>
-                      </td>
-                    </tr>
+      {/* CREATE GROUP BUTTON */}
+      {!group && (
+        <Box className="create-group-btn-wrap">
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => setOpen(true)}
+            className="create-group-btn"
+            startIcon={<AddIcon sx={{ fontSize: isMobile ? 25 : 35 }} />}
+          >
+            CREATE GROUP
+          </Button>
+        </Box>
+      )}
+
+      {/* GROUP TABLE */}
+      {group && (
+        <Box className="table-outer-wrap">
+          <Box className="group-card">
+            <Typography className="group-title">Group Members</Typography>
+            <TableContainer component={Paper} className="mui-table-container">
+              <Table className="mui-table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center" className="mui-table-head">Role</TableCell>
+                    <TableCell align="center" className="mui-table-head">Name</TableCell>
+                    <TableCell align="center" className="mui-table-head">SAP ID</TableCell>
+                    <TableCell align="center" className="mui-table-head">Email</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {group.members.map((m, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell align="center" className="mui-table-bodycell">{m.isLeader ? "Leader" : `Member ${idx + 1}`}</TableCell>
+                      <TableCell align="center" className="mui-table-bodycell">{getName(m.sapid)}</TableCell>
+                      <TableCell align="center" className="mui-table-bodycell">{m.sapid}</TableCell>
+                      <TableCell align="center" className="mui-table-bodycell">{m.email}</TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-
-              {/* Add Member button */}
-              {members.length < MAX_MEMBERS && (
-                <button
-                  type="button"
-                  className="view-btn"
-                  style={{
-                    background:"#bcd0ee",
-                    color:"#01337a",
-                    fontWeight:700,
-                    fontSize:"1.13rem",
-                    width:160,
-                    margin:"0 0 28px 0",
-                    height:42,
-                    borderRadius:10
-                  }}
-                  onClick={handleAddMember}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            {group.leader.sapid === CURRENT_USER_SAPID && (
+              <Box className="delete-btn-wrap">
+                <Button
+                  color="error"
+                  variant="contained"
+                  className="delete-group-btn"
+                  onClick={handleDeleteGroup}
                 >
-                  + Add Member
-                </button>
-              )}
+                  DELETE GROUP
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </Box>
+      )}
 
-              {/* Centered Save Group button */}
-              <div className="save-group-btn-center">
-                <button
-                  type="submit"
-                  className="view-btn"
-                  style={{
-                    background:"#01337a",
-                    color:"#fff",
-                    fontWeight:900,
-                    fontSize:"1.25rem",
-                    width:260,
-                    height:50,
-                    letterSpacing:0.7,
-                    borderRadius:12,
-                    alignSelf:"center",
-                    display: "block",
-                  }}
-                  disabled={!canSave || creating}
-                >
-                  {creating ? "Saving..." : "Save Group"}
-                </button>
-              </div>
+      {/* DIALOG FOR GROUP CREATION */}
+      <Dialog
+        open={open}
+        onClose={() => { setOpen(false); setStep(1); }}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            minWidth: isMobile ? "98vw" : 800,
+            maxWidth: isMobile ? "98vw" : 880,
+            px: isMobile ? 0.5 : 4,
+            py: isMobile ? 1 : 2,
+            mt: 5
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            color: "#01337a",
+            fontWeight: 900,
+            fontSize: isMobile ? "1.15rem" : "1.5rem",
+            textAlign: "center",
+            mt: 1,
+            mb: 0.5,
+          }}
+        >
+          {step === 1 ? "Enter Number of Group Members" : "Enter Member Details"}
+        </DialogTitle>
+        <DialogContent>
+          {step === 1 && (
+            <form onSubmit={handleNumMembersSubmit}>
+              <TextField
+                label="Number of Members (1-3)"
+                type="number"
+                fullWidth
+                autoFocus
+                value={numMembers}
+                onChange={e => setNumMembers(Math.max(1, Math.min(3, Number(e.target.value) || 1)))}
+                inputProps={{
+                  min: 1,
+                  max: 3,
+                  step: 1,
+                  style: { MozAppearance: "textfield" }
+                }}
+                sx={{
+                  my: 2,
+                  fontWeight: 700,
+                  fontSize: isMobile ? "1rem" : "1.14rem",
+                  letterSpacing: 0.8,
+                  "& input[type=number]::-webkit-inner-spin-button, & input[type=number]::-webkit-outer-spin-button": {
+                    WebkitAppearance: "none",
+                    margin: 0,
+                  },
+                }}
+              />
+              {error && <Alert severity="error">{error}</Alert>}
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                sx={{
+                  backgroundColor: "#01337a",
+                  color: "#fff",
+                  fontWeight: 900,
+                  fontSize: isMobile ? "1.04rem" : "1.18rem",
+                  letterSpacing: 1,
+                  py: 1.3,
+                  mt: 1,
+                  mb: 0.5,
+                  borderRadius: 1.5,
+                  "&:hover": {
+                    backgroundColor: "#002766"
+                  }
+                }}
+              >
+                NEXT
+              </Button>
             </form>
           )}
-
-          {/* After group creation, show only table */}
-          {groupCreated && (
-            <>
-              <div className="group-members-heading">
-                Group Members
-              </div>
-              <table style={{
-                width:"100%",
-                borderCollapse:"collapse",
-                marginBottom:8,
-                marginTop:32,
-                background:"#f8fafb",
-                borderRadius:13,
-                overflow:"hidden",
-                boxShadow:"0 1px 8px #01337a0c"
-              }}>
-                <thead>
-                  <tr style={{background:"#f4f6fa"}}>
-                    <th style={{textAlign:"center", color:"#01337a",fontWeight:900, fontSize:22, padding:"14px 8px", width:230}}>Name</th>
-                    <th style={{textAlign:"center", color:"#01337a",fontWeight:900, fontSize:22, padding:"14px 8px", width:130}}>SAP ID</th>
-                    <th style={{textAlign:"center", color:"#01337a",fontWeight:900, fontSize:22, padding:"14px 8px", width:320}}>Email</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {members.map((m, idx) => (
-                    <tr key={idx} style={{background: idx === 0 ? "#e6f0ff" : "#f8fafc"}}>
-                      <td style={{
-                        padding:"13px 6px",
-                        fontWeight:idx===0?900:700,
-                        color:idx===0?"#2563eb":"#222",
-                        fontSize:"1.25rem",
-                        textAlign:"center"
-                      }}>
-                        {idx === 0 ? "Leader (You)" : m.name}
-                      </td>
-                      <td style={{padding:"13px 6px", fontWeight:idx===0?800:700, fontSize:"1.22rem", textAlign:"center"}}>{m.studentId}</td>
-                      <td style={{padding:"13px 6px", fontWeight:idx===0?800:700, fontSize:"1.22rem", textAlign:"center"}}>{m.email}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
+          {step === 2 && (
+            <Stack spacing={3} sx={{ width: "100%", maxWidth: "100%" }}>
+              {[...Array(numMembers)].map((_, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    px: 2,
+                    py: 2.5,
+                    bgcolor: "#f8fafc",
+                    borderRadius: 2,
+                    boxShadow: "0 1.5px 6px #01337a15",
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      mb: 0.7,
+                      fontWeight: 700,
+                      color: "#01337a",
+                      fontSize: isMobile ? "1rem" : "1.23rem",
+                      alignSelf: "flex-start"
+                    }}
+                  >
+                    {i === 0 ? "Leader" : `Member ${i + 1}`}
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: 3, width: "100%" }}>
+                    <TextField
+                      label="SAP ID"
+                      value={members[i].sapid}
+                      onChange={e => handleMemberChange(i, e.target.value)}
+                      fullWidth
+                      disabled={i === 0}
+                      sx={{
+                        mb: 1,
+                        "& .MuiInputBase-input": { fontWeight: 600, fontSize: isMobile ? "1.07rem" : "1.18rem" }
+                      }}
+                    />
+                    <TextField
+                      label="Email"
+                      value={members[i].email}
+                      disabled
+                      fullWidth
+                      sx={{
+                        mb: 1,
+                        "& .MuiInputBase-input": { fontWeight: 600, fontSize: isMobile ? "1.07rem" : "1.18rem" }
+                      }}
+                    />
+                  </Box>
+                </Box>
+              ))}
+              {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+            </Stack>
           )}
-        </div>
-      </div>
-    </>
+        </DialogContent>
+        <DialogActions>
+          {step === 2 && (
+            <Button
+              onClick={handleCreateGroup}
+              variant="contained"
+              sx={{
+                backgroundColor: "#01337a",
+                color: "#fff",
+                fontWeight: 900,
+                fontSize: isMobile ? "1.04rem" : "1.19rem",
+                py: 1.2,
+                borderRadius: 1.5,
+                letterSpacing: 1,
+                "&:hover": { backgroundColor: "#002766" }
+              }}
+            >
+              CREATE GROUP
+            </Button>
+          )}
+          <Button
+            onClick={() => { setOpen(false); setStep(1); }}
+            color="inherit"
+            sx={{
+              fontWeight: 700,
+              fontSize: isMobile ? "0.99rem" : "1.08rem"
+            }}
+          >
+            CANCEL
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }

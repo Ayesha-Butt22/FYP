@@ -1,32 +1,73 @@
-.idea-feedback-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 18px 0 8px 0;
-  font-size: 1.1rem;
-  font-weight: 600;
+.idea-proposal-container {
+  max-width: 900px;
+  margin: 0 auto;
+  margin-top: 48px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 3px 24px #01337a1b;
+  min-height: 420px;
 }
 
 .section-desc {
-  margin: 20px 0 32px 0;
-  color: #475569;
-  font-size: 1.14rem;
-  font-weight: 500;
-  text-align: center;
-  line-height: 1.5;
+  color: #01337a;
+  font-size: 1.11rem;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  background: #f6faff;
+  border-radius: 8px;
+  padding: 12px 22px;
+  margin-bottom: 24px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
 }
 
-.MuiPaper-root {
-  box-shadow: 0 3px 26px #01337a17 !important;
+.input {
+  background: #f8faff;
+  border-radius: 8px;
 }
 
-.MuiChip-root {
-  font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
-  letter-spacing: 0.4px;
+.ai-btn {
+  margin-top: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px;
+  font-size: 0.98rem !important;
 }
 
-.MuiTextField-root label {
-  font-weight: 700;
-  color: #01337a !important;
-  letter-spacing: 0.05em;
+.submit-btn {
+  margin-top: 16px !important;
+  font-weight: 900 !important;
+  font-size: 1.13rem !important;
+  border-radius: 8px !important;
+  padding: 11px 0 !important;
+  background: #01337a !important;
+  -webkit-border-radius: 8px !important;
+  -moz-border-radius: 8px !important;
+  -ms-border-radius: 8px !important;
+  -o-border-radius: 8px !important;
+}
+
+.select-supervisor-btn {
+  font-size: 1.13rem !important;
+  font-weight: 800 !important;
+  padding: 12px 32px !important;
+  border-radius: 8px !important;
+  letter-spacing: 1px;
+  background: #0147a3 !important;
+  color: #fff !important;
+  -webkit-border-radius: 8px !important;
+  -moz-border-radius: 8px !important;
+  -ms-border-radius: 8px !important;
+  -o-border-radius: 8px !important;
+}
+
+@media (max-width: 700px) {
+  .idea-proposal-container {
+    padding: 8px;
+    max-width: 99vw;
+    min-width: 97vw;
+  }
+  .section-desc {
+    font-size: 0.99rem;
+    padding: 7px 9px;
+  }
 }

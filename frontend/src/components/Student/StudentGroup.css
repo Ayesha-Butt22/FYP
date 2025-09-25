@@ -8,17 +8,56 @@
   box-sizing: border-box;
   animation: fadeInGroups 0.7s;
   padding: 0 0 40px 0;
-  -webkit-animation: fadeInGroups 0.7s;
+}
+
+.create-group-btn-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.create-group-btn {
+  background: #01337a !important;
+  color: #fff !important;
+  font-weight: 900 !important;
+  padding: 18px 60px !important;
+  font-size: 1.5rem !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(1,51,122,0.13) !important;
+  letter-spacing: 1px;
+  min-width: 300px;
+  transition: background .18s, color .16s, transform .16s;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  justify-content: center;
+}
+.create-group-btn:hover {
+  background: #002766 !important;
+  color: #fff !important;
+  transform: scale(1.045) translateY(-1.5px);
+}
+
+.table-outer-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .group-card {
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 3px 24px #01337a1b;
-  min-width: 320px;
-  max-width: 1100px;
-  flex: 1 1 320px;
-  padding: 54px 56px 52px 56px;
+  min-width: 340px;
+  max-width: 1200px;
+  width: 85vw;
+  flex: 1 1 340px;
+  padding: 54px 50px 42px 50px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -31,121 +70,113 @@
   font-size: 2.1rem;
   font-weight: 900;
   color: #01337a !important;
-  margin-bottom: 28px;
-  text-align: left;
+  margin-bottom: 32px;
+  text-align: center;
   word-break: break-word;
   font-family: inherit;
   text-decoration: none;
-  cursor: default;
   letter-spacing: 0.7px;
 }
 
-.form-input {
-  font-size: 1.22rem;
-  border: 1.7px solid #dbeafe;
-  border-radius: 10px;
-  padding: 15px 18px;
-  outline: none;
-  background: #f8faff;
-  font-family: inherit;
-  transition: border 0.18s;
-  font-weight: 500;
+.mui-table-container {
+  border-radius: 12px !important;
+  margin-bottom: 24px !important;
+  width: 100% !important;
+  overflow-x: auto;
+  box-shadow: 0 1.5px 8px #01337a13 !important;
 }
 
-.form-input:focus {
-  border: 1.7px solid #2563eb;
-  background: #fff;
+.mui-table {
+  min-width: 1100px !important;
 }
 
-.view-btn {
-  margin-top: auto;
-  padding: 16px 0;
-  border-radius: 12px;
-  border: none;
-  background: #01337a;
-  color: #fff;
-  font-weight: 900;
-  font-size: 1.17rem;
-  cursor: pointer;
-  box-shadow: 0 2px 12px #01337a23;
+.mui-table-head {
+  font-weight: 900 !important;
+  color: #01337a !important;
+  font-size: 1.18rem !important;
+  background: #f0f6ff !important;
+}
+
+.mui-table-bodycell {
+  font-size: 1.14rem !important;
+  font-weight: 600 !important;
+  word-break: break-all;
+  background: #fff !important;
+}
+
+.delete-btn-wrap {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 240px;
-  justify-content: center;
-  letter-spacing: 0.7px;
-  transition: background 0.18s, color 0.19s, transform 0.17s;
-  font-family: inherit;
-  text-align: center;
-}
-
-.view-btn:hover {
-  background: #fff;
-  color: #01337a;
-  transform: scale(1.045) translateY(-1.5px);
-}
-
-.save-group-btn-center {
-  display: flex;
-  justify-content: center;
-  margin-top: 24px;
-  margin-bottom: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
   width: 100%;
 }
 
-.group-members-heading {
-  text-align: center;
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: #01337a;
-  letter-spacing: 0.5px;
-  margin: 16px 0 36px 0;
-}
-
-th, td {
+.delete-group-btn {
+  font-weight: 900 !important;
+  letter-spacing: 1.1px !important;
+  padding: 15px 40px !important;
   font-size: 1.15rem !important;
+  min-width: 180px;
+  border-radius: 12px !important;
+  box-shadow: 0 2.5px 12px #d32f2f22 !important;
+  background: #d32f2f !important;
+  transition: all 0.18s;
+}
+.delete-group-btn:hover {
+  background: #b71c1c !important;
 }
 
-table {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Make the table a bit further down */
-.group-card table {
-  margin-top: 36px !important;
-  margin-bottom: 24px;
-}
-
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .group-card {
     min-width: 94vw;
     max-width: 99vw;
-    padding: 16px 8vw 22px 8vw;
+    padding: 26px 4vw 28px 4vw;
   }
   .group-title {
     font-size: 1.45rem;
   }
-  th, td {
-    font-size: 1.08rem !important;
-  }
-  .form-input {
-    font-size: 1.05rem;
-    padding: 12px 8px;
+  .mui-table {
+    min-width: 800px !important;
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .group-card {
     min-width: 99vw;
     max-width: 99vw;
-    padding: 6vw 2vw 14vw 2vw;
+    padding: 16px 2vw 14vw 2vw;
   }
-  .form-input {
-    font-size: 0.93rem;
-    padding: 9px 4px;
+  .group-title {
+    font-size: 1.18rem;
   }
-  th, td {
-    font-size: 0.93rem !important;
+  .mui-table {
+    min-width: 600px !important;
   }
+  .mui-table-head,
+  .mui-table-bodycell {
+    font-size: 1.03rem !important;
+  }
+  .delete-group-btn {
+    padding: 12px 18px !important;
+    font-size: 1.09rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .group-card {
+    padding: 8px 0vw 10vw 0vw;
+  }
+  .group-title {
+    font-size: 1.02rem;
+    margin-bottom: 16px;
+  }
+  .mui-table {
+    min-width: 400px !important;
+  }
+}
+
+@keyframes fadeInGroups {
+  0% { opacity: 0; transform: translateY(25px);}
+  80% { opacity: 0.7; }
+  100% { opacity: 1; transform: translateY(0);}
 }

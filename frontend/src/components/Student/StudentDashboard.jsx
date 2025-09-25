@@ -1,10 +1,24 @@
 import React, { useState } from "react";
 import DashboardLayout from "../DashboardLayout";
+import OverviewStudent from "./OverviewStudent";
+import StudentGroup from "./StudentGroup";
+import StudentIdeaProposal from "./StudentIdeaProposal";
+import StudentSupervisorSelection from "./StudentSupervisorSelection";
+import StudentTemplates from "./StudentTemplates";
+import StudentTasks from "./StudentTasks";
+import StudentMeetings from "./StudentMeetings";
+import StudentChecklist from "./StudentChecklist";
+import StudentFeedback from "./StudentFeedback";
+import StudentJournal from "./StudentJournal";
+import StudentReports from "./StudentReports";
+import StudentArchive from "./StudentArchive";
+import StudentNotices from "./StudentNotices";
+import StudentProfile from "./StudentProfile";
 import {
   Dashboard as DashboardIcon,
   GroupAdd as GroupAddIcon,
-  PersonSearch as PersonSearchIcon,
   Assignment as AssignmentIcon,
+  PersonSearch as PersonSearchIcon,
   Description as DescriptionIcon,
   ListAlt as ListAltIcon,
   CalendarMonth as CalendarMonthIcon,
@@ -12,28 +26,15 @@ import {
   Feedback as FeedbackIcon,
   Book as BookIcon,
   LibraryBooks as LibraryBooksIcon,
+  AccountCircle as AccountCircleIcon,
 } from "@mui/icons-material";
 import capImg from "../../assets/cap.png";
-
-// --- Import all your student tab components below ---
-import OverviewStudent from "./OverviewStudent";
-import StudentGroup from "./StudentGroup";
-import StudentSupervisorSelection from "./StudentSupervisorSelection";
-import StudentIdeaProposal from "./StudentIdeaProposal";
-import StudentTemplates from "./StudentTemplates";
-import StudentTasks from "./StudentTasks";
-import StudentMeetings from "./StudentMeetings";
-import StudentChecklist from "./StudentChecklist";
-import StudentJournal from "./StudentJournal";
-import StudentArchive from "./StudentArchive";
-import StudentReports from "./StudentReports";
-import StudentNotices from "../Student/StudentNotices"; // <-- Notification bell
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
   { label: "My Group", icon: <GroupAddIcon /> },
-  { label: "Supervisor Selection", icon: <PersonSearchIcon /> },
   { label: "Idea & Proposal", icon: <AssignmentIcon /> },
+  { label: "Supervisor Selection", icon: <PersonSearchIcon /> },
   { label: "Templates", icon: <DescriptionIcon /> },
   { label: "Tasks", icon: <ListAltIcon /> },
   { label: "Meetings", icon: <CalendarMonthIcon /> },
@@ -42,14 +43,14 @@ const menu = [
   { label: "Journal", icon: <BookIcon /> },
   { label: "Reports", icon: <DescriptionIcon /> },
   { label: "FYP Archive", icon: <LibraryBooksIcon /> },
+  { label: "Noticeboard", icon: <LibraryBooksIcon /> },
+  { label: "Profile", icon: <AccountCircleIcon /> },
 ];
 
 const studentInfo = {
   logo: capImg,
   title: "Auto-FYP",
   name: localStorage.getItem("name") || "Student",
-  // subtitle: "", // Do NOT set subtitle so SAP ID does not show in corner
-  // email: localStorage.getItem("email") || "", // (Optional)
 };
 
 export default function StudentDashboard() {
@@ -63,16 +64,18 @@ export default function StudentDashboard() {
   const tabComponents = {
     "Overview": <OverviewStudent onTabChange={setActiveTab} />,
     "My Group": <StudentGroup />,
-    "Supervisor Selection": <StudentSupervisorSelection />,
     "Idea & Proposal": <StudentIdeaProposal />,
+    "Supervisor Selection": <StudentSupervisorSelection />,
     "Templates": <StudentTemplates />,
     "Tasks": <StudentTasks />,
     "Meetings": <StudentMeetings />,
     "Checklist": <StudentChecklist />,
-    "Evaluations": <StudentJournal />,
+    "Evaluations": <StudentFeedback />,
     "Journal": <StudentJournal />,
     "Reports": <StudentReports />,
     "FYP Archive": <StudentArchive />,
+    "Noticeboard": <StudentNotices />,
+    "Profile": <StudentProfile />,
   };
 
   return (
@@ -85,7 +88,7 @@ export default function StudentDashboard() {
       activeTab={activeTab}
       setActiveTab={setActiveTab}
       onLogout={handleLogout}
-      profileIcon={<StudentNotices />}  // <-- Notification bell in header
+      profileIcon={<StudentNotices />}
     />
   );
 }
