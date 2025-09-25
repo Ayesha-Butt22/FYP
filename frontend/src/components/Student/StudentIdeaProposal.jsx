@@ -199,7 +199,7 @@ export default function StudentIdeaProposal() {
                 color="secondary"
                 className="submit-btn"
                 disabled={!selectedTitle && !title}
-                sx={{ color: "#fff" }}
+                sx={{ color: "#fff !important" }}
               >
                 Select Supervisor
               </Button>
