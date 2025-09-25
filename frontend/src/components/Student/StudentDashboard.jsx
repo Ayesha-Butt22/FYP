@@ -12,7 +12,6 @@ import StudentFeedback from "./StudentFeedback";
 import StudentJournal from "./StudentJournal";
 import StudentReports from "./StudentReports";
 import StudentArchive from "./StudentArchive";
-import StudentNotices from "./StudentNotices";
 import StudentProfile from "./StudentProfile";
 import {
   Dashboard as DashboardIcon,
@@ -43,7 +42,7 @@ const menu = [
   { label: "Journal", icon: <BookIcon /> },
   { label: "Reports", icon: <DescriptionIcon /> },
   { label: "FYP Archive", icon: <LibraryBooksIcon /> },
-  { label: "Noticeboard", icon: <LibraryBooksIcon /> },
+  // Noticeboard removed
   { label: "Profile", icon: <AccountCircleIcon /> },
 ];
 
@@ -74,7 +73,7 @@ export default function StudentDashboard() {
     "Journal": <StudentJournal />,
     "Reports": <StudentReports />,
     "FYP Archive": <StudentArchive />,
-    "Noticeboard": <StudentNotices />,
+    // "Noticeboard": <StudentNotices />, // Removed
     "Profile": <StudentProfile />,
   };
 
@@ -88,7 +87,7 @@ export default function StudentDashboard() {
       activeTab={activeTab}
       setActiveTab={setActiveTab}
       onLogout={handleLogout}
-      profileIcon={<StudentNotices />}
+      profileIcon={<StudentProfile />}
     />
   );
 }

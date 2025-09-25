@@ -10,6 +10,17 @@
   padding: 0 0 40px 0;
 }
 
+.section-desc {
+  color: #01337a;
+  font-size: 1.11rem;
+  font-weight: 600;
+  background: #f6faff;
+  border-radius: 8px;
+  padding: 12px 22px;
+  margin: 18px 0 24px;
+  letter-spacing: 0.1px;
+}
+
 .create-group-btn-wrap {
   width: 100%;
   display: flex;
@@ -28,25 +39,19 @@
   box-shadow: 0 4px 16px rgba(1,51,122,0.13) !important;
   letter-spacing: 1px;
   min-width: 300px;
-  transition: background .18s, color .16s, transform .16s;
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  justify-content: center;
+  transition: background .18s, transform .16s;
 }
 .create-group-btn:hover {
   background: #002766 !important;
-  color: #fff !important;
   transform: scale(1.045) translateY(-1.5px);
 }
 
+/* Group Card */
 .table-outer-wrap {
   width: 100%;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  margin-top: 2.5rem;
-  margin-bottom: 2.5rem;
+  margin: 2.5rem 0;
 }
 
 .group-card {
@@ -56,13 +61,11 @@
   min-width: 340px;
   max-width: 1200px;
   width: 85vw;
-  flex: 1 1 340px;
   padding: 54px 50px 42px 50px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   margin-bottom: 18px;
-  font-family: inherit;
   text-align: left;
 }
 
@@ -72,12 +75,10 @@
   color: #01337a !important;
   margin-bottom: 32px;
   text-align: center;
-  word-break: break-word;
-  font-family: inherit;
-  text-decoration: none;
   letter-spacing: 0.7px;
 }
 
+/* Table Styling */
 .mui-table-container {
   border-radius: 12px !important;
   margin-bottom: 24px !important;
@@ -100,32 +101,101 @@
 .mui-table-bodycell {
   font-size: 1.14rem !important;
   font-weight: 600 !important;
-  word-break: break-all;
   background: #fff !important;
 }
 
+/* Delete Button */
 .delete-btn-wrap {
   display: flex;
   justify-content: flex-end;
   margin-top: 20px;
-  width: 100%;
 }
 
 .delete-group-btn {
   font-weight: 900 !important;
-  letter-spacing: 1.1px !important;
   padding: 15px 40px !important;
   font-size: 1.15rem !important;
-  min-width: 180px;
   border-radius: 12px !important;
   box-shadow: 0 2.5px 12px #d32f2f22 !important;
   background: #d32f2f !important;
-  transition: all 0.18s;
+  transition: background 0.18s;
 }
 .delete-group-btn:hover {
   background: #b71c1c !important;
 }
 
+/* Dialog */
+.dialog-paper {
+  border-radius: 18px !important;
+  min-width: 800px;
+  max-width: 880px;
+  padding: 20px;
+  margin-top: 40px;
+}
+.dialog-title {
+  color: #01337a !important;
+  font-weight: 900 !important;
+  font-size: 1.5rem !important;
+  text-align: center;
+}
+.num-members-input {
+  margin: 20px 0 !important;
+  font-weight: 700 !important;
+}
+.next-btn {
+  background-color: #01337a !important;
+  color: #fff !important;
+  font-weight: 900 !important;
+  font-size: 1.18rem !important;
+  border-radius: 12px !important;
+  margin-top: 10px;
+}
+.next-btn:hover {
+  background: #002766 !important;
+}
+
+/* Member Form */
+.member-list {
+  width: 100%;
+}
+.member-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  box-shadow: 0 1.5px 6px #01337a15;
+  padding: 18px;
+}
+.member-label {
+  font-weight: 700;
+  color: #01337a;
+  font-size: 1.23rem;
+  margin-bottom: 8px;
+}
+.member-fields {
+  display: flex;
+  gap: 16px;
+}
+.member-input input {
+  font-weight: 600;
+  font-size: 1.18rem;
+}
+
+/* Dialog Actions */
+.create-btn {
+  background-color: #01337a !important;
+  color: #fff !important;
+  font-weight: 900 !important;
+  font-size: 1.19rem !important;
+  border-radius: 12px !important;
+}
+.create-btn:hover {
+  background: #002766 !important;
+}
+.cancel-btn {
+  font-weight: 700 !important;
+  font-size: 1.08rem !important;
+}
+
+/* Responsive */
 @media (max-width: 1200px) {
   .group-card {
     min-width: 94vw;
@@ -139,11 +209,9 @@
     min-width: 800px !important;
   }
 }
-
 @media (max-width: 900px) {
   .group-card {
     min-width: 99vw;
-    max-width: 99vw;
     padding: 16px 2vw 14vw 2vw;
   }
   .group-title {
@@ -160,11 +228,14 @@
     padding: 12px 18px !important;
     font-size: 1.09rem !important;
   }
+  .dialog-paper {
+    min-width: 98vw;
+    max-width: 98vw;
+  }
 }
-
 @media (max-width: 600px) {
   .group-card {
-    padding: 8px 0vw 10vw 0vw;
+    padding: 8px 0 10vw;
   }
   .group-title {
     font-size: 1.02rem;
@@ -175,6 +246,7 @@
   }
 }
 
+/* Animation */
 @keyframes fadeInGroups {
   0% { opacity: 0; transform: translateY(25px);}
   80% { opacity: 0.7; }

@@ -13,7 +13,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  Alert
+  Alert,
 } from "@mui/material";
 import DashboardSectionHeader from "../Student/DashboardSectionHeader";
 import "./StudentIdeaProposal.css";
@@ -24,7 +24,6 @@ const SUPERVISORS = [
   { name: "Ms. Web Guru", expertise: ["React", "Node.js", "Web Development", "MERN", "MERN Stack"] },
   { name: "Mr. Data Wizard", expertise: ["Data Science", "Python", "Pandas"] },
   { name: "Ms. Cloud", expertise: ["AWS", "Azure", "Cloud"] },
-  // New ML supervisor
   { name: "Dr. ML Specialist", expertise: ["Machine Learning", "ML", "Scikit-learn", "TensorFlow", "Deep Learning"] },
 ];
 
@@ -36,12 +35,11 @@ export default function StudentIdeaProposal() {
   const [tools, setTools] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  // Supervisor selection & approval
   const [supervisorDialog, setSupervisorDialog] = useState(false);
   const [matchedSupervisors, setMatchedSupervisors] = useState([]);
   const [selectedSupervisor, setSelectedSupervisor] = useState("");
   const [statusDialog, setStatusDialog] = useState(false);
-  const [supervisorStatus, setSupervisorStatus] = useState(""); // "pending", "approved", "rejected"
+  const [supervisorStatus, setSupervisorStatus] = useState("");
   const [supervisorSuggestion, setSupervisorSuggestion] = useState("");
 
   // AI Project Title Suggestion only
@@ -54,10 +52,9 @@ export default function StudentIdeaProposal() {
     setSelectedTitle("");
   };
 
-  // When AI suggestion is clicked, update both selectedTitle and the Project Title input
   const handleSelectTitle = (t) => {
     setSelectedTitle(t);
-    setTitle(t); // This will fill the Project Title input as well
+    setTitle(t);
   };
 
   const handleSubmit = (e) => {
@@ -65,25 +62,23 @@ export default function StudentIdeaProposal() {
     setSubmitted(true);
   };
 
-  // Supervisor matching with fallback to all
   const handleOpenSupervisorDialog = () => {
-    const techArr = (tools)
+    const techArr = tools
       .split(/[\s,;]+/)
       .map((t) => t.trim().toLowerCase())
       .filter(Boolean);
+
     let matches = SUPERVISORS.filter((sup) =>
       sup.expertise.some((exp) =>
         techArr.some(
           (tool) =>
-            exp.toLowerCase().includes(tool) ||
-            tool.includes(exp.toLowerCase())
+            exp.toLowerCase().includes(tool) || tool.includes(exp.toLowerCase())
         )
       )
     );
-    // If no matches, show all supervisors as a fallback
-    if (matches.length === 0) {
-      matches = SUPERVISORS;
-    }
+
+    if (matches.length === 0) matches = SUPERVISORS;
+
     setMatchedSupervisors(matches);
     setSupervisorDialog(true);
   };
@@ -95,7 +90,6 @@ export default function StudentIdeaProposal() {
     setStatusDialog(true);
 
     setTimeout(() => {
-      // Both Dr. AI Expert and Dr. ML Specialist will approve for ML/AI/Deep Learning
       if (name === "Dr. AI Expert" || name === "Dr. ML Specialist") {
         setSupervisorStatus("approved");
         setSupervisorSuggestion("");
@@ -108,7 +102,6 @@ export default function StudentIdeaProposal() {
     }, 1800);
   };
 
-  // Reset for editing proposal after rejection
   const handleEditProposal = () => {
     setSubmitted(false);
     setSelectedSupervisor("");
@@ -120,14 +113,18 @@ export default function StudentIdeaProposal() {
   return (
     <>
       <DashboardSectionHeader>Idea & Proposal</DashboardSectionHeader>
-      <div className="section-desc" style={{ marginBottom: 18 }}>
-        Here you can create your FYP group, propose your project, and add your team members. Get AI suggestions for your project title. Once submitted, you can select a supervisor and proceed with your FYP process.
+
+      <div className="section-desc">
+        Here you can create your FYP group, propose your project, and add your
+        team members. Get AI suggestions for your project title. Once submitted,
+        you can select a supervisor and proceed with your FYP process.
       </div>
+
       <Box className="idea-proposal-container">
         {!submitted ? (
           <form onSubmit={handleSubmit}>
             <Stack gap={3}>
-              {/* AI Title Rewriter */}
+              {/* Project Title with AI Rewrite */}
               <Box>
                 <TextField
                   label="Project Title"
@@ -145,27 +142,22 @@ export default function StudentIdeaProposal() {
                   className="ai-btn"
                   onClick={handleSuggestTitle}
                   disabled={!title}
-                  sx={{ mt: 1 }}
                   type="button"
                 >
                   Rewrite with AI
                 </Button>
                 {aiTitleSuggestions.length > 0 && (
                   <Box className="ai-suggestions">
-                    <Typography sx={{ mt: 2, fontWeight: 700, color: "#01337a" }}>
+                    <Typography className="ai-suggestions-title">
                       AI Suggestions:
                     </Typography>
-                    <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                    <Stack direction="row" spacing={2} className="ai-chip-stack">
                       {aiTitleSuggestions.map((sug) => (
                         <Chip
                           key={sug}
                           label={sug}
                           color={selectedTitle === sug ? "primary" : "default"}
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: "1.01rem",
-                            cursor: "pointer"
-                          }}
+                          className="ai-chip"
                           onClick={() => handleSelectTitle(sug)}
                         />
                       ))}
@@ -173,6 +165,7 @@ export default function StudentIdeaProposal() {
                   </Box>
                 )}
               </Box>
+
               <Box>
                 <TextField
                   label="Project Description"
@@ -184,6 +177,7 @@ export default function StudentIdeaProposal() {
                   className="input"
                 />
               </Box>
+
               <Box>
                 <TextField
                   label="Tools / Technologies"
@@ -193,26 +187,25 @@ export default function StudentIdeaProposal() {
                   className="input"
                 />
               </Box>
+
               <Button
                 type="submit"
                 variant="contained"
                 color="secondary"
                 className="submit-btn"
                 disabled={!selectedTitle && !title}
-                sx={{ color: "#fff !important" }}
               >
                 Select Supervisor
               </Button>
             </Stack>
           </form>
         ) : (
-          <Box textAlign="center" sx={{ mt: 5 }}>
+          <Box textAlign="center" className="after-submit">
             <Button
               variant="contained"
               color="secondary"
               className="select-supervisor-btn"
               onClick={handleOpenSupervisorDialog}
-              sx={{ color: "#fff" }}
             >
               Select Supervisor
             </Button>
@@ -221,27 +214,17 @@ export default function StudentIdeaProposal() {
       </Box>
 
       {/* Supervisor Selection Dialog */}
-      <Dialog
-        open={supervisorDialog}
-        onClose={() => setSupervisorDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={supervisorDialog} onClose={() => setSupervisorDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Select Supervisor</DialogTitle>
         <DialogContent>
           {matchedSupervisors.length === 0 ? (
             <Alert severity="info">
-              No supervisors found matching your technologies. Please
-              review your tools/technologies.
+              No supervisors found matching your technologies. Please review your tools/technologies.
             </Alert>
           ) : (
             <List>
               {matchedSupervisors.map((sup) => (
-                <ListItem
-                  key={sup.name}
-                  button
-                  onClick={() => handleSendSupervisorRequest(sup.name)}
-                >
+                <ListItem key={sup.name} button onClick={() => handleSendSupervisorRequest(sup.name)}>
                   <ListItemText
                     primary={sup.name}
                     secondary={"Expertise: " + sup.expertise.join(", ")}
@@ -252,19 +235,12 @@ export default function StudentIdeaProposal() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setSupervisorDialog(false)}>
-            Cancel
-          </Button>
+          <Button onClick={() => setSupervisorDialog(false)}>Cancel</Button>
         </DialogActions>
       </Dialog>
 
       {/* Status Dialog */}
-      <Dialog
-        open={statusDialog}
-        onClose={() => setStatusDialog(false)}
-        maxWidth="xs"
-        fullWidth
-      >
+      <Dialog open={statusDialog} onClose={() => setStatusDialog(false)} maxWidth="xs" fullWidth>
         <DialogTitle>
           {supervisorStatus === "pending"
             ? "Request Sent"
@@ -281,22 +257,19 @@ export default function StudentIdeaProposal() {
             </Typography>
           )}
           {supervisorStatus === "approved" && (
-            <Typography color="success.main">
-              Your supervisor <b>{selectedSupervisor}</b> has approved your request.<br/>
+            <Typography className="approved-text">
+              Your supervisor <b>{selectedSupervisor}</b> has approved your request.
+              <br />
               You will be able to upload documents after approval.
             </Typography>
           )}
           {supervisorStatus === "rejected" && (
             <>
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert severity="error" className="reject-alert">
                 Your proposal was rejected by {selectedSupervisor}.
               </Alert>
-              <Typography color="text.secondary" fontWeight={600}>
-                Reason / Suggestion:
-              </Typography>
-              <Typography color="error.main" sx={{ mb: 2 }}>
-                {supervisorSuggestion}
-              </Typography>
+              <Typography className="reject-reason-label">Reason / Suggestion:</Typography>
+              <Typography className="reject-reason">{supervisorSuggestion}</Typography>
             </>
           )}
         </DialogContent>

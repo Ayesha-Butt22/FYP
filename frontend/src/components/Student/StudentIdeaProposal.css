@@ -33,6 +33,22 @@
   font-size: 0.98rem !important;
 }
 
+.ai-suggestions-title {
+  margin-top: 12px;
+  font-weight: 700;
+  color: #01337a;
+}
+
+.ai-chip-stack {
+  margin-top: 8px;
+}
+
+.ai-chip {
+  font-weight: 700 !important;
+  font-size: 1.01rem !important;
+  cursor: pointer !important;
+}
+
 .submit-btn {
   margin-top: 16px !important;
   font-weight: 900 !important;
@@ -40,10 +56,11 @@
   border-radius: 8px !important;
   padding: 11px 0 !important;
   background: #01337a !important;
-  -webkit-border-radius: 8px !important;
-  -moz-border-radius: 8px !important;
-  -ms-border-radius: 8px !important;
-  -o-border-radius: 8px !important;
+  color: #fff !important;
+}
+
+.after-submit {
+  margin-top: 40px;
 }
 
 .select-supervisor-btn {
@@ -54,10 +71,24 @@
   letter-spacing: 1px;
   background: #0147a3 !important;
   color: #fff !important;
-  -webkit-border-radius: 8px !important;
-  -moz-border-radius: 8px !important;
-  -ms-border-radius: 8px !important;
-  -o-border-radius: 8px !important;
+}
+
+.approved-text {
+  color: #2e7d32;
+}
+
+.reject-alert {
+  margin-bottom: 12px;
+}
+
+.reject-reason-label {
+  color: #555;
+  font-weight: 600;
+}
+
+.reject-reason {
+  color: #d32f2f;
+  margin-bottom: 16px;
 }
 
 @media (max-width: 700px) {
