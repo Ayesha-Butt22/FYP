@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
-import AppTable from "../AppTable";
-import "../Admin/ManageSupervisor.css";
+import AppTable from "./AppTable";
+import "../Admin/Modal&Button.css";
+
+const ALL_SPECIALITIES = [
+  "AI", "ML", "Web", "Cloud", "Data Science", "Networks", "Security", "IoT", "Embedded", "Software Engineering"
+];
 
 const headers = [
   "ID",
@@ -61,10 +65,106 @@ const initialRows = [
   }
 ];
 
+// Utility functions for joining/splitting specialities
+function splitSpeciality(str) {
+  if (!str) return [];
+  return str.split(",").map(s => s.trim()).filter(Boolean);
+}
+function joinSpeciality(arr) {
+  return arr.join(", ");
+}
+
+// Dropdown multi-select component
+function DropdownMultiSelect({
+  value = [],
+  options = [],
+  onChange = () => {},
+  placeholder = "Select specialities...",
+}) {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const containerRef = useRef(null);
+
+  // Close dropdown if clicked outside
+  React.useEffect(() => {
+    function handleClick(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const filtered = options.filter(
+    (opt) =>
+      !value.includes(opt) &&
+      opt.toLowerCase().includes(input.toLowerCase())
+  );
+
+  return (
+    <div className="speciality-dropdown-multiselect" ref={containerRef}>
+      <div
+        className="dropdown-selected-area"
+        onClick={() => setOpen((o) => !o)}
+        tabIndex={0}
+        style={{ minHeight: 36, cursor: "pointer", display: 'flex', alignItems: "center", flexWrap: "wrap", gap: 6, background: "#f7f8ff", borderRadius: 8, border: "1px solid #dbdbec", padding: "4px 7px", position: "relative" }}
+      >
+        {value.map((spec, idx) => (
+          <span className="speciality-chip" key={idx}>
+            {spec}
+            <button
+              type="button"
+              className="chip-remove"
+              tabIndex={-1}
+              onClick={e => {
+                e.stopPropagation();
+                onChange(value.filter((s) => s !== spec));
+              }}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+        <input
+          type="text"
+          placeholder={value.length === 0 ? placeholder : ""}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onFocus={() => setOpen(true)}
+          onClick={e => { e.stopPropagation(); setOpen(true); }}
+          style={{ flex: 1, minWidth: 70, border: "none", outline: "none", background: "transparent", fontSize: "1rem" }}
+        />
+        <span style={{marginLeft: 2, color: "#01337a", fontWeight: 900, fontSize: 18, userSelect: "none"}}>▼</span>
+      </div>
+      {open && (
+        <div className="dropdown-list">
+          {filtered.length === 0 ? (
+            <span className="dropdown-list-item" style={{color:"#aaa"}}>No options</span>
+          ) : (
+            filtered.map((spec) => (
+              <span
+                key={spec}
+                className="dropdown-list-item"
+                onMouseDown={() => {
+                  onChange([...value, spec]);
+                  setInput("");
+                  setOpen(false); // hide after select
+                }}
+              >
+                {spec}
+              </span>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ManageSupervisors() {
   const [rows, setRows] = useState(initialRows);
   const [editIndex, setEditIndex] = useState(null);
   const [editData, setEditData] = useState({});
+  const [editSpeciality, setEditSpeciality] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [addData, setAddData] = useState({
     ID: "",
@@ -76,12 +176,14 @@ export default function ManageSupervisors() {
     "Booked Slots": "",
     Password: ""
   });
+  const [addSpeciality, setAddSpeciality] = useState([]);
   const [addIdSuffix, setAddIdSuffix] = useState("");
 
   // Edit functions
   const handleEdit = (row, idx) => {
     setEditIndex(idx);
     setEditData({ ...row });
+    setEditSpeciality(splitSpeciality(row.Speciality));
   };
   const handleEditChange = (e) => {
     const { name, value } = e.target;
@@ -93,14 +195,16 @@ export default function ManageSupervisors() {
   const handleUpdate = (e) => {
     e.preventDefault();
     const updatedRows = [...rows];
-    updatedRows[editIndex] = { ...editData };
+    updatedRows[editIndex] = { ...editData, Speciality: joinSpeciality(editSpeciality) };
     setRows(updatedRows);
     setEditIndex(null);
     setEditData({});
+    setEditSpeciality([]);
   };
   const handleCancel = () => {
     setEditIndex(null);
     setEditData({});
+    setEditSpeciality([]);
     setShowAdd(false);
     setAddData({
       ID: "",
@@ -113,6 +217,7 @@ export default function ManageSupervisors() {
       Password: ""
     });
     setAddIdSuffix("");
+    setAddSpeciality([]);
   };
 
   // Delete
@@ -144,6 +249,7 @@ export default function ManageSupervisors() {
       alert("Please enter a valid ID (SUP followed by a number, e.g. SUP006)");
       return;
     }
+    rowData.Speciality = joinSpeciality(addSpeciality);
     setRows((prevRows) => [...prevRows, rowData]);
     handleCancel();
   };
@@ -162,6 +268,7 @@ export default function ManageSupervisors() {
       "Booked Slots": "",
       Password: ""
     });
+    setAddSpeciality([]);
   };
 
   return (
@@ -211,7 +318,12 @@ export default function ManageSupervisors() {
               </div>
               <div className="form-group">
                 <label>Speciality</label>
-                <input name="Speciality" value={editData.Speciality} onChange={handleEditChange} type="text" required />
+                <DropdownMultiSelect
+                  value={editSpeciality}
+                  options={ALL_SPECIALITIES}
+                  onChange={setEditSpeciality}
+                  placeholder="Select specialities..."
+                />
               </div>
               <div className="form-group">
                 <label>Available Slots</label>
@@ -278,7 +390,12 @@ export default function ManageSupervisors() {
               </div>
               <div className="form-group">
                 <label>Speciality</label>
-                <input name="Speciality" value={addData.Speciality} onChange={handleAddChange} type="text" required />
+                <DropdownMultiSelect
+                  value={addSpeciality}
+                  options={ALL_SPECIALITIES}
+                  onChange={setAddSpeciality}
+                  placeholder="Select specialities..."
+                />
               </div>
               <div className="form-group">
                 <label>Available Slots</label>

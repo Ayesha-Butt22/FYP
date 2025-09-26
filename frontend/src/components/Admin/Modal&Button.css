@@ -1,4 +1,4 @@
-/* Modal overlay */
+/* Modal overlay & modal box */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -8,8 +8,6 @@
   justify-content: center;
   z-index: 999;
 }
-
-/* Modal box */
 .edit-modal {
   background: #fff;
   border-radius: 16px;
@@ -103,4 +101,57 @@
 }
 .add-supervisor-btn:hover {
   background: #2563eb;
+}
+
+/* ===== Speciality Multi-Select Dropdown Styles ===== */
+.speciality-dropdown-multiselect { position: relative; }
+.dropdown-selected-area:focus-within, .dropdown-selected-area:focus { box-shadow: 0 0 0 2px #2563eb44; border-color: #2563eb !important; }
+.dropdown-list {
+  position: absolute;
+  left: 0;
+  top: 110%;
+  background: #fff;
+  box-shadow: 0 4px 16px #01337a22;
+  z-index: 10;
+  border-radius: 0 0 8px 8px;
+  width: 100%;
+  max-height: 210px;
+  overflow-y: auto;
+  border: 1px solid #dbdbec;
+  border-top: none;
+}
+.dropdown-list-item {
+  display: block;
+  padding: 9px 18px;
+  cursor: pointer;
+  color: #01337a;
+  font-weight: 700;
+  font-size: 1rem;
+  border-bottom: 1px solid #f0f1fa;
+  transition: background 0.12s;
+}
+.dropdown-list-item:last-child { border-bottom: none; }
+.dropdown-list-item:hover { background: #e8eafc; }
+
+.speciality-chip {
+  display: flex;
+  align-items: center;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 13px;
+  padding: 3px 10px 3px 10px;
+  font-size: 0.97rem;
+  font-weight: 700;
+  margin-right: 4px;
+  margin-bottom: 3px;
+}
+.chip-remove {
+  background: none;
+  border: none;
+  color: #fff;
+  margin-left: 5px;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
 }
