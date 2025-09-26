@@ -1,10 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./components/LandingPage";
-import RolesPage from "./components/RolesPage";
 import Auth from "./components/Auth/Auth";
 import SupervisorDashboard from "./components/Supervisor/SupervisorDashboard";
 import StudentDashboard from "./components/Student/StudentDashboard.jsx";
+import AdminDashboard from "./components/Admin/AdminDashboard"; // Admin dashboard import
 import ToastContainer from "./components/ToastService/ToastContainer.jsx";
 import getUserInfoFromStorage from "./components/Auth/UserInfo.jsx";
 import ProtectedAuthRoute from "./components/Auth/ProtectedAuthRoute.jsx";
@@ -30,6 +30,14 @@ export default function App() {
                   <Auth />
               </ProtectedAuthRoute>
           } />
+          <Route
+            path="/dashboard/admin"
+            element={
+              <ProtectedRoute allowedRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard/supervisor"
             element={

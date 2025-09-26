@@ -1,4 +1,4 @@
-
+//fyp-backend/routes/auth.js
 const express = require('express');
 const { protect } = require('../middlewares/authMiddleware');
 const authController = require('../controllers/authController');
