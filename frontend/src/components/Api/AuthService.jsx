@@ -1,4 +1,3 @@
-//components/Api/AuthService.jsx
 const API_BASE_URL = "http://localhost:5000/api/auth";
 
 class AuthService {
@@ -48,7 +47,6 @@ class AuthService {
         return await this.makeAPICall("register", userData);
     }
 
-    // Store user data in localStorage
     storeUserData(data) {
         const userInfo = {
             token: data.token || "demoToken",
@@ -58,7 +56,7 @@ class AuthService {
             email: data.user?.email || "",
             department: data.user?.department || "",
             studentId: data.user?.studentId || "",
-            mustChangePassword: data.user?.mustChangePassword || false,
+            mustChangePassword: data.user?.mustChangePassword ? 'true' : 'false'
         };
 
         Object.entries(userInfo).forEach(([key, value]) => {
@@ -87,6 +85,44 @@ class AuthService {
 
     isAuthenticated() {
         return !!localStorage.getItem('token');
+    }
+
+    async changePassword(payload) {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch("http://localhost:5000/api/auth/change-password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    oldPassword: payload.oldPassword,
+                    newPassword: payload.newPassword,
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                return {
+                    success: true,
+                    data
+                };
+            } else {
+                return {
+                    success: false,
+                    error: data.error || "Something went wrong",
+                    data
+                };
+            }
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                data: null
+            };
+        }
     }
 
 

@@ -1,16 +1,13 @@
-// controllers/adminController.js
 const bcrypt = require('bcryptjs');
-const User = require("../models/User");
-
-// helper email regex
+const User = require('../models/User');
 const isValidOfficialEmail = email => /^[a-zA-Z0-9._]+@riphah\.edu\.pk$/.test(email);
 
 exports.createUser = async (req, res) => {
   try {
-    const { email, password, role, department, specialization } = req.body;
+    const { name, email, password, role, department, specialization , availableSlots , bookedSlots } = req.body;
 
-    if (!email || !password || !role)
-      return res.status(400).json({ error: "Email, password and role are required" });
+    if (!name || !email || !password || !role)
+      return res.status(400).json({ error: "Name, email, password and role are required" });
 
     if (!["admin", "supervisor", "coordinator"].includes(role))
       return res.status(400).json({ error: "Invalid role" });
@@ -24,25 +21,28 @@ exports.createUser = async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
 
     const newUser = new User({
+      name,
       email,
       password: hashed,
       role,
       department,
       specialization,
-      // admin-created users must reset on first login
+      availableSlots,
+      bookedSlots,
       mustChangePassword: true,
-      first_login: true,
-      first_logic: false
+      first_login: true
     });
 
     await newUser.save();
     const u = newUser.toObject();
     delete u.password;
+
     return res.status(201).json({ message: `${role} created successfully`, user: u });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
+
 
 exports.getSupervisors = async (req, res) => {
   try {
@@ -53,6 +53,7 @@ exports.getSupervisors = async (req, res) => {
   }
 };
 
+
 exports.getCoordinators = async (req, res) => {
   try {
     const list = await User.find({ role: 'coordinator' }).select('-password');
@@ -62,6 +63,7 @@ exports.getCoordinators = async (req, res) => {
   }
 };
 
+// GET ALL USERS
 exports.getAllUsers = async (req, res) => {
   try {
     const list = await User.find({}).select('-password');
@@ -71,10 +73,12 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+
 exports.updateUser = async (req, res) => {
   try {
-    const { email, department, specialization, password } = req.body;
+    const { name, email, department, specialization, password , availableSlots , bookedSlots } = req.body;
     const user = await User.findById(req.params.id);
+
     if (!user) return res.status(404).json({ error: "User not found" });
 
     if (email && email !== user.email) {
@@ -82,8 +86,13 @@ exports.updateUser = async (req, res) => {
       if (exists) return res.status(400).json({ error: "Email already taken" });
       user.email = email;
     }
+
+    if (name && name.trim() !== "") user.name = name;
     if (department) user.department = department;
     if (specialization) user.specialization = specialization;
+    if (bookedSlots) user.bookedSlots = bookedSlots;
+    if (availableSlots) user.availableSlots = availableSlots;
+
     if (password) {
       user.password = await bcrypt.hash(password, 10);
       user.mustChangePassword = true;
@@ -93,17 +102,18 @@ exports.updateUser = async (req, res) => {
     await user.save();
     const u = user.toObject();
     delete u.password;
+
     return res.json({ message: "User updated successfully", user: u });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
 
+// DELETE USER
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
-
     await user.deleteOne();
     return res.json({ message: "User deleted successfully" });
   } catch (err) {
@@ -111,7 +121,7 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// Admin can change password by email (reset)
+
 exports.resetPasswordByEmail = async (req, res) => {
   try {
     const { email, newPassword } = req.body;
@@ -121,10 +131,10 @@ exports.resetPasswordByEmail = async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     user.password = await bcrypt.hash(newPassword, 10);
-    user.mustChangePassword = true; // force them to change after reset if you want
+    user.mustChangePassword = true;
     user.first_login = true;
-    await user.save();
 
+    await user.save();
     return res.json({ message: "Password reset successfully for user" });
   } catch (err) {
     return res.status(500).json({ error: err.message });

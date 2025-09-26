@@ -103,6 +103,34 @@
   background: #2563eb;
 }
 
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #dbdbec;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #01337a;
+  box-shadow: 0 0 0 2px rgba(1, 51, 122, 0.1);
+}
+
+
 /* ===== Speciality Multi-Select Dropdown Styles ===== */
 .speciality-dropdown-multiselect { position: relative; }
 .dropdown-selected-area:focus-within, .dropdown-selected-area:focus { box-shadow: 0 0 0 2px #2563eb44; border-color: #2563eb !important; }

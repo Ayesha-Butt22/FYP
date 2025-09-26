@@ -1,19 +1,16 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-
-// 🔐 Protect route (JWT required)
 const protect = async (req, res, next) => {
   try {
     let token;
 
-    // Header check: "Authorization: Bearer <token>"
     if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
+        req.headers.authorization &&
+        req.headers.authorization.startsWith("Bearer")
     ) {
       token = req.headers.authorization.split(" ")[1];
 
-      // Verify token
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // DB se user fetch (password exclude)
@@ -22,7 +19,6 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ error: "User not found" });
       }
 
-      // Attach user object to req
       req.user = user;
       return next();
     }
@@ -34,7 +30,6 @@ const protect = async (req, res, next) => {
   }
 };
 
-// 👨‍💼 Admin-only access
 const isAdmin = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     return next();
