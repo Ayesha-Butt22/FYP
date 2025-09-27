@@ -3,8 +3,18 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable";
 import "../Admin/Modal&Button.css";
 
-const headers = ["Name", "Email", "Password"];
+// --- Reusable input for form fields ---
+function FormInput({ label, error, ...props }) {
+  return (
+    <div className="form-group">
+      <label>{label} {props.required && <span style={{color: '#f43f5e'}}>*</span>}</label>
+      <input {...props} style={{ borderColor: error ? '#f43f5e' : '#dbdbec' }} />
+      {error && <span className="error-text">{error}</span>}
+    </div>
+  );
+}
 
+const headers = ["Name", "Email"];
 const initialRows = [
   {
     Name: "System Admin",
@@ -18,154 +28,233 @@ const initialRows = [
   }
 ];
 
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+const validateForm = (data, showPassword) => {
+  const errors = {};
+  if (!data.Name?.trim()) errors.Name = "Name is required";
+  if (!data.Email?.trim()) {
+    errors.Email = "Email is required";
+  } else if (!validateEmail(data.Email)) {
+    errors.Email = "Invalid email format";
+  }
+  if (showPassword) {
+    if (!data.Password?.trim()) errors.Password = "Password is required";
+    if (data.Password && data.Password.length < 6) errors.Password = "Password must be at least 6 characters";
+  }
+  return errors;
+};
+
 export default function ManageAdmin() {
   const [rows, setRows] = useState(initialRows);
+  const [sideFormMode, setSideFormMode] = useState(null); // 'add' or 'edit'
   const [editIndex, setEditIndex] = useState(null);
-  const [editData, setEditData] = useState({});
-  const [showAdd, setShowAdd] = useState(false);
-  const [addData, setAddData] = useState({
+  const [formData, setFormData] = useState({
     Name: "",
     Email: "",
     Password: ""
   });
+  const [formErrors, setFormErrors] = useState({});
 
-  // Edit
+  const resetForm = () => {
+    setFormData({ Name: "", Email: "", Password: "" });
+    setFormErrors({});
+    setSideFormMode(null);
+    setEditIndex(null);
+  };
+
+  // Add/Edit handler
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const errors = validateForm(formData, sideFormMode === "add"); // Only require password for ADD
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+    if (sideFormMode === 'edit') {
+      handleUpdate();
+    } else {
+      handleAdd();
+    }
+  };
+
   const handleEdit = (row, idx) => {
     setEditIndex(idx);
-    setEditData({ ...row });
+    setFormData({...row, Password: ""}); // Don't show password in edit form
+    setFormErrors({});
+    setSideFormMode('edit');
   };
-  const handleEditChange = (e) => {
+  const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setEditData((prev) => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: "" }));
+    }
   };
-  const handleUpdate = (e) => {
-    e.preventDefault();
+  const handleUpdate = () => {
     const updatedRows = [...rows];
-    updatedRows[editIndex] = { ...editData };
+    updatedRows[editIndex] = { ...rows[editIndex], Name: formData.Name, Email: formData.Email };
     setRows(updatedRows);
-    setEditIndex(null);
-    setEditData({});
+    resetForm();
   };
-  const handleCancel = () => {
-    setEditIndex(null);
-    setEditData({});
-    setShowAdd(false);
-    setAddData({
-      Name: "",
-      Email: "",
-      Password: ""
-    });
+  const handleAdd = () => {
+    setRows((prevRows) => [...prevRows, formData]);
+    resetForm();
   };
-  // Delete
   const handleDelete = (idx) => {
+    if (!window.confirm("Are you sure you want to delete this admin?")) return;
     setRows((prevRows) => prevRows.filter((_, i) => i !== idx));
-    if (editIndex === idx) handleCancel();
+    if (editIndex === idx) resetForm();
   };
-
-  // Add
-  const handleAddChange = (e) => {
-    const { name, value } = e.target;
-    setAddData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  const handleAdd = (e) => {
-    e.preventDefault();
-    setRows((prevRows) => [...prevRows, addData]);
-    handleCancel();
-  };
-  const openAddModal = () => {
-    setShowAdd(true);
-    setAddData({
-      Name: "",
-      Email: "",
-      Password: ""
-    });
+  const openAddForm = () => {
+    resetForm();
+    setSideFormMode('add');
   };
 
   return (
-    <>
-      <DashboardSectionHeader>Manage Admin</DashboardSectionHeader>
-      <div className="section-desc">
-        Admins can view, add, update, and delete system administrators.
+    <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
+      <div style={{ flex: sideFormMode ? '2' : '1', transition: 'flex 0.3s ease' }}>
+        <DashboardSectionHeader>Manage Admin</DashboardSectionHeader>
+        <div className="section-desc">
+          Admins can view, add, update, and delete system administrators.
+        </div>
+        <div style={{ display: "flex", justifyContent: "right", margin: "20px 0" }}>
+          <button
+            className="add-supervisor-btn"
+            onClick={openAddForm}
+            disabled={sideFormMode === 'add'}
+          >
+            + Add Admin
+          </button>
+        </div>
+        <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+          <AppTable
+            headers={headers}
+            rows={rows.map(({ Name, Email }) => ({ Name, Email }))}
+            renderActions={(row, i) => (
+              <>
+                <button
+                  className="table-action-btn"
+                  onClick={() => handleEdit(rows[i], i)}
+                  disabled={sideFormMode && editIndex === i}
+                >
+                  {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
+                </button>
+                <button
+                  className="table-action-btn"
+                  style={{ background: "#f43f5e" }}
+                  onClick={() => handleDelete(i)}
+                  disabled={sideFormMode}
+                >
+                  Delete
+                </button>
+              </>
+            )}
+          />
+        </div>
       </div>
-      {/* Add Admin Button */}
-      <div style={{ display: "flex", justifyContent: "center", margin: "20px 0 0 0" }}>
-        <button className="add-supervisor-btn" onClick={openAddModal}>
-          + Add Admin
-        </button>
-      </div>
-      <AppTable
-        headers={headers}
-        rows={rows.map((row) => ({
-          ...row,
-          Password: "•".repeat(row.Password.length)
-        }))}
-        renderActions={(row, i) => (
-          <>
-            <button className="table-action-btn" onClick={() => handleEdit(rows[i], i)}>Edit</button>
-            <button className="table-action-btn" style={{ background: "#f43f5e" }} onClick={() => handleDelete(i)}>Delete</button>
-          </>
-        )}
-      />
-
-      {/* Edit Modal */}
-      {editIndex !== null && (
-        <div className="modal-overlay" onClick={handleCancel}>
-          <div className="edit-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">Edit Admin</div>
-            <form onSubmit={handleUpdate} className="edit-form-grid">
-              <div className="form-group">
-                <label>Name</label>
-                <input name="Name" value={editData.Name} onChange={handleEditChange} type="text" required />
-              </div>
-              <div className="form-group">
-                <label>Email</label>
-                <input name="Email" value={editData.Email} onChange={handleEditChange} type="email" required />
-              </div>
-              <div className="form-group">
-                <label>Password</label>
-                <input name="Password" value={editData.Password} onChange={handleEditChange} type="password" required />
-              </div>
-              <div className="modal-actions">
-                <button type="submit" className="table-action-btn" style={{ minWidth: 120, fontWeight: 800 }}>Update</button>
-                <button type="button" className="table-action-btn" style={{ background: "#aaa", minWidth: 120, fontWeight: 800 }} onClick={handleCancel}>Cancel</button>
-              </div>
-            </form>
+      {sideFormMode && (
+        <div style={{
+          flex: '1',
+          minWidth: '400px',
+          maxWidth: '500px',
+          backgroundColor: '#f8f9fa',
+          padding: '20px',
+          borderRadius: '8px',
+          boxShadow: '-2px 0 10px rgba(0,0,0,0.1)',
+          maxHeight: '90vh',
+          overflowY: 'auto'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '20px',
+            paddingBottom: '10px',
+            borderBottom: '2px solid #e9ecef'
+          }}>
+            <h3 style={{ margin: 0, color: '#01337a' }}>
+              {sideFormMode === 'edit' ? 'Edit Admin' : 'Add New Admin'}
+            </h3>
+            <button
+              onClick={resetForm}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#6c757d'
+              }}
+            >
+              ×
+            </button>
           </div>
+          <form onSubmit={handleSubmit}>
+            <FormInput
+              label="Name"
+              name="Name"
+              value={formData.Name}
+              onChange={handleFormChange}
+              type="text"
+              required
+              error={formErrors.Name}
+              placeholder="Enter admin name"
+            />
+            <FormInput
+              label="Email"
+              name="Email"
+              value={formData.Email}
+              onChange={handleFormChange}
+              type="email"
+              required
+              error={formErrors.Email}
+              placeholder="Enter admin email"
+            />
+            {sideFormMode === "add" && (
+              <FormInput
+                label="Password"
+                name="Password"
+                value={formData.Password}
+                onChange={handleFormChange}
+                type="password"
+                required
+                error={formErrors.Password}
+                placeholder="Enter admin password"
+              />
+            )}
+            <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+              <button
+                type="submit"
+                className="table-action-btn"
+                style={{
+                  flex: 1,
+                  fontWeight: 800,
+                  backgroundColor: '#01337a'
+                }}
+              >
+                {sideFormMode === 'edit' ? 'Update' : 'Save'}
+              </button>
+              <button
+                type="button"
+                className="table-action-btn"
+                style={{
+                  flex: 1,
+                  background: "#6c757d",
+                  fontWeight: 800
+                }}
+                onClick={resetForm}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       )}
-
-      {/* Add Modal */}
-      {showAdd && (
-        <div className="modal-overlay" onClick={handleCancel}>
-          <div className="edit-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">Add Admin</div>
-            <form onSubmit={handleAdd} className="edit-form-grid">
-              <div className="form-group">
-                <label>Name</label>
-                <input name="Name" value={addData.Name} onChange={handleAddChange} type="text" required />
-              </div>
-              <div className="form-group">
-                <label>Email</label>
-                <input name="Email" value={addData.Email} onChange={handleAddChange} type="email" required />
-              </div>
-              <div className="form-group">
-                <label>Password</label>
-                <input name="Password" value={addData.Password} onChange={handleAddChange} type="password" required />
-              </div>
-              <div className="modal-actions">
-                <button type="submit" className="table-action-btn" style={{ minWidth: 120, fontWeight: 800 }}>Save</button>
-                <button type="button" className="table-action-btn" style={{ background: "#aaa", minWidth: 120, fontWeight: 800 }} onClick={handleCancel}>Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 }
