@@ -79,19 +79,41 @@ export default function ChangePassword() {
     };
 
     return (
-        <div className="auth-container active">
-            <div className="form-box login">
-                <form onSubmit={handleSubmit} noValidate>
-                    <h1>Change Password</h1>
-                    <div className="input-box" style={{position: "relative"}}>
-                        <input
-                            type={"text"}
-                            required
-                            value={user.email}
-                            disabled={true}
-                        />
-                    </div>
-                        <div className="input-box" style={{position: "relative"}}>
+        <div className="auth-container">
+            <div className="toggle-panel toggle-left" style={{background: '#01337a'}}>
+                <p>Hello, Welcome!</p>
+            </div>
+
+            <div className="auth-right">
+                <div className="form-box">
+                    <form onSubmit={handleSubmit} noValidate>
+                        <h1>Change Password</h1>
+
+                        <div
+                            style={{
+                                background: "#e0e7ff",
+                                color: "#01337a",
+                                borderRadius: "8px",
+                                padding: "12px 18px",
+                                marginBottom: "22px",
+                                marginTop: '40px',
+                                fontWeight: 700,
+                                fontSize: "1.13rem",
+                                textAlign: "center",
+                                border: "1.5px solid #2563eb77",
+                                letterSpacing: ".3px"
+                            }}
+                        >
+                            Please change password before proceeding
+                        </div>
+
+
+                        <div className="input-box" style={{position: "relative" , marginTop: '50px'}}>
+                            <input type="text" required value={user.email} disabled={true}/>
+                        </div>
+
+
+                        <div className="input-box" style={{position: "relative" , marginTop: '20px'}}>
                             <input
                                 type={showPwd.old ? "text" : "password"}
                                 placeholder="Old Password"
@@ -100,9 +122,7 @@ export default function ChangePassword() {
                                 onChange={(e) => handleChange("oldPassword", e.target.value)}
                                 disabled={isLoading}
                             />
-                            <span className="input-icon" role="img" aria-label="lock">
-              🔑
-            </span>
+                            <span className="input-icon" role="img" aria-label="lock">🔑</span>
                             <button
                                 type="button"
                                 className="show-btn"
@@ -113,7 +133,7 @@ export default function ChangePassword() {
                                     position: "absolute",
                                     right: 10,
                                     top: "50%",
-                                    transform: "translateY(-50%)",
+                                    transform: "translateY(-50%)"
                                 }}
                             >
                                 {showPwd.old ? "Hide" : "Show"}
@@ -133,9 +153,7 @@ export default function ChangePassword() {
                                 onChange={(e) => handleChange("newPassword", e.target.value)}
                                 disabled={isLoading}
                             />
-                            <span className="input-icon" role="img" aria-label="lock">
-              🔒
-            </span>
+                            <span className="input-icon" role="img" aria-label="lock">🔒</span>
                             <button
                                 type="button"
                                 className="show-btn"
@@ -146,7 +164,7 @@ export default function ChangePassword() {
                                     position: "absolute",
                                     right: 10,
                                     top: "50%",
-                                    transform: "translateY(-50%)",
+                                    transform: "translateY(-50%)"
                                 }}
                             >
                                 {showPwd.new ? "Hide" : "Show"}
@@ -156,6 +174,7 @@ export default function ChangePassword() {
                             <div className="error-msg">{errors.newPassword}</div>
                         )}
 
+
                         <button
                             type="submit"
                             className="btn main-btn"
@@ -163,8 +182,10 @@ export default function ChangePassword() {
                         >
                             {isLoading ? "UPDATING..." : "UPDATE PASSWORD"}
                         </button>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
-);
+
+    );
 }
