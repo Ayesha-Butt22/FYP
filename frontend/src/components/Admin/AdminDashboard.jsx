@@ -12,10 +12,9 @@ import AdminOverview from "./AdminOverview";
 import ManageSupervisors from "./ManageSupervisors";
 import ManageAdmin from "./ManageAmin"; 
 import ManageCoordinators from "./ManageCoordinators";
-// import ApprovedStudents from "./ApprovedStudents";
+ import ApprovedStudents from "./ApprovedStudents";
 
-// Dummy placeholder ONLY for ApprovedStudents (until you build the file)
-const ApprovedStudents = () => <div style={{padding:30}}>Approved Students Component</div>;
+
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
