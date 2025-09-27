@@ -10,14 +10,11 @@ import {
 import capImg from "../../assets/cap.png";
 import AdminOverview from "./AdminOverview";
 import ManageSupervisors from "./ManageSupervisors";
-// Placeholder imports for new tabs
-// import ManageAdmin from "./ManageAdmin";
-// import ManageCoordinators from "./ManageCoordinators";
+import ManageAdmin from "./ManageAmin"; 
+import ManageCoordinators from "./ManageCoordinators";
 // import ApprovedStudents from "./ApprovedStudents";
 
-// Dummy placeholder components for demonstration
-const ManageAdmin = () => <div style={{padding:30}}>Manage Admin Component</div>;
-const ManageCoordinators = () => <div style={{padding:30}}>Manage Project Coordinators Component</div>;
+// Dummy placeholder ONLY for ApprovedStudents (until you build the file)
 const ApprovedStudents = () => <div style={{padding:30}}>Approved Students Component</div>;
 
 const menu = [
