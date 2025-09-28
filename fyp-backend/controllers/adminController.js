@@ -63,6 +63,26 @@ exports.getCoordinators = async (req, res) => {
   }
 };
 
+exports.getAdmins = async (req, res) => {
+  try {
+    const list = await User.find({ role: 'admin' }).select('-password');
+    return res.json(list);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getStudents = async (req, res) => {
+  try {
+    const list = await User.find({ role: 'student' }).select('-password');
+    return res.json(list);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+
+
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
   try {

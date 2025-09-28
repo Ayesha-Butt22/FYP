@@ -65,10 +65,9 @@ export default function ManageAdmin() {
     setEditIndex(null);
   };
 
-  // Add/Edit handler
   const handleSubmit = (e) => {
     e.preventDefault();
-    const errors = validateForm(formData, sideFormMode === "add"); // Only require password for ADD
+    const errors = validateForm(formData, sideFormMode === "add");
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) {
       return;
@@ -82,7 +81,7 @@ export default function ManageAdmin() {
 
   const handleEdit = (row, idx) => {
     setEditIndex(idx);
-    setFormData({...row, Password: ""}); // Don't show password in edit form
+    setFormData({...row, Password: ""});
     setFormErrors({});
     setSideFormMode('edit');
   };

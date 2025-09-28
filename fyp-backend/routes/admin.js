@@ -29,6 +29,8 @@ router.post(
 
 router.get('/supervisors', protect, isAdmin, adminController.getSupervisors);
 router.get('/coordinators', protect, isAdmin, adminController.getCoordinators);
+router.get('/alladmins', protect, isAdmin, adminController.getAdmins);
+router.get('/students', protect, isAdmin, adminController.getStudents);
 
 router.get('/all', protect, isAdmin, adminController.getAllUsers);
 

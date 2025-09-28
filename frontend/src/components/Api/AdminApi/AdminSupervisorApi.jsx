@@ -43,6 +43,13 @@ class AdminSupervisorApi {
         return await this.makeAPICall("admin/coordinators", {}, { method: "GET" });
     }
 
+    async getAdmins() {
+        return await this.makeAPICall("admin/alladmins", {}, { method: "GET" });
+    }
+
+    async getStudents() {
+        return await this.makeAPICall("admin/students", {}, { method: "GET" });
+    }
     async getAllUser() {
         return await  this.makeAPICall("admin/all" , {} , { method: "GET"})
     }
