@@ -34,6 +34,8 @@ router.get('/coordinators', protect, isAdmin, adminController.getCoordinators);
 // GET ADMINS/SUPERVISORS (for other modules)
 router.get('/alladmins', protect, isAdmin, adminController.getAdmins);
 router.get('/supervisors', protect, isAdmin, adminController.getSupervisors);
+router.get('/students', protect, isAdmin, adminController.getAllStudents);
+router.post('/approve-students', protect, isAdmin, adminController.approveStudent);
 
 // GET ALL USERS
 router.get('/all', protect, isAdmin, adminController.getAllUsers);

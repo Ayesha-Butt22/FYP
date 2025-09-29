@@ -74,6 +74,28 @@ exports.getSupervisors = async (req, res) => {
   }
 };
 
+exports.getAllStudents = async (req, res) => {
+  try {
+    const students = await User.find({ role: "student" }).select('-password');
+    res.json(students);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.approveStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const student = await User.findById(id);
+    if (!student) return res.status(404).json({ error: "Student not found" });
+    student.IsApproved = true;
+    await student.save();
+    res.json({ message: "Student approved!", student });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
   try {
