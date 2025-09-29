@@ -1,6 +1,6 @@
 const API_BASE_URL = "http://localhost:5000/api";
 
-class AdminSupervisorApi {
+class AdminApis {
     async makeAPICall(endpoint, payload = {}, options = {}) {
         try {
             const token = localStorage.getItem("token");
@@ -72,6 +72,9 @@ class AdminSupervisorApi {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
 
+
+
+
     // --- Utility ---
     async getAllUsers() {
         return await this.makeAPICall("admin/all", {}, { method: "GET" });
@@ -81,5 +84,5 @@ class AdminSupervisorApi {
     }
 }
 
-export const adminSupervisorApi = new AdminSupervisorApi();
+export const adminSupervisorApi = new AdminApis();
 export default adminSupervisorApi;

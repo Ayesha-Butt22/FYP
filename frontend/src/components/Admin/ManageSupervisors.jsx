@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useCallback} from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable";
-import adminSupervisorApi from "../Api/AdminApi/AdminSupervisorApi.jsx";
+import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
 import {DropdownSingleSelect , DropdownMultiSelect} from "./DropDowns.jsx";
