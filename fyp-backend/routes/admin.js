@@ -31,10 +31,16 @@ router.post(
 // GET COORDINATORS
 router.get('/coordinators', protect, isAdmin, adminController.getCoordinators);
 
-// GET ADMINS/SUPERVISORS (for other modules)
+// GET ADMINS
 router.get('/alladmins', protect, isAdmin, adminController.getAdmins);
+
+// GET SUPERVISORS
 router.get('/supervisors', protect, isAdmin, adminController.getSupervisors);
+
+// GET ALL STUDENTS for admin
 router.get('/students', protect, isAdmin, adminController.getAllStudents);
+
+// APPROVE STUDENT (admin action, POST with id in body)
 router.post('/approve-students', protect, isAdmin, adminController.approveStudent);
 
 // GET ALL USERS

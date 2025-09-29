@@ -31,6 +31,14 @@ class AdminApis {
         }
     }
 
+    // --- Students for admin ---
+    async getStudents() {
+        return await this.makeAPICall("admin/students", {}, { method: "GET" });
+    }
+    async approveStudent(id) {
+        return await this.makeAPICall("admin/approve-students", { id }, { method: "POST" });
+    }
+
     // --- COORDINATOR CRUD ---
     async createCoordinator(coordinatorData) {
         return await this.makeAPICall("admin/create", { ...coordinatorData, role: "coordinator" }, { method: "POST" });
@@ -45,7 +53,7 @@ class AdminApis {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
 
-    // --- Other roles (admin/supervisor) for convenience ---
+    // --- Admin CRUD ---
     async createAdmin(adminData) {
         return await this.makeAPICall("admin/create", { ...adminData, role: "admin" }, { method: "POST" });
     }
@@ -59,6 +67,7 @@ class AdminApis {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
 
+    // --- Supervisor CRUD ---
     async createSupervisor(supervisorData) {
         return await this.makeAPICall("admin/create", { ...supervisorData, role: "supervisor" }, { method: "POST" });
     }
@@ -78,9 +87,6 @@ class AdminApis {
     // --- Utility ---
     async getAllUsers() {
         return await this.makeAPICall("admin/all", {}, { method: "GET" });
-    }
-    async getStudents() {
-        return await this.makeAPICall("admin/students", {}, { method: "GET" });
     }
 }
 
