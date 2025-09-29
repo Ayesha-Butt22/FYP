@@ -31,7 +31,21 @@ class AdminSupervisorApi {
         }
     }
 
-    // --- ADMIN CRUD ---
+    // --- COORDINATOR CRUD ---
+    async createCoordinator(coordinatorData) {
+        return await this.makeAPICall("admin/create", { ...coordinatorData, role: "coordinator" }, { method: "POST" });
+    }
+    async getCoordinators() {
+        return await this.makeAPICall("admin/coordinators", {}, { method: "GET" });
+    }
+    async updateCoordinator(id, updates) {
+        return await this.makeAPICall(`admin/${id}`, { ...updates, role: "coordinator" }, { method: "PUT" });
+    }
+    async deleteCoordinator(id) {
+        return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
+    }
+
+    // --- Other roles (admin/supervisor) for convenience ---
     async createAdmin(adminData) {
         return await this.makeAPICall("admin/create", { ...adminData, role: "admin" }, { method: "POST" });
     }
@@ -45,7 +59,6 @@ class AdminSupervisorApi {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
 
-    // --- SUPERVISOR CRUD ---
     async createSupervisor(supervisorData) {
         return await this.makeAPICall("admin/create", { ...supervisorData, role: "supervisor" }, { method: "POST" });
     }
@@ -56,20 +69,6 @@ class AdminSupervisorApi {
         return await this.makeAPICall(`admin/${id}`, { ...updates, role: "supervisor" }, { method: "PUT" });
     }
     async deleteSupervisor(id) {
-        return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
-    }
-
-    // --- COORDINATOR CRUD (if needed) ---
-    async createCoordinator(coordinatorData) {
-        return await this.makeAPICall("admin/create", { ...coordinatorData, role: "coordinator" }, { method: "POST" });
-    }
-    async getCoordinators() {
-        return await this.makeAPICall("admin/coordinators", {}, { method: "GET" });
-    }
-    async updateCoordinator(id, updates) {
-        return await this.makeAPICall(`admin/${id}`, { ...updates, role: "coordinator" }, { method: "PUT" });
-    }
-    async deleteCoordinator(id) {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
 

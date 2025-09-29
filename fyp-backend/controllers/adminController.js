@@ -44,16 +44,6 @@ exports.createUser = async (req, res) => {
   }
 };
 
-// GET SUPERVISORS
-exports.getSupervisors = async (req, res) => {
-  try {
-    const list = await User.find({ role: 'supervisor' }).select('-password');
-    return res.json(list);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-};
-
 // GET COORDINATORS
 exports.getCoordinators = async (req, res) => {
   try {
@@ -64,7 +54,7 @@ exports.getCoordinators = async (req, res) => {
   }
 };
 
-// GET ADMINS
+// GET ADMINS (for other modules)
 exports.getAdmins = async (req, res) => {
   try {
     const list = await User.find({ role: 'admin' }).select('-password');
@@ -74,10 +64,10 @@ exports.getAdmins = async (req, res) => {
   }
 };
 
-// GET STUDENTS
-exports.getStudents = async (req, res) => {
+// GET SUPERVISORS (for other modules)
+exports.getSupervisors = async (req, res) => {
   try {
-    const list = await User.find({ role: 'student' }).select('-password');
+    const list = await User.find({ role: 'supervisor' }).select('-password');
     return res.json(list);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -94,7 +84,7 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// UPDATE USER (Admin, Supervisor, Coordinator)
+// UPDATE USER
 exports.updateUser = async (req, res) => {
   try {
     const { name, email, department, specialization, password, availableSlots, bookedSlots } = req.body;
@@ -137,26 +127,6 @@ exports.deleteUser = async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
     await user.deleteOne();
     return res.json({ message: "User deleted successfully" });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-};
-
-// RESET PASSWORD BY EMAIL
-exports.resetPasswordByEmail = async (req, res) => {
-  try {
-    const { email, newPassword } = req.body;
-    if (!email || !newPassword) return res.status(400).json({ error: "email and newPassword required" });
-
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    user.password = await bcrypt.hash(newPassword, 10);
-    user.mustChangePassword = true;
-    user.first_login = true;
-
-    await user.save();
-    return res.json({ message: "Password reset successfully for user" });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

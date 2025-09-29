@@ -28,17 +28,12 @@ router.post(
     adminController.createUser
 );
 
-// GET SUPERVISORS
-router.get('/supervisors', protect, isAdmin, adminController.getSupervisors);
-
 // GET COORDINATORS
 router.get('/coordinators', protect, isAdmin, adminController.getCoordinators);
 
-// GET ALL ADMINS
+// GET ADMINS/SUPERVISORS (for other modules)
 router.get('/alladmins', protect, isAdmin, adminController.getAdmins);
-
-// GET STUDENTS
-router.get('/students', protect, isAdmin, adminController.getStudents);
+router.get('/supervisors', protect, isAdmin, adminController.getSupervisors);
 
 // GET ALL USERS
 router.get('/all', protect, isAdmin, adminController.getAllUsers);
@@ -57,15 +52,5 @@ router.put(
 
 // DELETE USER
 router.delete('/:id', protect, isAdmin, adminController.deleteUser);
-
-// RESET PASSWORD BY EMAIL
-router.post(
-    '/reset-password',
-    protect,
-    isAdmin,
-    [body('email').isEmail().withMessage('Valid email is required')],
-    validate,
-    adminController.resetPasswordByEmail
-);
 
 module.exports = router;
