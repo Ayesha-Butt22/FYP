@@ -74,6 +74,7 @@ exports.getSupervisors = async (req, res) => {
   }
 };
 
+// GET ALL STUDENTS (for admin)
 exports.getAllStudents = async (req, res) => {
   try {
     const students = await User.find({ role: "student" }).select('-password');
@@ -83,9 +84,11 @@ exports.getAllStudents = async (req, res) => {
   }
 };
 
+// APPROVE STUDENT (admin action)
 exports.approveStudent = async (req, res) => {
   try {
-    const { id } = req.params;
+    // If using POST, student id should come in body
+    const { id } = req.body;
     const student = await User.findById(id);
     if (!student) return res.status(404).json({ error: "Student not found" });
     student.IsApproved = true;
