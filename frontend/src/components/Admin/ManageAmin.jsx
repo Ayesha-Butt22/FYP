@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable";
+import adminSupervisorApi from "../Api/AdminApi/AdminSupervisorApi.jsx";
 import "../Admin/Modal&Button.css";
+import { toastService } from '../ToastService/ToastService.jsx';
 
 // --- Reusable input for form fields ---
 function FormInput({ label, error, ...props }) {
@@ -15,18 +17,6 @@ function FormInput({ label, error, ...props }) {
 }
 
 const headers = ["Name", "Email"];
-const initialRows = [
-  {
-    Name: "System Admin",
-    Email: "admin@riphah.edu.pk",
-    Password: "admin123"
-  },
-  {
-    Name: "Ayesha Butt",
-    Email: "ayesha.butt@riphah.edu.pk",
-    Password: "ayesha321"
-  }
-];
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -48,7 +38,8 @@ const validateForm = (data, showPassword) => {
 };
 
 export default function ManageAdmin() {
-  const [rows, setRows] = useState(initialRows);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [sideFormMode, setSideFormMode] = useState(null); // 'add' or 'edit'
   const [editIndex, setEditIndex] = useState(null);
   const [formData, setFormData] = useState({
@@ -58,6 +49,28 @@ export default function ManageAdmin() {
   });
   const [formErrors, setFormErrors] = useState({});
 
+  // Fetch admins from backend
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      setLoading(true);
+      const res = await adminSupervisorApi.getAdmins();
+      if (res.success) {
+        // API returns array of admin users
+        const admins = res.data.map(adm => ({
+          ID: adm._id,
+          Name: adm.name,
+          Email: adm.email
+        }));
+        setRows(admins);
+      } else {
+        setRows([]);
+        toastService.error("Failed to fetch admins. Please try again.");
+      }
+      setLoading(false);
+    };
+    fetchAdmins();
+  }, []);
+
   const resetForm = () => {
     setFormData({ Name: "", Email: "", Password: "" });
     setFormErrors({});
@@ -65,51 +78,96 @@ export default function ManageAdmin() {
     setEditIndex(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validateForm(formData, sideFormMode === "add");
     setFormErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-    if (sideFormMode === 'edit') {
-      handleUpdate();
-    } else {
-      handleAdd();
+    if (Object.keys(errors).length > 0) return;
+
+    try {
+      if (sideFormMode === 'edit') {
+        await handleUpdate();
+      } else {
+        await handleAdd();
+      }
+    } catch (err) {
+      toastService.error('An error occurred. Please try again.');
     }
   };
 
   const handleEdit = (row, idx) => {
     setEditIndex(idx);
-    setFormData({...row, Password: ""});
+    setFormData({ Name: row.Name, Email: row.Email, Password: "" });
     setFormErrors({});
     setSideFormMode('edit');
   };
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
-  const handleUpdate = () => {
-    const updatedRows = [...rows];
-    updatedRows[editIndex] = { ...rows[editIndex], Name: formData.Name, Email: formData.Email };
-    setRows(updatedRows);
-    resetForm();
+
+  const handleUpdate = async () => {
+    setLoading(true);
+    const id = rows[editIndex].ID;
+    const payload = {
+      name: formData.Name,
+      email: formData.Email,
+      ...(formData.Password ? { password: formData.Password } : {})
+    };
+    const res = await adminSupervisorApi.updateAdmin(id, payload);
+    setLoading(false);
+    if (res.success) {
+      toastService.success('Admin updated successfully!');
+      resetForm();
+      // refetch list
+      const refreshed = await adminSupervisorApi.getAdmins();
+      setRows(refreshed.data.map(adm => ({ ID: adm._id, Name: adm.name, Email: adm.email })));
+    } else {
+      toastService.error("Update failed: " + (res.error || res.data?.message || 'Unknown error'));
+    }
   };
-  const handleAdd = () => {
-    setRows((prevRows) => [...prevRows, formData]);
-    resetForm();
+
+  const handleAdd = async () => {
+    setLoading(true);
+    const payload = {
+      name: formData.Name,
+      email: formData.Email,
+      password: formData.Password
+    };
+    const res = await adminSupervisorApi.createAdmin(payload);
+    setLoading(false);
+    if (res.success) {
+      toastService.success('Admin added successfully!');
+      resetForm();
+      // refetch list
+      const refreshed = await adminSupervisorApi.getAdmins();
+      setRows(refreshed.data.map(adm => ({ ID: adm._id, Name: adm.name, Email: adm.email })));
+    } else {
+      toastService.error("Add failed: " + (res.error || res.data?.message || 'Unknown error'));
+    }
   };
-  const handleDelete = (idx) => {
+
+  const handleDelete = async (idx) => {
     if (!window.confirm("Are you sure you want to delete this admin?")) return;
-    setRows((prevRows) => prevRows.filter((_, i) => i !== idx));
-    if (editIndex === idx) resetForm();
+    setLoading(true);
+    const id = rows[idx].ID;
+    const res = await adminSupervisorApi.deleteAdmin(id);
+    setLoading(false);
+    if (res.success) {
+      toastService.success('Admin deleted successfully!');
+      resetForm();
+      // refetch list
+      const refreshed = await adminSupervisorApi.getAdmins();
+      setRows(refreshed.data.map(adm => ({ ID: adm._id, Name: adm.name, Email: adm.email })));
+    } else {
+      toastService.error("Delete failed: " + (res.error || res.data?.message || 'Unknown error'));
+    }
   };
+
   const openAddForm = () => {
     resetForm();
     setSideFormMode('add');
@@ -131,31 +189,35 @@ export default function ManageAdmin() {
             + Add Admin
           </button>
         </div>
-        <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-          <AppTable
-            headers={headers}
-            rows={rows.map(({ Name, Email }) => ({ Name, Email }))}
-            renderActions={(row, i) => (
-              <>
-                <button
-                  className="table-action-btn"
-                  onClick={() => handleEdit(rows[i], i)}
-                  disabled={sideFormMode && editIndex === i}
-                >
-                  {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
-                </button>
-                <button
-                  className="table-action-btn"
-                  style={{ background: "#f43f5e" }}
-                  onClick={() => handleDelete(i)}
-                  disabled={sideFormMode}
-                >
-                  Delete
-                </button>
-              </>
-            )}
-          />
-        </div>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: 20 }}>Loading admins...</div>
+        ) : (
+          <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+            <AppTable
+              headers={headers}
+              rows={rows.map(({ Name, Email }) => ({ Name, Email }))}
+              renderActions={(row, i) => (
+                <>
+                  <button
+                    className="table-action-btn"
+                    onClick={() => handleEdit(rows[i], i)}
+                    disabled={sideFormMode && editIndex === i}
+                  >
+                    {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
+                  </button>
+                  <button
+                    className="table-action-btn"
+                    style={{ background: "#f43f5e" }}
+                    onClick={() => handleDelete(i)}
+                    disabled={sideFormMode}
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
+            />
+          </div>
+        )}
       </div>
       {sideFormMode && (
         <div style={{

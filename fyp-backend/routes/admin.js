@@ -13,6 +13,7 @@ const validate = (req, res, next) => {
     next();
 };
 
+// CREATE USER (Admin, Supervisor, Coordinator)
 router.post(
     '/create',
     protect,
@@ -27,13 +28,22 @@ router.post(
     adminController.createUser
 );
 
+// GET SUPERVISORS
 router.get('/supervisors', protect, isAdmin, adminController.getSupervisors);
+
+// GET COORDINATORS
 router.get('/coordinators', protect, isAdmin, adminController.getCoordinators);
+
+// GET ALL ADMINS
 router.get('/alladmins', protect, isAdmin, adminController.getAdmins);
+
+// GET STUDENTS
 router.get('/students', protect, isAdmin, adminController.getStudents);
 
+// GET ALL USERS
 router.get('/all', protect, isAdmin, adminController.getAllUsers);
 
+// UPDATE USER (Admin, Supervisor, Coordinator)
 router.put(
     '/:id',
     protect,
@@ -44,9 +54,11 @@ router.put(
     validate,
     adminController.updateUser
 );
+
+// DELETE USER
 router.delete('/:id', protect, isAdmin, adminController.deleteUser);
 
-
+// RESET PASSWORD BY EMAIL
 router.post(
     '/reset-password',
     protect,
