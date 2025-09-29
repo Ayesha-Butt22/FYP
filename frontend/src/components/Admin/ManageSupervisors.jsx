@@ -194,7 +194,7 @@ export default function ManageSupervisors() {
       bookedSlots: updated["Booked Slots"],
       role: 'supervisor',
     };
-    const res = await adminSupervisorApi.updateUser(id, payload);
+    const res = await adminSupervisorApi.updateSupervisor(id, payload);
     if (res.success) {
       const updatedRows = [...rows];
       updatedRows[editIndex] = { ...rows[editIndex], ...updated };
@@ -220,7 +220,7 @@ export default function ManageSupervisors() {
       bookedSlots: formData.Booked_Slots,
     };
 
-    const res = await adminSupervisorApi.createUser(payload);
+    const res = await adminSupervisorApi.createSupervisor(payload);
     if (res.success) {
       const newSupervisor = {
         ID: res.data.id || `SUP${rows.length + 1}`,
@@ -245,7 +245,7 @@ export default function ManageSupervisors() {
       return;
     }
     const id = rows[idx].ID;
-    const res = await adminSupervisorApi.deleteUser(id);
+    const res = await adminSupervisorApi.deleteSupervisor(id);
     if (res.success) {
       setRows((prev) => prev.filter((_, i) => i !== idx));
       if (editIndex === idx) resetForm();
