@@ -4,6 +4,7 @@ import AppTable from "./AppTable";
 import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
+import {Confirm} from "../ConfirmService/ConfirmService.jsx";
 
 // --- Reusable input for form fields ---
 function FormInput({ label, error, ...props }) {
@@ -150,7 +151,6 @@ export default function ManageCoordinators() {
     if (res.success) {
       toastService.success('Coordinator added successfully!');
       resetForm();
-      // refetch list
       const refreshed = await adminSupervisorApi.getCoordinators();
       setRows(refreshed.data.map(coord => ({
         ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || ""
@@ -161,7 +161,10 @@ export default function ManageCoordinators() {
   };
 
   const handleDelete = async (idx) => {
-    if (!window.confirm("Are you sure you want to delete this coordinator?")) return;
+    const confirmed = await Confirm("Are you sure you want to delete this coordinator??");
+    if (!confirmed) {
+      return;
+    }
     setLoading(true);
     const id = rows[idx].ID;
     const res = await adminSupervisorApi.deleteCoordinator(id);

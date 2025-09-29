@@ -40,7 +40,7 @@ export default function AdminDashboard() {
   };
 
   const tabComponents = {
-    "Overview": <AdminOverview />,
+    "Overview": <AdminOverview onTabChange={setActiveTab} />,
     "Manage Admin": <ManageAdmin />,
     "Manage Supervisors": <ManageSupervisors />,
     "Manage Project Coordinators": <ManageCoordinators />,

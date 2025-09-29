@@ -5,6 +5,7 @@ import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
 import {DropdownSingleSelect , DropdownMultiSelect} from "./DropDowns.jsx";
+import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 
 const ALL_SPECIALITIES = [
   "AI", "ML", "Web", "Cloud", "Data Science", "Networks", "Security", "IoT", "Embedded", "Software Engineering"
@@ -241,7 +242,9 @@ export default function ManageSupervisors() {
     }
   };
   const handleDelete = async (idx) => {
-    if (!window.confirm('Are you sure you want to delete this supervisor?')) {
+
+    const confirmed = await Confirm("Are you sure you want to delete this supervisor??");
+    if (!confirmed) {
       return;
     }
     const id = rows[idx].ID;
