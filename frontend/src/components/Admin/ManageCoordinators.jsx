@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable";
+import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
+import { toastService } from '../ToastService/ToastService.jsx';
+import {Confirm} from "../ConfirmService/ConfirmService.jsx";
 
 // --- Reusable input for form fields ---
 function FormInput({ label, error, ...props }) {
@@ -15,20 +18,6 @@ function FormInput({ label, error, ...props }) {
 }
 
 const headers = ["Name", "Email", "Department"];
-const initialRows = [
-  {
-    Name: "Sana Fatima",
-    Email: "sana.fatima@riphah.edu.pk",
-    Department: "SE",
-    Password: "sana432"
-  },
-  {
-    Name: "Imran Akram",
-    Email: "imran.akram@riphah.edu.pk",
-    Department: "CS",
-    Password: "imran987"
-  }
-];
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -51,7 +40,8 @@ const validateForm = (data, showPassword) => {
 };
 
 export default function ManageCoordinators() {
-  const [rows, setRows] = useState(initialRows);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [sideFormMode, setSideFormMode] = useState(null); // 'add' or 'edit'
   const [editIndex, setEditIndex] = useState(null);
   const [formData, setFormData] = useState({
@@ -62,6 +52,28 @@ export default function ManageCoordinators() {
   });
   const [formErrors, setFormErrors] = useState({});
 
+  // Fetch coordinators from backend
+  useEffect(() => {
+    const fetchCoordinators = async () => {
+      setLoading(true);
+      const res = await adminSupervisorApi.getCoordinators();
+      if (res.success) {
+        const coordinators = res.data.map(coord => ({
+          ID: coord._id,
+          Name: coord.name,
+          Email: coord.email,
+          Department: coord.department || ""
+        }));
+        setRows(coordinators);
+      } else {
+        setRows([]);
+        toastService.error("Failed to fetch coordinators. Please try again.");
+      }
+      setLoading(false);
+    };
+    fetchCoordinators();
+  }, []);
+
   const resetForm = () => {
     setFormData({ Name: "", Email: "", Department: "", Password: "" });
     setFormErrors({});
@@ -70,51 +82,106 @@ export default function ManageCoordinators() {
   };
 
   // Add/Edit handler
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validateForm(formData, sideFormMode === 'add');
     setFormErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-    if (sideFormMode === 'edit') {
-      handleUpdate();
-    } else {
-      handleAdd();
+    if (Object.keys(errors).length > 0) return;
+
+    try {
+      if (sideFormMode === 'edit') {
+        await handleUpdate();
+      } else {
+        await handleAdd();
+      }
+    } catch (err) {
+      toastService.error('An error occurred. Please try again.');
     }
   };
 
   const handleEdit = (row, idx) => {
     setEditIndex(idx);
-    setFormData({...row, Password: ""}); // don't show password in edit form
+    setFormData({ Name: row.Name, Email: row.Email, Department: row.Department, Password: "" });
     setFormErrors({});
     setSideFormMode('edit');
   };
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
-  const handleUpdate = () => {
-    const updatedRows = [...rows];
-    updatedRows[editIndex] = { ...rows[editIndex], Name: formData.Name, Email: formData.Email, Department: formData.Department };
-    setRows(updatedRows);
-    resetForm();
+
+  const handleUpdate = async () => {
+    setLoading(true);
+    const id = rows[editIndex].ID;
+    const payload = {
+      name: formData.Name,
+      email: formData.Email,
+      department: formData.Department,
+      ...(formData.Password ? { password: formData.Password } : {})
+    };
+    const res = await adminSupervisorApi.updateCoordinator(id, payload);
+    setLoading(false);
+    if (res.success) {
+      toastService.success('Coordinator updated successfully!');
+      resetForm();
+      // refetch list
+      const refreshed = await adminSupervisorApi.getCoordinators();
+      setRows(refreshed.data.map(coord => ({
+        ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || ""
+      })));
+    } else {
+      toastService.error("Update failed: " + (res.error || res.data?.message || 'Unknown error'));
+    }
   };
-  const handleAdd = () => {
-    setRows((prevRows) => [...prevRows, formData]);
-    resetForm();
+
+  const handleAdd = async () => {
+    setLoading(true);
+    const payload = {
+      name: formData.Name,
+      email: formData.Email,
+      password: formData.Password,
+      department: formData.Department
+    };
+    const res = await adminSupervisorApi.createCoordinator(payload);
+    setLoading(false);
+    if (res.success) {
+      toastService.success('Coordinator added successfully!');
+      resetForm();
+      const refreshed = await adminSupervisorApi.getCoordinators();
+      setRows(refreshed.data.map(coord => ({
+        ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || ""
+      })));
+    } else {
+      toastService.error("Add failed: " + (res.error || res.data?.message || 'Unknown error'));
+    }
   };
-  const handleDelete = (idx) => {
-    if (!window.confirm("Are you sure you want to delete this coordinator?")) return;
-    setRows((prevRows) => prevRows.filter((_, i) => i !== idx));
-    if (editIndex === idx) resetForm();
+
+  const handleDelete = async (idx) => {
+    const confirmed = await Confirm("Are you sure you want to delete this coordinator??");
+    if (!confirmed) {
+      return;
+    }
+    setLoading(true);
+    const id = rows[idx].ID;
+    const res = await adminSupervisorApi.deleteCoordinator(id);
+    setLoading(false);
+    if (res.success) {
+      toastService.success('Coordinator deleted successfully!');
+      resetForm();
+      // refetch list
+      const refreshed = await adminSupervisorApi.getCoordinators();
+      setRows(refreshed.data.map(coord => ({
+        ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || ""
+      })));
+    } else {
+      toastService.error("Delete failed: " + (res.error || res.data?.message || 'Unknown error'));
+    }
   };
+
   const openAddForm = () => {
     resetForm();
     setSideFormMode('add');
@@ -136,31 +203,35 @@ export default function ManageCoordinators() {
             + Add Coordinator
           </button>
         </div>
-        <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-          <AppTable
-            headers={headers.filter(h => h !== "Password")}
-            rows={rows.map(({ Name, Email, Department }) => ({ Name, Email, Department }))}
-            renderActions={(row, i) => (
-              <>
-                <button
-                  className="table-action-btn"
-                  onClick={() => handleEdit(rows[i], i)}
-                  disabled={sideFormMode && editIndex === i}
-                >
-                  {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
-                </button>
-                <button
-                  className="table-action-btn"
-                  style={{ background: "#f43f5e" }}
-                  onClick={() => handleDelete(i)}
-                  disabled={sideFormMode}
-                >
-                  Delete
-                </button>
-              </>
-            )}
-          />
-        </div>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: 20 }}>Loading coordinators...</div>
+        ) : (
+          <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+            <AppTable
+              headers={headers}
+              rows={rows.map(({ Name, Email, Department }) => ({ Name, Email, Department }))}
+              renderActions={(row, i) => (
+                <>
+                  <button
+                    className="table-action-btn"
+                    onClick={() => handleEdit(rows[i], i)}
+                    disabled={sideFormMode && editIndex === i}
+                  >
+                    {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
+                  </button>
+                  <button
+                    className="table-action-btn"
+                    style={{ background: "#f43f5e" }}
+                    onClick={() => handleDelete(i)}
+                    disabled={sideFormMode}
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
+            />
+          </div>
+        )}
       </div>
       {sideFormMode && (
         <div style={{

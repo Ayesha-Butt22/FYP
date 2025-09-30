@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable";
-import adminSupervisorApi from "../Api/AdminApi/AdminSupervisorApi.jsx";
+import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
+import {Confirm} from "../ConfirmService/ConfirmService.jsx";
 
 // --- Reusable input for form fields ---
 function FormInput({ label, error, ...props }) {
@@ -152,7 +153,10 @@ export default function ManageAdmin() {
   };
 
   const handleDelete = async (idx) => {
-    if (!window.confirm("Are you sure you want to delete this admin?")) return;
+    const confirmed = await Confirm("Are you sure you want to delete this admin?");
+    if (!confirmed) {
+      return;
+    }
     setLoading(true);
     const id = rows[idx].ID;
     const res = await adminSupervisorApi.deleteAdmin(id);
@@ -160,7 +164,6 @@ export default function ManageAdmin() {
     if (res.success) {
       toastService.success('Admin deleted successfully!');
       resetForm();
-      // refetch list
       const refreshed = await adminSupervisorApi.getAdmins();
       setRows(refreshed.data.map(adm => ({ ID: adm._id, Name: adm.name, Email: adm.email })));
     } else {

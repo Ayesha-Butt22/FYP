@@ -1,10 +1,11 @@
 import React, {useState, useEffect, useCallback} from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable";
-import adminSupervisorApi from "../Api/AdminApi/AdminSupervisorApi.jsx";
+import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
 import {DropdownSingleSelect , DropdownMultiSelect} from "./DropDowns.jsx";
+import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 
 const ALL_SPECIALITIES = [
   "AI", "ML", "Web", "Cloud", "Data Science", "Networks", "Security", "IoT", "Embedded", "Software Engineering"
@@ -194,7 +195,7 @@ export default function ManageSupervisors() {
       bookedSlots: updated["Booked Slots"],
       role: 'supervisor',
     };
-    const res = await adminSupervisorApi.updateUser(id, payload);
+    const res = await adminSupervisorApi.updateSupervisor(id, payload);
     if (res.success) {
       const updatedRows = [...rows];
       updatedRows[editIndex] = { ...rows[editIndex], ...updated };
@@ -220,7 +221,7 @@ export default function ManageSupervisors() {
       bookedSlots: formData.Booked_Slots,
     };
 
-    const res = await adminSupervisorApi.createUser(payload);
+    const res = await adminSupervisorApi.createSupervisor(payload);
     if (res.success) {
       const newSupervisor = {
         ID: res.data.id || `SUP${rows.length + 1}`,
@@ -241,11 +242,13 @@ export default function ManageSupervisors() {
     }
   };
   const handleDelete = async (idx) => {
-    if (!window.confirm('Are you sure you want to delete this supervisor?')) {
+
+    const confirmed = await Confirm("Are you sure you want to delete this supervisor??");
+    if (!confirmed) {
       return;
     }
     const id = rows[idx].ID;
-    const res = await adminSupervisorApi.deleteUser(id);
+    const res = await adminSupervisorApi.deleteSupervisor(id);
     if (res.success) {
       setRows((prev) => prev.filter((_, i) => i !== idx));
       if (editIndex === idx) resetForm();

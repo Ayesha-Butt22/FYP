@@ -1,6 +1,6 @@
 const API_BASE_URL = "http://localhost:5000/api";
 
-class AdminSupervisorApi {
+class AdminApis {
     async makeAPICall(endpoint, payload = {}, options = {}) {
         try {
             const token = localStorage.getItem("token");
@@ -31,35 +31,15 @@ class AdminSupervisorApi {
         }
     }
 
-    // --- ADMIN CRUD ---
-    async createAdmin(adminData) {
-        return await this.makeAPICall("admin/create", { ...adminData, role: "admin" }, { method: "POST" });
+    // --- Students for admin ---
+    async getStudents() {
+        return await this.makeAPICall("admin/students", {}, { method: "GET" });
     }
-    async getAdmins() {
-        return await this.makeAPICall("admin/alladmins", {}, { method: "GET" });
-    }
-    async updateAdmin(id, updates) {
-        return await this.makeAPICall(`admin/${id}`, { ...updates, role: "admin" }, { method: "PUT" });
-    }
-    async deleteAdmin(id) {
-        return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
+    async approveStudent(id) {
+        return await this.makeAPICall("admin/approve-students", { id }, { method: "POST" });
     }
 
-    // --- SUPERVISOR CRUD ---
-    async createSupervisor(supervisorData) {
-        return await this.makeAPICall("admin/create", { ...supervisorData, role: "supervisor" }, { method: "POST" });
-    }
-    async getSupervisors() {
-        return await this.makeAPICall("admin/supervisors", {}, { method: "GET" });
-    }
-    async updateSupervisor(id, updates) {
-        return await this.makeAPICall(`admin/${id}`, { ...updates, role: "supervisor" }, { method: "PUT" });
-    }
-    async deleteSupervisor(id) {
-        return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
-    }
-
-    // --- COORDINATOR CRUD (if needed) ---
+    // --- COORDINATOR CRUD ---
     async createCoordinator(coordinatorData) {
         return await this.makeAPICall("admin/create", { ...coordinatorData, role: "coordinator" }, { method: "POST" });
     }
@@ -73,14 +53,42 @@ class AdminSupervisorApi {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
 
+    // --- Admin CRUD ---
+    async createAdmin(adminData) {
+        return await this.makeAPICall("admin/create", { ...adminData, role: "admin" }, { method: "POST" });
+    }
+    async getAdmins() {
+        return await this.makeAPICall("admin/alladmins", {}, { method: "GET" });
+    }
+    async updateAdmin(id, updates) {
+        return await this.makeAPICall(`admin/${id}`, { ...updates, role: "admin" }, { method: "PUT" });
+    }
+    async deleteAdmin(id) {
+        return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
+    }
+
+    // --- Supervisor CRUD ---
+    async createSupervisor(supervisorData) {
+        return await this.makeAPICall("admin/create", { ...supervisorData, role: "supervisor" }, { method: "POST" });
+    }
+    async getSupervisors() {
+        return await this.makeAPICall("admin/supervisors", {}, { method: "GET" });
+    }
+    async updateSupervisor(id, updates) {
+        return await this.makeAPICall(`admin/${id}`, { ...updates, role: "supervisor" }, { method: "PUT" });
+    }
+    async deleteSupervisor(id) {
+        return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
+    }
+
+
+
+
     // --- Utility ---
     async getAllUsers() {
         return await this.makeAPICall("admin/all", {}, { method: "GET" });
     }
-    async getStudents() {
-        return await this.makeAPICall("admin/students", {}, { method: "GET" });
-    }
 }
 
-export const adminSupervisorApi = new AdminSupervisorApi();
+export const adminSupervisorApi = new AdminApis();
 export default adminSupervisorApi;

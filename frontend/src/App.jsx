@@ -9,6 +9,7 @@ import ToastContainer from "./components/ToastService/ToastContainer.jsx";
 import getUserInfoFromStorage from "./components/Auth/UserInfo.jsx";
 import ProtectedAuthRoute from "./components/Auth/ProtectedAuthRoute.jsx";
 import ChangePassword from "./components/Auth/ChangePassword.jsx";
+import {ConfirmService} from "./components/ConfirmService/ConfirmService.jsx";
 
 function ProtectedRoute({ children, allowedRole }) {
   const user = getUserInfoFromStorage();
@@ -33,6 +34,7 @@ export default function App() {
   return (
     <>
       <ToastContainer />
+        <ConfirmService />
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />

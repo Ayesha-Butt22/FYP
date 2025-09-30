@@ -60,7 +60,9 @@ exports.registerStudent = async (req, res) => {
       department,
       specialization,
       first_login: false,
-      mustChangePassword: false
+      mustChangePassword: false,
+      IsApproved:false,
+
     });
 
     await user.save();
