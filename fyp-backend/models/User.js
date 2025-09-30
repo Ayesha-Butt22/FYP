@@ -13,6 +13,8 @@ const userSchema = new mongoose.Schema({
   bookedSlots: {type: Number , default:0 },
   availableSlots: {type: Number , default:0 },
   IsApproved: {type: Boolean , default: true},
+
+  isGroupMade: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
