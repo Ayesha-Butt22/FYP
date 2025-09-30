@@ -1,19 +1,16 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-
-// 🔐 Protect route (JWT required)
 const protect = async (req, res, next) => {
   try {
     let token;
 
-    // Header check: "Authorization: Bearer <token>"
     if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
+        req.headers.authorization &&
+        req.headers.authorization.startsWith("Bearer")
     ) {
       token = req.headers.authorization.split(" ")[1];
 
-      // Verify token
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // DB se user fetch (password exclude)
@@ -22,7 +19,6 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ error: "User not found" });
       }
 
-      // Attach user object to req
       req.user = user;
       return next();
     }
@@ -34,7 +30,7 @@ const protect = async (req, res, next) => {
   }
 };
 
-// 👨‍💼 Admin-only access
+
 const isAdmin = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     return next();
@@ -42,4 +38,28 @@ const isAdmin = (req, res, next) => {
   return res.status(403).json({ error: "Access denied. Admin only." });
 };
 
-module.exports = { protect, isAdmin };
+
+const isStudent = (req, res, next) => {
+  if (req.user && req.user.role === "student") {
+    return next();
+  }
+  return res.status(403).json({ error: "Access denied. Students only." });
+};
+
+
+const isSupervisor = (req, res, next) => {
+  if (req.user && req.user.role === "supervisor") {
+    return next();
+  }
+  return res.status(403).json({ error: "Access denied. Supervisors only." });
+};
+
+
+const isCoordinator = (req, res, next) => {
+  if (req.user && req.user.role === "coordinator") {
+    return next();
+  }
+  return res.status(403).json({ error: "Access denied. Coordinators only." });
+};
+
+module.exports = { protect, isAdmin, isStudent, isSupervisor, isCoordinator };

@@ -3,10 +3,13 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
+
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 require('dotenv').config();
 
 // MongoDB connect
@@ -17,6 +20,9 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
+
+app.use('/api/groups', require('./routes/group'));       // Group CRUD
+app.use('/api/proposals', require('./routes/proposal'));
 
 // Test route
 app.get('/', (req, res) => res.send('API Running'));

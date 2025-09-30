@@ -2,15 +2,26 @@ import React, { useState } from "react";
 import DashboardLayout from "../DashboardLayout";
 import {
   Dashboard as DashboardIcon,
-  Groups as GroupsIcon
+  Person as PersonIcon,
+  Groups as GroupsIcon,
+  SupervisorAccount as SupervisorAccountIcon,
+  School as SchoolIcon
 } from "@mui/icons-material";
 import capImg from "../../assets/cap.png";
 import AdminOverview from "./AdminOverview";
 import ManageSupervisors from "./ManageSupervisors";
+import ManageAdmin from "./ManageAmin"; 
+import ManageCoordinators from "./ManageCoordinators";
+ import ApprovedStudents from "./ApprovedStudents";
+
+
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
-  { label: "Manage Supervisors", icon: <GroupsIcon /> }
+  { label: "Manage Admin", icon: <PersonIcon /> },
+  { label: "Manage Supervisors", icon: <GroupsIcon /> },
+  { label: "Manage Project Coordinators", icon: <SupervisorAccountIcon /> },
+  { label: "Approved Students", icon: <SchoolIcon /> }
 ];
 
 const adminInfo = {
@@ -29,8 +40,11 @@ export default function AdminDashboard() {
   };
 
   const tabComponents = {
-    "Overview": <AdminOverview />,
-    "Manage Supervisors": <ManageSupervisors />
+    "Overview": <AdminOverview onTabChange={setActiveTab} />,
+    "Manage Admin": <ManageAdmin />,
+    "Manage Supervisors": <ManageSupervisors />,
+    "Manage Project Coordinators": <ManageCoordinators />,
+    "Approved Students": <ApprovedStudents />
   };
 
   return (

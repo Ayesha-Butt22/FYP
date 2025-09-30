@@ -3,7 +3,7 @@ import { FaUsers, FaClipboardCheck, FaCalendarCheck, FaStar, FaArrowRight } from
 import { useNavigate } from "react-router-dom";
 import "./OverviewSupervisor.css";
 
-// Dummy Data
+
 const activities = [
   { type: "proposal", text: "Reviewed Proposal for Group G-101", time: "2 hours ago" },
   { type: "meeting", text: "Scheduled meeting with Group G-102", time: "Yesterday" },
@@ -16,9 +16,9 @@ const progress = [
 ];
 
 export default function OverviewSupervisor({ onTabChange }) {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  return (
+     return (
     <div className="overview-container">
       <div className="welcome-banner">
         <div className="banner-title">Welcome, Supervisor!</div>

@@ -28,7 +28,7 @@ export default function AdminOverview({ onTabChange }) {
           <span style={{ marginLeft: 18 }}>|</span>
           <span style={{ marginLeft: 18 }}>Date: {new Date().toLocaleDateString()}</span>
         </div>
-        <div className="quick-links">
+        <div className="quick-links" style={{ marginTop: 20 }}>
           <button
             className="quick-link-btn"
             onClick={() => onTabChange && onTabChange("Manage Supervisors")}
@@ -37,17 +37,15 @@ export default function AdminOverview({ onTabChange }) {
           </button>
           <button
             className="quick-link-btn"
-            onClick={() => onTabChange && onTabChange("Manage Coordinators")}
-            disabled
+            onClick={() => onTabChange && onTabChange("Manage Project Coordinators")}
           >
             <FaUserTie /> Manage Coordinators <FaArrowRight />
           </button>
           <button
             className="quick-link-btn"
-            onClick={() => onTabChange && onTabChange("Registrations")}
-            disabled
+            onClick={() => onTabChange && onTabChange("Approved Students")}
           >
-            <FaUserPlus /> Registrations <FaArrowRight />
+            <FaUserPlus /> Approve Students <FaArrowRight />
           </button>
         </div>
       </div>

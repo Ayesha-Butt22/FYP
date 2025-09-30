@@ -1,20 +1,15 @@
-//fyp-backend/controllers/authController.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require("../models/User");
+const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Helpers
 const isValidStudentEmail = email => /^[0-9]{5}@students\.riphah\.edu\.pk$/.test(email);
 const isValidOfficialEmail = email => /^[a-zA-Z0-9._]+@riphah\.edu\.pk$/.test(email);
 const isValidSapId = id => /^[0-9]{5}$/.test(id);
-
 const isStrongPassword = password => {
-  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/.test(password)
-    && !/\s/.test(password);
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/.test(password) && !/\s/.test(password);
 };
-
 const commonPasswords = [
   "password", "12345678", "qwerty", "abcdefgh", "student", "riphah",
   "admin", "letmein", "123456789", "123456"
@@ -23,7 +18,7 @@ const commonPasswords = [
 // 🧑‍🎓 Student Registration
 exports.registerStudent = async (req, res) => {
   try {
-    const { email, password, studentId, department, specialization } = req.body;
+    const { name, email, password, studentId, department, specialization } = req.body;
     const role = 'student';
 
     if (!email || !password || !studentId)
@@ -57,20 +52,21 @@ exports.registerStudent = async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
 
     const user = new User({
+      name,
       email,
       password: hashed,
       role,
       studentId,
       department,
       specialization,
-      first_logic: false,
       first_login: false,
-      mustChangePassword: false
+      mustChangePassword: false,
+      IsApproved:false,
+
     });
 
     await user.save();
     return res.status(201).json({ message: 'Registration successful' });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -80,8 +76,7 @@ exports.registerStudent = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
-      return res.status(400).json({ error: "email & password required" });
+    if (!email || !password) return res.status(400).json({ error: "email & password required" });
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: 'User not found' });
@@ -97,38 +92,23 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
-    // If admin-created or first login, force password change
-    if (user.mustChangePassword || user.first_login || user.first_logic) {
-      return res.status(200).json({
-        token,
-        mustChangePassword: true,
-        message: "You must change your password before proceeding.",
-        user: {
-          id: user._id,
-          email: user.email,
-          role: user.role
-        }
-      });
-    }
-
-    // Normal login
     return res.json({
       token,
       user: {
+        name:user.name,
         id: user._id,
         email: user.email,
         role: user.role,
         mustChangePassword: user.mustChangePassword,
-        first_login: user.first_login || user.first_logic
+        first_login: user.first_login
       }
     });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
 
-// 🔄 Change Password (all roles)
+
 exports.changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
@@ -147,11 +127,9 @@ exports.changePassword = async (req, res) => {
     user.password = await bcrypt.hash(newPassword, 10);
     user.mustChangePassword = false;
     user.first_login = false;
-    user.first_logic = false;
 
     await user.save();
     return res.json({ message: "Password updated successfully" });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

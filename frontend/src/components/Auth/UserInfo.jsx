@@ -7,7 +7,7 @@ const getUserInfoFromStorage = () => ({
     email: localStorage.getItem("email") || "",
     department: localStorage.getItem("department") || "",
     studentId: localStorage.getItem("studentId") || "",
-    mustChangePassword: localStorage.getItem("mustChangePassword") === "true",
+    mustChangePassword: localStorage.getItem("mustChangePassword"),
 });
 
 export default getUserInfoFromStorage;
