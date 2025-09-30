@@ -30,6 +30,7 @@ const protect = async (req, res, next) => {
   }
 };
 
+
 const isAdmin = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     return next();
@@ -37,4 +38,28 @@ const isAdmin = (req, res, next) => {
   return res.status(403).json({ error: "Access denied. Admin only." });
 };
 
-module.exports = { protect, isAdmin };
+
+const isStudent = (req, res, next) => {
+  if (req.user && req.user.role === "student") {
+    return next();
+  }
+  return res.status(403).json({ error: "Access denied. Students only." });
+};
+
+
+const isSupervisor = (req, res, next) => {
+  if (req.user && req.user.role === "supervisor") {
+    return next();
+  }
+  return res.status(403).json({ error: "Access denied. Supervisors only." });
+};
+
+
+const isCoordinator = (req, res, next) => {
+  if (req.user && req.user.role === "coordinator") {
+    return next();
+  }
+  return res.status(403).json({ error: "Access denied. Coordinators only." });
+};
+
+module.exports = { protect, isAdmin, isStudent, isSupervisor, isCoordinator };
