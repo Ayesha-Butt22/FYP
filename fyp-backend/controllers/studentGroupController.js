@@ -36,6 +36,15 @@ exports.createGroup = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+exports.getGroup = async (req, res) => {
+  try {
+    const group = await Group.findById(req.params.id);
+    if (!group) return res.status(404).json({ error: "Group not found" });
+    return res.json(group);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
 
 exports.getGroupByEmail = async (req, res) => {
   try {
