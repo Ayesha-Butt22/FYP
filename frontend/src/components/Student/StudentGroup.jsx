@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import {
   Button,
@@ -23,7 +23,7 @@ import {
 import { toastService } from "../ToastService/ToastService";
 import DashboardSectionHeader from "../Student/DashboardSectionHeader"; 
 import "./StudentGroup.css";
-import { studentGroupApi } from "../Api/StudentApi/StudentGroupApi"; 
+import { studentGroupApi } from "../Api/StudentApi/StudentGroupApi"; // <-- Corrected import
 
 const sapidToName = {
   "48288": "Ayesha Butt",
@@ -33,7 +33,7 @@ const sapidToName = {
 
 const getName = (sapid) => sapidToName[sapid] || "Name not found";
 const sapidToEmail = (sapid) => sapid ? `${sapid}@students.riphah.edu.pk` : "";
-const CURRENT_USER_SAPID = "48288"; // Simulate logged in user SAPID
+const CURRENT_USER_SAPID = "48288"; // Replace with actual logged-in user's SAP ID
 
 export default function StudentGroup() {
   const [group, setGroup] = useState(null);
@@ -52,10 +52,37 @@ export default function StudentGroup() {
   ]);
   const [error, setError] = useState("");
 
+  // ---- useEffect to check if user already has group ----
+  useEffect(() => {
+    const checkGroup = async () => {
+      try {
+        const res = await studentGroupApi.getGroupByEmail(sapidToEmail(CURRENT_USER_SAPID));
+        if (res && res.groupId) {
+          setGroup({
+            members: [
+              { ...res.leader, isLeader: true },
+              ...(res.member2?.sapId ? [{ ...res.member2, isLeader: false }] : []),
+              ...(res.member3?.sapId ? [{ ...res.member3, isLeader: false }] : []),
+            ],
+            leader: res.leader,
+            _id: res._id,
+          });
+        } else {
+          setGroup(null);
+        }
+      } catch (err) {
+        setGroup(null);
+      }
+    };
+    checkGroup();
+    // eslint-disable-next-line
+  }, []);
+
   const handleNumMembersSubmit = (e) => {
     e.preventDefault();
     if (numMembers < 1 || numMembers > 3) {
       setError("Members must be between 1 and 3.");
+      toastService.error("Members must be between 1 and 3.");
       return;
     }
     setError("");
