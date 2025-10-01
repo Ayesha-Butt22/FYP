@@ -48,7 +48,7 @@ exports.getGroup = async (req, res) => {
 
 exports.getGroupByEmail = async (req, res) => {
   try {
-    const { email } = req.params; // email will come from req.params.email
+    const { email } = req.params;
 
     const group = await Group.findOne({
       $or: [
@@ -56,10 +56,39 @@ exports.getGroupByEmail = async (req, res) => {
         { "member2.email": email },
         { "member3.email": email }
       ]
-    });
+    }).lean();
 
     if (!group) return res.status(404).json({ error: "Group not found for this email" });
+
+    const emails = [
+      group.leader?.email,
+      group.member2?.email,
+      group.member3?.email
+    ].filter(Boolean);
+
+    const users = await User.find({ email: { $in: emails } }).select("email name");
+
+    const emailNameMap = {};
+    users.forEach(user => {
+      emailNameMap[user.email] = user.name;
+    });
+
+    group.leader = {
+      ...group.leader,
+      name: emailNameMap[group.leader?.email] || "Not found"
+    };
+    group.member2 = {
+      ...group.member2,
+      name: emailNameMap[group.member2?.email] || "Not found"
+    };
+    group.member3 = {
+      ...group.member3,
+      name: emailNameMap[group.member3?.email] || "Not found"
+    };
+
     return res.json(group);
+
+
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
