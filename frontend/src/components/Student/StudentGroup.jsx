@@ -21,10 +21,9 @@ import {
   Stack,
 } from "@mui/material";
 import { toastService } from "../ToastService/ToastService";
-import ToastContainer from "../ToastService/ToastContainer";
 import DashboardSectionHeader from "../Student/DashboardSectionHeader"; 
 import "./StudentGroup.css";
-import { studentGroupApi } from "../Api/StudentApi/StudentGroupApi";
+import { studentGroupApi } from "../Api/StudentApi/StudentGroupApi"; 
 
 const sapidToName = {
   "48288": "Ayesha Butt",
@@ -78,6 +77,7 @@ export default function StudentGroup() {
     for (let i = 0; i < numMembers; ++i) {
       if (!members[i].sapid) {
         setError("All SAP IDs must be filled.");
+        toastService.error("All SAP IDs must be filled.");
         return;
       }
     }
@@ -115,9 +115,11 @@ export default function StudentGroup() {
         toastService.success("Group created successfully!");
       } else {
         setError(res?.error || "Failed to create group.");
+        toastService.error(res?.error || "Failed to create group.");
       }
     } catch (err) {
       setError("Server error. Try again.");
+      toastService.error("Server error. Try again.");
     }
   };
 
@@ -145,7 +147,6 @@ export default function StudentGroup() {
 
   return (
     <Box className="page-container">
-      <ToastContainer />
       <DashboardSectionHeader>My Group</DashboardSectionHeader>
       <div className="section-desc">
         Here you can create your FYP group and add your team members. Once your group is created, you can view all team members and their details here.
