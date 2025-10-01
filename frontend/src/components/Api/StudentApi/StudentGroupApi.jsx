@@ -23,9 +23,10 @@ class StudentGroupApi {
     async createGroup(data) {
         return await this.makeAPICall("/", data, { method: "POST" });
     }
-    async getGroup(id) {
-        return await this.makeAPICall(`/${id}`, {}, { method: "GET" });
-    }
+   async getGroupByEmail(email) {
+    return await this.makeAPICall(`/by-email/${encodeURIComponent(email)}`, {}, { method: "GET" });
+}
+
     async deleteGroup(id) {
         return await this.makeAPICall(`/${id}`, {}, { method: "DELETE" });
     }

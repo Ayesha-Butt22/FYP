@@ -7,5 +7,8 @@ const router = express.Router();
 router.post("/", protect, isStudent, groupController.createGroup);
 router.get("/:id", protect, isStudent, groupController.getGroup);
 router.delete("/:id", protect, isStudent, groupController.deleteGroup);
+router.get("/by-email/:email", protect, isStudent, groupController.getGroupByEmail);
 
 module.exports = router;
+
+

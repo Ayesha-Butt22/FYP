@@ -37,10 +37,19 @@ exports.createGroup = async (req, res) => {
   }
 };
 
-exports.getGroup = async (req, res) => {
+exports.getGroupByEmail = async (req, res) => {
   try {
-    const group = await Group.findById(req.params.id);
-    if (!group) return res.status(404).json({ error: "Group not found" });
+    const { email } = req.params; // email will come from req.params.email
+
+    const group = await Group.findOne({
+      $or: [
+        { "leader.email": email },
+        { "member2.email": email },
+        { "member3.email": email }
+      ]
+    });
+
+    if (!group) return res.status(404).json({ error: "Group not found for this email" });
     return res.json(group);
   } catch (err) {
     return res.status(500).json({ error: err.message });
