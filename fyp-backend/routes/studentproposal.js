@@ -1,6 +1,6 @@
 const express = require("express");
 const { protect, isStudent } = require("../middlewares/authMiddleware");
-const proposalController = require("../controllers/proposalController");
+const proposalController = require("../controllers/studentproposalController");
 
 const router = express.Router();
 

@@ -10,7 +10,7 @@ import {
 import capImg from "../../assets/cap.png";
 import AdminOverview from "./AdminOverview";
 import ManageSupervisors from "./ManageSupervisors";
-import ManageAdmin from "./ManageAmin"; 
+import ManageAdmin from "./ManageAdmin";
 import ManageCoordinators from "./ManageCoordinators";
  import ApprovedStudents from "./ApprovedStudents";
 
