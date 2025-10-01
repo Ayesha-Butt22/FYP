@@ -62,7 +62,7 @@ exports.registerStudent = async (req, res) => {
       first_login: false,
       mustChangePassword: false,
       IsApproved:false,
-
+      isGroupMade: false,
     });
 
     await user.save();
@@ -100,7 +100,9 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
         mustChangePassword: user.mustChangePassword,
-        first_login: user.first_login
+        first_login: user.first_login,
+        studentId: user.studentId ? user.studentId : 0,
+        isGroupMade: user.isGroupMade ? user.isGroupMade : false,
       }
     });
   } catch (err) {

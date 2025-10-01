@@ -9,37 +9,30 @@ import {
   DialogActions,
   Box,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Alert,
   useMediaQuery,
   Stack,
+  CircularProgress
 } from "@mui/material";
 import { toastService } from "../ToastService/ToastService";
-import DashboardSectionHeader from "../Student/DashboardSectionHeader"; 
+import DashboardSectionHeader from "../Student/DashboardSectionHeader";
 import "./StudentGroup.css";
-import { studentGroupApi } from "../Api/StudentApi/StudentGroupApi"; // <-- Corrected import
+import { studentGroupApi } from "../Api/StudentApi/StudentGroupApi";
+import {Confirm} from "../ConfirmService/ConfirmService.jsx";
+import AppTable from "../Admin/AppTable.jsx";
 
-const sapidToName = {
-  "48288": "Ayesha Butt",
-  "12345": "Ali Raza",
-  "67890": "Sara Khan",
-};
 
-const getName = (sapid) => sapidToName[sapid] || "Name not found";
+const CURRENT_USER_EMAIL = localStorage.getItem("email") || "";
+const CURRENT_USER_SAPID = localStorage.getItem("studentId") || "";
+
 const sapidToEmail = (sapid) => sapid ? `${sapid}@students.riphah.edu.pk` : "";
-const CURRENT_USER_SAPID = "48288"; // Replace with actual logged-in user's SAP ID
 
 export default function StudentGroup() {
   const [group, setGroup] = useState(null);
+  const [loading, setLoading] = useState(false);
   const isMobile = useMediaQuery("(max-width:900px)");
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState(1); 
+  const [step, setStep] = useState(1);
   const [numMembers, setNumMembers] = useState(1);
   const [members, setMembers] = useState([
     {
@@ -52,13 +45,14 @@ export default function StudentGroup() {
   ]);
   const [error, setError] = useState("");
 
-  // ---- useEffect to check if user already has group ----
   useEffect(() => {
     const checkGroup = async () => {
+      setLoading(true);
       try {
-        const res = await studentGroupApi.getGroupByEmail(sapidToEmail(CURRENT_USER_SAPID));
+        const res = await studentGroupApi.getGroupByEmail(CURRENT_USER_EMAIL);
         if (res && res.groupId) {
           setGroup({
+            groupId: res.groupId,
             members: [
               { ...res.leader, isLeader: true },
               ...(res.member2?.sapId ? [{ ...res.member2, isLeader: false }] : []),
@@ -72,10 +66,11 @@ export default function StudentGroup() {
         }
       } catch (err) {
         setGroup(null);
+      } finally {
+        setLoading(false);
       }
     };
-    checkGroup();
-    // eslint-disable-next-line
+    if (CURRENT_USER_EMAIL) checkGroup();
   }, []);
 
   const handleNumMembersSubmit = (e) => {
@@ -96,24 +91,22 @@ export default function StudentGroup() {
     setMembers(newMembers);
   };
 
-  // Generate a unique groupId (could use uuid library in production)
   const generateGroupId = () => `group-${Date.now()}`;
 
   const handleCreateGroup = async () => {
     setError("");
     for (let i = 0; i < numMembers; ++i) {
-      if (!members[i].sapid) {
+      if (!members[i].sapid && i !== 0) {
         setError("All SAP IDs must be filled.");
         toastService.error("All SAP IDs must be filled.");
         return;
       }
     }
-
     const groupObj = {
       groupId: generateGroupId(),
       leader: {
         sapId: members[0].sapid,
-        email: members[0].email,
+        email: CURRENT_USER_EMAIL,
       },
       member2: numMembers > 1 ? {
         sapId: members[1].sapid,
@@ -152,14 +145,15 @@ export default function StudentGroup() {
 
   const handleDeleteGroup = async () => {
     if (!group || !group._id) return;
-    if (window.confirm("Are you sure you want to delete this group?")) {
+    const confirmed = await Confirm("Are you sure you want to delete this group?");
+    if (confirmed) {
       const res = await studentGroupApi.deleteGroup(group._id);
       if (res && res.message) {
         setGroup(null);
         setMembers([
           {
-            sapid: CURRENT_USER_SAPID,
-            email: sapidToEmail(CURRENT_USER_SAPID),
+            sapid: "",
+            email: CURRENT_USER_EMAIL,
             isLeader: true,
           },
           { sapid: "", email: "", isLeader: false },
@@ -173,140 +167,135 @@ export default function StudentGroup() {
   };
 
   return (
-    <Box className="page-container">
-      <DashboardSectionHeader>My Group</DashboardSectionHeader>
-      <div className="section-desc">
-        Here you can create your FYP group and add your team members. Once your group is created, you can view all team members and their details here.
-      </div>
+      <Box className="page-container">
+        <DashboardSectionHeader>My Group</DashboardSectionHeader>
+        <div className="section-desc">
+          Here you can create your FYP group and add your team members. Once your group is created, you can view all team members and their details here.
+        </div>
 
-      {/* CREATE GROUP BUTTON */}
-      {!group && (
-        <Box className="create-group-btn-wrap">
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => setOpen(true)}
-            className="create-group-btn"
-            startIcon={<AddIcon sx={{ fontSize: isMobile ? 25 : 35 }} />}
-          >
-            CREATE GROUP
-          </Button>
-        </Box>
-      )}
+        {loading && (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: 4 }}>
+              <CircularProgress />
+            </Box>
+        )}
 
-      {/* GROUP TABLE */}
-      {group && (
-        <Box className="table-outer-wrap">
-          <Box className="group-card">
-            <Typography className="group-title">Group Members</Typography>
-            <TableContainer component={Paper} className="mui-table-container">
-              <Table className="mui-table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell align="center" className="mui-table-head">Role</TableCell>
-                    <TableCell align="center" className="mui-table-head">Name</TableCell>
-                    <TableCell align="center" className="mui-table-head">SAP ID</TableCell>
-                    <TableCell align="center" className="mui-table-head">Email</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {group.members.map((m, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell align="center" className="mui-table-bodycell">{m.isLeader ? "Leader" : `Member ${idx + 1}`}</TableCell>
-                      <TableCell align="center" className="mui-table-bodycell">{getName(m.sapId)}</TableCell>
-                      <TableCell align="center" className="mui-table-bodycell">{m.sapId}</TableCell>
-                      <TableCell align="center" className="mui-table-bodycell">{m.email}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            {group.leader.sapId === CURRENT_USER_SAPID && (
-              <Box className="delete-btn-wrap">
-                <Button
-                  color="error"
+
+        {!loading && !group && (
+            <Box className="create-group-btn-wrap">
+              <Button
                   variant="contained"
-                  className="delete-group-btn"
-                  onClick={handleDeleteGroup}
-                >
-                  DELETE GROUP
-                </Button>
-              </Box>
-            )}
-          </Box>
-        </Box>
-      )}
-
-      {/* GROUP CREATION DIALOG */}
-      <Dialog
-        open={open}
-        onClose={() => { setOpen(false); setStep(1); }}
-        PaperProps={{ className: "dialog-paper" }}
-      >
-        <DialogTitle className="dialog-title">
-          {step === 1 ? "Enter Number of Group Members" : "Enter Member Details"}
-        </DialogTitle>
-        <DialogContent>
-          {step === 1 && (
-            <form onSubmit={handleNumMembersSubmit}>
-              <TextField
-                label="Number of Members (1-3)"
-                type="number"
-                fullWidth
-                autoFocus
-                value={numMembers}
-                onChange={e => setNumMembers(Math.max(1, Math.min(3, Number(e.target.value) || 1)))}
-                inputProps={{ min: 1, max: 3, step: 1 }}
-                className="num-members-input"
-              />
-              {error && <Alert severity="error">{error}</Alert>}
-              <Button type="submit" variant="contained" fullWidth className="next-btn">
-                NEXT
+                  size="large"
+                  onClick={() => setOpen(true)}
+                  className="create-group-btn"
+                  startIcon={<AddIcon sx={{ fontSize: isMobile ? 25 : 35 }} />}
+              >
+                CREATE GROUP
               </Button>
-            </form>
-          )}
+            </Box>
+        )}
 
-          {step === 2 && (
-            <Stack spacing={3} className="member-list">
-              {[...Array(numMembers)].map((_, i) => (
-                <Box key={i} className="member-card">
-                  <Typography className="member-label">
-                    {i === 0 ? "Leader" : `Member ${i + 1}`}
-                  </Typography>
-                  <Box className="member-fields">
-                    <TextField
-                      label="SAP ID"
-                      value={members[i].sapid}
-                      onChange={e => handleMemberChange(i, e.target.value)}
+
+        {!loading && group && (
+            <Box className="table-outer-wrap">
+              <Box className="group-card">
+                <Typography className="group-title">Group Members</Typography>
+                <Typography variant="subtitle1">{group.groupId}</Typography>
+                <AppTable
+                    headers={["Role", "Name", "SAP ID", "Email"]}
+                    rows={group.members.map((m, idx) => ({
+                      Role: m.isLeader ? "Leader" : `Member ${idx}`,
+                      Name: m.name || "N/A",
+                      "SAP ID": m.sapId,
+                      Email: m.email,
+                    }))}
+                />
+
+                {group.leader.email === CURRENT_USER_EMAIL && (
+                    <Box className="delete-btn-wrap">
+                      <Button
+                          color="error"
+                          variant="contained"
+                          className="delete-group-btn"
+                          onClick={handleDeleteGroup}
+                      >
+                        DELETE GROUP
+                      </Button>
+                    </Box>
+                )}
+              </Box>
+            </Box>
+        )}
+
+
+        <Dialog
+            open={open}
+            onClose={() => { setOpen(false); setStep(1); }}
+            PaperProps={{ className: "dialog-paper" }}
+        >
+          <DialogTitle className="dialog-title">
+            {step === 1 ? "Enter Number of Group Members" : "Enter Member Details"}
+          </DialogTitle>
+          <DialogContent>
+            {step === 1 && (
+                <form onSubmit={handleNumMembersSubmit}>
+                  <TextField
+                      label="Number of Members (1-3)"
+                      type="number"
                       fullWidth
-                      disabled={i === 0}
-                      className="member-input"
-                    />
-                    <TextField
-                      label="Email"
-                      value={members[i].email}
-                      disabled
-                      fullWidth
-                      className="member-input"
-                    />
-                  </Box>
-                </Box>
-              ))}
-              {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-            </Stack>
-          )}
-        </DialogContent>
-        <DialogActions>
-          {step === 2 && (
-            <Button onClick={handleCreateGroup} variant="contained" className="create-btn">
-              CREATE GROUP
+                      autoFocus
+                      value={numMembers}
+                      onChange={e => setNumMembers(Math.max(1, Math.min(3, Number(e.target.value) || 1)))}
+                      inputProps={{ min: 1, max: 3, step: 1 }}
+                      className="num-members-input"
+                  />
+                  {error && <Alert severity="error">{error}</Alert>}
+                  <Button type="submit" variant="contained" fullWidth className="next-btn">
+                    NEXT
+                  </Button>
+                </form>
+            )}
+
+            {step === 2 && (
+                <Stack spacing={3} className="member-list">
+                  {[...Array(numMembers)].map((_, i) => (
+                      <Box key={i} className="member-card">
+                        <Typography className="member-label">
+                          {i === 0 ? "Leader" : `Member ${i + 1}`}
+                        </Typography>
+                        <Box className="member-fields">
+                          <TextField
+                              label="SAP ID"
+                              value={members[i].sapid}
+                              onChange={e => handleMemberChange(i, e.target.value)}
+                              fullWidth
+                              disabled={i === 0}
+                              className="member-input"
+                          />
+                          <TextField
+                              label="Email"
+                              value={i === 0 ? CURRENT_USER_EMAIL : members[i].email}
+                              disabled
+                              fullWidth
+                              className="member-input"
+                          />
+                        </Box>
+                      </Box>
+                  ))}
+                  {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+                </Stack>
+            )}
+          </DialogContent>
+          <DialogActions>
+            {step === 2 && (
+                <Button onClick={handleCreateGroup} variant="contained" className="create-btn">
+                  CREATE GROUP
+                </Button>
+            )}
+            <Button onClick={() => { setOpen(false); setStep(1); }} className="cancel-btn">
+              CANCEL
             </Button>
-          )}
-          <Button onClick={() => { setOpen(false); setStep(1); }} className="cancel-btn">
-            CANCEL
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+          </DialogActions>
+        </Dialog>
+      </Box>
   );
 }

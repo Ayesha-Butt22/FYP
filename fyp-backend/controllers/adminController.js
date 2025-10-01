@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const Group = require('../models/StudentGroup');
 const isValidOfficialEmail = email => /^[a-zA-Z0-9._]+@riphah\.edu\.pk$/.test(email);
 
 // CREATE ANY USER (Admin, Supervisor, Coordinator)
@@ -108,7 +109,14 @@ exports.getAllUsers = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
-
+exports.getAllGroups = async (req, res) => {
+  try {
+    const list = await Group.find({});
+    return res.json(list);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
 // UPDATE USER
 exports.updateUser = async (req, res) => {
   try {

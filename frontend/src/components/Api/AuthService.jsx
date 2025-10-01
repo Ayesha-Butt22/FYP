@@ -56,7 +56,8 @@ class AuthService {
             email: data.user?.email || "",
             department: data.user?.department || "",
             studentId: data.user?.studentId || "",
-            mustChangePassword: data.user?.mustChangePassword ? 'true' : 'false'
+            mustChangePassword: data.user?.mustChangePassword ? 'true' : 'false',
+            isGroupMade: data.user?.isGroupMade ? 'true' : 'false'
         };
 
         Object.entries(userInfo).forEach(([key, value]) => {

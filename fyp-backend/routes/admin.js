@@ -45,6 +45,7 @@ router.post('/approve-students', protect, isAdmin, adminController.approveStuden
 
 // GET ALL USERS
 router.get('/all', protect, isAdmin, adminController.getAllUsers);
+router.get('/all-groups',protect, isAdmin, adminController.getAllGroups);
 
 // UPDATE USER (Admin, Supervisor, Coordinator)
 router.put(
