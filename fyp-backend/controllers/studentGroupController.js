@@ -1,25 +1,21 @@
 const User = require("../models/User");
-const Group = require("../models/Group");
+const Group = require("../models/StudentGroup");
 
 exports.createGroup = async (req, res) => {
   try {
     const { groupId, leader, member2, member3 } = req.body;
 
-    // Leader email validate
+    // Validate leader
     const leaderUser = await User.findOne({ email: leader.email });
     if (!leaderUser) return res.status(400).json({ error: "Leader email not found in users" });
     if (leaderUser.isGroupMade) return res.status(400).json({ error: "Leader already has a group" });
 
-    // Member 2 email validate (if provided)
-    let member2User;
+    let member2User, member3User;
     if (member2?.email) {
       member2User = await User.findOne({ email: member2.email });
       if (!member2User) return res.status(400).json({ error: "Member2 email not found" });
       if (member2User.isGroupMade) return res.status(400).json({ error: "Member2 already in a group" });
     }
-
-    // Member 3 email validate (if provided)
-    let member3User;
     if (member3?.email) {
       member3User = await User.findOne({ email: member3.email });
       if (!member3User) return res.status(400).json({ error: "Member3 email not found" });
@@ -30,10 +26,8 @@ exports.createGroup = async (req, res) => {
     const group = new Group({ groupId, leader, member2, member3 });
     await group.save();
 
-
     leaderUser.isGroupMade = true;
     await leaderUser.save();
-
     if (member2User) { member2User.isGroupMade = true; await member2User.save(); }
     if (member3User) { member3User.isGroupMade = true; await member3User.save(); }
 

@@ -21,8 +21,8 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
 
-app.use('/api/groups', require('./routes/group'));       // Group CRUD
-app.use('/api/proposals', require('./routes/proposal'));
+app.use('/api/groups', require('./routes/studentgroup'));       // Group CRUD
+app.use('/api/proposals', require('./routes/studentproposal'));
 
 // Test route
 app.get('/', (req, res) => res.send('API Running'));

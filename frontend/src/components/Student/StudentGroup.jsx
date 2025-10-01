@@ -24,8 +24,8 @@ import { toastService } from "../ToastService/ToastService";
 import ToastContainer from "../ToastService/ToastContainer";
 import DashboardSectionHeader from "../Student/DashboardSectionHeader"; 
 import "./StudentGroup.css";
+import { studentGroupApi } from "../Api/StudentApi/StudentGroupApi";
 
-// Demo: Map SAPID to Student Name (simulate a database)
 const sapidToName = {
   "48288": "Ayesha Butt",
   "12345": "Ali Raza",
@@ -33,23 +33,11 @@ const sapidToName = {
 };
 
 const getName = (sapid) => sapidToName[sapid] || "Name not found";
-const sapidToEmail = (sapid) =>
-  sapid ? `${sapid}@students.riphah.edu.pk` : "";
-
+const sapidToEmail = (sapid) => sapid ? `${sapid}@students.riphah.edu.pk` : "";
 const CURRENT_USER_SAPID = "48288"; // Simulate logged in user SAPID
 
 export default function StudentGroup() {
-  const [group, setGroup] = useState(() => {
-    const g = localStorage.getItem("fyp_groupdata");
-    if (g) {
-      const parsed = JSON.parse(g);
-      if (parsed.members.some((m) => m.sapid === CURRENT_USER_SAPID)) {
-        return parsed;
-      }
-    }
-    return null;
-  });
-
+  const [group, setGroup] = useState(null);
   const isMobile = useMediaQuery("(max-width:900px)");
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1); 
@@ -82,7 +70,10 @@ export default function StudentGroup() {
     setMembers(newMembers);
   };
 
-  const handleCreateGroup = () => {
+  // Generate a unique groupId (could use uuid library in production)
+  const generateGroupId = () => `group-${Date.now()}`;
+
+  const handleCreateGroup = async () => {
     setError("");
     for (let i = 0; i < numMembers; ++i) {
       if (!members[i].sapid) {
@@ -90,34 +81,65 @@ export default function StudentGroup() {
         return;
       }
     }
+
     const groupObj = {
-      members: members.slice(0, numMembers).map((m, i) => ({
-        ...m,
-        isLeader: i === 0,
-      })),
-      leader: members[0],
+      groupId: generateGroupId(),
+      leader: {
+        sapId: members[0].sapid,
+        email: members[0].email,
+      },
+      member2: numMembers > 1 ? {
+        sapId: members[1].sapid,
+        email: members[1].email,
+      } : undefined,
+      member3: numMembers > 2 ? {
+        sapId: members[2].sapid,
+        email: members[2].email,
+      } : undefined,
     };
-    localStorage.setItem("fyp_groupdata", JSON.stringify(groupObj));
-    setGroup(groupObj);
-    setOpen(false);
-    setStep(1);
-    toastService.success("Group created successfully!");
+
+    try {
+      const res = await studentGroupApi.createGroup(groupObj);
+      if (res && res.group) {
+        setGroup({
+          members: [
+            { ...groupObj.leader, isLeader: true },
+            ...(groupObj.member2?.sapId ? [{ ...groupObj.member2, isLeader: false }] : []),
+            ...(groupObj.member3?.sapId ? [{ ...groupObj.member3, isLeader: false }] : []),
+          ],
+          leader: groupObj.leader,
+          _id: res.group._id,
+        });
+        setOpen(false);
+        setStep(1);
+        toastService.success("Group created successfully!");
+      } else {
+        setError(res?.error || "Failed to create group.");
+      }
+    } catch (err) {
+      setError("Server error. Try again.");
+    }
   };
 
-  const handleDeleteGroup = () => {
+  const handleDeleteGroup = async () => {
+    if (!group || !group._id) return;
     if (window.confirm("Are you sure you want to delete this group?")) {
-      localStorage.removeItem("fyp_groupdata");
-      setGroup(null);
-      setMembers([
-        {
-          sapid: CURRENT_USER_SAPID,
-          email: sapidToEmail(CURRENT_USER_SAPID),
-          isLeader: true,
-        },
-        { sapid: "", email: "", isLeader: false },
-        { sapid: "", email: "", isLeader: false },
-      ]);
-      toastService.success("Group deleted!");
+      const res = await studentGroupApi.deleteGroup(group._id);
+      if (res && res.message) {
+        setGroup(null);
+        setMembers([
+          {
+            sapid: CURRENT_USER_SAPID,
+            email: sapidToEmail(CURRENT_USER_SAPID),
+            isLeader: true,
+          },
+          { sapid: "", email: "", isLeader: false },
+          { sapid: "", email: "", isLeader: false },
+        ]);
+        toastService.success("Group deleted!");
+      } else {
+        toastService.error(res?.error || "Failed to delete group.");
+      }
     }
   };
 
@@ -163,15 +185,15 @@ export default function StudentGroup() {
                   {group.members.map((m, idx) => (
                     <TableRow key={idx}>
                       <TableCell align="center" className="mui-table-bodycell">{m.isLeader ? "Leader" : `Member ${idx + 1}`}</TableCell>
-                      <TableCell align="center" className="mui-table-bodycell">{getName(m.sapid)}</TableCell>
-                      <TableCell align="center" className="mui-table-bodycell">{m.sapid}</TableCell>
+                      <TableCell align="center" className="mui-table-bodycell">{getName(m.sapId)}</TableCell>
+                      <TableCell align="center" className="mui-table-bodycell">{m.sapId}</TableCell>
                       <TableCell align="center" className="mui-table-bodycell">{m.email}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
-            {group.leader.sapid === CURRENT_USER_SAPID && (
+            {group.leader.sapId === CURRENT_USER_SAPID && (
               <Box className="delete-btn-wrap">
                 <Button
                   color="error"

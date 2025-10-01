@@ -1,6 +1,7 @@
+//fyp-backend/routes/studentgroup.js
 const express = require("express");
 const { protect, isStudent } = require("../middlewares/authMiddleware");
-const groupController = require("../controllers/groupController");
+const groupController = require("../controllers/studentGroupController");
 
 const router = express.Router();
 

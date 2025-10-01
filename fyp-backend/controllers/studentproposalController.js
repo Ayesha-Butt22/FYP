@@ -1,4 +1,4 @@
-const Proposal = require("../models/Proposal");
+const Proposal = require("../models/StudentProposal");
 
 exports.createProposal = async (req, res) => {
   try {

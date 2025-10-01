@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import DashboardSectionHeader from "./DashboardSectionHeader";
-import AppTable from "./AppTable";
+import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
+import AppTable from "./AppTable.jsx";
 import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
