@@ -49,7 +49,7 @@ export default function StudentGroup() {
     const checkGroup = async () => {
       setLoading(true);
       try {
-        const res = await studentGroupApi.getGroupByEmail(CURRENT_USER_EMAIL);
+         const res = await studentGroupApi.getGroupByEmail(CURRENT_USER_EMAIL);
         if (res && res.groupId) {
           setGroup({
             groupId: res.groupId,
