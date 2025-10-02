@@ -374,7 +374,7 @@ export default function ManageSupervisors() {
                   </label>
                   <DropdownSingleSelect
                       value={formData.Department}
-                      options={["cs", "se", "ai"]}
+                      options={["CS", "SE", "CA"]}
                       onChange={(val) =>
                           setFormData(prev => ({ ...prev, Department: val }))
                       }
