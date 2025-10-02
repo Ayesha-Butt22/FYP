@@ -19,7 +19,7 @@ import DashboardSectionHeader from "../Student/DashboardSectionHeader";
 import "./StudentGroup.css";
 import { studentGroupApi } from "../Api/StudentApi/StudentGroupApi";
 import {Confirm} from "../ConfirmService/ConfirmService.jsx";
-import AppTable from "../Admin/AppTable.jsx";
+ import AppTable from "../Admin/AppTable.jsx";
 
 
 const CURRENT_USER_EMAIL = localStorage.getItem("email") || "";
