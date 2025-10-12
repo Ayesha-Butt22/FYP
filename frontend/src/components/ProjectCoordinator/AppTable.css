@@ -1,0 +1,81 @@
+.app-table-outer {
+  width: 100%;
+  margin: 38px auto 0 auto;
+  background: #f9faff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px #01337a11;
+  overflow-x: auto;
+  padding: 0 0 24px 0;
+}
+
+.app-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.app-table thead tr {
+  background: #01337a;
+}
+
+.app-table th,
+.app-table td {
+  padding: 14px 22px;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.app-table th {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-right: 1px solid #01337a11;
+}
+
+.app-table th:last-child,
+.app-table td:last-child {
+  border-right: none;
+}
+
+.app-table tbody tr {
+  background: #f7f8ff;
+  border-bottom: 1px solid #f0f1fa;
+  transition: background 0.18s;
+}
+
+.app-table tbody tr:nth-child(even) {
+  background: #ffffff;
+}
+
+.app-table tbody tr:hover {
+  background: #e8eafc;
+}
+
+.app-table td {
+  color: #01337a;
+  font-weight: 500;
+}
+
+.app-table td .table-action-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  outline: none;
+  padding: 7px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.98rem;
+  transition: background 0.18s, color 0.19s;
+  margin-right: 8px;
+}
+.app-table td .table-action-btn:last-child {
+  margin-right: 0;
+}
+.app-table td .table-action-btn:hover {
+  background: #01337a;
+  color: #fff;
+}

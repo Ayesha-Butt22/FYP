@@ -1,4 +1,4 @@
-//components/Auth/Auth.jsx
+//components/Auth/ProtectedAurhRoute
 import getUserInfoFromStorage from "./UserInfo.jsx";
 import {Navigate} from "react-router-dom";
 const ProtectedAuthRoute = ({ children }) => {
