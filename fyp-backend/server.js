@@ -23,7 +23,7 @@ app.use('/api/admin', require('./routes/admin'));
 
 app.use('/api/groups', require('./routes/studentgroup'));       // Group CRUD
 app.use('/api/proposals', require('./routes/studentproposal'));
-
+app.use("/api/student", require("./routes/student"));
 // Test route
 app.get('/', (req, res) => res.send('API Running'));
 

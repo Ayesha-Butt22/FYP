@@ -164,3 +164,26 @@ exports.deleteUser = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+
+exports.getSystemStats = async (req, res) => {
+  try {
+    const totalStudents = await User.countDocuments({ role: "student" });
+    const totalSupervisors = await User.countDocuments({ role: "supervisor" });
+    const totalCoordinators = await User.countDocuments({ role: "coordinator" });
+    const totalAdmins = await User.countDocuments({ role: "admin" });
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        totalStudents,
+        totalSupervisors,
+        totalCoordinators,
+        totalAdmins
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching system stats:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
