@@ -171,7 +171,7 @@ exports.getSystemStats = async (req, res) => {
     const totalStudents = await User.countDocuments({ role: "student" });
     const totalSupervisors = await User.countDocuments({ role: "supervisor" });
     const totalCoordinators = await User.countDocuments({ role: "coordinator" });
-    const totalAdmins = await User.countDocuments({ role: "admin" });
+    const totalGroups = await Group.countDocuments();
 
     res.status(200).json({
       success: true,
@@ -179,7 +179,7 @@ exports.getSystemStats = async (req, res) => {
         totalStudents,
         totalSupervisors,
         totalCoordinators,
-        totalAdmins
+        totalGroups
       },
     });
   } catch (error) {

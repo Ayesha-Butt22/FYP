@@ -81,7 +81,9 @@ class AdminApis {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
 
-
+    async getstats() {
+        return await this.makeAPICall("admin/stats", {}, { method: "GET" });
+    }
 
 
     // --- Utility ---
