@@ -1,7 +1,5 @@
 .idea-proposal-container {
-  max-width: 900px;
   margin: 0 auto;
-  margin-top: 48px;
   padding: 24px;
   background: #fff;
   border-radius: 18px;
@@ -9,96 +7,189 @@
   min-height: 420px;
 }
 
-.section-desc {
-  color: #01337a;
-  font-size: 1.11rem;
-  font-family: 'Inter', 'Roboto', Arial, sans-serif;
-  background: #f6faff;
-  border-radius: 8px;
-  padding: 12px 22px;
-  margin-bottom: 24px;
+.proposal-form .form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.proposal-form label {
   font-weight: 600;
-  letter-spacing: 0.1px;
+  color: #333;
+  margin-bottom: 0.5rem;
 }
 
-.input {
-  background: #f8faff;
+.required {
+  color: #e11d48;
+  font-weight: bold;
+}
+
+.proposal-form input,
+.proposal-form textarea {
+  border: 1px solid #d1d5db;
   border-radius: 8px;
+  padding: 0.8rem 1rem;
+  font-size: 15px;
+  transition: all 0.2s ease;
 }
 
-.ai-btn {
-  margin-top: 10px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.2px;
-  font-size: 0.98rem !important;
+.proposal-form input:focus,
+.proposal-form textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
-.ai-suggestions-title {
-  margin-top: 12px;
-  font-weight: 700;
-  color: #01337a;
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
 }
 
-.ai-chip-stack {
-  margin-top: 8px;
-}
-
-.ai-chip {
-  font-weight: 700 !important;
-  font-size: 1.01rem !important;
-  cursor: pointer !important;
-}
-
-.submit-btn {
-  margin-top: 16px !important;
-  font-weight: 900 !important;
-  font-size: 1.13rem !important;
-  border-radius: 8px !important;
-  padding: 11px 0 !important;
-  background: #01337a !important;
-  color: #fff !important;
-}
-
-.after-submit {
-  margin-top: 40px;
+.submit-btn,
+.select-supervisor-btn {
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .select-supervisor-btn {
-  font-size: 1.13rem !important;
-  font-weight: 800 !important;
-  padding: 12px 32px !important;
-  border-radius: 8px !important;
-  letter-spacing: 1px;
-  background: #0147a3 !important;
-  color: #fff !important;
+  background-color: #9333ea;
 }
 
-.approved-text {
-  color: #2e7d32;
+.submit-btn:hover {
+  background-color: #013379;
 }
 
-.reject-alert {
-  margin-bottom: 12px;
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
 }
 
-.reject-reason-label {
-  color: #555;
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 700px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
+  animation: scaleIn 0.3s ease;
+}
+
+
+.modal-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: #777;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modal-close-btn:hover {
+  color: #000;
+}
+
+/* Modal Title */
+.modal-title {
+  text-align: center;
+  font-size: 1.5rem;
   font-weight: 600;
+  margin-bottom: 20px;
 }
 
-.reject-reason {
-  color: #d32f2f;
-  margin-bottom: 16px;
+
+.supervisor-list {
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-@media (max-width: 700px) {
-  .idea-proposal-container {
-    padding: 8px;
-    max-width: 99vw;
-    min-width: 97vw;
+.supervisor-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: box-shadow 0.2s ease;
+}
+
+.supervisor-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.supervisor-card h3 {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.select-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.select-btn:hover {
+  background-color: #1e40af;
+}
+
+.close-link {
+  display: block;
+  text-align: center;
+  margin-top: 18px;
+  color: #555;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.slots {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-  .section-desc {
-    font-size: 0.99rem;
-    padding: 7px 9px;
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }

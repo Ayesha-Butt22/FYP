@@ -11,7 +11,6 @@ async function getSystemStats() {
         throw new Error('Failed to fetch stats from the server.');
     }
     const data = await response.data;
-    console.log(data)
     if (!data.success) {
         throw new Error(data.message || 'API returned an error.');
     }

@@ -1,4 +1,3 @@
-console.log("✅ Student routes file loaded");
 const express = require("express");
 const { protect } = require("../middlewares/authMiddleware");
 const studentController = require("../controllers/studentController");
@@ -6,7 +5,7 @@ const studentController = require("../controllers/studentController");
 const router = express.Router();
 
 
-router.get("/supervisors", studentController.getAvailableSupervisors);
+router.get("/supervisors/:spec", studentController.getAvailableSupervisors);
 
 
 module.exports = router;
