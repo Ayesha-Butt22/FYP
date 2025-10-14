@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const xlsx = require("xlsx");
 const User = require('../models/User');
 const Group = require('../models/StudentGroup');
 const isValidOfficialEmail = email => /^[a-zA-Z0-9._]+@riphah\.edu\.pk$/.test(email);
@@ -168,9 +169,9 @@ exports.deleteUser = async (req, res) => {
 
 exports.getSystemStats = async (req, res) => {
   try {
-    const totalStudents = await User.countDocuments({ role: "student" });
-    const totalSupervisors = await User.countDocuments({ role: "supervisor" });
-    const totalCoordinators = await User.countDocuments({ role: "coordinator" });
+    const totalStudents = await User.countDocuments({role: "student"});
+    const totalSupervisors = await User.countDocuments({role: "supervisor"});
+    const totalCoordinators = await User.countDocuments({role: "coordinator"});
     const totalGroups = await Group.countDocuments();
 
     res.status(200).json({
@@ -184,6 +185,78 @@ exports.getSystemStats = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching system stats:", error);
-    res.status(500).json({ success: false, message: "Server Error" });
+    res.status(500).json({success: false, message: "Server Error"});
   }
 };
+
+
+  exports.uploadExcelAndCreateUsers = async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+      const workbook = xlsx.readFile(req.file.path);
+      const sheetName = workbook.SheetNames[0];
+      const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+      if (sheetData.length === 0)
+        return res.status(400).json({ error: "Empty Excel file" });
+
+      let createdUsers = [];
+      let skippedUsers = [];
+
+      for (const row of sheetData) {
+        const { id , name, email, password, role, department, specialization, availableSlots, bookedSlots } = row;
+
+        if (!name || !email || !password || !role) {
+          skippedUsers.push({ email, reason: "Missing required fields" });
+          continue;
+        }
+
+        if (!["admin", "supervisor", "coordinator"].includes(role)) {
+          skippedUsers.push({ email, reason: "Invalid role" });
+          continue;
+        }
+
+        if (!isValidOfficialEmail(email)) {
+          skippedUsers.push({ email, reason: "Invalid email format" });
+          continue;
+        }
+
+        const existing = await User.findOne({ email });
+        if (existing) {
+          skippedUsers.push({ email, reason: "Already exists" });
+          continue;
+        }
+
+        const hashed = await bcrypt.hash(password.toString(), 10);
+
+        const newUser = new User({
+          studentId: id,
+          name,
+          email,
+          password: hashed,
+          role,
+          department,
+          specialization,
+          availableSlots: availableSlots || 0,
+          bookedSlots: bookedSlots || 0,
+          mustChangePassword: true,
+          first_login: true,
+        });
+
+        await newUser.save();
+        createdUsers.push(email);
+      }
+
+      return res.status(201).json({
+        message: "Excel processed successfully",
+        createdCount: createdUsers.length,
+        skippedCount: skippedUsers.length,
+        createdUsers,
+        skippedUsers,
+      });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: err.message });
+    }
+  };
+

@@ -6,6 +6,7 @@ import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
 import {DropdownSingleSelect , DropdownMultiSelect} from "./DropDowns.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
+import UploadExcelModal from "../UploadExcelModal";
 
 const ALL_SPECIALITIES = [
   "AI", "ML", "Web", "Cloud", "Data Science", "Networks", "Security", "IoT", "Embedded", "Software Engineering"
@@ -83,6 +84,7 @@ export default function ManageSupervisors() {
   });
   const [formSpeciality, setFormSpeciality] = useState([]);
   const [formErrors, setFormErrors] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const resetForm = () => {
     setFormData({
       Name: "",
@@ -262,6 +264,7 @@ export default function ManageSupervisors() {
     setSideFormMode('add');
   };
   return (
+      <>
       <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
         <div style={{ flex: sideFormMode ? '2' : '1', transition: 'flex 0.3s ease' }}>
           <DashboardSectionHeader>Manage Supervisors</DashboardSectionHeader>
@@ -269,7 +272,7 @@ export default function ManageSupervisors() {
             Admins can view the list of supervisors, add new supervisors, update existing supervisor details, and delete supervisors from the system.
           </div>
 
-          <div style={{ display: "flex", justifyContent: "right", margin: "20px 0" }}>
+          <div style={{display: "flex", justifyContent: "right", margin: "20px 0" , gap: "20px"}}>
             <button
                 className="add-supervisor-btn"
                 onClick={openAddForm}
@@ -277,13 +280,21 @@ export default function ManageSupervisors() {
             >
               + Add Supervisor
             </button>
+
+            <button
+                className="add-supervisor-btn ml-4"
+                onClick={() => setIsModalOpen(true)}
+                disabled={sideFormMode === 'add'}
+            >
+              + upload Excel
+            </button>
           </div>
 
           {loading ? (
-              <div style={{ textAlign: "center", padding: 20 }}>Loading supervisors...</div>
+              <div style={{textAlign: "center", padding: 20}}>Loading supervisors...</div>
           ) : (
-              <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-                <AppTable
+              <div style={{maxHeight: '70vh', overflowY: 'auto'}}>
+              <AppTable
                     headers={headers}
                     rows={rows}
                     renderActions={(row, i) => (
@@ -463,5 +474,12 @@ export default function ManageSupervisors() {
             </div>
         )}
       </div>
+
+  <UploadExcelModal
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+  />
+  </>
+
   );
 }

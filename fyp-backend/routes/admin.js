@@ -2,7 +2,9 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { protect, isAdmin } = require('../middlewares/authMiddleware');
 const adminController = require('../controllers/adminController');
+const multer = require("multer");
 
+const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
 const validate = (req, res, next) => {
@@ -12,6 +14,7 @@ const validate = (req, res, next) => {
     }
     next();
 };
+
 
 // CREATE USER (Admin, Supervisor, Coordinator)
 router.post(
@@ -27,6 +30,9 @@ router.post(
     validate,
     adminController.createUser
 );
+
+router.post("/upload-excel", protect, isAdmin, upload.single("file"), adminController.uploadExcelAndCreateUsers);
+
 
 // GET COORDINATORS
 router.get('/coordinators', protect, isAdmin, adminController.getCoordinators);
