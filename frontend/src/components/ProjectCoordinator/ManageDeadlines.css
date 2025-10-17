@@ -1,11 +1,10 @@
-/* Small adjustments for ManageDeadlines wrapper to work with AppTable */
+
 .app-table-wrapper {
   width: 100%;
-  overflow-x: hidden; /* ensure no horizontal scrollbar */
+  overflow-x: hidden; 
   margin-top: 8px;
 }
 
-/* Keep table container centered like other pages */
 @media (min-width: 1120px) {
   .app-table-wrapper {
     max-width: 1120px;

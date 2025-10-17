@@ -1,14 +1,9 @@
+//src/components/ProjectCoordinator/OverviewCoordinator.jsx
 import React from "react";
 import { FaUsers, FaClipboardCheck, FaCalendarCheck, FaStar, FaArrowRight, FaUserTie } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./OverviewCoordinator.css";
 
-/**
- * Coordinator Overview
- * - Layout and style follow Supervisor overview you provided.
- * - Quick links and cards are adapted for the Coordinator role.
- * - onTabChange prop is used to switch to other tabs (e.g., "Idea & Proposal Review", "Manage Deadlines", "Supervisor Allocation").
- */
 
 const activities = [
   { type: "deadline", text: "Created department deadline: Proposal Submission", time: "1 hour ago" },

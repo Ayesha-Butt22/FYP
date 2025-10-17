@@ -1,0 +1,97 @@
+/* GroupsGrid.css - updated to avoid horizontal overflow */
+
+/* page container */
+.groups-page {
+  padding: 28px 32px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  min-height: calc(100vh - 80px);
+  overflow-x: hidden; /* extra safety */
+}
+
+/* main container */
+.groups-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: 8px;   /* small padding to avoid edge overflow with shadows */
+  padding-right: 8px;
+  box-sizing: border-box;
+}
+
+/* header row layout */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.header-left {
+  flex: 1;
+  min-width: 0; /* allow children to shrink */
+}
+
+.section-desc {
+  margin-top: 8px;
+  background: rgba(2, 6, 23, 0.03);
+  padding: 14px 18px;
+  border-radius: 8px;
+  color: #164e63;
+  max-width: 760px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* right block for the add button */
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Add button style similar to ManageDeadlines */
+.add-group-btn {
+  background: linear-gradient(90deg, #0b4ea2, #01337a);
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(1, 51, 122, 0.08);
+}
+
+/* Grid of cards (responsive)
+   Use minmax(0, 1fr) to prevent overflowing children (important for CSS grid + flex items) */
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* minmax(0, 1fr) prevents overflow */
+  gap: 28px;
+  margin-top: 20px;
+}
+
+/* Ensure any direct child can shrink (prevents cards pushing width) */
+.groups-grid > * {
+  min-width: 0;
+}
+
+/* 2 columns on medium screens */
+@media (max-width: 1199px) {
+  .groups-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 1 column on small screens */
+@media (max-width: 899px) {
+  .groups-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-right {
+    justify-content: flex-end;
+  }
+}

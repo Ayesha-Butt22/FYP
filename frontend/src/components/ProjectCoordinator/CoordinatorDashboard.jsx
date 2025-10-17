@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import DashboardLayout from "../DashboardLayout";
-import { Dashboard as DashboardIcon, CalendarMonth as CalendarMonthIcon } from "@mui/icons-material";
+import {
+  Dashboard as DashboardIcon,
+  CalendarMonth as CalendarMonthIcon,
+  Groups as GroupsIcon,
+} from "@mui/icons-material";
 import capImg from "../../assets/cap.png";
 import OverviewCoordinator from "./OverviewCoordinator";
 import ManageDeadlines from "./ManageDeadlines";
+import GroupsTab from "./GroupsGrid"; 
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
   { label: "Manage Deadlines", icon: <CalendarMonthIcon /> },
+  { label: "Groups", icon: <GroupsIcon /> }, // new Groups tab
 ];
 
 const coordinatorInfo = {
@@ -29,6 +35,7 @@ export default function CoordinatorDashboard() {
   const tabComponents = {
     "Overview": <OverviewCoordinator onTabChange={setActiveTab} />,
     "Manage Deadlines": <ManageDeadlines />,
+    "Groups": <GroupsTab />, // render the GroupsTab component here
   };
 
   return (

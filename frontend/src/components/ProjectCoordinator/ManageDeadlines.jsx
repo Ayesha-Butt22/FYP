@@ -17,15 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import "./ManageDeadlines.css";
 
-/**
- * ManageDeadlines (Coordinator)
- *
- * Layout and behavior mirror ManageSupervisors:
- * - Left area: header, description, Add Deadline button, full table (scrollable)
- * - Right side: slide-over form for Add / Edit (same visual pattern as ManageSupervisors)
- *
- * This component keeps data client-side. Replace or extend API calls where indicated to persist changes.
- */
+
 
 const SESSIONS = ["Fall", "Spring"];
 const YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
