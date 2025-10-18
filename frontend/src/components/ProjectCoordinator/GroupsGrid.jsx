@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import GroupInfoCard from "./GroupInfoCard";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import "./GroupsGrid.css";

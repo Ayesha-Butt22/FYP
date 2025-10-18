@@ -4,16 +4,24 @@ import {
   Dashboard as DashboardIcon,
   CalendarMonth as CalendarMonthIcon,
   Groups as GroupsIcon,
+  Settings as SettingsIcon,
+  Archive as ArchiveIcon
 } from "@mui/icons-material";
 import capImg from "../../assets/cap.png";
 import OverviewCoordinator from "./OverviewCoordinator";
 import ManageDeadlines from "./ManageDeadlines";
-import GroupsTab from "./GroupsGrid"; 
+import GroupsTab from "./GroupsGrid";
+import SupervisorSlots from "./SupervisorSlots";
+import ManageTemplates from "./ManageTemplates";
+import SupervisorArchive from "../Supervisor/SupervisorArchive";
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
   { label: "Manage Deadlines", icon: <CalendarMonthIcon /> },
-  { label: "Groups", icon: <GroupsIcon /> }, // new Groups tab
+  { label: "Groups", icon: <GroupsIcon /> },
+  { label: "Supervisor Slots", icon: <SettingsIcon /> },
+  { label: "Manage Templates", icon: <SettingsIcon /> },
+  { label: "FYP Archive", icon: <ArchiveIcon /> }
 ];
 
 const coordinatorInfo = {
@@ -35,7 +43,10 @@ export default function CoordinatorDashboard() {
   const tabComponents = {
     "Overview": <OverviewCoordinator onTabChange={setActiveTab} />,
     "Manage Deadlines": <ManageDeadlines />,
-    "Groups": <GroupsTab />, // render the GroupsTab component here
+    "Groups": <GroupsTab />,
+    "Supervisor Slots": <SupervisorSlots />,
+    "Manage Templates": <ManageTemplates />,
+    "FYP Archive": <SupervisorArchive />
   };
 
   return (

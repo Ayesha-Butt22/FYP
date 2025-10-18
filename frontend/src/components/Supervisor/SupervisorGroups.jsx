@@ -72,9 +72,8 @@ export default function SupervisorGroups() {
   const [selectedGroup, setSelectedGroup] = useState(null);
 
   return (
-    <div className="page-container">
-      <DashboardSectionHeader 
- >
+    <div className="supervisor-page-container">
+      <DashboardSectionHeader>
         My Groups
       </DashboardSectionHeader>
 
@@ -82,54 +81,54 @@ export default function SupervisorGroups() {
         Here you can view all the FYP groups assigned to you. Click "View Group Details" to see team members, program, milestones, and progress analytics.
       </div>
 
-      <div className="group-cards-row">
+      <div className="supervisor-group-cards-row">
         {assignedGroups.map(group => (
-          <div className="group-card" key={group.groupId}>
-            <div className="group-icon"><FaUsers /></div>
-            <div className="group-no">Group {group.groupNo}</div>
-            <div className="group-title">{group.title}</div>
-            <button className="view-btn" onClick={() => setSelectedGroup(group)}>
+          <div className="supervisor-group-card" key={group.groupId}>
+            <div className="supervisor-group-icon"><FaUsers /></div>
+            <div className="supervisor-group-no">Group {group.groupNo}</div>
+            <div className="supervisor-group-title">{group.title}</div>
+            <button className="supervisor-view-btn" onClick={() => setSelectedGroup(group)}>
               View Group Details <FaArrowRight />
             </button>
           </div>
         ))}
       </div>
 
-      {/* Modal for group details */}
+      {/* ----- Modal for group details ----- */}
       {selectedGroup && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <button className="modal-close" aria-label="Close" onClick={() => setSelectedGroup(null)}>
+        <div className="supervisor-modal-overlay">
+          <div className="supervisor-modal-card">
+            <button className="supervisor-modal-close" aria-label="Close" onClick={() => setSelectedGroup(null)}>
               <FaTimes />
             </button>
-            {/* Title */}
-            <div className="modal-title">{selectedGroup.title}</div>
-            
-            {/* Details Form */}
-            <div className="group-details-form">
-              <div className="group-detail-row">
-                <span className="group-detail-label">Group Number:</span>
-                <span className="group-detail-value">{selectedGroup.groupNo}</span>
+
+            <div className="supervisor-modal-title">{selectedGroup.title}</div>
+
+            {/* ----- Details Section ----- */}
+            <div className="supervisor-group-details-form">
+              <div className="supervisor-group-detail-row">
+                <span className="supervisor-group-detail-label">Group Number:</span>
+                <span className="supervisor-group-detail-value">{selectedGroup.groupNo}</span>
               </div>
-              <div className="group-detail-row">
-                <span className="group-detail-label">Group ID:</span>
-                <span className="group-detail-value">{selectedGroup.groupId}</span>
+              <div className="supervisor-group-detail-row">
+                <span className="supervisor-group-detail-label">Group ID:</span>
+                <span className="supervisor-group-detail-value">{selectedGroup.groupId}</span>
               </div>
-              <div className="group-detail-row">
-                <span className="group-detail-label">Program:</span>
-                <span className="group-detail-value">{selectedGroup.program}</span>
+              <div className="supervisor-group-detail-row">
+                <span className="supervisor-group-detail-label">Program:</span>
+                <span className="supervisor-group-detail-value">{selectedGroup.program}</span>
               </div>
-              <div className="group-detail-row">
-                <span className="group-detail-label">Proposal/Idea Status:</span>
+              <div className="supervisor-group-detail-row">
+                <span className="supervisor-group-detail-label">Proposal/Idea Status:</span>
                 <span
-                  className={`status-badge status-${selectedGroup.proposalStatus.toLowerCase()}`}
+                  className={`supervisor-status-badge supervisor-status-${selectedGroup.proposalStatus.toLowerCase()}`}
                 >
                   {selectedGroup.proposalStatus}
                 </span>
               </div>
 
-              {/* Progress */}
-              <div className="progress-row">
+              {/* ----- Progress Section ----- */}
+              <div className="supervisor-progress-row">
                 <span>
                   <b>Progress: </b>
                   <span style={{ color: "#15803d", fontWeight: 700 }}>
@@ -141,9 +140,9 @@ export default function SupervisorGroups() {
                   &nbsp;({selectedGroup.milestonesCompleted} of {selectedGroup.milestonesTotal} milestones)
                 </span>
               </div>
-              <div className="progress-bar-bg">
+              <div className="supervisor-progress-bar-bg">
                 <div
-                  className="progress-bar-fill"
+                  className="supervisor-progress-bar-fill"
                   style={{
                     width: `${
                       selectedGroup.milestonesTotal && selectedGroup.milestonesCompleted
@@ -155,11 +154,11 @@ export default function SupervisorGroups() {
               </div>
             </div>
 
-            {/* Members Table */}
-            <div className="modal-label" style={{ fontWeight: 700, color: "#01337a", margin: "8px 0 5px 0" }}>
+            {/* ----- Members Table ----- */}
+            <div className="supervisor-modal-label">
               Group Members:
             </div>
-            <table className="member-table">
+            <table className="supervisor-member-table">
               <thead>
                 <tr>
                   <th>Member Name</th>
@@ -176,9 +175,9 @@ export default function SupervisorGroups() {
               </tbody>
             </table>
 
-            {/* Donut Analytics Panel */}
-            <div className="analytics-card">
-              <h3 className="chart-title">Progress Tracking</h3>
+            {/* ----- Donut Chart Analytics ----- */}
+            <div className="supervisor-analytics-card">
+              <h3 className="supervisor-chart-title">Progress Tracking</h3>
               <DonutChart
                 data={selectedGroup.milestones.map(m => ({
                   label: m.name,

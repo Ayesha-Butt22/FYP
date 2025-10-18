@@ -5,23 +5,26 @@ import {
   Person as PersonIcon,
   Groups as GroupsIcon,
   SupervisorAccount as SupervisorAccountIcon,
-  School as SchoolIcon
+  School as SchoolIcon,
+  Archive as ArchiveIcon
 } from "@mui/icons-material";
 import capImg from "../../assets/cap.png";
 import AdminOverview from "./AdminOverview";
 import ManageSupervisors from "./ManageSupervisors";
 import ManageAdmin from "./ManageAdmin";
 import ManageCoordinators from "./ManageCoordinators";
- import ApprovedStudents from "./ApprovedStudents";
-
-
+import ApprovedStudents from "./ApprovedStudents";
+import GroupsGrid from "../ProjectCoordinator/GroupsGrid";
+import SupervisorArchive from "../Supervisor/SupervisorArchive";
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
   { label: "Manage Admin", icon: <PersonIcon /> },
   { label: "Manage Supervisors", icon: <GroupsIcon /> },
   { label: "Manage Project Coordinators", icon: <SupervisorAccountIcon /> },
-  { label: "Approved Students", icon: <SchoolIcon /> }
+  { label: "Approved Students", icon: <SchoolIcon /> },
+  { label: "View Groups", icon: <GroupsIcon /> },
+  { label: "FYP Archive", icon: <ArchiveIcon /> }
 ];
 
 const adminInfo = {
@@ -29,7 +32,7 @@ const adminInfo = {
   title: "Auto-FYP",
   name: localStorage.getItem("name") || "Admin",
   subtitle: "FYP Admin",
-  email: localStorage.getItem("email") || "admin@riphah.edu.pk"
+  email: localStorage.getItem("email") || "admin@riphah.edu.pk",
 };
 
 export default function AdminDashboard() {
@@ -40,11 +43,13 @@ export default function AdminDashboard() {
   };
 
   const tabComponents = {
-    "Overview": <AdminOverview onTabChange={setActiveTab} />,
+    Overview: <AdminOverview onTabChange={setActiveTab} />,
     "Manage Admin": <ManageAdmin />,
     "Manage Supervisors": <ManageSupervisors />,
     "Manage Project Coordinators": <ManageCoordinators />,
-    "Approved Students": <ApprovedStudents />
+    "Approved Students": <ApprovedStudents />,
+    "View Groups": <GroupsGrid />,
+    "FYP Archive": <SupervisorArchive />
   };
 
   return (

@@ -187,14 +187,18 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #2563eb; /* default, can be overridden inline */
-  display: flex;
+  background: #2563eb;
+  /*default,canbeoverriddeninline*/display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.6rem;
   color: #fff;
   margin-bottom: 18px;
   font-family: inherit !important;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
 }
 .stat-title {
   font-size: 1.25rem;

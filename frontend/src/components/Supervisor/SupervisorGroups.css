@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
-.page-container {
+.supervisor-page-container {
   width: 100%;
   min-height: 100vh;
   background: #f8faff;
@@ -10,11 +10,10 @@
   padding: 0 0 40px 0;
 }
 
-.dashboard-title {
+.supervisor-dashboard-title {
   font-size: 2.1rem;
   font-weight: 900;
   color: #01337a;
-  font-family: inherit;
   margin-top: 38px;
   margin-bottom: 0;
   text-align: left;
@@ -22,11 +21,10 @@
   letter-spacing: -1.1px;
 }
 
-.main-header {
+.supervisor-main-header {
   font-size: 2rem;
   font-weight: 900;
   color: #01337a;
-  font-family: inherit;
   margin-top: 0.4em;
   margin-bottom: 0.13em;
   margin-left: 50px;
@@ -34,18 +32,17 @@
   letter-spacing: -0.7px;
 }
 
-.section-desc {
+.supervisor-section-desc {
   font-size: 1.08rem;
   color: #64748b;
   margin-bottom: 30px;
   max-width: 650px;
   text-align: left;
   margin-left: 0;
-  font-family: inherit;
   margin-top: 0;
 }
 
-.group-cards-row {
+.supervisor-group-cards-row {
   display: flex;
   gap: 36px;
   margin: 0 0 40px 0;
@@ -54,34 +51,40 @@
   flex-wrap: wrap;
 }
 
-.group-card {
+.supervisor-group-card {
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 3px 24px #01337a1b;
   min-width: 325px;
-  max-width: 340px;
+ max-width: 547px;
   flex: 1 1 320px;
   padding: 34px 30px 28px 30px;
   display: flex;
   flex-direction: column;
   align-items: center !important;
   margin-bottom: 12px;
-  font-family: inherit;
   text-align: center;
+  -webkit-border-radius: 18px;
+  -moz-border-radius: 18px;
+  -ms-border-radius: 18px;
+  -o-border-radius: 18px;
 }
 
-.group-icon {
+.supervisor-group-icon {
   background: #e6f0ff;
   color: #01337a;
   font-size: 2.1rem;
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   box-shadow: 0 2px 10px #2563eb17;
   margin-bottom: 13px;
 }
 
-.group-no {
+.supervisor-group-no {
   font-size: 1.08rem;
   font-weight: 700;
   background: #01337a13;
@@ -90,10 +93,9 @@
   padding: 4px 18px;
   margin-bottom: 11px;
   text-align: center;
-  font-family: inherit;
 }
 
-.group-title {
+.supervisor-group-title {
   font-size: 1.19rem;
   font-weight: 800;
   color: #01337a !important;
@@ -101,22 +103,11 @@
   text-align: center;
   min-height: 38px;
   word-break: break-word;
-  font-family: inherit;
-  text-decoration: none;
   cursor: default;
 }
 
-.group-title a,
-.group-title a:visited,
-.group-title a:active {
-  color: #01337a;
-  text-decoration: none;
-  font-weight: 800;
-  font-family: inherit;
-}
-
-.view-btn {
-  margin-top: auto;
+.supervisor-view-btn {
+  margin-top: 40px;
   padding: 12px 0;
   border-radius: 10px;
   border: none;
@@ -133,28 +124,31 @@
   justify-content: center;
   letter-spacing: 0.7px;
   transition: background 0.18s, color 0.19s, transform 0.17s;
-  font-family: inherit;
   text-align: center;
 }
 
-.view-btn:hover {
+.supervisor-view-btn:hover {
   background: white;
   color: #01337a;
   transform: scale(1.045) translateY(-1.5px);
 }
 
-/* Modal styles for details */
-.modal-overlay {
+/* ----- Modal ----- */
+.supervisor-modal-overlay {
   position: fixed;
   z-index: 1001;
-  left: 0; top: 0; right: 0; bottom: 0;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(20, 35, 69, 0.27);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: auto;
 }
-.modal-card {
+
+.supervisor-modal-card {
   background: #fff;
   border-radius: 20px;
   padding: 38px 40px 30px 40px;
@@ -167,9 +161,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  font-family: inherit;
 }
-.modal-close {
+
+.supervisor-modal-close {
   border: none;
   background: none;
   color: #01337a;
@@ -178,73 +172,78 @@
   top: 18px;
   right: 22px;
   cursor: pointer;
-  font-family: inherit;
 }
-.modal-close:hover { color: #f43f5e; }
-.modal-title {
+.supervisor-modal-close:hover {
+  color: #f43f5e;
+}
+
+.supervisor-modal-title {
   font-size: 1.55rem;
   font-weight: 900;
   color: #01337a;
   margin-bottom: 18px;
-  font-family: inherit;
   text-align: left;
   width: 100%;
 }
-.group-details-form {
+
+.supervisor-group-details-form {
   width: 100%;
   margin-bottom: 18px;
 }
-.group-detail-row {
+
+.supervisor-group-detail-row {
   margin-bottom: 5px;
   font-size: 1.09rem;
   display: flex;
   gap: 7px;
   align-items: center;
 }
-.group-detail-label {
+
+.supervisor-group-detail-label {
   font-weight: 700;
   color: #01337a;
   min-width: 170px;
-  font-family: inherit;
 }
-.group-detail-value {
+
+.supervisor-group-detail-value {
   font-weight: 500;
   color: #22223b;
-  font-family: inherit;
 }
-.status-badge {
+
+.supervisor-status-badge {
   display: inline-block;
   padding: 3.5px 18px;
   border-radius: 15px;
   font-weight: 700;
   font-size: 1.01rem;
   margin-left: 8px;
-  font-family: inherit;
   background: #fef7aa;
   color: #b58900;
 }
-.status-approved {
+
+.supervisor-status-approved {
   background: #d1fadf;
   color: #15803d;
 }
-.status-rejected {
+.supervisor-status-rejected {
   background: #fee2e2;
   color: #d62d20;
 }
-.status-pending {
+.supervisor-status-pending {
   background: #fef7aa;
   color: #b58900;
 }
-.progress-row {
+
+.supervisor-progress-row {
   margin: 14px 0 4px 0;
   width: 100%;
   font-size: 1.08rem;
-  font-family: inherit;
   display: flex;
   align-items: center;
   gap: 14px;
 }
-.progress-bar-bg {
+
+.supervisor-progress-bar-bg {
   width: 100%;
   background: #e5e7eb;
   height: 12px;
@@ -252,43 +251,45 @@
   overflow: hidden;
   margin: 6px 0 18px 0;
 }
-.progress-bar-fill {
+.supervisor-progress-bar-fill {
   background: #2563eb;
   height: 100%;
   min-width: 4%;
   transition: width 0.5s;
 }
-.modal-label {
+
+.supervisor-modal-label {
   font-weight: 700;
   color: #01337a;
   margin: 8px 0 5px 0;
-  font-family: inherit;
 }
-.member-table {
+
+.supervisor-member-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 22px;
   margin-top: 8px;
-  font-family: inherit;
 }
-.member-table th, .member-table td {
+
+.supervisor-member-table th,
+.supervisor-member-table td {
   padding: 8px 16px 8px 10px;
   font-size: 1.07rem;
   text-align: left;
-  font-family: inherit;
 }
-.member-table th {
+.supervisor-member-table th {
   color: #01337a;
   font-weight: 700;
   border-bottom: 2px solid #eaeaea;
   background: #f8faff;
 }
-.member-table td {
+.supervisor-member-table td {
   color: #183b56;
   font-weight: 500;
   border-bottom: 1px solid #e5e7eb;
 }
-.analytics-card {
+
+.supervisor-analytics-card {
   margin: 24px 0 0 0;
   background: #f5faff;
   border-radius: 18px;
@@ -297,34 +298,35 @@
   width: 100%;
   max-width: 650px;
   align-self: center;
-  font-family: inherit;
 }
-.chart-title {
+
+.supervisor-chart-title {
   font-size: 1.19rem;
   font-weight: 900;
   color: #2563eb;
   margin-bottom: 19px;
   letter-spacing: 0.2px;
   text-align: center;
-  font-family: inherit;
 }
 
 @media (max-width: 900px) {
-  .dashboard-title, .main-header, .section-desc, .group-cards-row {
+  .supervisor-dashboard-title,
+  .supervisor-main-header,
+  .supervisor-section-desc,
+  .supervisor-group-cards-row {
     margin-left: 0 !important;
     padding-left: 0 !important;
   }
-  .group-cards-row {
+  .supervisor-group-cards-row {
     justify-content: center;
-    padding-left: 0;
   }
-  .group-card {
+  .supervisor-group-card {
     align-items: center;
     text-align: center;
     min-width: 90vw;
     max-width: 98vw;
   }
-  .modal-card {
+  .supervisor-modal-card {
     padding: 16px 8px 14px 8px;
   }
 }

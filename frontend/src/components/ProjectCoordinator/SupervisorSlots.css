@@ -1,0 +1,133 @@
+/* SupervisorSlots.css - styles for SupervisorSlots.jsx
+   Place at: src/components/ProjectCoordinator/SupervisorSlots.css
+*/
+
+/* Description box (uses the exact visual you provided) */
+.section-desc {
+  margin-bottom: 12px;
+  color: #01337a;
+  background: rgb(249 250 255);
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+/* Table card wrapper */
+.sup-table-card {
+  border-radius: 12px;
+  padding: 0; /* AppTable handles inner spacing */
+}
+
+/* Name style used in table rows */
+.sup-name {
+  color: #102a43;
+  font-weight: 700;
+}
+
+/* Edit modal backdrop */
+.sup-edit-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Edit modal box */
+.sup-edit-modal {
+  width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 12px 40px rgba(2,6,23,0.25);
+  box-sizing: border-box;
+}
+
+/* Modal title */
+.sup-edit-title {
+  margin: 0 0 12px 0;
+  color: #01337a;
+  font-size: 1.05rem;
+}
+
+/* Edit row */
+.sup-edit-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+/* Label and input */
+.sup-edit-label {
+  width: 140px;
+  font-weight: 700;
+  color: #102a43;
+  font-size: 0.95rem;
+}
+.sup-edit-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #e6eef6;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+/* Modal actions */
+.sup-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+/* Save / Cancel buttons */
+.sup-btn-save {
+  background: linear-gradient(90deg,#2563eb,#01337a);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+}
+.sup-btn-cancel {
+  background: #6c757d;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Table action buttons (used by AppTable rows) */
+.table-action-btn {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  background: linear-gradient(90deg,#2563eb,#01337a);
+  color: #fff;
+  margin-right: 8px;
+}
+
+/* Delete variant */
+.table-action-btn.delete,
+.table-action-btn.delete:hover {
+  background: #f43f5e !important;
+  color: #fff !important;
+}
+
+/* Responsive tweak */
+@media (max-width: 800px) {
+  .sup-edit-modal {
+    width: 92%;
+  }
+  .sup-edit-label {
+    width: 110px;
+  }
+}
