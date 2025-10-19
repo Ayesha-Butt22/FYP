@@ -1,8 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import { toastService } from "../ToastService/ToastService.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 import "./ManageTemplates.css";
+
+/**
+ * ManageTemplates (backend-backed)
+ *
+ * Improvements in this version:
+ * - Uses REACT_APP_API_BASE (falls back to '') so frontend can run on different port.
+ * - Robust fetch error handling (checks response.ok and prints response text).
+ * - After successful upload, refreshes list from backend (avoids client/server drift).
+ * - Resets file input after upload/cancel.
+ * - Disable Save button until file is selected and not loading.
+ * - Uses server-returned id/filePath; original filename falls back to filePath basename.
+ */
+
+const API_BASE = "http://localhost:5000";
 
 const TEMPLATES = [
   { id: "t01", label: "Template-01: Project Team (MS Word)" },
@@ -33,19 +47,64 @@ export default function ManageTemplates() {
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedDept, setSelectedDept] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
-  // uploaded structure: { templateId: { deptCode: { fileName, fileUrl, uploadedAt, department } } }
-  const [uploaded, setUploaded] = useState({});
+  // uploadedList: array of { id, template, department, filePath, originalName, uploadedAt }
+  const [uploadedList, setUploadedList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchUploadedFiles();
+  }, []);
+
+  const fetchUploadedFiles = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/files`);
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        console.error("GET /api/files failed:", res.status, txt);
+        toastService.error(`Could not load uploaded templates (${res.status})`);
+        setUploadedList([]);
+        return;
+      }
+      const data = await res.json();
+      if (!data || !data.success) {
+        console.error("GET /api/files returned error:", data);
+        toastService.error("Could not load uploaded templates");
+        setUploadedList([]);
+        return;
+      }
+      const list = data.data.map((d) => ({
+        id: d._id || d.id,
+        template: d.template,
+        department: d.department,
+        filePath: d.filePath,
+        originalName: d.originalName || d.fileName || (d.filePath ? d.filePath.split("/").pop() : "file"),
+        uploadedAt: d.uploadedAt || d.createdAt || d.created_at,
+      }));
+      setUploadedList(list);
+    } catch (err) {
+      console.error("fetchUploadedFiles error", err);
+      toastService.error("Could not load uploaded templates (network error)");
+      setUploadedList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openModal = () => {
     setSelectedTemplate("");
     setSelectedDept("");
     setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     setIsOpen(true);
   };
 
   const closeModal = () => {
     setIsOpen(false);
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const onFileChange = (e) => {
@@ -83,98 +142,90 @@ export default function ManageTemplates() {
       toastService.error("Please upload a file before saving.");
       return;
     }
-    if (!hasAllowedExtension(selectedFile.name)) {
-      toastService.error("Only MS Word (.doc/.docx) or PowerPoint (.ppt/.pptx) files are allowed.");
-      return;
-    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("template", selectedTemplate);
+    formData.append("department", selectedDept);
 
     try {
-      // demo upload: create object URL; replace with real API call when available
-      const url = URL.createObjectURL(selectedFile);
-      const now = new Date().toISOString();
-
-      setUploaded((prev) => {
-        const copy = { ...(prev || {}) };
-        if (!copy[selectedTemplate]) copy[selectedTemplate] = {};
-        copy[selectedTemplate][selectedDept] = {
-          fileName: selectedFile.name,
-          fileUrl: url,
-          uploadedAt: now,
-          department: selectedDept,
-          templateLabel: TEMPLATES.find((t) => t.id === selectedTemplate)?.label || selectedTemplate,
-        };
-        return copy;
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/files/upload`, {
+        method: "POST",
+        body: formData,
       });
+
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        console.error("POST /api/files/upload failed:", res.status, txt);
+        toastService.error(`Upload failed (${res.status})`);
+        return;
+      }
+
+      const json = await res.json();
+      if (!json || !json.success) {
+        console.error("upload returned error:", json);
+        toastService.error(json?.message || "Upload failed");
+        return;
+      }
+
+      // refresh from server to ensure consistent state
+      await fetchUploadedFiles();
 
       toastService.success("Template uploaded successfully.");
       setIsOpen(false);
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
-      console.error("upload error", err);
+      console.error("upload API error", err);
       toastService.error("Upload failed. Try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDownload = (templateId, dept) => {
-    const entry = uploaded?.[templateId]?.[dept];
-    if (!entry) {
-      toastService.error("No uploaded file found.");
+  const handleDownload = (row) => {
+    if (!row || !row.filePath) {
+      toastService.error("File not available");
       return;
     }
-    const a = document.createElement("a");
-    a.href = entry.fileUrl;
-    a.download = entry.fileName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    const url = row.filePath.startsWith("http") ? row.filePath : (API_BASE ? API_BASE + row.filePath : window.location.origin + row.filePath);
+    window.open(url, "_blank");
   };
 
-  const handleRemove = async (templateId, dept) => {
-    const entry = uploaded?.[templateId]?.[dept];
-    if (!entry) {
+  const handleRemove = async (row) => {
+    if (!row || !row.id) {
       toastService.error("No uploaded file found to remove.");
       return;
     }
 
-    const ok = await Confirm(`Remove uploaded file "${entry.fileName}" for ${dept}?`);
+    const ok = await Confirm(`Remove uploaded file "${row.originalName}" for ${row.department}?`);
     if (!ok) return;
 
     try {
-      URL.revokeObjectURL(entry.fileUrl);
-    } catch (e) {
-      /* ignore */
-    }
-
-    setUploaded((prev) => {
-      const copy = { ...(prev || {}) };
-      if (copy[templateId] && copy[templateId][dept]) {
-        delete copy[templateId][dept];
-        if (Object.keys(copy[templateId]).length === 0) delete copy[templateId];
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/files/${row.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        console.error("DELETE /api/files/:id failed", res.status, txt);
+        toastService.error(`Delete failed (${res.status})`);
+        return;
       }
-      return copy;
-    });
-
-    toastService.success("Uploaded template removed.");
+      const json = await res.json();
+      if (!json || !json.success) {
+        toastService.error(json?.message || "Delete failed");
+        return;
+      }
+      // refresh
+      await fetchUploadedFiles();
+      toastService.success("Uploaded template removed.");
+    } catch (err) {
+      console.error("delete API error", err);
+      toastService.error("Delete failed. Try again.");
+    } finally {
+      setLoading(false);
+    }
   };
-
-  // Build a flat list of only uploaded entries to render (user requested: show only uploaded rows)
-  const uploadedList = [];
-  Object.keys(uploaded).forEach((templateId) => {
-    const map = uploaded[templateId];
-    if (!map) return;
-    Object.keys(map).forEach((dept) => {
-      const e = map[dept];
-      uploadedList.push({
-        templateId,
-        templateLabel: e.templateLabel || (TEMPLATES.find((t) => t.id === templateId)?.label || templateId),
-        department: dept,
-        fileName: e.fileName,
-        fileUrl: e.fileUrl,
-        uploadedAt: e.uploadedAt,
-      });
-    });
-  });
-
-  const hasUploads = uploadedList.length > 0;
 
   return (
     <div className="mt-root">
@@ -185,14 +236,12 @@ export default function ManageTemplates() {
       </div>
 
       <div className="mt-toolbar">
-        <button className="mt-primary" onClick={openModal}>
+        <button className="mt-primary" onClick={openModal} disabled={loading}>
           Upload Template
         </button>
       </div>
 
-      {/* Render table only when there are uploaded entries.
-          NOTE: only uploaded rows are shown (user request). */}
-      {hasUploads && (
+      {uploadedList.length > 0 && (
         <div className="mt-list">
           <h4>Uploaded templates</h4>
           <div className="mt-table">
@@ -206,14 +255,14 @@ export default function ManageTemplates() {
 
             <div className="mt-table-body">
               {uploadedList.map((row) => (
-                <div className="mt-row" key={`${row.templateId}_${row.department}`}>
-                  <div>{row.templateLabel}</div>
+                <div className="mt-row" key={`${row.id}`}>
+                  <div>{TEMPLATES.find((t) => t.id === row.template)?.label || row.template}</div>
                   <div>{row.department}</div>
-                  <div>{row.fileName}</div>
-                  <div>{new Date(row.uploadedAt).toLocaleString()}</div>
+                  <div>{row.originalName}</div>
+                  <div>{row.uploadedAt ? new Date(row.uploadedAt).toLocaleString() : "—"}</div>
                   <div>
-                    <button className="mt-btn" onClick={() => handleDownload(row.templateId, row.department)}>Download</button>
-                    <button className="mt-btn danger" onClick={() => handleRemove(row.templateId, row.department)}>Remove</button>
+                    <button className="mt-btn" onClick={() => handleDownload(row)}>Download</button>
+                    <button className="mt-btn danger" onClick={() => handleRemove(row)}>Remove</button>
                   </div>
                 </div>
               ))}
@@ -221,6 +270,7 @@ export default function ManageTemplates() {
           </div>
         </div>
       )}
+
       {/* Modal */}
       {isOpen && (
         <div className="mt-modal-backdrop" role="dialog" aria-modal="true">
@@ -229,11 +279,7 @@ export default function ManageTemplates() {
 
             <div className="mt-field">
               <label>Template</label>
-              <select
-                value={selectedTemplate}
-                onChange={(e) => setSelectedTemplate(e.target.value)}
-                required
-              >
+              <select value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)} required>
                 <option value="">-- choose template --</option>
                 {TEMPLATES.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -245,11 +291,7 @@ export default function ManageTemplates() {
 
             <div className="mt-field">
               <label>Department</label>
-              <select
-                value={selectedDept}
-                onChange={(e) => setSelectedDept(e.target.value)}
-                required
-              >
+              <select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)} required>
                 <option value="">-- choose department --</option>
                 {DEPARTMENTS.map((d) => (
                   <option key={d.value} value={d.value}>
@@ -261,18 +303,13 @@ export default function ManageTemplates() {
 
             <div className="mt-field">
               <label>Upload file</label>
-              <input
-                type="file"
-                accept={ALLOWED_EXTS.join(",")}
-                onChange={onFileChange}
-                required
-              />
+              <input ref={fileInputRef} type="file" accept={ALLOWED_EXTS.join(",")} onChange={onFileChange} required />
               <small className="mt-hint">Allowed: {ALLOWED_EXTS.join(", ")} — max 20 MB</small>
             </div>
 
             <div className="mt-modal-actions">
-              <button type="button" className="mt-btn cancel" onClick={closeModal}>Cancel</button>
-              <button type="submit" className="mt-btn primary">Save</button>
+              <button type="button" className="mt-btn cancel" onClick={closeModal} disabled={loading}>Cancel</button>
+              <button type="submit" className="mt-btn primary" disabled={loading || !selectedFile}>Save</button>
             </div>
           </form>
         </div>
