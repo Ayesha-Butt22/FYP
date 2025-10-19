@@ -27,10 +27,15 @@ import SupervisorAnalytics from "./SupervisorAnalytics";
 import SupervisorNotices from "./SupervisorNotices";
 import SupervisorProfile from "./SupervisorProfile";
 
+// Added import for StudentTemplates so Supervisors can view templates
+import StudentTemplates from "../Student/StudentTemplates.jsx";
+
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
   { label: "Idea & Proposal Review", icon: <AssignmentIcon /> },
   { label: "My Groups", icon: <GroupsIcon /> },
+  // Templates tab inserted after "My Groups"
+  { label: "Templates", icon: <DescriptionIcon /> },
   { label: "Milestones", icon: <StarIcon /> },
   { label: "Whiteboard", icon: <CampaignIcon /> },
   { label: "Meetings", icon: <CalendarMonthIcon /> },
@@ -61,6 +66,8 @@ export default function SupervisorDashboard() {
     "Overview": <OverviewSupervisor onTabChange={setActiveTab} />,
     "Idea & Proposal Review": <SupervisorIdeaReview />,
     "My Groups": <SupervisorGroups />,
+    // Templates tab component (uses StudentTemplates component)
+    "Templates": <StudentTemplates />,
     "Milestones": <SupervisorMilestones />,
     "Whiteboard": <SupervisorWhiteboard />,
     "Meetings": <SupervisorMeetings />,

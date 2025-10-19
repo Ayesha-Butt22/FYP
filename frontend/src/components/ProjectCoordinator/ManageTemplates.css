@@ -3,7 +3,6 @@
 .mt-root { padding-bottom: 18px; }
 
 .mt-desc {
- 
     color: #01337a;
     font-size: 1.11rem;
     font-weight: 600;
@@ -12,7 +11,6 @@
     padding: 12px 22px;
     margin: 18px 0 24px;
     letter-spacing: 0.1px;
-
 }
 
 /* Toolbar */
@@ -56,6 +54,7 @@
 .mt-quick-file { margin-top: 6px; display:flex; gap: 12px; align-items:center; }
 .mt-file-meta { color: #475569; font-weight:700; }
 .mt-file-actions { display:flex; gap:8px; }
+
 .mt-btn {
   background: #0b5ed7;
   color: #fff;
@@ -66,6 +65,21 @@
   font-weight: 700;
 }
 .mt-btn.danger { background: #f43f5e; }
+
+/* Add spacing between action buttons and right-align the action cell.
+   Using the last cell of the row (no changes required in JSX).
+*/
+.mt-row > div:last-child {
+  display: flex;
+  gap: 10px;                  /* space between buttons */
+  align-items: center;
+  justify-content: flex-end;  /* align buttons to the right inside the cell */
+}
+
+/* Prevent buttons from wrapping and keep them visually consistent */
+.mt-row > div:last-child .mt-btn {
+  white-space: nowrap;
+}
 
 /* List / table */
 .mt-list { margin-top: 12px; }
