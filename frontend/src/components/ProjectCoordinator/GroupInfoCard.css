@@ -1,11 +1,10 @@
 
 .group-cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  max-width: 1585px;
+    display: flex
+;
+    flex-wrap: wrap;
+    justify-content: space-between;
 }
-
 .group-card {
   flex: 0 0 calc(33.333% - 16px);
   display: flex;
@@ -18,12 +17,24 @@
   overflow: hidden;
   transition: all 0.3s ease;
   min-height: 550px;
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
 }
 
 .group-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
   border-color: #2563eb;
+  -webkit-transform: translateY(-4px);
+  -moz-transform: translateY(-4px);
+  -ms-transform: translateY(-4px);
+  -o-transform: translateY(-4px);
 }
 
 .card-header {

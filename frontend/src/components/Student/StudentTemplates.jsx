@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Box } from "@mui/material"; // Only Box is needed now
-import { toastService } from "../ToastService/ToastService";
+import { Box } from "@mui/material";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "../Admin/AppTable.jsx";
+import { toastService } from "../ToastService/ToastService";
+import "./StudentTemplates.css";
 
 let TemplateService = null;
 try {
@@ -34,7 +35,7 @@ const MOCK_FILES = [
     _id: "m3",
     template: "t01",
     templateLabel: "Template-01: Project Team (MS Word)",
-    department: "SE",
+    department: "CS",
     filePath: "/Filesk/mock-team.docx",
     originalName: "mock-team.docx",
     createdAt: new Date().toISOString(),
@@ -42,14 +43,25 @@ const MOCK_FILES = [
 ];
 
 export default function StudentTemplates() {
+  const [allFiles, setAllFiles] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Show only this department dropdown (All, SE, CS, CA)
+  const DEPARTMENTS = ["All", "SE", "CS", "CA"];
+  const [selectedDept, setSelectedDept] = useState("All");
 
   const headers = ["Template", "Department", "Filename", "Uploaded At"];
 
   useEffect(() => {
     loadTemplates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allFiles, selectedDept]);
 
   const loadTemplates = async () => {
     setLoading(true);
@@ -61,22 +73,20 @@ export default function StudentTemplates() {
         files = MOCK_FILES;
       }
 
-      const tableRows = files.map((f) => {
-        const filename = f.originalName || f.fileName || (f.filePath ? f.filePath.split("/").pop() : "");
-        const uploadedAt = f.uploadedAt || f.createdAt || f.created_at || "";
-        return {
-          Template: f.templateLabel || f.template || "Template",
-          Department: f.department || "",
-          Filename: filename,
-          "Uploaded At": uploadedAt ? new Date(uploadedAt).toLocaleString() : "",
-          __meta: f,
-        };
-      });
-      setRows(tableRows);
+      const normalized = files.map((f) => ({
+        id: f._id || f.id,
+        templateLabel: f.templateLabel || f.template || "Template",
+        department: f.department || "",
+        filename: f.originalName || f.fileName || (f.filePath ? f.filePath.split("/").pop() : ""),
+        filePath: f.filePath,
+        uploadedAt: f.uploadedAt || f.createdAt || f.created_at || "",
+        __raw: f,
+      }));
+      setAllFiles(normalized);
     } catch (err) {
       console.error("Could not load templates", err);
       toastService.error("Could not load templates: " + (err.message || ""));
-      setRows([]);
+      setAllFiles([]);
     } finally {
       setLoading(false);
     }
@@ -92,7 +102,7 @@ export default function StudentTemplates() {
   };
 
   const handleView = (row) => {
-    const meta = row.__meta;
+    const meta = row.__meta || row;
     if (!meta || !meta.filePath) {
       toastService.error("File not available");
       return;
@@ -102,7 +112,7 @@ export default function StudentTemplates() {
   };
 
   const handleDownload = (row) => {
-    const meta = row.__meta;
+    const meta = row.__meta || row;
     if (!meta || !meta.filePath) {
       toastService.error("File not available");
       return;
@@ -110,31 +120,77 @@ export default function StudentTemplates() {
     const url = buildFileUrl(meta.filePath);
     const a = document.createElement("a");
     a.href = url;
-    const filename = row.Filename || url.split("/").pop();
+    const filename = row.Filename || meta.filename || url.split("/").pop();
     a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
   };
 
-  const renderActions = (row) => (
-    <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-      <button className="mt-btn" onClick={() => handleView(row)} title="View" style={{ background: "#0b5ed7" }}>
-        View
-      </button>
-      <button className="mt-btn" onClick={() => handleDownload(row)} title="Download" style={{ background: "#2563eb" }}>
-        Download
-      </button>
-    </Box>
-  );
+  function applyFilters() {
+    const filtered = allFiles.filter((f) => {
+      if (selectedDept && selectedDept !== "All" && f.department !== selectedDept) return false;
+      return true;
+    });
+
+    const tableRows = filtered.map((f) => ({
+      Template: f.templateLabel,
+      Department: f.department,
+      Filename: f.filename,
+      "Uploaded At": f.uploadedAt ? new Date(f.uploadedAt).toLocaleString() : "—",
+      __meta: f,
+    }));
+    setRows(tableRows);
+  }
+
+  // AppTable action renderer
+  const renderActions = (row) => {
+    const meta = row.__meta || row;
+    return (
+      <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
+        <button className="mt-btn" onClick={() => handleView(row)} title="View" style={{ background: "#0b5ed7" }}>
+          View
+        </button>
+        <button className="mt-btn" onClick={() => handleDownload(row)} title="Download" style={{ background: "#2563eb" }}>
+          Download
+        </button>
+      </Box>
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedDept("All");
+  };
 
   return (
     <Box sx={{ pb: 3 }}>
-     
+      <DashboardSectionHeader description={"Here you can view the templates provided by the department and download them."}>
+        View Templates
+      </DashboardSectionHeader>
 
-      <DashboardSectionHeader description={"Here you can view the templates provided by the department and download them."}>View Templates</DashboardSectionHeader>
-                
-      <AppTable headers={headers} rows={rows} renderActions={renderActions} loading={loading} />
+      <Box className="st-controls">
+        <div className="st-filter">
+          <label>Department</label>
+          <select className="st-dept-select" value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)}>
+            {DEPARTMENTS.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <button className="st-clear-btn" onClick={clearFilters}>Clear filters</button>
+        </div>
+      </Box>
+
+      {loading ? (
+        <div className="st-loading">Loading templates…</div>
+      ) : (
+        <div style={{ marginTop: 12 }}>
+          <AppTable headers={headers} rows={rows} renderActions={renderActions} />
+          {rows.length === 0 && <div className="st-empty">No templates found for the selected department.</div>}
+        </div>
+      )}
     </Box>
   );
 }

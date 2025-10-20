@@ -24,7 +24,6 @@ import AppTable from "../Admin/AppTable.jsx";
 const sapidToEmail = (sapid) => sapid ? `${sapid}@students.riphah.edu.pk` : "";
 
 export default function StudentGroup() {
-  
   const [CURRENT_USER_SAPID, setCURRENT_USER_SAPID] = useState(localStorage.getItem("studentId") || "");
   const [CURRENT_USER_EMAIL, setCURRENT_USER_EMAIL] = useState(localStorage.getItem("email") || "");
   const [group, setGroup] = useState(null);
@@ -34,20 +33,13 @@ export default function StudentGroup() {
   const [step, setStep] = useState(1);
   const [groupChanged, setGroupChanged] = useState(0);
 
-
-  
   const [numMembers, setNumMembers] = useState("1");
   const [members, setMembers] = useState([
-    {
-      sapid: CURRENT_USER_SAPID,
-      email: sapidToEmail(CURRENT_USER_SAPID),
-      isLeader: true,
-    },
+    { sapid: CURRENT_USER_SAPID, email: sapidToEmail(CURRENT_USER_SAPID), isLeader: true },
     { sapid: "", email: "", isLeader: false },
     { sapid: "", email: "", isLeader: false },
   ]);
   const [error, setError] = useState("");
-
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -87,7 +79,6 @@ export default function StudentGroup() {
     if (CURRENT_USER_EMAIL) checkGroup();
   }, [CURRENT_USER_EMAIL, CURRENT_USER_SAPID, groupChanged]);
 
- 
   const handleNumMembersSubmit = (e) => {
     e.preventDefault();
     const num = Math.max(1, Math.min(3, Number(numMembers) || 1));
@@ -98,10 +89,9 @@ export default function StudentGroup() {
     }
     setError("");
     setStep(2);
-    setNumMembers(num.toString()); 
+    setNumMembers(num.toString());
   };
 
- 
   const handleMemberChange = (i, value) => {
     const newMembers = [...members];
     newMembers[i].sapid = value;
@@ -123,18 +113,9 @@ export default function StudentGroup() {
     }
     const groupObj = {
       groupId: generateGroupId(),
-      leader: {
-        sapId: members[0].sapid,
-        email: CURRENT_USER_EMAIL,
-      },
-      member2: num > 1 ? {
-        sapId: members[1].sapid,
-        email: members[1].email,
-      } : undefined,
-      member3: num > 2 ? {
-        sapId: members[2].sapid,
-        email: members[2].email,
-      } : undefined,
+      leader: { sapId: members[0].sapid, email: CURRENT_USER_EMAIL },
+      member2: num > 1 ? { sapId: members[1].sapid, email: members[1].email } : undefined,
+      member3: num > 2 ? { sapId: members[2].sapid, email: members[2].email } : undefined,
     };
 
     try {
@@ -163,7 +144,6 @@ export default function StudentGroup() {
     }
   };
 
- 
   const handleDeleteGroup = async () => {
     if (!group || !group._id) return;
     const confirmed = await Confirm("Are you sure you want to delete this group?");
@@ -172,11 +152,7 @@ export default function StudentGroup() {
       if (res && res.message) {
         setGroup(null);
         setMembers([
-          {
-            sapid: CURRENT_USER_SAPID,
-            email: sapidToEmail(CURRENT_USER_SAPID),
-            isLeader: true,
-          },
+          { sapid: CURRENT_USER_SAPID, email: sapidToEmail(CURRENT_USER_SAPID), isLeader: true },
           { sapid: "", email: "", isLeader: false },
           { sapid: "", email: "", isLeader: false },
         ]);
@@ -188,12 +164,12 @@ export default function StudentGroup() {
   };
 
   return (
-   <Box>
-  <DashboardSectionHeader
-              description="Here you can create your FYP group and add your team members. Once your group is created, you can view all team members and their details here."
-            >
-              My Group
-            </DashboardSectionHeader>
+    <Box className="studentgroup-page-container">
+      <DashboardSectionHeader
+        description="Here you can create your FYP group and add your team members. Once your group is created, you can view all team members and their details here."
+      >
+        My Group
+      </DashboardSectionHeader>
 
       {loading && (
         <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: 4 }}>
@@ -202,12 +178,12 @@ export default function StudentGroup() {
       )}
 
       {!loading && !group && (
-        <Box className="create-group-btn-wrap">
+        <Box className="studentgroup-create-group-btn-wrap">
           <Button
             variant="contained"
             size="large"
             onClick={() => setOpen(true)}
-            className="create-group-btn"
+            className="studentgroup-create-group-btn"
             startIcon={<AddIcon sx={{ fontSize: isMobile ? 25 : 35 }} />}
           >
             CREATE GROUP
@@ -216,9 +192,9 @@ export default function StudentGroup() {
       )}
 
       {!loading && group && (
-        <Box className="table-outer-wrap">
-          <Box className="group-card">
-            <Typography className="group-title">Group Members</Typography>
+        <Box className="studentgroup-table-outer-wrap">
+          <Box className="studentgroup-group-card">
+            <Typography className="studentgroup-group-title">Group Members</Typography>
             <Typography variant="subtitle1">{group.groupId}</Typography>
             <AppTable
               headers={["Role", "Name", "SAP ID", "Email"]}
@@ -231,11 +207,11 @@ export default function StudentGroup() {
             />
 
             {group.leader.email === CURRENT_USER_EMAIL && (
-              <Box className="delete-btn-wrap">
+              <Box className="studentgroup-delete-btn-wrap">
                 <Button
                   color="error"
                   variant="contained"
-                  className="delete-group-btn"
+                  className="studentgroup-delete-group-btn"
                   onClick={handleDeleteGroup}
                 >
                   DELETE GROUP
@@ -249,9 +225,9 @@ export default function StudentGroup() {
       <Dialog
         open={open}
         onClose={() => { setOpen(false); setStep(1); }}
-        PaperProps={{ className: "dialog-paper" }}
+        PaperProps={{ className: "studentgroup-dialog-paper" }}
       >
-        <DialogTitle className="dialog-title">
+        <DialogTitle className="studentgroup-dialog-title">
           {step === 1 ? "Enter Number of Group Members" : "Enter Member Details"}
         </DialogTitle>
         <DialogContent>
@@ -265,45 +241,38 @@ export default function StudentGroup() {
                 autoFocus
                 value={numMembers}
                 onChange={e => setNumMembers(e.target.value)}
-                inputProps={{
-                  min: 1,
-                  max: 3,
-                  step: 1,
-                  pattern: "\\d*",
-                  
-                  style: { MozAppearance: 'textfield' }
-                }}
-                className="num-members-input"
+                inputProps={{ min: 1, max: 3, step: 1, pattern: "\\d*", style: { MozAppearance: 'textfield' } }}
+                className="studentgroup-num-members-input"
               />
               {error && <Alert severity="error">{error}</Alert>}
-              <Button type="submit" variant="contained" fullWidth className="next-btn">
+              <Button type="submit" variant="contained" fullWidth className="studentgroup-next-btn">
                 NEXT
               </Button>
             </form>
           )}
 
           {step === 2 && (
-            <Stack spacing={3} className="member-list">
+            <Stack spacing={3} className="studentgroup-member-list">
               {[...Array(Math.max(1, Math.min(3, Number(numMembers) || 1)))].map((_, i) => (
-                <Box key={i} className="member-card">
-                  <Typography className="member-label">
+                <Box key={i} className="studentgroup-member-card">
+                  <Typography className="studentgroup-member-label">
                     {i === 0 ? "Leader" : `Member ${i + 1}`}
                   </Typography>
-                  <Box className="member-fields">
+                  <Box className="studentgroup-member-fields">
                     <TextField
                       label="SAP ID"
                       value={members[i].sapid}
                       onChange={e => handleMemberChange(i, e.target.value)}
                       fullWidth
                       disabled={i === 0}
-                      className="member-input"
+                      className="studentgroup-member-input"
                     />
                     <TextField
                       label="Email"
                       value={i === 0 ? CURRENT_USER_EMAIL : members[i].email}
                       disabled
                       fullWidth
-                      className="member-input"
+                      className="studentgroup-member-input"
                     />
                   </Box>
                 </Box>
@@ -314,11 +283,11 @@ export default function StudentGroup() {
         </DialogContent>
         <DialogActions>
           {step === 2 && (
-            <Button onClick={handleCreateGroup} variant="contained" className="create-btn">
+            <Button onClick={handleCreateGroup} variant="contained" className="studentgroup-create-btn">
               CREATE GROUP
             </Button>
           )}
-          <Button onClick={() => { setOpen(false); setStep(1); }} className="cancel-btn">
+          <Button onClick={() => { setOpen(false); setStep(1); }} className="studentgroup-cancel-btn">
             CANCEL
           </Button>
         </DialogActions>

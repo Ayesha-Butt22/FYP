@@ -8,7 +8,8 @@ import {
   School as SchoolIcon,
   Archive as ArchiveIcon,
   Description as DescriptionIcon,
-  Campaign as CampaignIcon
+  Campaign as CampaignIcon,
+  Dashboard
 } from "@mui/icons-material";
 import capImg from "../../assets/cap.png";
 import AdminOverview from "./AdminOverview";
@@ -22,7 +23,7 @@ import StudentTemplates from "../Student/StudentTemplates.jsx";
 import Noticeboard from "./Noticeboard"; // newly added
 
 const menu = [
-  { label: "Overview", icon: <DashboardIcon /> },
+  { label: "Dashboard", icon: <DashboardIcon /> },
   { label: "Manage Admin", icon: <PersonIcon /> },
   { label: "Manage Supervisors", icon: <GroupsIcon /> },
   { label: "Manage Project Coordinators", icon: <SupervisorAccountIcon /> },
@@ -49,7 +50,7 @@ export default function AdminDashboard() {
   };
 
   const tabComponents = {
-    Overview: <AdminOverview onTabChange={setActiveTab} />,
+    Dashboard: <AdminOverview onTabChange={setActiveTab} />,
     "Manage Admin": <ManageAdmin />,
     "Manage Supervisors": <ManageSupervisors />,
     "Manage Project Coordinators": <ManageCoordinators />,
@@ -66,7 +67,7 @@ export default function AdminDashboard() {
       headerTitle="Admin Dashboard"
       roleInfo={adminInfo}
       tabComponents={tabComponents}
-      defaultTab="Overview"
+      defaultTab="Dashboard"
       activeTab={activeTab}
       setActiveTab={setActiveTab}
       onLogout={handleLogout}
