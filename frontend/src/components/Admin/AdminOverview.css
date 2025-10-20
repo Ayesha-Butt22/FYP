@@ -121,7 +121,7 @@
 }
 @media (max-width: 700px) { .banner-title { font-size: 1.45rem; } }
 .banner-desc {
-  font-size: 1.23rem;
+  font-size: 18px;
   font-weight: 400;
   opacity: 0.98;
   color: #e3e8f5;
@@ -222,6 +222,10 @@
   width: 100%;
   margin-bottom: 18px;
   overflow: hidden;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 .progress-fill {
   background: #2563eb;

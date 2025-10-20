@@ -157,6 +157,10 @@
   font-size: 1rem;
   border-bottom: 1px solid #f0f1fa;
   transition: background 0.12s;
+  -webkit-transition:;
+  -moz-transition:;
+  -ms-transition:;
+  -o-transition:;
 }
 .dropdown-list-item:last-child { border-bottom: none; }
 .dropdown-list-item:hover { background: #e8eafc; }

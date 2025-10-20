@@ -97,11 +97,11 @@ export default function SupervisorSlots() {
 
   return (
     <>
-      <DashboardSectionHeader>Supervisor Slots</DashboardSectionHeader>
+     
 
-      <div className="section-desc">
-        You can manage supervisor slots and set a fixed limit for how many groups each supervisor can handle. This helps ensure balanced workload distribution.
-      </div>
+       <DashboardSectionHeader description={"You can manage supervisor slots and set a fixed limit for how many groups each supervisor can handle. This helps ensure balanced workload distribution."}>
+         Supervisor Slots
+        </DashboardSectionHeader>
 
       <div className="sup-table-card">
         <AppTable headers={headers} rows={rows} renderActions={renderActions} />

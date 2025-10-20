@@ -17,7 +17,10 @@ export default function AppTable({ headers = [], rows = [], renderActions }) {
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={headers.length + (renderActions ? 1 : 0)} style={{ textAlign: "center", color: "#888" }}>
+              <td
+                colSpan={headers.length + (renderActions ? 1 : 0)}
+                style={{ textAlign: "center", color: "#888" }}
+              >
                 No records found.
               </td>
             </tr>
@@ -26,8 +29,7 @@ export default function AppTable({ headers = [], rows = [], renderActions }) {
               <tr key={i}>
                 {Array.isArray(row)
                   ? row.map((cell, j) => <td key={j}>{cell}</td>)
-                  : headers.map((h, j) => <td key={j}>{row[h]}</td>)
-                }
+                  : headers.map((h, j) => <td key={j}>{row[h]}</td>)}
                 {renderActions && <td>{renderActions(row, i)}</td>}
               </tr>
             ))

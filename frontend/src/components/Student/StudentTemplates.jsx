@@ -1,25 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { Box } from "@mui/material"; // Only Box is needed now
 import { toastService } from "../ToastService/ToastService";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "../Admin/AppTable.jsx";
 
-/**
- * StudentTemplates (standalone / frontend-only)
- *
- * Behavior:
- * - If TemplateService is available at ../ProjectCoordinatorApi/TemplateService.jsx it will be used.
- * - Otherwise a mock dataset is used so the UI works without a backend.
- *
- * To enable real backend later:
- * - Create src/components/ProjectCoordinatorApi/TemplateService.jsx (as we discussed earlier)
- * - Ensure it exports default with getFiles() and buildFileUrl(filePath)
- * - The component will automatically use it.
- */
-
 let TemplateService = null;
 try {
-  // try to import TemplateService if it exists
-  // eslint-disable-next-line import/no-unresolved, global-require
   TemplateService = require("../ProjectCoordinatorApi/TemplateService.jsx").default;
 } catch (e) {
   TemplateService = null;
@@ -63,7 +49,6 @@ export default function StudentTemplates() {
 
   useEffect(() => {
     loadTemplates();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadTemplates = async () => {
@@ -71,14 +56,11 @@ export default function StudentTemplates() {
     try {
       let files = [];
       if (TemplateService && typeof TemplateService.getFiles === "function") {
-        // use real API service if available
         files = await TemplateService.getFiles();
       } else {
-        // no backend/service available -> use mock data (frontend-only mode)
         files = MOCK_FILES;
       }
 
-      // Map DB records to AppTable-friendly rows (object keyed by header text)
       const tableRows = files.map((f) => {
         const filename = f.originalName || f.fileName || (f.filePath ? f.filePath.split("/").pop() : "");
         const uploadedAt = f.uploadedAt || f.createdAt || f.created_at || "";
@@ -104,7 +86,6 @@ export default function StudentTemplates() {
     if (TemplateService && typeof TemplateService.buildFileUrl === "function") {
       return TemplateService.buildFileUrl(filePath);
     }
-    // frontend-only: use relative path so dev server can serve /public/Filesk/... if you place mocks there
     if (!filePath) return "";
     if (filePath.startsWith("http")) return filePath;
     return window.location.origin + filePath;
@@ -117,7 +98,6 @@ export default function StudentTemplates() {
       return;
     }
     const url = buildFileUrl(meta.filePath);
-    // Open in new tab for viewing
     window.open(url, "_blank");
   };
 
@@ -128,10 +108,8 @@ export default function StudentTemplates() {
       return;
     }
     const url = buildFileUrl(meta.filePath);
-    // Force download
     const a = document.createElement("a");
     a.href = url;
-    // use filename if available
     const filename = row.Filename || url.split("/").pop();
     a.download = filename;
     document.body.appendChild(a);
@@ -140,25 +118,23 @@ export default function StudentTemplates() {
   };
 
   const renderActions = (row) => (
-    <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+    <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
       <button className="mt-btn" onClick={() => handleView(row)} title="View" style={{ background: "#0b5ed7" }}>
         View
       </button>
       <button className="mt-btn" onClick={() => handleDownload(row)} title="Download" style={{ background: "#2563eb" }}>
         Download
       </button>
-    </div>
+    </Box>
   );
 
   return (
-    <div style={{ paddingBottom: 18 }}>
-      <DashboardSectionHeader>View templates</DashboardSectionHeader>
+    <Box sx={{ pb: 3 }}>
+     
 
-      <div style={{ color: "#01337a", fontSize: "1rem", marginBottom: 12 }}>
-        Here you can view your templates provided by the department and you can also download them.
-      </div>
-
-      <AppTable headers={headers} rows={rows} renderActions={renderActions} />
-    </div>
+      <DashboardSectionHeader description={"Here you can view the templates provided by the department and download them."}>View Templates</DashboardSectionHeader>
+                
+      <AppTable headers={headers} rows={rows} renderActions={renderActions} loading={loading} />
+    </Box>
   );
 }

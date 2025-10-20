@@ -66,23 +66,29 @@
 }
 .mt-btn.danger { background: #f43f5e; }
 
-/* Add spacing between action buttons and right-align the action cell.
-   Using the last cell of the row (no changes required in JSX).
-*/
+/* Add spacing between action buttons and right-align the action cell. */
 .mt-row > div:last-child {
   display: flex;
-  gap: 10px;                  /* space between buttons */
+  gap: 10px;
   align-items: center;
-  justify-content: flex-end;  /* align buttons to the right inside the cell */
+  justify-content: flex-end;
 }
 
-/* Prevent buttons from wrapping and keep them visually consistent */
 .mt-row > div:last-child .mt-btn {
   white-space: nowrap;
 }
 
 /* List / table */
 .mt-list { margin-top: 12px; }
+
+/* ✅ Updated "Uploaded templates" styling */
+.mt-list h4 {
+  font-weight: 700;       /* Bold */
+  color: #01337a;         /* Dark blue */
+  margin-bottom: 14px;    /* Space below */
+  font-size: 1.1rem;      /* Slightly prominent */
+}
+
 .mt-table { border-radius: 10px; overflow: hidden; border: 1px solid #eef3fb; }
 .mt-table-head {
   display: grid;

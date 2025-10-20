@@ -7,7 +7,8 @@ import {
   SupervisorAccount as SupervisorAccountIcon,
   School as SchoolIcon,
   Archive as ArchiveIcon,
-  Description as DescriptionIcon
+  Description as DescriptionIcon,
+  Campaign as CampaignIcon
 } from "@mui/icons-material";
 import capImg from "../../assets/cap.png";
 import AdminOverview from "./AdminOverview";
@@ -17,9 +18,8 @@ import ManageCoordinators from "./ManageCoordinators";
 import ApprovedStudents from "./ApprovedStudents";
 import GroupsGrid from "../ProjectCoordinator/GroupsGrid";
 import SupervisorArchive from "../Supervisor/SupervisorArchive";
-
-// Added: import StudentTemplates so Admin can view Templates tab
 import StudentTemplates from "../Student/StudentTemplates.jsx";
+import Noticeboard from "./Noticeboard"; // newly added
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
@@ -27,8 +27,8 @@ const menu = [
   { label: "Manage Supervisors", icon: <GroupsIcon /> },
   { label: "Manage Project Coordinators", icon: <SupervisorAccountIcon /> },
   { label: "Approved Students", icon: <SchoolIcon /> },
-  // Templates tab inserted after "Approved Students"
   { label: "Templates", icon: <DescriptionIcon /> },
+  { label: "Noticeboard", icon: <CampaignIcon /> }, // inserted
   { label: "View Groups", icon: <GroupsIcon /> },
   { label: "FYP Archive", icon: <ArchiveIcon /> }
 ];
@@ -54,8 +54,8 @@ export default function AdminDashboard() {
     "Manage Supervisors": <ManageSupervisors />,
     "Manage Project Coordinators": <ManageCoordinators />,
     "Approved Students": <ApprovedStudents />,
-    // Templates tab component (uses StudentTemplates component)
     "Templates": <StudentTemplates />,
+    "Noticeboard": <Noticeboard />, // wired here
     "View Groups": <GroupsGrid />,
     "FYP Archive": <SupervisorArchive />
   };

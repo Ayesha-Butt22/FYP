@@ -1,20 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
+import AppTable from "../Admin/AppTable.jsx";
 import { toastService } from "../ToastService/ToastService.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 import "./ManageTemplates.css";
-
-/**
- * ManageTemplates (backend-backed)
- *
- * Improvements in this version:
- * - Uses REACT_APP_API_BASE (falls back to '') so frontend can run on different port.
- * - Robust fetch error handling (checks response.ok and prints response text).
- * - After successful upload, refreshes list from backend (avoids client/server drift).
- * - Resets file input after upload/cancel.
- * - Disable Save button until file is selected and not loading.
- * - Uses server-returned id/filePath; original filename falls back to filePath basename.
- */
 
 const API_BASE = "http://localhost:5000";
 
@@ -184,27 +173,27 @@ export default function ManageTemplates() {
     }
   };
 
-  const handleDownload = (row) => {
-    if (!row || !row.filePath) {
+  const handleDownload = (meta) => {
+    if (!meta || !meta.filePath) {
       toastService.error("File not available");
       return;
     }
-    const url = row.filePath.startsWith("http") ? row.filePath : (API_BASE ? API_BASE + row.filePath : window.location.origin + row.filePath);
+    const url = meta.filePath.startsWith("http") ? meta.filePath : (API_BASE ? API_BASE + meta.filePath : window.location.origin + meta.filePath);
     window.open(url, "_blank");
   };
 
-  const handleRemove = async (row) => {
-    if (!row || !row.id) {
+  const handleRemove = async (meta) => {
+    if (!meta || !meta.id) {
       toastService.error("No uploaded file found to remove.");
       return;
     }
 
-    const ok = await Confirm(`Remove uploaded file "${row.originalName}" for ${row.department}?`);
+    const ok = await Confirm(`Remove uploaded file "${meta.originalName}" for ${meta.department}?`);
     if (!ok) return;
 
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/api/files/${row.id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE}/api/files/${meta.id}`, { method: "DELETE" });
       if (!res.ok) {
         const txt = await res.text().catch(() => "");
         console.error("DELETE /api/files/:id failed", res.status, txt);
@@ -227,13 +216,31 @@ export default function ManageTemplates() {
     }
   };
 
+  // Prepare rows for AppTable
+  const headers = ["Template", "Department", "Filename", "Uploaded At"];
+  const rows = uploadedList.map((r) => ({
+    Template: TEMPLATES.find((t) => t.id === r.template)?.label || r.template,
+    Department: r.department,
+    Filename: r.originalName,
+    "Uploaded At": r.uploadedAt ? new Date(r.uploadedAt).toLocaleString() : "—",
+    __meta: r,
+  }));
+
+  const renderActions = (row) => {
+    const meta = row.__meta;
+    return (
+      <>
+        <button className="table-action-btn" onClick={() => handleDownload(meta)}>Download</button>
+        <button className="table-action-btn" style={{ background: "#f43f5e" }} onClick={() => handleRemove(meta)}>Remove</button>
+      </>
+    );
+  };
+
   return (
     <div className="mt-root">
-      <DashboardSectionHeader>Manage Templates</DashboardSectionHeader>
-
-      <div className="mt-desc">
-        Here you can upload templates for each department so students can easily download them through their portal.
-      </div>
+      <DashboardSectionHeader description={"Here you can upload templates for each department so students can easily download them through their portal."}>
+        Manage Templates
+      </DashboardSectionHeader>
 
       <div className="mt-toolbar">
         <button className="mt-primary" onClick={openModal} disabled={loading}>
@@ -241,35 +248,14 @@ export default function ManageTemplates() {
         </button>
       </div>
 
-      {uploadedList.length > 0 && (
-        <div className="mt-list">
-          <h4>Uploaded templates</h4>
-          <div className="mt-table">
-            <div className="mt-table-head">
-              <div>Template</div>
-              <div>Department</div>
-              <div>Filename</div>
-              <div>Uploaded At</div>
-              <div>Action</div>
-            </div>
+      {loading && <div style={{ color: "#666", marginBottom: 8 }}>Loading…</div>}
 
-            <div className="mt-table-body">
-              {uploadedList.map((row) => (
-                <div className="mt-row" key={`${row.id}`}>
-                  <div>{TEMPLATES.find((t) => t.id === row.template)?.label || row.template}</div>
-                  <div>{row.department}</div>
-                  <div>{row.originalName}</div>
-                  <div>{row.uploadedAt ? new Date(row.uploadedAt).toLocaleString() : "—"}</div>
-                  <div>
-                    <button className="mt-btn" onClick={() => handleDownload(row)}>Download</button>
-                    <button className="mt-btn danger" onClick={() => handleRemove(row)}>Remove</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      <div className="mt-list">
+        <h4>Uploaded templates</h4>
+        <div>
+          <AppTable headers={headers} rows={rows} renderActions={renderActions} />
         </div>
-      )}
+      </div>
 
       {/* Modal */}
       {isOpen && (

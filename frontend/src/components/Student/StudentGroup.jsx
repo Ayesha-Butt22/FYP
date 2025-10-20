@@ -188,11 +188,12 @@ export default function StudentGroup() {
   };
 
   return (
-    <Box className="page-container">
-      <DashboardSectionHeader>My Group</DashboardSectionHeader>
-      <div className="section-desc">
-        Here you can create your FYP group and add your team members. Once your group is created, you can view all team members and their details here.
-      </div>
+   <Box>
+  <DashboardSectionHeader
+              description="Here you can create your FYP group and add your team members. Once your group is created, you can view all team members and their details here."
+            >
+              My Group
+            </DashboardSectionHeader>
 
       {loading && (
         <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: 4 }}>

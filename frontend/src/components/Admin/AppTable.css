@@ -23,17 +23,24 @@
 
 .app-table th,
 .app-table td {
-  padding: 14px 22px;
+  padding: 16px 24px; /* Slightly increased padding for bigger feel */
   text-align: left;
-  font-size: 1rem;
 }
 
 .app-table th {
   color: #fff;
+  font-size: 1.3rem; /* ✅ Bigger Header Font */
   font-weight: 700;
   letter-spacing: .2px;
   border-right: 1px solid #01337a11;
 }
+
+.app-table td {
+  color: #01337a;
+  font-size: 1.15rem; /* ✅ Bigger Row Font */
+  font-weight: 500;
+}
+
 
 .app-table th:last-child,
 .app-table td:last-child {
@@ -52,11 +59,6 @@
 
 .app-table tbody tr:hover {
   background: #e8eafc;
-}
-
-.app-table td {
-  color: #01337a;
-  font-weight: 500;
 }
 
 .app-table td .table-action-btn {

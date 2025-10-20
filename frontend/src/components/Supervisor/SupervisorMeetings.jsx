@@ -125,12 +125,13 @@ export default function SupervisorMeetings() {
 
   return (
       <>
-        <DashboardSectionHeader>Meetings</DashboardSectionHeader>
-
-        <div className="section-desc">
-          Here you can see all your meetings. Click "Add available slot" to add the time you are free to reach,
-          and you can also see your past and upcoming meetings.
-        </div>
+        
+        <DashboardSectionHeader
+                description={`Here you can see all your meetings. Click "Add available slot" to add the time you are free to reach,
+          and you can also see your past and upcoming meetings`}
+              >
+               Meetings
+              </DashboardSectionHeader>
 
         <Box width="100%">
           {/* Add Slot Button */}

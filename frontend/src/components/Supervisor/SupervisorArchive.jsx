@@ -62,13 +62,15 @@ export default function SupervisorArchive() {
 
   return (
       <Box>
-        <DashboardSectionHeader>FYP Archive</DashboardSectionHeader>
+        
+        
 
-        <div className="section-desc">
-          Here you can preview groups records. search functionality can be used to search records by project name, and
-          it also provides description and technologies used.
-        </div>
-
+<DashboardSectionHeader
+        description={`Here you can preview group records. Search functionality can be used to find records by project name, description, or technologies used.`}
+      >
+         FYP Archive
+      </DashboardSectionHeader>
+      
         <Box className="archive-container">
           <Stack spacing={0.5} mb={3}>
             <p style={{color: "#555", fontSize: 18, margin: 0}}>

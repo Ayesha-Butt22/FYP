@@ -190,10 +190,10 @@ export default function ManageCoordinators() {
   return (
     <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
       <div style={{ flex: sideFormMode ? '2' : '1', transition: 'flex 0.3s ease' }}>
-        <DashboardSectionHeader>Manage Project Coordinators</DashboardSectionHeader>
-        <div className="section-desc">
-          Admins can view the list of coordinators, add new coordinators, update existing coordinator details, and delete coordinators from the system.
-        </div>
+        
+
+  <DashboardSectionHeader description={" Admins can view the list of coordinators, add new coordinators, update existing coordinator details, and delete coordinators from the system."}>Manage Project Coordinators</DashboardSectionHeader>
+                  
         <div style={{ display: "flex", justifyContent: "right", margin: "20px 0" }}>
           <button
             className="add-supervisor-btn"

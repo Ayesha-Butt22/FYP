@@ -144,13 +144,13 @@ export default function SupervisorAnalytics() {
 
   return (
       <Box>
-        <DashboardSectionHeader>Analytics</DashboardSectionHeader>
-
-        <div className="section-desc">
-          Here you can see overall analysis. How particular groups are performing in certain milestones and
-          the pictorial graph to view the groups performance comparison
-        </div>
-
+       
+      <DashboardSectionHeader
+        description={`Here you can see overall analysis. How particular groups are performing in certain milestones and
+          the pictorial graph to view the groups performance comparison`}
+      >
+        Analytics
+      </DashboardSectionHeader>
         <div className="analytics-container">
           <Grid container spacing={9}>{groupLineCharts}</Grid>
 

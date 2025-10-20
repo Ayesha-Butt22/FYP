@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback} from "react";
-import DashboardSectionHeader from "./DashboardSectionHeader";
+import DashboardSectionHeader from "../Admin/DashboardSectionHeader.jsx";
 import AppTable from "./AppTable";
 import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
@@ -267,10 +267,8 @@ export default function ManageSupervisors() {
       <>
       <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
         <div style={{ flex: sideFormMode ? '2' : '1', transition: 'flex 0.3s ease' }}>
-          <DashboardSectionHeader>Manage Supervisors</DashboardSectionHeader>
-          <div className="section-desc">
-            Admins can view the list of supervisors, add new supervisors, update existing supervisor details, and delete supervisors from the system.
-          </div>
+          <DashboardSectionHeader description={"Admins can view the list of supervisors, add new supervisors, update existing supervisor details, and delete supervisors from the system."}>Manage Supervisors</DashboardSectionHeader>
+          
 
           <div style={{display: "flex", justifyContent: "right", margin: "20px 0" , gap: "20px"}}>
             <button

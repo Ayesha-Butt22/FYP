@@ -26,8 +26,6 @@ import SupervisorArchive from "./SupervisorArchive";
 import SupervisorAnalytics from "./SupervisorAnalytics";
 import SupervisorNotices from "./SupervisorNotices";
 import SupervisorProfile from "./SupervisorProfile";
-
-// Added import for StudentTemplates so Supervisors can view templates
 import StudentTemplates from "../Student/StudentTemplates.jsx";
 
 const menu = [

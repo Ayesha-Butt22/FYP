@@ -4,29 +4,20 @@ import AppTable from "./AppTable";
 import { toastService } from "../ToastService/ToastService.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 import {
-  Box,
-  Button,
-  MenuItem,
   Select,
-  TextField,
-  IconButton,
-  Stack,
-  Typography
+  MenuItem,
+  TextField
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
 import "./ManageDeadlines.css";
-
-
 
 const SESSIONS = ["Fall", "Spring"];
 const YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 
 const WEEKS = [
-  "Week 1","Week 2","Week 3","Week 4","Week 5",
-  "Week 6","Week 7","Week 8","Week 9","Week 10",
-  "Week 11","Week 12","Week 13","13th Week (before Final Exams)",
-  "Week 14","Week 15","Week After Finals"
+  "Week 1", "Week 2", "Week 3", "Week 4", "Week 5",
+  "Week 6", "Week 7", "Week 8", "Week 9", "Week 10",
+  "Week 11", "Week 12", "Week 13", "13th Week (before Final Exams)",
+  "Week 14", "Week 15", "Week After Finals"
 ];
 
 const TEMPLATES = [
@@ -51,7 +42,9 @@ const createEmptyRow = () => ({
 function FormInput({ label, error, children }) {
   return (
     <div className="form-group">
-      <label>{label} <span style={{ color: '#f43f5e' }}>*</span></label>
+      <label>
+        {label} <span style={{ color: '#f43f5e' }}>*</span>
+      </label>
       {children}
       {error && <span className="error-text">{error}</span>}
     </div>
@@ -59,7 +52,7 @@ function FormInput({ label, error, children }) {
 }
 
 export default function ManageDeadlines() {
-  const [rows, setRows] = useState([ createEmptyRow() ]);
+  const [rows, setRows] = useState([createEmptyRow()]);
   const [sideFormMode, setSideFormMode] = useState(null); // 'add' | 'edit' | null
   const [editIndex, setEditIndex] = useState(null);
   const [formData, setFormData] = useState(createEmptyRow());
@@ -92,7 +85,6 @@ export default function ManageDeadlines() {
     setRows(prev => prev.filter((_, i) => i !== idx));
     toastService.success("Deadline deleted");
     if (sideFormMode === 'edit' && editIndex === idx) resetForm();
-    // TODO: call backend DELETE endpoint here if needed
   };
 
   const validate = (data) => {
@@ -117,37 +109,28 @@ export default function ManageDeadlines() {
     if (Object.keys(errors).length > 0) return;
 
     if (sideFormMode === 'add') {
-      // Add new row
-      setRows(prev => [ { ...formData, id: Date.now()+Math.random() }, ...prev ]);
+      setRows(prev => [{ ...formData, id: Date.now() + Math.random() }, ...prev]);
       toastService.success("Deadline added");
       resetForm();
-      // TODO: POST to backend to persist
     } else if (sideFormMode === 'edit') {
-      // Update existing row
       setRows(prev => {
-        const copy = [...prev];
-        copy[editIndex] = { ...formData };
-        return copy;
+        const updatedRows = [...prev];
+        updatedRows[editIndex] = { ...formData };
+        return updatedRows;
       });
       toastService.success("Deadline updated");
       resetForm();
-      // TODO: PUT to backend to persist
     }
   };
 
-  const tableRows = rows.map((r) => ({
-    ...r,
-    id: r.id
-  }));
+  const tableRows = rows.map(r => ({ ...r }));
 
   return (
     <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
-      <div style={{ flex: sideFormMode ? '2' : '1', transition: 'flex 0.3s ease' }}>
-        <DashboardSectionHeader>Manage Deadlines</DashboardSectionHeader>
-
-        <div className="section-desc">
-          Define semester/session templates and set the final submission weeks/dates for your department.
-        </div>
+      <div style={{ flex: 2 }}>
+        <DashboardSectionHeader description={"Define semester/session templates and set the final submission weeks/dates for your department."}>
+          Manage Deadlines
+        </DashboardSectionHeader>
 
         <div style={{ display: "flex", justifyContent: "right", margin: "20px 0" }}>
           <button
@@ -187,25 +170,29 @@ export default function ManageDeadlines() {
       </div>
 
       {sideFormMode && (
-        <div style={{
-          flex: '1',
-          minWidth: '360px',
-          maxWidth: '460px',
-          backgroundColor: '#f8f9fa',
-          padding: '18px',
-          borderRadius: '8px',
-          boxShadow: '-2px 0 10px rgba(0,0,0,0.1)',
-          maxHeight: '90vh',
-          overflowY: 'auto'
-        }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '16px',
-            paddingBottom: '8px',
-            borderBottom: '2px solid #e9ecef'
-          }}>
+        <div
+          style={{
+            flex: '1',
+            minWidth: '360px',
+            maxWidth: '460px',
+            backgroundColor: '#f8f9fa',
+            padding: '18px',
+            borderRadius: '8px',
+            boxShadow: '-2px 0 10px rgba(0,0,0,0.1)',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '16px',
+              paddingBottom: '8px',
+              borderBottom: '2px solid #e9ecef'
+            }}
+          >
             <h3 style={{ margin: 0, color: '#01337a', fontSize: '1.05rem' }}>
               {sideFormMode === 'edit' ? 'Edit Deadline' : 'Add Deadline'}
             </h3>

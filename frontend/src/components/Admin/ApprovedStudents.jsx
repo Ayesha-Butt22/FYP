@@ -45,10 +45,7 @@ export default function ApprovedStudents() {
 
   return (
     <>
-      <DashboardSectionHeader>Approved Students</DashboardSectionHeader>
-      <div className="section-desc">
-        Admins can view registered students, approve them for portal access, or update their details.
-      </div>
+      <DashboardSectionHeader description={"Admins can view registered students, approve them for portal access, or update their details."}>Approved Students</DashboardSectionHeader>
       <AppTable
         headers={headers}
         rows={rows.map((row, i) => ({

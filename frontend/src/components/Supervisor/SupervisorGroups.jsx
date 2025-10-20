@@ -72,14 +72,12 @@ export default function SupervisorGroups() {
   const [selectedGroup, setSelectedGroup] = useState(null);
 
   return (
-    <div className="supervisor-page-container">
-      <DashboardSectionHeader>
+    <div>
+      <DashboardSectionHeader
+        description="Here you can view all FYP groups assigned to you. Click 'View Group Details' to see members, milestones, and progress analytics."
+      >
         My Groups
       </DashboardSectionHeader>
-
-      <div className="section-desc">
-        Here you can view all the FYP groups assigned to you. Click "View Group Details" to see team members, program, milestones, and progress analytics.
-      </div>
 
       <div className="supervisor-group-cards-row">
         {assignedGroups.map(group => (
@@ -120,44 +118,31 @@ export default function SupervisorGroups() {
               </div>
               <div className="supervisor-group-detail-row">
                 <span className="supervisor-group-detail-label">Proposal/Idea Status:</span>
-                <span
-                  className={`supervisor-status-badge supervisor-status-${selectedGroup.proposalStatus.toLowerCase()}`}
-                >
+                <span className={`supervisor-status-badge supervisor-status-${selectedGroup.proposalStatus.toLowerCase()}`}>
                   {selectedGroup.proposalStatus}
                 </span>
               </div>
 
               {/* ----- Progress Section ----- */}
               <div className="supervisor-progress-row">
-                <span>
-                  <b>Progress: </b>
-                  <span style={{ color: "#15803d", fontWeight: 700 }}>
-                    {selectedGroup.milestonesTotal && selectedGroup.milestonesCompleted
-                      ? Math.round((selectedGroup.milestonesCompleted / selectedGroup.milestonesTotal) * 100)
-                      : selectedGroup.progress || 0
-                    }%
-                  </span>
-                  &nbsp;({selectedGroup.milestonesCompleted} of {selectedGroup.milestonesTotal} milestones)
+                <b>Progress: </b>
+                <span style={{ color: "#15803d", fontWeight: 700, marginLeft: 4 }}>
+                  {Math.round((selectedGroup.milestonesCompleted / selectedGroup.milestonesTotal) * 100)}%
                 </span>
+                &nbsp;({selectedGroup.milestonesCompleted} of {selectedGroup.milestonesTotal} milestones)
               </div>
               <div className="supervisor-progress-bar-bg">
                 <div
                   className="supervisor-progress-bar-fill"
                   style={{
-                    width: `${
-                      selectedGroup.milestonesTotal && selectedGroup.milestonesCompleted
-                        ? Math.round((selectedGroup.milestonesCompleted / selectedGroup.milestonesTotal) * 100)
-                        : selectedGroup.progress || 0
-                    }%`
+                    width: `${Math.round((selectedGroup.milestonesCompleted / selectedGroup.milestonesTotal) * 100)}%`
                   }}
                 />
               </div>
             </div>
 
             {/* ----- Members Table ----- */}
-            <div className="supervisor-modal-label">
-              Group Members:
-            </div>
+            <div className="supervisor-modal-label">Group Members:</div>
             <table className="supervisor-member-table">
               <thead>
                 <tr>
@@ -186,8 +171,6 @@ export default function SupervisorGroups() {
                 }))}
                 size={290}
                 donutWidth={80}
-                centerTitle=""
-                centerValue=""
               />
             </div>
           </div>

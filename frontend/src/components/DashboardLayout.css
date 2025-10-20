@@ -92,6 +92,10 @@
   color: #01337a !important;
   transition: background 0.18s, color 0.19s;
   box-shadow: 0 2px 12px #0001;
+  -webkit-transition: background 0.18s, color 0.19s;
+  -moz-transition: background 0.18s, color 0.19s;
+  -ms-transition: background 0.18s, color 0.19s;
+  -o-transition: background 0.18s, color 0.19s;
 }
 .logout-area .MuiIconButton-root:hover {
   background: #e8eafc !important;
@@ -114,7 +118,7 @@
   margin-bottom: 20px;
 }
 .dashboard-title {
-  font-size: 2rem !important;
+     font-size: 3rem !important;
   font-weight: 900 !important;
   color: #01337a !important;
   margin: 0 !important;
@@ -131,8 +135,12 @@
   border-radius: 50%;
   box-shadow: 0 2px 12px #01337a22;
   background: #fff;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
 }
-.name-text {
+.name-text { 
   font-weight: 700;
   font-size: 1.13rem;
   color: #01337a;

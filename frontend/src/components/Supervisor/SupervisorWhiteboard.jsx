@@ -21,22 +21,25 @@ const GROUPS = [
   { id: "G-103", name: "Group 3" },
 ];
 
-// Export notes for all groups
+// Export notes as HTML
 function exportNotesAsHTML(notesByGroup) {
   const html =
     `<html><head><title>Supervisor Whiteboard Notes</title></head><body>` +
-    GROUPS.map(
-      (group) =>
+    GROUPS.map((group) => {
+      const notes = notesByGroup[group.id] || [];
+      return (
         `<h2>${group.name} (${group.id})</h2>` +
-        (notesByGroup[group.id] || [])
+        notes
           .map(
             (note) =>
               `<div><em>${note.date}</em></div>${note.content}<hr/>`
           )
           .join("") +
         "<br/>"
-    ).join("") +
+      );
+    }).join("") +
     `</body></html>`;
+
   const blob = new Blob([html], { type: "text/html" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -52,11 +55,13 @@ export default function SupervisorWhiteboard() {
     "G-102": [],
     "G-103": [],
   });
+
   const [inputs, setInputs] = useState({
     "G-101": "",
     "G-102": "",
     "G-103": "",
   });
+
   const [errors, setErrors] = useState({
     "G-101": "",
     "G-102": "",
@@ -91,20 +96,18 @@ export default function SupervisorWhiteboard() {
 
   return (
     <Box>
-      <Box textAlign="left" mb={2}>
-        <DashboardSectionHeader>Whiteboard</DashboardSectionHeader>
-        <div className="section-desc">
-          Here you can post all the FYP groups notes. Click "Post Note" to send that  group a note or message,
-          and you can view your old notes below.
-        </div>
+      <DashboardSectionHeader
+        description={`Here you can post notes for all FYP groups. Click "Post Note" to send a note to a group, and view past notes below.`}
+      >
+        Whiteboard
+      </DashboardSectionHeader>
 
-      </Box>
       <Stack
-          direction="row"
-          spacing={3}
-          justifyContent="center"
-          alignItems="flex-start"
-          className="group-stack"
+        direction="row"
+        spacing={3}
+        justifyContent="center"
+        alignItems="flex-start"
+        className="group-stack"
       >
         {GROUPS.map((group) => (
           <Paper elevation={3} key={group.id} className="group-card">
@@ -146,9 +149,7 @@ export default function SupervisorWhiteboard() {
             />
 
             {errors[group.id] && (
-              <Typography className="error-text">
-                {errors[group.id]}
-              </Typography>
+              <Typography className="error-text">{errors[group.id]}</Typography>
             )}
 
             <Button

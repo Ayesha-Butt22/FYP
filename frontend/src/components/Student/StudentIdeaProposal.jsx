@@ -95,14 +95,15 @@ export default function StudentIdeaProposal() {
 
   return (
 
-      <div className="idea-proposal-wrapper relative">
-        <DashboardSectionHeader>Idea & Proposal</DashboardSectionHeader>
-
-        <p className="section-desc">
-          Propose your FYP project, describe it briefly, list the tools you plan
+      <div>
+       
+<DashboardSectionHeader
+              description="Propose your FYP project, describe it briefly, list the tools you plan
           to use, and choose your speciality. Once done, select a supervisor to
-          continue.
-        </p>
+          continue."
+            >
+          Idea & Proposal
+            </DashboardSectionHeader>
 
         <form onSubmit={handleOpenSupervisorDialog} className="proposal-form">
           <div className="form-group">
