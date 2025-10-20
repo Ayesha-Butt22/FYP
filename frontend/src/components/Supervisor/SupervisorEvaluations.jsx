@@ -1,11 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
-  Box, Typography, Paper, Stack, Button, MenuItem, Select, FormControl, InputLabel,
-  TextField, Table, TableHead, TableRow, TableCell, TableBody, LinearProgress, Tooltip, Chip, Divider
+  Box,
+  Typography,
+  Paper,
+  Stack,
+  Button,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  TextField,
+  LinearProgress,
+  Tooltip,
+  Chip,
+  Divider,
+  IconButton,
+  InputAdornment,
+  Grid,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { PieChart } from "@mui/x-charts";
-import { CheckCircle } from "@mui/icons-material";
+import { CheckCircle, FileDownload, RestartAlt } from "@mui/icons-material";
 import DashboardSectionHeader from "./DashboardSectionHeader";
+import AppTable from "../Admin/AppTable.jsx";
 import "./SupervisorEvaluations.css";
 
 // Dummy Data
@@ -86,15 +103,19 @@ export default function SupervisorEvaluations() {
   const [formError, setFormError] = useState("");
   const [alreadyEvaluated, setAlreadyEvaluated] = useState(false);
 
+  // UI filters for All Evaluations table
+  const [evalSearch, setEvalSearch] = useState("");
+  const [evalMilestoneFilter, setEvalMilestoneFilter] = useState("All");
+
   useEffect(() => {
     setEvaluations(DUMMY_EVALUATIONS);
   }, []);
 
   useEffect(() => {
     if (selectedMilestone) {
-      setRubric(RUBRICS[selectedMilestone]);
-      setScores(Array(RUBRICS[selectedMilestone].length).fill(""));
-      setFeedback(Array(RUBRICS[selectedMilestone].length).fill(""));
+      setRubric(RUBRICS[selectedMilestone] || []);
+      setScores(Array((RUBRICS[selectedMilestone] || []).length).fill(""));
+      setFeedback(Array((RUBRICS[selectedMilestone] || []).length).fill(""));
     } else {
       setRubric([]);
       setScores([]);
@@ -119,7 +140,7 @@ export default function SupervisorEvaluations() {
   const weightedPercent = Math.round(percentage * 0.5);
 
   const handleScoreChange = (idx, value) => {
-    const v = Math.max(0, Math.min(Number(value), rubric[idx].maxMarks));
+    const v = Math.max(0, Math.min(Number(value || 0), rubric[idx].maxMarks));
     setScores(scores.map((s, i) => (i === idx ? v : s)));
   };
 
@@ -136,20 +157,18 @@ export default function SupervisorEvaluations() {
       setFormError("Enter valid marks for all criteria.");
       return;
     }
-    setEvaluations([
-      ...evaluations,
-      {
-        groupId: selectedGroup,
-        milestone: selectedMilestone,
-        scores: [...scores],
-        feedback: [...feedback],
-        totalMarks,
-        maxMarks,
-        percentage,
-        timestamp: new Date().toLocaleString(),
-        supervisor: true
-      }
-    ]);
+    const newEval = {
+      groupId: selectedGroup,
+      milestone: selectedMilestone,
+      scores: [...scores],
+      feedback: [...feedback],
+      totalMarks,
+      maxMarks,
+      percentage,
+      timestamp: new Date().toLocaleString(),
+      supervisor: true
+    };
+    setEvaluations(prev => [newEval, ...prev]);
     setSubmitted(true);
     setFormError("");
   };
@@ -158,6 +177,58 @@ export default function SupervisorEvaluations() {
     setSubmitted(false);
     setFormError("");
   }, [selectedGroup, selectedMilestone]);
+
+  // All Evaluations table: apply filters and search
+  const filteredEvaluations = useMemo(() => {
+    const term = (evalSearch || "").trim().toLowerCase();
+    return evaluations
+      .filter(ev => {
+        if (evalMilestoneFilter !== "All" && ev.milestone !== evalMilestoneFilter) return false;
+        if (!term) return true;
+        const groupName = GROUPS.find(g => g.id === ev.groupId)?.name || ev.groupId;
+        return (
+          groupName.toLowerCase().includes(term) ||
+          ev.milestone.toLowerCase().includes(term) ||
+          (ev.timestamp || "").toLowerCase().includes(term)
+        );
+      })
+      .map(ev => ({
+        Group: GROUPS.find(g => g.id === ev.groupId)?.name || ev.groupId,
+        Milestone: ev.milestone,
+        Score: `${ev.totalMarks}/${ev.maxMarks}`,
+        "%": `${ev.percentage}%`,
+        When: ev.timestamp.split(" ")[0],
+        __meta: ev
+      }));
+  }, [evaluations, evalSearch, evalMilestoneFilter]);
+
+  // CSV export (simple)
+  const exportCSV = () => {
+    const headers = ["Group", "Milestone", "Total Marks", "Max Marks", "Percentage", "Timestamp"];
+    const rows = evaluations
+      .filter(ev => ev.supervisor)
+      .map(ev => [
+        GROUPS.find(g => g.id === ev.groupId)?.name || ev.groupId,
+        ev.milestone,
+        ev.totalMarks,
+        ev.maxMarks,
+        ev.percentage + "%",
+        ev.timestamp
+      ]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `evaluations_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  // AppTable headers for All Evaluations
+  const evalHeaders = ["Group", "Milestone", "Score", "%", "When"];
 
   return (
     <Box>
@@ -168,32 +239,58 @@ export default function SupervisorEvaluations() {
       </DashboardSectionHeader>
 
       {/* Evaluation Form */}
-      <Paper className="evaluation-form-paper">
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2}>
-          <FormControl className="evaluation-form-control">
-            <InputLabel>Select Group</InputLabel>
-            <Select
-              value={selectedGroup}
-              label="Select Group"
-              onChange={e => setSelectedGroup(e.target.value)}
-              size="small"
-            >
-              {GROUPS.map(g => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
-            </Select>
-          </FormControl>
+      <Paper className="evaluation-form-paper elevated-card">
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={6} md={4}>
+            <FormControl fullWidth className="evaluation-form-control" variant="filled" size="small">
+              <InputLabel>Select Group</InputLabel>
+              <Select
+                value={selectedGroup}
+                label="Select Group"
+                onChange={e => setSelectedGroup(e.target.value)}
+                size="small"
+              >
+                <MenuItem value=""><em>Choose group</em></MenuItem>
+                {GROUPS.map(g => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Grid>
 
-          <FormControl className="evaluation-form-control">
-            <InputLabel>Select Milestone</InputLabel>
-            <Select
-              value={selectedMilestone}
-              label="Select Milestone"
-              onChange={e => setSelectedMilestone(e.target.value)}
+          <Grid item xs={12} sm={6} md={4}>
+            <FormControl fullWidth className="evaluation-form-control" variant="filled" size="small">
+              <InputLabel>Select Milestone</InputLabel>
+              <Select
+                value={selectedMilestone}
+                label="Select Milestone"
+                onChange={e => setSelectedMilestone(e.target.value)}
+                size="small"
+              >
+                <MenuItem value=""><em>Choose milestone</em></MenuItem>
+                {MILESTONES.map(m => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={12} md={4} sx={{ textAlign: { xs: "left", md: "right" } }}>
+            <Button
+              variant="outlined"
               size="small"
+              startIcon={<FileDownload />}
+              onClick={exportCSV}
+              sx={{ mr: 1 }}
             >
-              {MILESTONES.map(m => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
-            </Select>
-          </FormControl>
-        </Stack>
+              Export CSV
+            </Button>
+            <Button
+              variant="text"
+              size="small"
+              startIcon={<RestartAlt />}
+              onClick={() => { setSelectedGroup(""); setSelectedMilestone(""); setFormError(""); setSubmitted(false); }}
+            >
+              Reset form
+            </Button>
+          </Grid>
+        </Grid>
 
         <Divider className="evaluation-divider" />
 
@@ -203,45 +300,47 @@ export default function SupervisorEvaluations() {
             <Typography fontWeight={700} mb={1} className="rubric-title">
               Rubric for {selectedMilestone}
             </Typography>
-            <Table size="small" className="rubric-table enhanced-table">
-              <TableHead>
-                <TableRow>
-                  <TableCell className="table-header">Criteria</TableCell>
-                  <TableCell className="table-header">Max Marks</TableCell>
-                  <TableCell className="table-header">Marks</TableCell>
-                  <TableCell className="table-header">Comments</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rubric.map((item, idx) => (
-                  <TableRow key={item.name}>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.maxMarks}</TableCell>
-                    <TableCell>
-                      <TextField
-                        type="number"
-                        size="small"
-                        value={scores[idx]}
-                        inputProps={{ min: 0, max: item.maxMarks, className: "marks-input" }}
-                        onChange={e => handleScoreChange(idx, e.target.value)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <TextField
-                        value={feedback[idx]}
-                        onChange={e => handleFeedbackChange(idx, e.target.value)}
-                        size="small"
-                        placeholder="(optional)"
-                        inputProps={{ maxLength: 80, className: "feedback-input" }}
-                      />
-                    </TableCell>
+            <Box sx={{ overflowX: "auto" }}>
+              <Table size="small" className="rubric-table enhanced-table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell className="table-header">Criteria</TableCell>
+                    <TableCell className="table-header">Max Marks</TableCell>
+                    <TableCell className="table-header">Marks</TableCell>
+                    <TableCell className="table-header">Comments</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {rubric.map((item, idx) => (
+                    <TableRow key={item.name}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell>{item.maxMarks}</TableCell>
+                      <TableCell>
+                        <TextField
+                          type="number"
+                          size="small"
+                          value={scores[idx]}
+                          inputProps={{ min: 0, max: item.maxMarks, className: "marks-input" }}
+                          onChange={e => handleScoreChange(idx, e.target.value)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField
+                          value={feedback[idx]}
+                          onChange={e => handleFeedbackChange(idx, e.target.value)}
+                          size="small"
+                          placeholder="(optional)"
+                          inputProps={{ maxLength: 80, className: "feedback-input" }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
 
             {/* Total + Chart */}
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="center" mb={1}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="center" mb={1} mt={2}>
               <Box sx={{ minWidth: 230 }}>
                 <Typography fontWeight={700} className="total-marks">
                   Total: {totalMarks}/{maxMarks} &nbsp;
@@ -265,7 +364,7 @@ export default function SupervisorEvaluations() {
                     {
                       data: [
                         { id: 0, value: totalMarks, label: "Score", color: "#2563eb" },
-                        { id: 1, value: maxMarks - totalMarks, label: "Remaining", color: "#e5e7eb" }
+                        { id: 1, value: Math.max(0, maxMarks - totalMarks), label: "Remaining", color: "#e5e7eb" }
                       ],
                       innerRadius: 35,
                       outerRadius: 55,
@@ -292,7 +391,7 @@ export default function SupervisorEvaluations() {
             </Button>
           </>
         ) : (
-          <Typography color="#aaa" fontSize={15} my={3}>
+          <Typography color="#666" fontSize={15} my={3}>
             {submitted || alreadyEvaluated
               ? "Evaluation submitted for this group and milestone."
               : "Select a group and milestone to fill evaluation."}
@@ -323,56 +422,38 @@ export default function SupervisorEvaluations() {
 
       {/* All Evaluations */}
       <Paper className="evaluation-table-paper" sx={{ mt: 3, p: 2 }}>
-        <Typography fontWeight={700} className="all-evals-title">
-          All Evaluations Given
-        </Typography>
-        <Table size="small" className="all-evals-table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Group</TableCell>
-              <TableCell>Milestone</TableCell>
-              <TableCell>Score</TableCell>
-              <TableCell>%</TableCell>
-              <TableCell>When</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {evaluations.filter(e => e.supervisor).map(ev => (
-              <TableRow key={ev.groupId + ev.milestone}>
-                <TableCell>{GROUPS.find(g => g.id === ev.groupId)?.name || ev.groupId}</TableCell>
-                <TableCell>{ev.milestone}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={`${ev.totalMarks}/${ev.maxMarks}`}
-                    color="info"
-                    size="small"
-                    className="evaluation-chip"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={`${ev.percentage}%`}
-                    color={ev.percentage >= 70 ? "success" : "warning"}
-                    size="small"
-                    className="evaluation-chip percent-chip"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Tooltip title={ev.timestamp}>
-                    <span>{ev.timestamp.split(" ")[0]}</span>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-            {evaluations.filter(e => e.supervisor).length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5}>
-                  <Typography color="#aaa" align="center">No evaluations given yet.</Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        <Stack direction={{ xs: "column", sm: "row" }} alignItems="center" spacing={2} mb={2}>
+          <Typography fontWeight={700} className="all-evals-title">All Evaluations Given</Typography>
+
+          <Box sx={{ display: "flex", gap: 2, marginLeft: "auto", alignItems: "center" }}>
+            <TextField
+              size="small"
+              placeholder="Search group / milestone"
+              value={evalSearch}
+              onChange={e => setEvalSearch(e.target.value)}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><SearchIcon color="primary" /></InputAdornment>
+              }}
+            />
+            <FormControl size="small">
+              <Select value={evalMilestoneFilter} onChange={e => setEvalMilestoneFilter(e.target.value)}>
+                <MenuItem value="All">All milestones</MenuItem>
+                {MILESTONES.map(m => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+
+            <IconButton size="small" onClick={() => { setEvalSearch(""); setEvalMilestoneFilter("All"); }}>
+              <RestartAlt />
+            </IconButton>
+          </Box>
+        </Stack>
+
+        <AppTable headers={evalHeaders} rows={filteredEvaluations} />
+
+        <Box mt={2} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography color="#666">Showing {filteredEvaluations.length} of {evaluations.filter(e => e.supervisor).length} evaluations</Typography>
+          <Button variant="outlined" size="small" startIcon={<FileDownload />} onClick={exportCSV}>Export CSV</Button>
+        </Box>
       </Paper>
     </Box>
   );

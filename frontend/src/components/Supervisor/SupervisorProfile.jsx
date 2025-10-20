@@ -76,6 +76,10 @@ export default function SupervisorProfile({ supervisorInfo }) {
 
   return (
       <Box>
+          
+
+          
+
           <DashboardSectionHeader
                   description={`Here you can see your profile. Click "Add or + button" to add any idea that fills your mind for fyp,
               and your current skills are also visible to students you they can select the best from you.`}

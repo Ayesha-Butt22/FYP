@@ -1,43 +1,59 @@
+/* Improvements and refreshed UI for SupervisorEvaluations */
+
 .evaluation-form-paper,
 .evaluation-table-paper {
-  padding: 24px;
-  border-radius: 18px;
-  margin-bottom: 32px;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 28px;
   width: 100% !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  padding-top: 0 !important;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  box-shadow: 0 8px 30px rgba(1,51,122,0.06);
+  border: 1px solid #eef6ff;
 }
 
+/* subtle elevated card */
+.elevated-card {
+  transition: transform 120ms, box-shadow 120ms;
+}
+.elevated-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(1,51,122,0.08);
+}
+
+/* form controls */
 .evaluation-form-control {
-  min-width: 180px !important;
+  min-width: 200px !important;
 }
 
+/* divider */
 .evaluation-divider {
-  margin-bottom: 24px !important;
+  margin: 16px 0 !important;
+  border-color: #eef6ff !important;
 }
 
+/* rubric title */
 .rubric-title {
   font-weight: 700 !important;
   margin-bottom: 8px !important;
   color: #01337a !important;
 }
 
+/* tables */
 .rubric-table.enhanced-table,
 .all-evals-table {
   width: 100% !important;
-  table-layout: fixed !important;
+  table-layout: auto !important;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 5px #01337a13;
-  background: #f8fafc;
+  box-shadow: 0 2px 10px rgba(1,51,122,0.04);
+  background: #ffffff;
+  border: 1px solid #f1f7ff;
 }
 
 .rubric-table.enhanced-table .MuiTableCell-root,
 .all-evals-table .MuiTableCell-root {
-  padding: 13px 10px !important;
-  font-size: 16px !important;
-  width: auto !important;
+  padding: 12px 12px !important;
+  font-size: 15px !important;
   white-space: nowrap;
 }
 
@@ -46,91 +62,73 @@
   height: 50px !important;
 }
 
+/* header cells */
 .table-header {
   font-weight: 800 !important;
-  background: #f1f5fa !important;
-  font-size: 16px !important;
+  background: linear-gradient(90deg,#f7fbff,#f1f7ff) !important;
+  font-size: 15px !important;
   color: #01337a !important;
+  border-bottom: 2px solid #e6f0ff !important;
 }
 
+/* inputs */
 .marks-input {
-  width: 65px !important;
+  width: 80px !important;
 }
-
 .feedback-input {
-  width: 170px !important;
+  width: 240px !important;
 }
 
+/* totals */
 .total-marks {
   font-weight: 700 !important;
   color: #2563eb !important;
 }
-
 .total-percentage {
   color: #01337a !important;
+  font-weight: 700;
 }
-
 .supervisor-weight {
   font-weight: 600 !important;
-  font-size: 16px !important;
+  font-size: 15px !important;
   color: #219653 !important;
 }
 
+/* progress */
 .linear-progress-box {
-  width: 220px;
+  width: 260px;
   margin-top: 8px;
 }
-
 .custom-linear-progress {
   height: 10px !important;
   border-radius: 6px !important;
-  background: #e5e7eb !important;
+  background: #eef3fb !important;
 }
 .custom-linear-progress .MuiLinearProgress-bar {
-  background: #2563eb !important;
+  background: linear-gradient(90deg,#2563eb,#01337a) !important;
 }
 
+/* chips and badges */
 .evaluated-chip {
   font-weight: 700 !important;
   margin-bottom: 4px !important;
-  font-size: 1rem !important;
+  font-size: 0.95rem !important;
 }
-
-.submit-evaluation-btn {
-  font-weight: 700 !important;
-  padding-left: 32px !important;
-  padding-right: 32px !important;
-  margin-top: 8px !important;
-}
-
 .all-evals-title {
   font-weight: 700 !important;
   color: #01337a !important;
-  margin-bottom: 16px !important;
   display: block;
 }
 
-.evaluation-chip {
-  font-size: 0.93rem !important;
-  min-width: 44px !important;
-  height: 28px !important;
-  padding: 0 8px !important;
-  margin-right: 5px !important;
-  vertical-align: middle;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
+/* table action area spacing */
+.app-table-outer {
+  margin-top: 8px;
 }
 
-.evaluation-chip.percent-chip {
-  min-width: 52px !important;
-}
-
-.rubric-piechart-wrap {
-  min-width: 170px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-left: 10px;
+/* responsive */
+@media (max-width: 900px) {
+  .evaluation-form-control { min-width: 140px !important; }
+  .marks-input { width: 60px !important; }
+  .feedback-input { width: 140px !important; }
+  .linear-progress-box { width: 100%; }
 }
