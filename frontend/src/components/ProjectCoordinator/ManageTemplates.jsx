@@ -229,9 +229,12 @@ export default function ManageTemplates() {
   const renderActions = (row) => {
     const meta = row.__meta;
     return (
+
       <>
+      <div className = "render-actions-btn">
         <button className="table-action-btn" onClick={() => handleDownload(meta)}>Download</button>
         <button className="table-action-btn" style={{ background: "#f43f5e" }} onClick={() => handleRemove(meta)}>Remove</button>
+        </div>
       </>
     );
   };

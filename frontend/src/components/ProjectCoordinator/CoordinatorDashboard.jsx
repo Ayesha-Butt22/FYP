@@ -15,7 +15,7 @@ import GroupsTab from "./GroupsGrid";
 import SupervisorSlots from "./SupervisorSlots";
 import ManageTemplates from "./ManageTemplates";
 import SupervisorArchive from "../Supervisor/SupervisorArchive";
-import Noticeboard from "./Noticeboard"; // imported Noticeboard from Admin
+import Noticeboard from "../Admin/Noticeboard"; 
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },

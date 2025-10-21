@@ -141,6 +141,11 @@
 .mt-btn.primary { background: linear-gradient(90deg,#2563eb,#01337a); color:#fff; padding: 8px 12px; border-radius: 8px; border:none; cursor:pointer; font-weight:700; }
 
 .mt-no-file { color:#9ca3af; font-style:italic; }
+.render-actions-btn
+{
+  display: flex;
+  flex-direction: row;
+}
 
 /* Responsive */
 @media (max-width: 720px) {
@@ -149,3 +154,4 @@
   .mt-quick-select { min-width: 100%; }
   .mt-modal { width: 92%; }
 }
+
