@@ -29,7 +29,7 @@ import SupervisorProfile from "./SupervisorProfile";
 import StudentTemplates from "../Student/StudentTemplates.jsx";
 
 const menu = [
-  { label: "Overview", icon: <DashboardIcon /> },
+  // { label: "Overview", icon: <DashboardIcon /> },
   { label: "Idea & Proposal Review", icon: <AssignmentIcon /> },
   { label: "My Groups", icon: <GroupsIcon /> },
   // Templates tab inserted after "My Groups"

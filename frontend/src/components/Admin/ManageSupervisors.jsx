@@ -259,6 +259,24 @@ export default function ManageSupervisors() {
       toastService.error("Delete failed: " + (res.error || res.data?.message || 'Unknown error'));
     }
   };
+
+
+  const handleMakeCoordinator = async (idx) => {
+    const confirmed = await Confirm("Are you sure you want to make this user Coordinator?");
+    if (!confirmed) {
+      return;
+    }
+    const id = rows[idx].ID;
+    const res = await adminSupervisorApi.makeCoordinator(id);
+    if (res.success) {
+      setRows((prev) => prev.filter((_, i) => i !== idx));
+      if (editIndex === idx) resetForm();
+      toastService.success('Promoted to Coordinator successfully!');
+    } else {
+      toastService.error("Coordinator role assigning  failed: " + (res.error || res.data?.message || 'Unknown error'));
+    }
+
+  }
   const openAddForm = () => {
     resetForm();
     setSideFormMode('add');
@@ -306,15 +324,25 @@ export default function ManageSupervisors() {
                           </button>
                           <button
                               className="table-action-btn"
-                              style={{ background: "#f43f5e" }}
+                              style={{background: "#f43f5e"}}
                               onClick={() => handleDelete(i)}
                               disabled={sideFormMode}
                           >
                             Delete
                           </button>
+
+                          <button
+                              className="table-action-btn"
+                              style={{background: "#013379"}}
+                              onClick={() => handleMakeCoordinator(i)}
+                              disabled={sideFormMode}
+                          >
+                            Make Coordinator
+                          </button>
+
                         </>
                     )}
-                />
+              />
               </div>
           )}
         </div>

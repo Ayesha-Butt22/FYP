@@ -12,3 +12,25 @@ body {
   font-family: 'Inter', sans-serif;
   /* background: var(--color-background-light); */
 }
+
+/* Global Styles */
+
+/*p {*/
+/*  font-size: 18px !important;*/
+/*  font-weight: 400 !important;*/
+/*  opacity: 0.98 !important;*/
+/*  color: #e3e8f5 !important;*/
+/*}*/
+
+td {
+  color: #01337a !important;
+  font-weight: 500 !important;
+  text-align: left !important;
+  font-size: 17px !important;
+}
+
+label {
+  font-weight: 700 !important;
+  color: #01337a !important;
+  font-size: 1rem !important;
+}

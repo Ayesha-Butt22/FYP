@@ -80,7 +80,9 @@ class AdminApis {
     async deleteSupervisor(id) {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
-
+    async makeCoordinator(id) {
+        return await this.makeAPICall(`admin/promote/${id}`, {}, { method: "POST" });
+    }
     async getstats() {
         return await this.makeAPICall("admin/stats", {}, { method: "GET" });
     }

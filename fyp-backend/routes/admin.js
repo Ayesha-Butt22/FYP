@@ -68,5 +68,6 @@ router.put(
 // DELETE USER
 router.delete('/:id', protect, isAdmin, adminController.deleteUser);
 router.get('/stats', protect, isAdmin, adminController.getSystemStats);
+router.post('/promote/:id', protect, isAdmin, adminController.makeCoordinator);
 
 module.exports = router;

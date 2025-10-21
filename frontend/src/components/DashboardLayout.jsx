@@ -1,8 +1,11 @@
-import React from "react";
+import React, {useEffect, useRef, useState} from "react";
 import styled, { keyframes } from "styled-components";
 import { IconButton, Tooltip } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
+import Avatar from "@mui/material/Avatar";
 import "./DashboardLayout.css";
+import ToastService from "./ToastService/ToastService.jsx";
+import ProfileService from "./Api/ProfileService.jsx";
 
 const fadeIn = keyframes`
   0% { opacity: 0; transform: translateY(20px);}
@@ -30,15 +33,38 @@ export default function DashboardLayout({
   headerTitle,
   roleInfo,
   tabComponents,
-  defaultTab = "",
   onLogout,
-  profileIcon,
   children, activeTab, setActiveTab,
 }) {
-  // Only show name (no SAP ID)
+  const [profilePic, setProfilePic] = useState(null);
+  const fileInputRef = useRef(null);
   const displayName = localStorage.getItem("name") || roleInfo.name || "User";
-  // subtitle intentionally disabled
-  // const displaySubtitle = "";
+  const email = localStorage.getItem("email");
+
+  useEffect(() => {
+    const loadProfilePic = async () => {
+      if (!email) return;
+      const imageUrl = await ProfileService.getProfilePic(email);
+      if (imageUrl) setProfilePic(imageUrl);
+    };
+    loadProfilePic();
+  }, [email]);
+
+  const handleUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      await ProfileService.uploadProfilePic(email, file);
+      ToastService.success("Profile picture uploaded!");
+      const imageUrl = await ProfileService.getProfilePic(email);
+      if (imageUrl) setProfilePic(imageUrl);
+    } catch {
+      ToastService.error("Upload failed!");
+    }
+  };
+
+  const handleAvatarClick = () => fileInputRef.current.click();
 
   return (
     <DashboardLayoutStyled>
@@ -77,11 +103,33 @@ export default function DashboardLayout({
         <header className="dashboard-header">
           <h1 className="dashboard-title">{headerTitle}</h1>
           <div className="dashboard-profile">
-            {profileIcon}
-            <div className="name-text">
-              {displayName}
-              {/* No SAP ID/subtitle here */}
-            </div>
+            <Tooltip title="Click to change profile picture">
+              <Avatar
+                  src={profilePic || "/default-avatar.png"}
+                  alt={displayName}
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    marginRight: "10px",
+                    cursor: "pointer",
+                    border: "2px solid #ddd",
+                    transition: "0.3s",
+                    "&:hover": {
+                      borderColor: "#1976d2",
+                      transform: "scale(1.05)",
+                    },
+                  }}
+                  onClick={handleAvatarClick}
+              />
+            </Tooltip>
+            <div className="name-text">{displayName}</div>
+            <input
+                type="file"
+                accept="image/png, image/jpeg, image/jpg, image/webp"
+                ref={fileInputRef}
+                onChange={handleUpload}
+                style={{display: "none"}}
+            />
           </div>
         </header>
         {tabComponents[activeTab]}

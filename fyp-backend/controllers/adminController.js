@@ -190,6 +190,19 @@ exports.getSystemStats = async (req, res) => {
 };
 
 
+exports.makeCoordinator = async (req , res ) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    user.role = "coordinator";
+    await user.save();
+    return res.json({ message: "User promoted successfully" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+
+}
+
   exports.uploadExcelAndCreateUsers = async (req, res) => {
     try {
       if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -204,17 +217,18 @@ exports.getSystemStats = async (req, res) => {
       let skippedUsers = [];
 
       for (const row of sheetData) {
-        const { id , name, email, password, role, department, specialization, availableSlots, bookedSlots } = row;
+        const { id , name, email, password, department, specialization, availableSlots, bookedSlots } = row;
 
-        if (!name || !email || !password || !role) {
+        if (!name || !email || !password) {
           skippedUsers.push({ email, reason: "Missing required fields" });
           continue;
         }
 
-        if (!["admin", "supervisor", "coordinator"].includes(role)) {
-          skippedUsers.push({ email, reason: "Invalid role" });
-          continue;
-        }
+        //
+        // if (!["admin", "supervisor", "coordinator"].includes(role)) {
+        //   skippedUsers.push({ email, reason: "Invalid role" });
+        //   continue;
+        // }
 
         if (!isValidOfficialEmail(email)) {
           skippedUsers.push({ email, reason: "Invalid email format" });
@@ -234,7 +248,7 @@ exports.getSystemStats = async (req, res) => {
           name,
           email,
           password: hashed,
-          role,
+          role: 'supervisor',
           department,
           specialization,
           availableSlots: availableSlots || 0,

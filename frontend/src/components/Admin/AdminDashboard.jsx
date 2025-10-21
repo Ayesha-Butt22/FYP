@@ -23,7 +23,7 @@ import StudentTemplates from "../Student/StudentTemplates.jsx";
 import Noticeboard from "./Noticeboard"; // newly added
 
 const menu = [
-  { label: "Dashboard", icon: <DashboardIcon /> },
+  // { label: "Dashboard", icon: <DashboardIcon /> },
   { label: "Manage Admin", icon: <PersonIcon /> },
   { label: "Manage Supervisors", icon: <GroupsIcon /> },
   { label: "Manage Project Coordinators", icon: <SupervisorAccountIcon /> },
@@ -43,7 +43,7 @@ const adminInfo = {
 };
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("Overview");
+  const [activeTab, setActiveTab] = useState("Dashboard");
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/auth";

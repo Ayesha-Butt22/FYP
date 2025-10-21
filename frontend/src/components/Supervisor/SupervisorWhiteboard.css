@@ -9,8 +9,9 @@
   flex-wrap: wrap;
 }
 
-.group-card {
+.whiteboardsup-group-card {
   flex: 1 1 30%;
+  padding: 23px;
   min-width: 300px;
   max-width: none;
 }

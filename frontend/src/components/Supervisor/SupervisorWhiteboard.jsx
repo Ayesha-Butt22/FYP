@@ -21,7 +21,6 @@ const GROUPS = [
   { id: "G-103", name: "Group 3" },
 ];
 
-// Export notes as HTML
 function exportNotesAsHTML(notesByGroup) {
   const html =
     `<html><head><title>Supervisor Whiteboard Notes</title></head><body>` +
@@ -110,7 +109,7 @@ export default function SupervisorWhiteboard() {
         className="group-stack"
       >
         {GROUPS.map((group) => (
-          <Paper elevation={3} key={group.id} className="group-card">
+          <Paper elevation={3} key={group.id} className="whiteboardsup-group-card">
             <Stack direction="row" alignItems="center" spacing={1} mb={2}>
               <Typography className="group-title">{group.name}</Typography>
               <Tooltip title="Export notes as HTML file">

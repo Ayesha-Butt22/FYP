@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connect
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
@@ -35,6 +35,8 @@ app.use("/api/student", require("./routes/student"));
  * FileRouter at: fyp-backend/routes/FileRouter.js
  */
 app.use('/api/files', require('./routes/FileRouter'));
+app.use("/api/profile-pic", require("./routes/profile"));
+
 
 // Test route
 app.get('/', (req, res) => res.send('API Running'));
