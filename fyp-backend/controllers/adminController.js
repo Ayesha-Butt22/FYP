@@ -215,20 +215,28 @@ exports.makeCoordinator = async (req , res ) => {
 
       let createdUsers = [];
       let skippedUsers = [];
+      const designationSlotsMap = {
+        'dean': 0,
+        'professor': 1,
+        'associateprofessor': 2,
+        'assistantprofessor': 3,
+        'lecturer': 3,
+        'sr.lecturer': 3,
+        'srlecturer': 3,
+        'juniorlecturer': 2,
+        'researchassociate': 1,
+        'researchassistant': 1,
+        'teachingfellow': 1
+      };
+
 
       for (const row of sheetData) {
-        const { id , name, email, password, department, specialization, availableSlots, bookedSlots } = row;
+        const { id , name, email, password, department, specialization, designation, bookedSlots } = row;
 
         if (!name || !email || !password) {
           skippedUsers.push({ email, reason: "Missing required fields" });
           continue;
         }
-
-        //
-        // if (!["admin", "supervisor", "coordinator"].includes(role)) {
-        //   skippedUsers.push({ email, reason: "Invalid role" });
-        //   continue;
-        // }
 
         if (!isValidOfficialEmail(email)) {
           skippedUsers.push({ email, reason: "Invalid email format" });
@@ -238,6 +246,25 @@ exports.makeCoordinator = async (req , res ) => {
         const existing = await User.findOne({ email });
         if (existing) {
           skippedUsers.push({ email, reason: "Already exists" });
+          continue;
+        }
+
+        let availableSlots = 0;
+        let normalizedDesignation = '';
+
+        if (designation) {
+          normalizedDesignation = designation.toString().toLowerCase().replace(/\s+/g, '');
+          if (designationSlotsMap.hasOwnProperty(normalizedDesignation)) {
+            availableSlots = designationSlotsMap[normalizedDesignation];
+          } else {
+            skippedUsers.push({
+              email,
+              reason: `Invalid designation: ${designation}`
+            });
+            continue;
+          }
+        } else {
+          skippedUsers.push({ email, reason: "Missing designation" });
           continue;
         }
 
@@ -251,7 +278,8 @@ exports.makeCoordinator = async (req , res ) => {
           role: 'supervisor',
           department,
           specialization,
-          availableSlots: availableSlots || 0,
+          designation: designation,
+          availableSlots: availableSlots,
           bookedSlots: bookedSlots || 0,
           mustChangePassword: true,
           first_login: true,

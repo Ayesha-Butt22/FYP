@@ -39,6 +39,7 @@ export default function DashboardLayout({
   const [profilePic, setProfilePic] = useState(null);
   const fileInputRef = useRef(null);
   const displayName = localStorage.getItem("name") || roleInfo.name || "User";
+  const displayRole = localStorage.getItem("role") || "User";
   const email = localStorage.getItem("email");
 
   useEffect(() => {
@@ -122,7 +123,10 @@ export default function DashboardLayout({
                   onClick={handleAvatarClick}
               />
             </Tooltip>
+            <div className="grid-flow-col">
             <div className="name-text">{displayName}</div>
+            <div className="name-text"><span>({displayRole}) </span></div>
+            </div>
             <input
                 type="file"
                 accept="image/png, image/jpeg, image/jpg, image/webp"

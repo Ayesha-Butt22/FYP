@@ -1,27 +1,111 @@
-/* Noticeboard small styles (save as src/components/Admin/Noticeboard.css) */
+/* Noticeboard improved clean layout */
 
-.nb-root { padding-bottom: 18px; }
+.nb-root {
+  padding: 20px 0;
+  font-family: "Inter", sans-serif;
+}
 
 .nb-form-card {
-  background: #fff;
-  border: 7px solid #eef3fb;
-  padding: 5px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.noticeboard-form-outer{
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.nb-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.nb-left,
+.nb-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Each input row */
+.nb-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.nb-row label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #102a43;
+  font-size: 0.95rem;
+}
+
+.nb-row input,
+.nb-row select,
+.nb-row textarea {
+  padding: 10px 12px;
   border-radius: 8px;
-  margin-bottom: 16px;
+  border: 1px solid #d1d9e6;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
 }
 
-.nb-row { display:flex; flex-direction:column; margin-bottom:10px; }
-.nb-row label { font-weight:700; margin-bottom:6px; color:#102a43; }
-.nb-row input, .nb-row textarea, .nb-row select {
-  padding:8px 10px; border-radius:6px; border:1px solid #e6eef6; font-size:1rem;
+.nb-row input:focus,
+.nb-row select:focus,
+.nb-row textarea:focus {
+  border-color: #2b6cb0;
+  box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.15);
 }
 
-.nb-row.nb-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* Actions */
+.nb-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
 
-.nb-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:6px; }
-.mt-btn.primary { background:#01337a; color:#fff; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
-.mt-btn.cancel { background:#6c757d; color:#fff; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; }
+.mt-btn {
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
 
-@media (max-width: 720px) {
-  .nb-row.nb-grid { grid-template-columns: 1fr; }
+.mt-btn.primary {
+  background: #01337a;
+  color: #fff;
+}
+
+.mt-btn.primary:hover {
+  background: #0a4599;
+}
+
+.mt-btn.cancel {
+  background: #6c757d;
+  color: #fff;
+}
+
+.mt-btn.cancel:hover {
+  background: #5a6268;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .nb-form {
+    grid-template-columns: 1fr;
+  }
 }

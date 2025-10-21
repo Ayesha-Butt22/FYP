@@ -33,7 +33,9 @@ export default function GroupInfoCard({ groups }) {
                                         <div className="member-details">
                                             <div className="member-name">{member.name}</div>
                                             <div className="member-info">
-                                                <span className="sap-id">SAP: {member.sap}</span>
+                                                <div className="sap-id">
+                                                    SAP: {member.sap}
+                                                </div>
                                                 {member.email && (
                                                     <a
                                                         href={`mailto:${member.email}`}

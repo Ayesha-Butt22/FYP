@@ -147,9 +147,11 @@
   text-align: right;
 }
 .name-text span {
+  margin-top: 2px;
   color: #2563eb;
   font-size: 0.98rem;
   font-weight: 400;
   display: block;
+  text-transform: capitalize;
   opacity: 0.8;
 }

@@ -159,95 +159,97 @@ export default function Noticeboard() {
   );
 
   return (
-    <div className="nb-root">
-      <DashboardSectionHeader
-        description="Post important announcements for Students, Supervisors, and Coordinators in one centralized space. Keep all roles informed with role-based visibility."
-      >
-        Noticeboard
-      </DashboardSectionHeader>
+      <div className="nb-root">
+        <DashboardSectionHeader
+            description="Post important announcements for Students, Supervisors, and Coordinators in one centralized space. Keep all roles informed with role-based visibility."
+        >
+          Noticeboard
+        </DashboardSectionHeader>
 
-      <div className="nb-form-card">
-        <form onSubmit={handlePost}>
-          <div className="nb-row">
-            <label>Title</label>
-            <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="Enter title"
-            />
-          </div>
+        <div className="noticeboard-form-outer">
+        <form onSubmit={handlePost} className="nb-form">
+          <div className="nb-left">
+            <div className="nb-row">
+              <label>Title</label>
+              <input
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  placeholder="Enter title"
+              />
+            </div>
 
-          <div className="nb-row">
-            <label>Description</label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="Enter full description or instructions"
-              rows={4}
-            />
-          </div>
-
-          <div className="nb-row nb-grid">
-            <div>
+            <div className="nb-row">
               <label>Audience</label>
               <select
-                name="audience"
-                value={form.audience}
-                onChange={handleChange}
+                  name="audience"
+                  value={form.audience}
+                  onChange={handleChange}
               >
                 {AUDIENCE.map((a) => (
-                  <option key={a.value} value={a.value}>
-                    {a.label}
-                  </option>
+                    <option key={a.value} value={a.value}>
+                      {a.label}
+                    </option>
                 ))}
               </select>
             </div>
-            <div>
+
+            <div className="nb-row">
               <label>Department (optional)</label>
               <select
-                name="department"
-                value={form.department}
-                onChange={handleChange}
+                  name="department"
+                  value={form.department}
+                  onChange={handleChange}
               >
                 {DEPARTMENTS.map((d) => (
-                  <option key={d.value} value={d.value}>
-                    {d.label}
-                  </option>
+                    <option key={d.value} value={d.value}>
+                      {d.label}
+                    </option>
                 ))}
               </select>
             </div>
           </div>
 
-          <div className="nb-actions">
-            <button
-              type="submit"
-              className="mt-btn primary"
-              disabled={loading}
-            >
+          {/* Right column */}
+          <div className="nb-right">
+            <div className="nb-row" style={{height: "100%"}}>
+              <label>Description</label>
+              <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  placeholder="Enter full description or instructions"
+                  rows={9}
+                  style={{height: "100%"}}
+              />
+            </div>
+          </div>
+
+
+          <div className="nb-actions" style={{gridColumn: "1 / -1"}}>
+            <button type="submit" className="mt-btn primary" disabled={loading}>
               {mode === "edit" ? "Update Notice" : "Post Notice"}
             </button>
             <button
-              type="button"
-              className="mt-btn cancel"
-              onClick={resetForm}
-              disabled={loading}
+                type="button"
+                className="mt-btn cancel"
+                onClick={resetForm}
+                disabled={loading}
             >
               Clear
             </button>
           </div>
         </form>
-      </div>
+        </div>
 
-      <div style={{ marginTop: 20 }}>
-        <h4>Posted notices</h4>
-        <AppTable
-          headers={headers}
-          rows={rows}
-          renderActions={renderActions}
-        />
+        <div style={{marginTop: 20}}>
+          <label>Posted notices</label>
+          <AppTable
+              headers={headers}
+              rows={rows}
+              renderActions={renderActions}
+          />
+        </div>
       </div>
-    </div>
   );
 }

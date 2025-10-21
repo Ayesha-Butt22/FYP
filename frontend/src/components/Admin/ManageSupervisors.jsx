@@ -17,9 +17,68 @@ const headers = [
   "Email",
   "Department",
   "Speciality",
-  "Available Slots",
-  "Booked Slots"
+  "Designation",
+  "Booked",
+  "Status"
 ];
+
+const ALL_DESIGNATIONS = [
+  "Dean",
+  "Professor",
+  "Associate Professor",
+  "Assistant Professor",
+  "Lecturer",
+  "Sr Lecturer",
+  "Junior Lecturer",
+  "Research Associate",
+  "Research Assistant",
+  "Teaching Fellow"
+];
+
+
+function StatusBadge({ text, color }) {
+  const colorMap = {
+    green: { background: '#dcfce7', text: '#166534' }, // Green
+    red: { background: '#fee2e2', text: '#991b1b' },   // Red
+    yellow: { background: '#fef9c3', text: '#854d0e' }, // Yellow
+    gray: { background: '#f1f5f9', text: '#334155' }    // Gray/Default
+  };
+
+  const style = {
+    backgroundColor: colorMap[color]?.background || colorMap.gray.background,
+    color: colorMap[color]?.text || colorMap.gray.text,
+    padding: '4px 12px',
+    borderRadius: '16px',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    textAlign: 'center',
+    textTransform: 'capitalize'
+  };
+
+  return <span style={style}>{text}</span>;
+}
+
+const getSupervisorStatus = (available, booked) => {
+  const avail = Number(available) || 0;
+  const book = Number(booked) || 0;
+
+  if (book === 0) {
+    return <StatusBadge text="NoLoad" color="green" />;
+  }
+  if (book === avail) {
+    return <StatusBadge text="Full" color="red" />;
+  }
+  if (avail - book > 0) {
+    return <StatusBadge text="Average" color="yellow" />;
+  }
+
+  if (book > avail) {
+    return <StatusBadge text="Overbooked" color="red" />;
+  }
+
+  return <StatusBadge text="N/A" color="gray" />;
+};
+
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -37,6 +96,7 @@ const validateForm = (data, isEdit = false) => {
   if (!data.Department?.trim()) errors.Department = "Department is required";
   if (!data.Password?.trim() && !isEdit) errors.Password = "Password is required";
   if (data.Password && data.Password.length < 6) errors.Password = "Password must be at least 6 characters";
+  if (!data.Designation?.trim()) errors.Designation = "Designation is required"; // <-- ADD THIS
 
   const availableSlots = Number(data["Available_Slots"] || data["Available Slots"]);
   const bookedSlots = Number(data["Booked_Slots"] || data["Booked Slots"]);
@@ -78,6 +138,7 @@ export default function ManageSupervisors() {
     Name: "",
     Email: "",
     Department: "",
+    Designation: "",
     Available_Slots: 0,
     Booked_Slots: 0,
     Password: ""
@@ -90,6 +151,7 @@ export default function ManageSupervisors() {
       Name: "",
       Email: "",
       Department: "",
+      Designation: "",
       Available_Slots: 0,
       Booked_Slots: 0,
       Password: ""
@@ -112,7 +174,10 @@ export default function ManageSupervisors() {
           Department: sup.department || "",
           Speciality: sup.specialization || "",
           "Available Slots": sup.availableSlots || 0,
-          "Booked Slots": sup.bookedSlots || 0
+          Designation: (sup.designation || "N/A").toUpperCase(),
+          "Booked Slots": sup.bookedSlots || 0,
+          "Booked": sup.bookedSlots || 0,
+          Status: getSupervisorStatus(sup.availableSlots, sup.bookedSlots)
         }));
         setRows(supervisors);
       } else {
@@ -138,6 +203,7 @@ export default function ManageSupervisors() {
       Name: row.Name,
       Email: row.Email,
       Department: row.Department,
+      Designation: row.Designation,
       Available_Slots: row["Available Slots"],
       Booked_Slots: row["Booked Slots"],
       Password: ""
@@ -192,6 +258,7 @@ export default function ManageSupervisors() {
       name: updated.Name,
       email: updated.Email,
       department: updated.Department,
+      designation: updated.Designation,
       specialization: updated.Speciality,
       availableSlots: updated["Available Slots"],
       bookedSlots: updated["Booked Slots"],
@@ -309,8 +376,8 @@ export default function ManageSupervisors() {
           {loading ? (
               <div style={{textAlign: "center", padding: 20}}>Loading supervisors...</div>
           ) : (
-              <div style={{maxHeight: '70vh', overflowY: 'auto'}}>
-              <AppTable
+              <div style={{display: 'flex', gap: '5px'}}>
+                <AppTable
                     headers={headers}
                     rows={rows}
                     renderActions={(row, i) => (
@@ -333,16 +400,15 @@ export default function ManageSupervisors() {
 
                           <button
                               className="table-action-btn"
-                              style={{background: "#013379"}}
+                              style={{ background: "#013379" }}
                               onClick={() => handleMakeCoordinator(i)}
                               disabled={sideFormMode}
                           >
-                            Make Coordinator
+                            Promote
                           </button>
-
                         </>
                     )}
-              />
+                />
               </div>
           )}
         </div>
@@ -413,7 +479,7 @@ export default function ManageSupervisors() {
                       value={formData.Department}
                       options={["CS", "SE", "CA"]}
                       onChange={(val) =>
-                          setFormData(prev => ({ ...prev, Department: val }))
+                          setFormData(prev => ({...prev, Department: val}))
                       }
                       placeholder="Select Department"
                   />
@@ -421,7 +487,6 @@ export default function ManageSupervisors() {
                       <span className="error-text">{formErrors.Department}</span>
                   )}
                 </div>
-
 
 
                 <div className="form-group">
@@ -435,6 +500,23 @@ export default function ManageSupervisors() {
                       placeholder="Select specialities"
                   />
                   {formErrors.Speciality && <span className="error-text">{formErrors.Speciality}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label>
+                    Designation <span style={{color: '#f43f5e'}}>*</span>
+                  </label>
+                  <DropdownSingleSelect
+                      value={formData.Designation}
+                      options={ALL_DESIGNATIONS}
+                      onChange={(val) =>
+                          setFormData(prev => ({...prev, Designation: val}))
+                      }
+                      placeholder="Select Designation"
+                  />
+                  {formErrors.Designation && (
+                      <span className="error-text">{formErrors.Designation}</span>
+                  )}
                 </div>
 
                 <FormInput
@@ -501,11 +583,11 @@ export default function ManageSupervisors() {
         )}
       </div>
 
-  <UploadExcelModal
-      isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
-  />
-  </>
+        <UploadExcelModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+        />
+      </>
 
   );
 }
