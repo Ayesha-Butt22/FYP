@@ -116,7 +116,7 @@ export default function DonutChart({
           x={cx}
           y={cy - 12}
           textAnchor="middle"
-          fontSize="2.2rem"
+          fontSize="1.5rem"
           fontWeight="900"
           fill="#232323"
           dominantBaseline="middle"

@@ -126,14 +126,14 @@ export default function SupervisorIdeaReview() {
 
   const thStyle = {
     fontWeight: 800,
-    fontSize: 17,
+    fontSize: 19, // increased ~12%
     color: "#01337a",
     borderBottom: "2.5px solid #e5e7eb",
     background: "#f4f6fa",
     fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
   };
   const tdStyle = {
-    fontSize: 15,
+    fontSize: 17, // increased ~13%
     color: "#22223b",
     fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
   };
@@ -175,7 +175,7 @@ export default function SupervisorIdeaReview() {
             <TableHead>
               <TableRow>
                 <TableCell sx={thStyle}>
-                  <GroupOutlined sx={{ verticalAlign: "middle", color: "white", mr: 1 , fontSize:28}} />
+                  <GroupOutlined sx={{ verticalAlign: "middle", color: "white", mr: 1 , fontSize:28 }} />
                   Group
                 </TableCell>
                 <TableCell sx={thStyle}>Title</TableCell>
@@ -198,7 +198,7 @@ export default function SupervisorIdeaReview() {
                       <TableCell sx={tdStyle}>
                         <Stack direction="row" gap={1.5} alignItems="center">
                           <Typography className="group-number-badge">{idx + 1}</Typography>
-                          <Typography fontWeight={700}>{idea.groupName}</Typography>
+                          <Typography fontWeight={700} sx={{ fontSize: 17 }}>{idea.groupName}</Typography>
                         </Stack>
                       </TableCell>
 
@@ -213,6 +213,7 @@ export default function SupervisorIdeaReview() {
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
                               cursor: "pointer",
+                              fontSize: 17, // increased
                             }}
                             onClick={() =>
                               setExpanded(exp => ({
@@ -235,9 +236,9 @@ export default function SupervisorIdeaReview() {
                             ...status.chipStyle,
                             borderRadius: 25,
                             fontWeight: 700,
-                            fontSize: 15,
-                            height: 32,
-                            minWidth: 120,
+                            fontSize: 17, // increased
+                            height: 36,
+                            minWidth: 130,
                             justifyContent: "left",
                             fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
                           }}
@@ -300,7 +301,7 @@ export default function SupervisorIdeaReview() {
 
                           {idea.status === "pending" ? (
                             <Box mt={1}>
-                              <Typography fontWeight={700} fontSize={15} mb={0.5}>
+                              <Typography fontWeight={700} fontSize={16} mb={0.5}>
                                 Supervisor Feedback:
                               </Typography>
 
