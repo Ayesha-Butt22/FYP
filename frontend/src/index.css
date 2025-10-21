@@ -26,11 +26,17 @@ td {
   color: #01337a !important;
   font-weight: 500 !important;
   text-align: left !important;
-  font-size: 17px !important;
+  font-size: 19px !important;
+}
+
+th{
+  color:white !important;
+  font-size: 21px !important;
+
 }
 
 label {
   font-weight: 700 !important;
   color: #01337a !important;
-  font-size: 1rem !important;
+  font-size: 1.5rem !important;
 }
