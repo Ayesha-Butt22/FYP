@@ -161,7 +161,7 @@ export default function Noticeboard() {
   return (
     <div className="nb-root">
       <DashboardSectionHeader
-        description="Post important announcements for Students, Supervisors, and Coordinators in one centralized space. Keep all roles informed with role-based visibility."
+        description="Post important announcements for Students and Supervisors in one centralized space."
       >
         Noticeboard
       </DashboardSectionHeader>

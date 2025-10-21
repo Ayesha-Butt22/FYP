@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import { FaUsers, FaArrowRight, FaTimes } from "react-icons/fa";
 import DonutChart from "./DonutChart";
@@ -21,7 +21,7 @@ const assignedGroups = [
       { name: "Bilal Khan", sapId: "2021003" },
     ],
     milestones: [
-      { name: "Proposal", score: 95, level: "Completed", timeSpent: "0:45:00", totalTime: "1:00:00", color: "#3b82f6" },
+      { name: "Proposal", score: 95, level: "Completed", timeSpent: "0:45:00", totalTime: "1:00:00", color: "#2563eb" },
       { name: "Mid Evaluation", score: 70, level: "In Progress", timeSpent: "0:30:00", totalTime: "1:00:00", color: "#22c55e" },
       { name: "Final Report", score: 35, level: "Not Started", timeSpent: "0:00:00", totalTime: "1:00:00", color: "#f43f5e" }
     ]
@@ -41,7 +41,7 @@ const assignedGroups = [
       { name: "Saad Farooq", sapId: "2021006" },
     ],
     milestones: [
-      { name: "Proposal", score: 80, level: "Completed", timeSpent: "0:40:00", totalTime: "1:00:00", color: "#3b82f6" },
+      { name: "Proposal", score: 80, level: "Completed", timeSpent: "0:40:00", totalTime: "1:00:00", color: "#2563eb" },
       { name: "Mid Evaluation", score: 45, level: "In Progress", timeSpent: "0:20:00", totalTime: "1:00:00", color: "#22c55e" },
       { name: "Final Report", score: 0, level: "Not Started", timeSpent: "0:00:00", totalTime: "1:00:00", color: "#f43f5e" }
     ]
@@ -61,7 +61,7 @@ const assignedGroups = [
       { name: "Hira Qureshi", sapId: "2021009" },
     ],
     milestones: [
-      { name: "Proposal", score: 55, level: "Completed", timeSpent: "0:32:00", totalTime: "1:00:00", color: "#3b82f6" },
+      { name: "Proposal", score: 55, level: "Completed", timeSpent: "0:32:00", totalTime: "1:00:00", color: "#2563eb" },
       { name: "Mid Evaluation", score: 25, level: "In Progress", timeSpent: "0:11:00", totalTime: "1:00:00", color: "#22c55e" },
       { name: "Final Report", score: 0, level: "Not Started", timeSpent: "0:00:00", totalTime: "1:00:00", color: "#f43f5e" }
     ]
@@ -71,8 +71,19 @@ const assignedGroups = [
 export default function SupervisorGroups() {
   const [selectedGroup, setSelectedGroup] = useState(null);
 
+  // close modal on ESC for better UX
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") setSelectedGroup(null);
+    };
+    if (selectedGroup) {
+      window.addEventListener("keydown", onKey);
+    }
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedGroup]);
+
   return (
-    <div>
+    <div className="supervisor-page-container">
       <DashboardSectionHeader
         description="Here you can view all FYP groups assigned to you. Click 'View Group Details' to see members, milestones, and progress analytics."
       >
@@ -84,7 +95,7 @@ export default function SupervisorGroups() {
           <div className="supervisor-group-card" key={group.groupId}>
             <div className="supervisor-group-icon"><FaUsers /></div>
             <div className="supervisor-group-no">Group {group.groupNo}</div>
-            <div className="supervisor-group-title">{group.title}</div>
+            <div className="supervisor-group-title" title={group.title}>{group.title}</div>
             <button className="supervisor-view-btn" onClick={() => setSelectedGroup(group)}>
               View Group Details <FaArrowRight />
             </button>
@@ -94,7 +105,7 @@ export default function SupervisorGroups() {
 
       {/* ----- Modal for group details ----- */}
       {selectedGroup && (
-        <div className="supervisor-modal-overlay">
+        <div className="supervisor-modal-overlay" role="dialog" aria-modal="true" aria-label={`Details for ${selectedGroup.title}`}>
           <div className="supervisor-modal-card">
             <button className="supervisor-modal-close" aria-label="Close" onClick={() => setSelectedGroup(null)}>
               <FaTimes />
@@ -125,13 +136,19 @@ export default function SupervisorGroups() {
 
               {/* ----- Progress Section ----- */}
               <div className="supervisor-progress-row">
-                <b>Progress: </b>
-                <span style={{ color: "#15803d", fontWeight: 700, marginLeft: 4 }}>
-                  {Math.round((selectedGroup.milestonesCompleted / selectedGroup.milestonesTotal) * 100)}%
-                </span>
-                &nbsp;({selectedGroup.milestonesCompleted} of {selectedGroup.milestonesTotal} milestones)
+                <div style={{display: "flex", alignItems: "center", gap: 12, width: "100%", flexWrap: "wrap"}}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <b style={{ fontSize: 18 }}>Progress:</b>
+                    <span style={{ color: "#15803d", fontWeight: 800, fontSize: 18 }}>
+                      {Math.round((selectedGroup.milestonesCompleted / selectedGroup.milestonesTotal) * 100)}%
+                    </span>
+                  </div>
+                  <div className="supervisor-progress-subtext">
+                    ({selectedGroup.milestonesCompleted} of {selectedGroup.milestonesTotal} milestones)
+                  </div>
+                </div>
               </div>
-              <div className="supervisor-progress-bar-bg">
+              <div className="supervisor-progress-bar-bg supervisor-progress-bar-bg-large">
                 <div
                   className="supervisor-progress-bar-fill"
                   style={{
@@ -143,7 +160,7 @@ export default function SupervisorGroups() {
 
             {/* ----- Members Table ----- */}
             <div className="supervisor-modal-label">Group Members:</div>
-            <table className="supervisor-member-table">
+            <table className="supervisor-member-table supervisor-member-table-large">
               <thead>
                 <tr>
                   <th>Member Name</th>
@@ -161,7 +178,7 @@ export default function SupervisorGroups() {
             </table>
 
             {/* ----- Donut Chart Analytics ----- */}
-            <div className="supervisor-analytics-card">
+            <div className="supervisor-analytics-card supervisor-analytics-card-large">
               <h3 className="supervisor-chart-title">Progress Tracking</h3>
               <DonutChart
                 data={selectedGroup.milestones.map(m => ({
@@ -169,8 +186,8 @@ export default function SupervisorGroups() {
                   value: m.score,
                   color: m.color
                 }))}
-                size={290}
-                donutWidth={80}
+                size={360}
+                donutWidth={90}
               />
             </div>
           </div>

@@ -175,7 +175,7 @@ export default function SupervisorIdeaReview() {
             <TableHead>
               <TableRow>
                 <TableCell sx={thStyle}>
-                  <GroupOutlined sx={{ verticalAlign: "middle", color: "#2563eb", mr: 1 }} />
+                  <GroupOutlined sx={{ verticalAlign: "middle", color: "white", mr: 1 , fontSize:28}} />
                   Group
                 </TableCell>
                 <TableCell sx={thStyle}>Title</TableCell>
