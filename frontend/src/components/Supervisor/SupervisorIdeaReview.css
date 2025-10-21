@@ -41,11 +41,24 @@
   box-shadow: none;
   border-top: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
-  font-size: 17px; /* was 15px */
+  font-size: 15px;
   display: flex;
   flex-direction: row;
   gap: 0;
   line-height: 1.45;
+}
+.idea-detail-label {
+  min-width: 88px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #01337a;
+  margin-right: 7px;
+}
+.idea-detail-value {
+  font-size: 16px;
+  color: #22223b;
+  font-weight: 500;
+  word-break: break-word;
 }
 
 @media (max-width: 900px) {
@@ -59,36 +72,23 @@
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 .idea-detail-row {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 4px;
-  line-height: 1.5;
-}
-.idea-detail-label {
-  min-width: 100px; /* slightly wider to accommodate larger text */
-  font-size: 16px; /* was 14px */
-  font-weight: 700;
-  color: #01337a;
-  margin-right: 8px;
-}
-.idea-detail-value {
-  font-size: 16px; /* was 14px */
-  color: #22223b;
-  font-weight: 500;
-  word-break: break-word;
+  margin-bottom: 2px;
+  line-height: 1.4;
 }
 
-/* Members area bumped up */
+
 .members-section-align {
-  min-width: 190px;
+  min-width: 170px;
   margin-left: 36px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 4px;
+  gap: 2px;
   padding-right: 0;
 }
 @media (max-width: 900px) {
@@ -100,11 +100,11 @@
   }
 }
 .member-row-enhanced {
-  margin-bottom: 4px;
-  font-size: 16px; /* was 14px */
+  margin-bottom: 2px;
+  font-size: 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .member-name {
   font-weight: 700;
@@ -113,45 +113,29 @@
 .member-sapid {
   color: #64748b;
   font-weight: 500;
-  font-size: 14px; /* sap id can stay a little smaller */
+  font-size: 13px;
 }
 
-/* Make the group badge slightly larger */
 .group-number-badge {
   display: inline-block;
-  min-width: 32px; /* was 28px */
-  height: 32px; /* was 28px */
+  min-width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: #2563eb;
   color: #fff;
   font-weight: 700;
-  font-size: 18px; /* was 16px */
+  font-size: 16px;
   text-align: center;
-  line-height: 32px; /* updated to match height */
+  line-height: 28px;
   margin-right: 4px;
 }
 
-/* feedback row increase */
 .idea-feedback-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 16px; /* was 14px */
+  gap: 7px;
+  font-size: 14px;
   font-weight: 600;
   margin-top: 8px;
   margin-bottom: 2px;
 }
-
-/* Additional small adjustments for table headers and cells (applied via inline sx in component) */
-/* If you want these globally, uncomment and adjust below: */
-/*
-.MuiTableCell-head {
-  font-size: 19px; 
-  font-weight: 800;
-  color: #01337a;
-}
-.MuiTableCell-root {
-  font-size: 17px;
-  color: #22223b;
-}
-*/

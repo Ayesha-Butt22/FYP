@@ -126,14 +126,14 @@ export default function SupervisorIdeaReview() {
 
   const thStyle = {
     fontWeight: 800,
-    fontSize: 19, // increased ~12%
+    fontSize: 22,
     color: "#01337a",
     borderBottom: "2.5px solid #e5e7eb",
     background: "#f4f6fa",
     fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
   };
   const tdStyle = {
-    fontSize: 17, // increased ~13%
+    fontSize: 20,
     color: "#22223b",
     fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
   };
@@ -161,8 +161,12 @@ export default function SupervisorIdeaReview() {
     });
   };
 
+
+
+
   return (
     <>
+
       <DashboardSectionHeader
         description="Here you can review FYP group ideas and proposals. Click 'Action' to preview members, abstracts, methodology, and tools used."
       >
@@ -175,7 +179,7 @@ export default function SupervisorIdeaReview() {
             <TableHead>
               <TableRow>
                 <TableCell sx={thStyle}>
-                  <GroupOutlined sx={{ verticalAlign: "middle", color: "white", mr: 1 , fontSize:28 }} />
+                  <GroupOutlined sx={{ verticalAlign: "middle", color: "white", mr: 1 , fontSize:28}} />
                   Group
                 </TableCell>
                 <TableCell sx={thStyle}>Title</TableCell>
@@ -198,7 +202,7 @@ export default function SupervisorIdeaReview() {
                       <TableCell sx={tdStyle}>
                         <Stack direction="row" gap={1.5} alignItems="center">
                           <Typography className="group-number-badge">{idx + 1}</Typography>
-                          <Typography fontWeight={700} sx={{ fontSize: 17 }}>{idea.groupName}</Typography>
+                          <Typography fontWeight={700}>{idea.groupName}</Typography>
                         </Stack>
                       </TableCell>
 
