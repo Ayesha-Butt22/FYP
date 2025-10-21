@@ -181,7 +181,7 @@ export default function SupervisorWhiteboard() {
                         size="small"
                         color="error"
                       >
-                        <Delete fontSize="small" />
+                        <Delete fontSize="medium" />
                       </IconButton>
                     </Tooltip>
                   </Stack>
@@ -196,15 +196,7 @@ export default function SupervisorWhiteboard() {
         ))}
       </Stack>
 
-      <Stack direction="row" justifyContent="center" mt={3}>
-        <Button
-          variant="outlined"
-          startIcon={<FileDownload />}
-          onClick={() => exportNotesAsHTML(notesByGroup)}
-        >
-          Export All Groups Notes
-        </Button>
-      </Stack>
+      
     </Box>
   );
 }

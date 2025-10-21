@@ -49,13 +49,13 @@
 }
 .idea-detail-label {
   min-width: 88px;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
   color: #01337a;
   margin-right: 7px;
 }
 .idea-detail-value {
-  font-size: 16px;
+  font-size: 22px;
   color: #22223b;
   font-weight: 500;
   word-break: break-word;
@@ -131,11 +131,13 @@
 }
 
 .idea-feedback-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 14px;
-  font-weight: 600;
-  margin-top: 8px;
-  margin-bottom: 2px;
+    display: flex
+;
+    align-items: center;
+    gap: 7px;
+    font-size: 26px;
+    font-weight: 600;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    justify-content: center;
 }

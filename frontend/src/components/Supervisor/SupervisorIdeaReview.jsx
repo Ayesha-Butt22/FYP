@@ -35,7 +35,7 @@ const DUMMY_IDEAS = [
     ideaId: "G-102",
     groupName: "Group 2",
     title: "AI-Based Disease Prediction",
-    status: "pending",
+    status: "approved",
     abstract: "Predict diseases using patient data and ML.",
     methodology: "Data collection, preprocessing, ML models.",
     tools: "Python, Scikit-learn, React",
@@ -45,7 +45,10 @@ const DUMMY_IDEAS = [
       { name: "Madiha Sumbal", sapId: "2021005" },
       { name: "Saad Farooq", sapId: "2021006" },
     ],
-    feedback: null,
+    feedback: {
+      severity: "✅",
+      comment: "Good Idea , Unique Project.",
+    },
   },
   {
     ideaId: "G-103",
@@ -128,7 +131,7 @@ export default function SupervisorIdeaReview() {
     fontWeight: 800,
     fontSize: 22,
     color: "#01337a",
-    borderBottom: "2.5px solid #e5e7eb",
+   
     background: "#f4f6fa",
     fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
   };
@@ -201,8 +204,8 @@ export default function SupervisorIdeaReview() {
                     >
                       <TableCell sx={tdStyle}>
                         <Stack direction="row" gap={1.5} alignItems="center">
-                          <Typography className="group-number-badge">{idx + 1}</Typography>
-                          <Typography fontWeight={700}>{idea.groupName}</Typography>
+                         
+                          <Typography fontWeight={700} fontSize={20}>{idea.groupName}</Typography>
                         </Stack>
                       </TableCell>
 
@@ -212,12 +215,10 @@ export default function SupervisorIdeaReview() {
                             fontWeight={600}
                             color="#01337a"
                             sx={{
-                              maxWidth: 170,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
+                              
+                             
                               cursor: "pointer",
-                              fontSize: 17, // increased
+                              fontSize: 20, // increased
                             }}
                             onClick={() =>
                               setExpanded(exp => ({
@@ -295,17 +296,17 @@ export default function SupervisorIdeaReview() {
                               {idea.members.map((m, midx) => (
                                 <div className="member-row-enhanced" key={midx}>
                                   <span className="member-name">{m.name}</span>
-                                  <span className="member-sapid">({m.sapId})</span>
+                                 
                                 </div>
                               ))}
                             </Box>
                           </Box>
 
-                          <Divider sx={{ my: 1 }} />
+                      
 
                           {idea.status === "pending" ? (
                             <Box mt={1}>
-                              <Typography fontWeight={700} fontSize={16} mb={0.5}>
+                              <Typography fontWeight={700} fontSize={24} mb={0.5} justifyContent={"center"}>
                                 Supervisor Feedback:
                               </Typography>
 

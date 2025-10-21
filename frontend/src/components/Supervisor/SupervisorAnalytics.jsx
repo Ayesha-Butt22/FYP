@@ -69,7 +69,7 @@ export default function SupervisorAnalytics() {
       {
         label: "Overall Progress (%)",
         data: analyticsData.groupProgress.map((g) => g.progress),
-        backgroundColor: "#2563eb",
+        backgroundColor: "#01337a",
         borderRadius: 6,
         barThickness: isSmallScreen ? 36 : 48,
         maxBarThickness: 60,
@@ -152,8 +152,7 @@ export default function SupervisorAnalytics() {
         Analytics
       </DashboardSectionHeader>
         <div className="analytics-container">
-          <Grid container spacing={9}>{groupLineCharts}</Grid>
-
+         
           <Box className="bar-chart-box">
             <Card className="bar-card">
               <CardContent>
@@ -166,22 +165,35 @@ export default function SupervisorAnalytics() {
                   Group Performance Comparison
                 </Typography>
                 <Box className="bar-inner-box">
-                  <Bar
-                      data={barData}
-                      options={{
-                        responsive: true,
-                        plugins: {legend: {display: false}, title: {display: false}},
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {stepSize: 20, font: {size: 11}},
-                          },
-                        },
-                      }}
-                      height={110}
-                  />
-                </Box>
+                   <Bar
+    data={barData}
+    options={{
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: { display: false },
+      },
+      scales: {
+        x: {
+          ticks: {
+            font: { size: 20, weight: "bold" },
+            color: "#01337a",
+          },
+        },
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: {
+            stepSize: 20,
+            font: { size: 20,  weight: "bold" },
+            color: "#01337a",
+          },
+        },
+      },
+    }}
+    height={110}
+  />
+</Box>
               </CardContent>
             </Card>
           </Box>

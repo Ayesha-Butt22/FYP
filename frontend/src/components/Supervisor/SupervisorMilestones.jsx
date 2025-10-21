@@ -11,7 +11,6 @@ const GROUPS = [
     group: "Group 1",
     title: "Smart Attendance System",
     department: "Software Engineering",
-    templateLink: "https://drive.google.com/drive/folders/1hoi4pinQmXyC6hO0js786KTWTKKmxIMs",
     milestones: [
       { name: "Proposal", status: "completed", due: "2025-09-10" },
       { name: "SRS", status: "pending", due: "2025-09-20" },
@@ -25,7 +24,7 @@ const GROUPS = [
     group: "Group 2",
     title: "AI-Based Disease Prediction",
     department: "Computer Science",
-    templateLink: "https://drive.google.com/drive/folders/CS-TEMPLATES-URL",
+   
     milestones: [
       { name: "Proposal", status: "completed", due: "2025-09-11" },
       { name: "SRS", status: "completed", due: "2025-09-19" },
@@ -103,14 +102,7 @@ export default function SupervisorMilestones() {
                   <div className="milestone-card-members">
                     <b>Members:</b> {group.members.join(", ")}
                   </div>
-                  <a
-                    href={group.templateLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="milestone-template-link"
-                  >
-                    📂 {group.department} Templates
-                  </a>
+                  
                 </div>
 
                 <div className="milestone-card-progress">
