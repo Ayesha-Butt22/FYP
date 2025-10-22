@@ -40,12 +40,20 @@
   text-align: center;
   padding: 34px 20px !important;
   border-radius: 18px !important;
-  font-size: 1.1rem !important;
+  font-size: 0.5rem !important;
   transition: all 0.25s ease-in-out;
   position: relative;
   overflow: hidden;
   box-shadow: 0 6px 18px rgba(1, 51, 122, 0.08);
   background: white;
+  -webkit-transition: all 0.25s ease-in-out;
+  -moz-transition: all 0.25s ease-in-out;
+  -ms-transition: all 0.25s ease-in-out;
+  -o-transition: all 0.25s ease-in-out;
+  -webkit-border-radius: 18px !important;
+  -moz-border-radius: 18px !important;
+  -ms-border-radius: 18px !important;
+  -o-border-radius: 18px !important;
 }
 
 
@@ -57,7 +65,7 @@
 
 .supermeeting-summary-label {
   font-weight: 600;
-  font-size: 1.15rem;
+  font-size: 1.6rem!important;
   opacity: 0.9;
   margin-bottom: 8px;
   letter-spacing: 0.3px;
@@ -65,7 +73,7 @@
 
 .supermeeting-summary-value {
   font-weight: 800;
-  font-size: 2.5rem;
+  font-size: 2.3rem !important;
   line-height: 1.2;
 }
 
@@ -171,12 +179,12 @@
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid #e6efff;
-  font-size: 1.05rem !important;
+  font-size: 1.5rem !important;
 }
 
 .supermeeting-full-table .MuiTableCell-root {
   padding: 16px 14px !important;
-  font-size: 1.05rem !important;
+  font-size: 1.5rem !important;
 }
 
 .supermeeting-slot-row.booked-row {

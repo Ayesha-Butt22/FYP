@@ -71,7 +71,7 @@ const statusColor = (status) =>
     : status === "In Progress"
     ? "info"
     : status === "Pending"
-    ? "warning"
+    ? "info"
     : "default";
 
 export default function SupervisorReports() {
@@ -162,9 +162,9 @@ export default function SupervisorReports() {
                   <Stack direction="row" spacing={1} className="super-report-progress-summary">
                     <Chip label={`Completed: ${completed}`} color="success" style={{ width : '200px' , fontSize: '18px' }}/>
                     <Chip label={`In Progress: ${inProgress}`} color="info" style={{ width : '200px' , fontSize: '18px' }}/>
-                    <Chip label={`Pending: ${pending}`} color="warning" style={{ width : '200px' , fontSize: '18px' }}/>
-                    <Chip label={`Total: ${total}`} color="secondary" style={{ width : '200px' , fontSize: '18px' }}/>
-                    <Chip label={`Progress: ${percent}%`} color="primary" style={{ width : '200px' , fontSize: '18px' }}/>
+                    <Chip label={`Pending: ${pending}`} color="info" style={{ width : '200px' , fontSize: '18px' }}/>
+                    <Chip label={`Total: ${total}`} color="info" style={{ width : '200px' , fontSize: '18px' }}/>
+                    <Chip label={`Progress: ${percent}%`} color="success" style={{ width : '200px' , fontSize: '18px' }}/>
                   </Stack>
                   <Typography className="super-report-total-score">
                     <b>Total Score:</b> {groupScore}/{groupMax}

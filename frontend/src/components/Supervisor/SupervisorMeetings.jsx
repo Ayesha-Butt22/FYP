@@ -236,7 +236,7 @@ export default function SupervisorMeetings() {
                   <TableCell align="center">Action</TableCell>
                 </TableRow>
               </TableHead>
-              <TableBody>
+              <TableBody >
                 {sortedSlots.map((slot) => (
                     <TableRow
                         key={slot.slotId}

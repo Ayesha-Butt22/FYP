@@ -76,7 +76,7 @@ export default function ManageDeadlines() {
                 y={cy - 20}
                 textAnchor="middle"
                 fill="#01337a"
-                fontSize="12px"
+                fontSize="22px"
                 fontWeight="600"
             >
                 {payload.week}
@@ -86,7 +86,7 @@ export default function ManageDeadlines() {
                 y={cy + 30}
                 textAnchor="middle"
                 fill="#333"
-                fontSize="10px"
+                fontSize="15px"
                 fontWeight="500"
             >
                 {payload.milestone.length > 18
