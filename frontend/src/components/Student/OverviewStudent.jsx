@@ -66,22 +66,22 @@ export default function OverviewStudent({ onTabChange }) {
         <div className="stat-card">
           <div className="stat-icon-circle" style={{background: "#2563eb"}}><FaUsers /></div>
           <div className="stat-title">Group Status</div>
-          <div className="stat-value">Draft</div>
+          <div className="stat-value-studentonly">Draft</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon-circle" style={{background: "#fbc73d"}}><FaClipboardCheck /></div>
           <div className="stat-title">Proposal</div>
-          <div className="stat-value">Submitted</div>
+          <div className="stat-value-studentonly">Submitted</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon-circle" style={{background: "#16a34a"}}><FaCalendarCheck /></div>
           <div className="stat-title">Next Meeting</div>
-          <div className="stat-value">25 Sep</div>
+          <div className="stat-value-studentonly">25 Sep</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon-circle" style={{background: "#f43f5e"}}><FaCheckCircle /></div>
           <div className="stat-title">Checklist</div>
-          <div className="stat-value">5/8</div>
+          <div className="stat-value-studentonly">5/8</div>
         </div>
       </div>
 

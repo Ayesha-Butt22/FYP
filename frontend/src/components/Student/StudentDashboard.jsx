@@ -31,7 +31,7 @@ import {
 import capImg from "../../assets/cap.png";
 
 const menu = [
-  { label: "Overview", icon: <DashboardIcon /> },
+  // { label: "Overview", icon: <DashboardIcon /> },
   { label: "My Group", icon: <GroupAddIcon /> },
   { label: "Idea & Proposal", icon: <AssignmentIcon /> },
   { label: "Supervisor Selection", icon: <PersonSearchIcon /> },

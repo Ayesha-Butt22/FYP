@@ -57,39 +57,6 @@ const DEMO_EVALS = [
       },
     ],
   },
-  {
-    projectId: "G-1002",
-    projectTitle: "AI-Based Disease Prediction",
-    supervisor: "Dr Bilal",
-    evaluatedOn: "2025-10-12",
-    milestones: [
-      {
-        id: "proposal",
-        name: "Proposal",
-        weight: 0.2,
-        rubric: [
-          { id: "r1", criterion: "Problem definition", max: 10, score: 9, feedback: "Excellent" },
-          { id: "r2", criterion: "Objectives", max: 10, score: 8, feedback: "Good" },
-        ],
-      },
-      {
-        id: "mid",
-        name: "Mid",
-        weight: 0.3,
-        rubric: [
-          { id: "r1", criterion: "Model baseline", max: 20, score: 18, feedback: "Strong baseline" },
-        ],
-      },
-      {
-        id: "final",
-        name: "Final Report / Defense",
-        weight: 0.5,
-        rubric: [
-          { id: "r1", criterion: "Final accuracy", max: 50, score: 45, feedback: "Great results" },
-        ],
-      },
-    ],
-  },
 ];
 
 const STORAGE_KEY = "student_evaluations_v1";
