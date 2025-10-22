@@ -3,6 +3,7 @@ import styled, { keyframes } from "styled-components";
 import { IconButton, Tooltip } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Avatar from "@mui/material/Avatar";
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import "./DashboardLayout.css";
 import ToastService from "./ToastService/ToastService.jsx";
 import ProfileService from "./Api/ProfileService.jsx";
@@ -104,6 +105,19 @@ export default function DashboardLayout({
         <header className="dashboard-header">
           <h1 className="dashboard-title">{headerTitle}</h1>
           <div className="dashboard-profile">
+            <Tooltip title="New Notification">
+              <NotificationsActiveIcon sx={{
+                width: 40,
+                height: 40,
+                marginRight: "10px",
+                color: '#01337a',
+                cursor: "pointer",
+                transition: "0.3s",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                },
+              }} />
+            </Tooltip>
             <Tooltip title="Click to change profile picture">
               <Avatar
                   src={profilePic || "/default-avatar.png"}
