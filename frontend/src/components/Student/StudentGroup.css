@@ -70,13 +70,23 @@
 }
 
 .studentgroup-group-title {
-  font-size: 2.1rem;
+  font-size: 2.2rem!important;
   font-weight: 900;
   color: #01337a !important;
   margin-bottom: 32px;
-  text-align: center;
+  text-align: left;
   letter-spacing: 0.7px;
 }
+
+.studentgroup-group-title-sub {
+  font-size: 1.8rem!important;
+  font-weight: 900;
+  color: #01337a !important;
+  margin-bottom: 10px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
 
 /* Table Styling */
 .studentgroup-mui-table-container {
@@ -124,7 +134,7 @@
   background: #b71c1c !important;
 }
 
-/* Dialog */
+/* Dialog (for the custom HTML modal) */
 .studentgroup-dialog-paper {
   border-radius: 18px !important;
   min-width: 800px;
@@ -149,6 +159,9 @@
   font-size: 1.18rem !important;
   border-radius: 12px !important;
   margin-top: 10px;
+  padding: 12px 18px !important;
+  border: none !important;
+  cursor: pointer;
 }
 .studentgroup-next-btn:hover {
   background: #002766 !important;
@@ -186,6 +199,9 @@
   font-weight: 900 !important;
   font-size: 1.19rem !important;
   border-radius: 12px !important;
+  padding: 10px 18px !important;
+  border: none !important;
+  cursor: pointer;
 }
 .studentgroup-create-btn:hover {
   background: #002766 !important;
@@ -251,4 +267,39 @@
   0% { opacity: 0; transform: translateY(25px);}
   80% { opacity: 0.7; }
   100% { opacity: 1; transform: translateY(0);}
+}
+
+/* Plain HTML modal specific overrides */
+.studentgroup-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1400;
+  padding-top: 40px;
+}
+
+.studentgroup-dialog-overlay .studentgroup-dialog-paper {
+  margin-top: 0;
+}
+
+/* Inputs inside the custom modal */
+.studentgroup-dialog-paper input[type="number"],
+.studentgroup-dialog-paper input[type="text"],
+.studentgroup-dialog-paper input[type="email"] {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e6eef6;
+  box-sizing: border-box;
+}
+
+/* Small adjustments to ensure full-width group card on pages where parent containers were MUI-based */
+.studentgroup-table-outer-wrap,
+.studentgroup-group-card {
+  width: 100%;
+  max-width: none;
 }

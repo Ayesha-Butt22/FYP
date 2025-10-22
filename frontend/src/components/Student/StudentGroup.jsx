@@ -164,7 +164,7 @@ export default function StudentGroup() {
   };
 
   return (
-    <Box className="studentgroup-page-container">
+    <>
       <DashboardSectionHeader
         description="Here you can create your FYP group and add your team members. Once your group is created, you can view all team members and their details here."
       >
@@ -184,7 +184,7 @@ export default function StudentGroup() {
             size="large"
             onClick={() => setOpen(true)}
             className="studentgroup-create-group-btn"
-            startIcon={<AddIcon sx={{ fontSize: isMobile ? 25 : 35 }} />}
+            startIcon={<AddIcon sx={{ fontSize: 28 }} />}
           >
             CREATE GROUP
           </Button>
@@ -194,8 +194,8 @@ export default function StudentGroup() {
       {!loading && group && (
         <Box className="studentgroup-table-outer-wrap">
           <Box className="studentgroup-group-card">
-            <Typography className="studentgroup-group-title">Group Members</Typography>
-            <Typography variant="subtitle1">{group.groupId}</Typography>
+            <label className="studentgroup-group-title" > Group Members</label>
+            <label className="studentgroup-group-title-sub">{group.groupId}</label>
             <AppTable
               headers={["Role", "Name", "SAP ID", "Email"]}
               rows={group.members.map((m, idx) => ({
@@ -222,76 +222,158 @@ export default function StudentGroup() {
         </Box>
       )}
 
-      <Dialog
-        open={open}
-        onClose={() => { setOpen(false); setStep(1); }}
-        PaperProps={{ className: "studentgroup-dialog-paper" }}
-      >
-        <DialogTitle className="studentgroup-dialog-title">
-          {step === 1 ? "Enter Number of Group Members" : "Enter Member Details"}
-        </DialogTitle>
-        <DialogContent>
-          {step === 1 && (
-            <form onSubmit={handleNumMembersSubmit}>
-              <TextField
-                label="Number of Members (1-3)"
-                type="number"
-                inputMode="numeric"
-                fullWidth
-                autoFocus
-                value={numMembers}
-                onChange={e => setNumMembers(e.target.value)}
-                inputProps={{ min: 1, max: 3, step: 1, pattern: "\\d*", style: { MozAppearance: 'textfield' } }}
-                className="studentgroup-num-members-input"
-              />
-              {error && <Alert severity="error">{error}</Alert>}
-              <Button type="submit" variant="contained" fullWidth className="studentgroup-next-btn">
-                NEXT
-              </Button>
-            </form>
-          )}
+      {/* Plain HTML modal (replaces MUI Dialog) */}
+      {open && (
+        <div
+          className="studentgroup-dialog-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="studentgroup-dialog-title"
+          onClick={(e) => {
+            // click outside closes modal
+            if (e.target.classList.contains("studentgroup-dialog-overlay")) {
+              setOpen(false);
+              setStep(1);
+            }
+          }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15,23,42,0.55)",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            zIndex: 1400,
+            paddingTop: "40px"
+          }}
+        >
+          <div
+            className="studentgroup-dialog-paper"
+            style={{
+              background: "#fff",
+              borderRadius: 18,
+              minWidth: 800,
+              maxWidth: "95vw",
+              padding: 20,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 id="studentgroup-dialog-title" className="studentgroup-dialog-title">
+                {step === 1 ? "Enter Number of Group Members" : "Enter Member Details"}
+              </h3>
+              <button
+                aria-label="close"
+                onClick={() => { setOpen(false); setStep(1); }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  fontSize: 20,
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
+            </div>
 
-          {step === 2 && (
-            <Stack spacing={3} className="studentgroup-member-list">
-              {[...Array(Math.max(1, Math.min(3, Number(numMembers) || 1)))].map((_, i) => (
-                <Box key={i} className="studentgroup-member-card">
-                  <Typography className="studentgroup-member-label">
-                    {i === 0 ? "Leader" : `Member ${i + 1}`}
-                  </Typography>
-                  <Box className="studentgroup-member-fields">
-                    <TextField
-                      label="SAP ID"
-                      value={members[i].sapid}
-                      onChange={e => handleMemberChange(i, e.target.value)}
-                      fullWidth
-                      disabled={i === 0}
-                      className="studentgroup-member-input"
-                    />
-                    <TextField
-                      label="Email"
-                      value={i === 0 ? CURRENT_USER_EMAIL : members[i].email}
-                      disabled
-                      fullWidth
-                      className="studentgroup-member-input"
-                    />
-                  </Box>
-                </Box>
-              ))}
-              {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-            </Stack>
-          )}
-        </DialogContent>
-        <DialogActions>
-          {step === 2 && (
-            <Button onClick={handleCreateGroup} variant="contained" className="studentgroup-create-btn">
-              CREATE GROUP
-            </Button>
-          )}
-          <Button onClick={() => { setOpen(false); setStep(1); }} className="studentgroup-cancel-btn">
-            CANCEL
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+            <div style={{ marginTop: 8 }}>
+              {step === 1 && (
+                <form onSubmit={handleNumMembersSubmit}>
+                  <label style={{ display: "block", marginBottom: 8, fontWeight: 700 }}>Number of Members (1-3)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="3"
+                    value={numMembers}
+                    onChange={(e) => setNumMembers(e.target.value)}
+                    autoFocus
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      fontSize: "1rem",
+                      borderRadius: 8,
+                      border: "1px solid #e6eef6",
+                      marginBottom: 12,
+                      fontWeight: 700,
+                    }}
+                  />
+                  {error && <div style={{ color: "#d32f2f", marginBottom: 10 }}>{error}</div>}
+                  <button
+                    type="submit"
+                    className="studentgroup-next-btn"
+                    style={{ width: "100%", cursor: "pointer" }}
+                  >
+                    NEXT
+                  </button>
+                </form>
+              )}
+
+              {step === 2 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  {[...Array(Math.max(1, Math.min(3, Number(numMembers) || 1)))].map((_, i) => (
+                    <div key={i} className="studentgroup-member-card" style={{ padding: 18 }}>
+                      <div style={{ marginBottom: 8 }}>
+                        <strong className="studentgroup-member-label">
+                          {i === 0 ? "Leader" : `Member ${i + 1}`}
+                        </strong>
+                      </div>
+
+                      <div className="studentgroup-member-fields" style={{ display: "flex", gap: 16 }}>
+                        <input
+                          type="text"
+                          placeholder="SAP ID"
+                          value={members[i]?.sapid || ""}
+                          onChange={(e) => handleMemberChange(i, e.target.value)}
+                          disabled={i === 0 ? false : false} /* leader editable here; you can adjust */
+                          style={{
+                            flex: 1,
+                            padding: "10px 12px",
+                            borderRadius: 8,
+                            border: "1px solid #e6eef6",
+                            fontWeight: 600,
+                            fontSize: "1rem"
+                          }}
+                        />
+                        <input
+                          type="email"
+                          value={i === 0 ? CURRENT_USER_EMAIL : members[i]?.email || ""}
+                          disabled
+                          style={{
+                            flex: 1,
+                            padding: "10px 12px",
+                            borderRadius: 8,
+                            border: "1px solid #e6eef6",
+                            background: "#f8fafc",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  {error && <div style={{ color: "#d32f2f", marginTop: 8 }}>{error}</div>}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 18 }}>
+              {step === 2 && (
+                <button
+                  onClick={handleCreateGroup}
+                  className="studentgroup-create-btn"
+                  style={{ cursor: "pointer" }}
+                >
+                  CREATE GROUP
+                </button>
+              )}
+              <button
+                onClick={() => { setOpen(false); setStep(1); }}
+                className="studentgroup-cancel-btn"
+                style={{ cursor: "pointer", background: "transparent", border: "none", fontWeight: 700, fontSize: "1rem" }}
+              >
+                CANCEL
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

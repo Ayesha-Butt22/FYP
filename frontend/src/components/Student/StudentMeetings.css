@@ -1,0 +1,146 @@
+/* Only modal/slot-row related styles are included here — the rest of your project CSS remains unchanged */
+
+/* Schedule button style: larger, bolder text, custom color with !important */
+.schedule-btn {
+  background: #01337a !important;
+  color: #fff !important;
+  font-size: 1.05rem !important;       /* larger text */
+  padding: 12px 22px !important;       /* bigger clickable area */
+  min-width: 220px !important;         /* ensure width */
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 28px rgba(1, 51, 122, 0.12);
+  border: none !important;
+}
+.schedule-btn:hover {
+  background: #012a5f !important;
+  box-shadow: 0 12px 40px rgba(1, 51, 122, 0.14) !important;
+}
+
+/* Confirm Booking button style: exact color and important override requested */
+.confirm-btn-meetingmodal {
+ background: #01337a !important;
+ color: #fff !important;
+ font-size: 1.05rem !important;
+ padding: 12px 22px !important;
+ border-radius: 8px;
+ 
+}
+
+.cancel-btn {
+ background:rgb(244, 63, 94)!important;
+ color: #fff !important;
+ font-size: 1.05rem !important;
+ padding: 12px 22px !important;
+ border-radius: 8px;
+ 
+}
+.confirm-btn-meetingmodal:hover {
+  background: #012a5f !important;
+  box-shadow: 0 12px 36px rgba(1, 51, 122, 0.14) !important;
+}
+
+/* Disabled confirm style */
+.confirm-btn-meetingmodal[disabled], .confirm-btn-meetingmodal:disabled, button.confirm-btn-meetingmodal[disabled] {
+  background: #cbd5e1 !important;
+  color: #94a3b8 !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important; /* keep full opacity but different colors */
+}
+
+/* Row-based slot styling (used by the reworked modal) */
+.slot-row {
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  -webkit-transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  -moz-transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  -ms-transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  -o-transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.slot-row.selected {
+  box-shadow: 0 8px 24px rgba(2,6,23,0.06);
+}
+
+/* Keep previous card/slot styles for any other places (no other changes) */
+.supervisor-card {
+  border-radius: 12px;
+  overflow: visible;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+  border: 1px solid transparent;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
+  -webkit-transition: transform 0.14s ease, box-shadow 0.14s ease;
+  -moz-transition: transform 0.14s ease, box-shadow 0.14s ease;
+  -ms-transition: transform 0.14s ease, box-shadow 0.14s ease;
+  -o-transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+.supervisor-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.06);
+}
+
+.slot-card {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border: 1px solid #e8eef8;
+  padding: 10px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(2,6,23,0.03);
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+  -webkit-transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+  -moz-transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+  -ms-transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+  -o-transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+}
+.slot-card:hover {
+  transform: translateY(-4px);
+  background: linear-gradient(180deg, #eef6ff 0%, #ffffff 100%);
+  border-color: #dbeafe;
+  -webkit-transform: translateY(-4px);
+  -moz-transform: translateY(-4px);
+  -ms-transform: translateY(-4px);
+  -o-transform: translateY(-4px);
+}
+.slot-card.selected {
+  border-width: 2px;
+  background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+}
+
+/* slots count pill (kept for compatibility if used elsewhere) */
+.slots-count {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  -webkit-border-radius: 999px;
+  -moz-border-radius: 999px;
+  -ms-border-radius: 999px;
+  -o-border-radius: 999px;
+}
+
+.cnf-booking-btn-div{
+    
+    display:flex;
+    flex-direction: row;
+    gap: 10px;
+    padding: 10px;
+    justify-content: right;
+    
+
+}
+
+/* small screens adjustments */
+@media (max-width: 720px) {
+  .slot-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .slot-card { padding: 8px; }
+  .slots-count { padding: 4px 8px; font-size: 0.75rem; }
+}
