@@ -1,8 +1,7 @@
-/* SupervisorSlots.css - styles for SupervisorSlots.jsx
-   Place at: src/components/ProjectCoordinator/SupervisorSlots.css
+/* SupervisorSlots.css
+   Updated so Available Slots field is non-editable (disabled) in the modal.
 */
 
-/* Description box (uses the exact visual you provided) */
 .section-desc {
   margin-bottom: 12px;
   color: #01337a;
@@ -14,12 +13,12 @@
 /* Table card wrapper */
 .sup-table-card {
   border-radius: 12px;
-  padding: 0; /* AppTable handles inner spacing */
+  padding: 0;
 }
 
 /* Name style used in table rows */
 .sup-name {
-  color: #102a43;
+      color: #01337a;
   font-weight: 700;
 }
 
@@ -27,7 +26,7 @@
 .sup-edit-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(2,6,23,0.4);
+  background: rgba(2, 6, 23, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,11 +35,11 @@
 
 /* Edit modal box */
 .sup-edit-modal {
-  width: 420px;
+  width: 460px;
   background: #fff;
   border-radius: 12px;
   padding: 18px;
-  box-shadow: 0 12px 40px rgba(2,6,23,0.25);
+  box-shadow: 0 12px 40px rgba(2, 6, 23, 0.25);
   box-sizing: border-box;
 }
 
@@ -61,7 +60,7 @@
 
 /* Label and input */
 .sup-edit-label {
-  width: 140px;
+  width: 150px;
   font-weight: 700;
   color: #102a43;
   font-size: 0.95rem;
@@ -75,6 +74,25 @@
   box-sizing: border-box;
 }
 
+/* Disabled (derived) input styling so it's clear user cannot edit it */
+.sup-edit-input[disabled],
+.sup-edit-input[readonly] {
+  background: #f1f5f9;
+  color: #334155;
+  cursor: not-allowed;
+}
+
+/* select in modal */
+.sup-edit-select {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e6eef6;
+  font-size: 0.95rem;
+  background: #fff;
+  box-sizing: border-box;
+}
+
 /* Modal actions */
 .sup-modal-actions {
   display: flex;
@@ -85,7 +103,7 @@
 
 /* Save / Cancel buttons */
 .sup-btn-save {
-  background: linear-gradient(90deg,#2563eb,#01337a);
+  background: linear-gradient(90deg, #2563eb, #01337a);
   color: #fff;
   padding: 8px 12px;
   border-radius: 8px;
@@ -110,7 +128,7 @@
   border: none;
   cursor: pointer;
   font-weight: 700;
-  background: linear-gradient(90deg,#2563eb,#01337a);
+  background: linear-gradient(90deg, #2563eb, #01337a);
   color: #fff;
   margin-right: 8px;
 }
@@ -122,12 +140,12 @@
   color: #fff !important;
 }
 
-/* Responsive tweak */
+/* Responsive */
 @media (max-width: 800px) {
   .sup-edit-modal {
     width: 92%;
   }
   .sup-edit-label {
-    width: 110px;
+    width: 120px;
   }
 }

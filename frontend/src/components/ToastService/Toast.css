@@ -22,10 +22,23 @@
     transition: all 0.3s ease;
     max-width: 100%;
     word-wrap: break-word;
+    -webkit-border-radius:;
+    -moz-border-radius:;
+    -ms-border-radius:;
+    -o-border-radius:;
+    -webkit-animation: slideIn 0.3s ease-out;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
 }
 .toast:hover {
     transform: translateX(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    -webkit-transform: translateX(-2px);
+    -moz-transform: translateX(-2px);
+    -ms-transform: translateX(-2px);
+    -o-transform: translateX(-2px);
 }
 .toast-content {
     display: flex;
@@ -67,6 +80,14 @@
     border-radius: 50%;
     flex-shrink: 0;
     transition: all 0.2s ease;
+    -webkit-border-radius:;
+    -moz-border-radius:;
+    -ms-border-radius:;
+    -o-border-radius:;
+    -webkit-transition: all 0.2s ease;
+    -moz-transition: all 0.2s ease;
+    -ms-transition: all 0.2s ease;
+    -o-transition: all 0.2s ease;
 }
 
 .toast-close:hover {

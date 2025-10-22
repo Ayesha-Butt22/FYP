@@ -163,11 +163,16 @@ export default function SupervisorArchive() {
                         </div>
                     )}
                 </div>
-                <Stack spacing={0.5} mt={2} ml={2}>
-                    <Typography variant="subtitle2" color="#444" sx={{ fontWeight: 700 }}>
-                        All records are read-only.
-                    </Typography>
-                </Stack>
+              <Stack spacing={0.5} mt={2} ml={2}>
+  <Typography
+    variant="subtitle2"
+    color=" #01337a"
+    sx={{ fontWeight: 700, fontSize: "1.8rem" }}
+  >
+    All records are read-only.
+  </Typography>
+</Stack>
+
             </Box>
         </Box>
     );

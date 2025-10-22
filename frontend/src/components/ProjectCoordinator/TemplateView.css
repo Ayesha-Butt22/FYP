@@ -1,0 +1,78 @@
+/* TemplateView.css — adjusted for new column layout and buttons
+   Kept most existing styles; removed/unused preview modal styles can remain harmlessly.
+*/
+
+.stv-card {
+  padding: 18px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #eef6ff;
+  box-shadow: 0 6px 24px rgba(1, 51, 122, 0.04);
+  margin-top: 12px;
+}
+
+.stv-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+/* Table tweaks */
+.stv-table th,
+.stv-table td {
+  padding: 12px 16px;
+  font-size: 0.98rem;
+}
+
+/* status badges (text-based) */
+.stv-status {
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 12px;
+  display: inline-block;
+  font-size: 0.9rem;
+  text-transform: none;
+}
+.stv-status-submitted { background: #eef6ff; color: #2563eb; }
+.stv-status-underreview { background: #fff7ed; color: #b45309; }
+.stv-status-reviewed { background: #f1fdf6; color: #15803d; }
+.stv-status-approved { background: #ecfdf5; color: #059669; }
+.stv-status-rejected { background: #fff1f2; color: #be123c; }
+
+/* student modal (individual view) */
+.stv-student-modal {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(980px, 96vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 26px 80px rgba(1, 51, 122, 0.18);
+}
+
+/* on-time / late badges in table */
+.stv-on-time { color: #0b5a3a; font-weight: 800; }
+.stv-late { color: #b91c1c; font-weight: 800; }
+
+/* small tweaks for View button */
+.stv-table .MuiButton-root {
+  min-width: 72px;
+  text-transform: none;
+  font-weight: 700;
+}
+
+/* responsive */
+@media (max-width: 720px) {
+  
+  .stv-student-modal {
+    width: 96vw;
+    top: 4%;
+  }
+}

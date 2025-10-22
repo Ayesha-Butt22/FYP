@@ -6,7 +6,8 @@ import {
   Groups as GroupsIcon,
   Settings as SettingsIcon,
   Archive as ArchiveIcon,
-  Announcement as AnnouncementIcon
+  Announcement as AnnouncementIcon,
+  Description as DescriptionIcon
 } from "@mui/icons-material";
 import capImg from "../../assets/cap.png";
 import OverviewCoordinator from "./OverviewCoordinator";
@@ -15,7 +16,8 @@ import GroupsTab from "./GroupsGrid";
 import SupervisorSlots from "./SupervisorSlots";
 import ManageTemplates from "./ManageTemplates";
 import SupervisorArchive from "../Supervisor/SupervisorArchive";
-import Noticeboard from "../Admin/Noticeboard"; 
+import Noticeboard from "../Admin/Noticeboard";
+import TemplateView from "./TemplateView"; // renamed component import
 
 const menu = [
   { label: "Overview", icon: <DashboardIcon /> },
@@ -23,7 +25,8 @@ const menu = [
   { label: "Groups", icon: <GroupsIcon /> },
   { label: "Supervisor Slots", icon: <SettingsIcon /> },
   { label: "Manage Templates", icon: <SettingsIcon /> },
-  { label: "Noticeboard", icon: <AnnouncementIcon /> }, // new tab
+  { label: "Noticeboard", icon: <AnnouncementIcon /> },
+  { label: "View Reports", icon: <DescriptionIcon /> }, // NEW: coordinator can view student templates/reports
   { label: "FYP Archive", icon: <ArchiveIcon /> }
 ];
 
@@ -49,7 +52,8 @@ export default function CoordinatorDashboard() {
     "Groups": <GroupsTab />,
     "Supervisor Slots": <SupervisorSlots />,
     "Manage Templates": <ManageTemplates />,
-    "Noticeboard": <Noticeboard />, // wired here
+    "Noticeboard": <Noticeboard />,
+    "View Reports": <TemplateView />, // wired here (renamed)
     "FYP Archive": <SupervisorArchive />
   };
 

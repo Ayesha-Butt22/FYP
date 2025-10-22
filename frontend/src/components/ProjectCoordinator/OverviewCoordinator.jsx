@@ -1,9 +1,7 @@
-//src/components/ProjectCoordinator/OverviewCoordinator.jsx
-import React from "react";
+import React, { useState } from "react";
 import { FaUsers, FaClipboardCheck, FaCalendarCheck, FaStar, FaArrowRight, FaUserTie } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./OverviewCoordinator.css";
-
 
 const activities = [
   { type: "deadline", text: "Created department deadline: Proposal Submission", time: "1 hour ago" },
@@ -11,14 +9,39 @@ const activities = [
   { type: "notice", text: "Posted notice: Midterm demo schedule", time: "3 days ago" },
 ];
 
-const progress = [
-  { label: "Proposal Reviews Completed", percent: 40, color: "#2563eb" },
-  { label: "Deadlines Met", percent: 82, color: "#16a34a" },
-  { label: "Supervisor Allocation", percent: 60, color: "#fbc73d" },
-];
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 export default function OverviewCoordinator({ onTabChange }) {
   const navigate = useNavigate();
+
+  const [stats] = useState(() => {
+    const departmentProjects = randInt(18, 46);
+    const week = randInt(0, 3);
+    const supervisors = randInt(6, 18);
+    const overdueMilestones = randInt(0, 6);
+
+    const proposalReviewsCompleted = randInt(30, 85);
+    const deadlinesMet = randInt(60, 95);
+    const supervisorAllocation = randInt(40, 90);
+
+    return {
+      departmentProjects,
+      week,
+      supervisors,
+      overdueMilestones,
+      proposalReviewsCompleted,
+      deadlinesMet,
+      supervisorAllocation,
+    };
+  });
+
+  const progress = [
+    { label: "Proposal Reviews Completed", percent: stats.proposalReviewsCompleted, color: "#2563eb" },
+    { label: "Deadlines Met", percent: stats.deadlinesMet, color: "#16a34a" },
+    { label: "Supervisor Allocation", percent: stats.supervisorAllocation, color: "#fbc73d" },
+  ];
 
   return (
     <div className="overview-container">
@@ -70,15 +93,15 @@ export default function OverviewCoordinator({ onTabChange }) {
             <FaUsers />
           </div>
           <div className="stat-title">Department Projects</div>
-          <div className="stat-value">—</div>
+          <div className="stat-value">{stats.departmentProjects}</div>
         </div>
 
         <div className="stat-card">
           <div className="stat-icon-circle" style={{ background: "#fbc73d" }}>
             <FaClipboardCheck />
           </div>
-          <div className="stat-title">Pending Proposals</div>
-          <div className="stat-value">—</div>
+          <div className="stat-title">Week</div>
+          <div className="stat-value">{stats.week}</div>
         </div>
 
         <div className="stat-card">
@@ -86,7 +109,7 @@ export default function OverviewCoordinator({ onTabChange }) {
             <FaUserTie />
           </div>
           <div className="stat-title">Supervisors</div>
-          <div className="stat-value">—</div>
+          <div className="stat-value">{stats.supervisors}</div>
         </div>
 
         <div className="stat-card">
@@ -94,7 +117,7 @@ export default function OverviewCoordinator({ onTabChange }) {
             <FaStar />
           </div>
           <div className="stat-title">Overdue Milestones</div>
-          <div className="stat-value">—</div>
+          <div className="stat-value">{stats.overdueMilestones}</div>
         </div>
       </div>
 
