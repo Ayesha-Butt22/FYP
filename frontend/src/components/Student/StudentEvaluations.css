@@ -1,0 +1,85 @@
+.student-evals-wrap {
+  max-width: 1100px;
+  margin: 0 auto 48px;
+  padding: 0 16px;
+  font-family: Inter, Roboto, Arial, sans-serif;
+}
+
+.eval-card {
+  border-radius: 12px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #eef6ff;
+}
+
+.eval-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.eval-project-title {
+  font-weight: 900;
+  color: #01337a;
+  font-size: 20px;
+}
+
+.eval-final-percent {
+  font-weight: 900;
+  color: #01337a;
+  font-size: 20px;
+}
+
+.eval-milestones-row {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.milestone-summary {
+  min-width: 200px;
+  background: #fbfdff;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #e6eef6;
+}
+
+.eval-rubric-wrap {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.eval-rubric-card {
+  background: #fbfdff;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #e6eef6;
+}
+
+/* rubric table tweaks */
+.rubric-table .MuiTableCell-root {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+/* actions */
+.eval-download-btn {
+  background: #01337a !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .eval-milestones-row {
+    gap: 12px;
+  }
+  .milestone-summary {
+    min-width: 140px;
+    padding: 8px;
+  }
+}

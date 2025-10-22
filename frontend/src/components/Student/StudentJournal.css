@@ -1,0 +1,112 @@
+.student-journal-wrap {
+  max-width: 1100px;
+  margin: 0 auto 48px;
+  padding: 0 16px;
+  font-family: Inter, Roboto, Arial, sans-serif;
+}
+
+.journal-controls {
+  margin-bottom: 10px;
+}
+
+.journal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* empty state */
+.journal-empty {
+  padding: 28px;
+  text-align: center;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #eef6ff;
+}
+
+/* week card */
+.journal-week-card {
+  padding: 18px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #eef6ff;
+  box-shadow: 0 6px 20px rgba(1, 51, 122, 0.04);
+}
+
+.journal-week-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+.journal-week-label {
+  font-weight: 900;
+  color: #01337a;
+}
+
+/* timeline list inside week */
+.journal-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.journal-activity {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border: 1px solid #eef6ff;
+}
+
+.journal-activity-left {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.journal-activity-date {
+  font-size: 13px;
+  color: #475569;
+  font-weight: 700;
+}
+
+.journal-activity-icon {
+  font-size: 18px;
+}
+
+.journal-activity-right {
+  flex: 1;
+}
+
+.journal-activity-title {
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.journal-activity-desc {
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* responsive */
+@media (max-width: 720px) {
+  .journal-activity {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .journal-activity-left {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  .journal-activity-date {
+    font-size: 12px;
+  }
+}

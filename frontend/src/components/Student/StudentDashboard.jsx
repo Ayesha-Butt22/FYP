@@ -8,11 +8,12 @@ import StudentTemplates from "./StudentTemplates";
 import StudentTasks from "./StudentTasks";
 import StudentMeetings from "./StudentMeetings";
 import StudentChecklist from "./StudentChecklist";
-import StudentFeedback from "./StudentFeedback";
+import StudentEvaluations from "./StudentEvaluations";
 import StudentJournal from "./StudentJournal";
 import StudentReports from "./StudentReports";
-import StudentArchive from "./StudentArchive";
-import StudentProfile from "./StudentProfile";
+
+import SupervisorArchive from "../Supervisor/SupervisorArchive";
+
 import {
   Dashboard as DashboardIcon,
   GroupAdd as GroupAddIcon,
@@ -42,8 +43,6 @@ const menu = [
   { label: "Journal", icon: <BookIcon /> },
   { label: "Reports", icon: <DescriptionIcon /> },
   { label: "FYP Archive", icon: <LibraryBooksIcon /> },
-  // Noticeboard removed
-  { label: "Profile", icon: <AccountCircleIcon /> },
 ];
 
 const studentInfo = {
@@ -69,12 +68,10 @@ export default function StudentDashboard() {
     "Tasks": <StudentTasks />,
     "Meetings": <StudentMeetings />,
     "Checklist": <StudentChecklist />,
-    "Evaluations": <StudentFeedback />,
+    "Evaluations": <StudentEvaluations />,
     "Journal": <StudentJournal />,
     "Reports": <StudentReports />,
-    "FYP Archive": <StudentArchive />,
-    // "Noticeboard": <StudentNotices />, // Removed
-    "Profile": <StudentProfile />,
+    "FYP Archive": <SupervisorArchive />,
   };
 
   return (
@@ -87,7 +84,6 @@ export default function StudentDashboard() {
       activeTab={activeTab}
       setActiveTab={setActiveTab}
       onLogout={handleLogout}
-      profileIcon={<StudentProfile />}
     />
   );
 }
