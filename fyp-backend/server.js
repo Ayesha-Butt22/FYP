@@ -36,6 +36,8 @@ app.use("/api/student", require("./routes/student"));
  */
 app.use('/api/files', require('./routes/FileRouter'));
 app.use("/api/profile-pic", require("./routes/profile"));
+app.use("/api/deadline", require("./routes/deadline"));
+
 
 
 // Test route

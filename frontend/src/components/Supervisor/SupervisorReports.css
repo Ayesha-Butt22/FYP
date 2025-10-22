@@ -1,5 +1,6 @@
 
 .reports-paper {
+  margin-top: -40px;
   padding: 32px;
   border-radius: 18px;
   margin-bottom: 32px;
@@ -11,9 +12,8 @@
   text-align: left;
 }
 
-.reports-placeholder {
-  color: #aaa;
-  font-size: 1.08rem;
+.supervisor-reports-placeholder {
+  font-size: 1.5rem !important;
   margin: 32px 0 12px 0;
   text-align: center;
 }
@@ -22,28 +22,32 @@
   margin-bottom: 18px;
 }
 
-.report-title {
-  font-size: 1.2rem;
-  font-weight: 800;
+.super-report-title {
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
   color: #2563eb;
   margin-bottom: 2px;
 }
 
-.report-members {
-  font-size: 1.07rem;
-  color: #64748b;
-  margin-bottom: 7px;
+.super-report-members {
+  font-size: 1.3rem !important;
+  color: #000000 !important;
+  margin-bottom: 7px !important;
+  margin-top: 7px !important;
 }
 
-.report-progress-summary {
-  margin-bottom: 9px;
+.super-report-progress-summary {
+  margin-bottom: 9px !important;
+  margin-top: 15px !important;
+  font-size: 1.3rem !important;
 }
 
-.report-total-score {
-  font-size: 1.08rem;
+.super-report-total-score {
+  font-size: 1.2rem !important;
   color: #219653;
-  font-weight: 700;
-  margin-bottom: 6px;
+  font-weight: 700 !important;
+  margin-bottom: 6px !important;
+  margin-top: 15px !important;
 }
 
 .report-export-btns {
@@ -56,10 +60,11 @@
   font-weight: 700 !important;
   letter-spacing: 0.2px;
   font-size: 1.07rem !important;
+  width: 250px !important;
 }
 
-.report-table {
-  margin-top: 10px;
+.super-report-table {
+  margin-top: 25px;
 }
 
 .report-status-chip {

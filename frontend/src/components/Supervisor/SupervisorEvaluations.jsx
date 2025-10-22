@@ -16,7 +16,7 @@ import {
   Divider,
   IconButton,
   InputAdornment,
-  Grid,
+  Grid, TableBody, TableHead, Table, TableRow, TableCell,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { PieChart } from "@mui/x-charts";
@@ -237,8 +237,6 @@ export default function SupervisorEvaluations() {
       >
         Evaluation & Rubrics
       </DashboardSectionHeader>
-
-      {/* Evaluation Form */}
       <Paper className="evaluation-form-paper elevated-card">
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={4}>
@@ -249,6 +247,7 @@ export default function SupervisorEvaluations() {
                 label="Select Group"
                 onChange={e => setSelectedGroup(e.target.value)}
                 size="small"
+                style={{ height: '47px'}}
               >
                 <MenuItem value=""><em>Choose group</em></MenuItem>
                 {GROUPS.map(g => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
@@ -264,6 +263,7 @@ export default function SupervisorEvaluations() {
                 label="Select Milestone"
                 onChange={e => setSelectedMilestone(e.target.value)}
                 size="small"
+                style={{ height: '47px' , width: '250px'}}
               >
                 <MenuItem value=""><em>Choose milestone</em></MenuItem>
                 {MILESTONES.map(m => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
@@ -274,7 +274,7 @@ export default function SupervisorEvaluations() {
           <Grid item xs={12} sm={12} md={4} sx={{ textAlign: { xs: "left", md: "right" } }}>
             <Button
               variant="outlined"
-              size="small"
+              size="large"
               startIcon={<FileDownload />}
               onClick={exportCSV}
               sx={{ mr: 1 }}
@@ -283,7 +283,7 @@ export default function SupervisorEvaluations() {
             </Button>
             <Button
               variant="text"
-              size="small"
+              size="large"
               startIcon={<RestartAlt />}
               onClick={() => { setSelectedGroup(""); setSelectedMilestone(""); setFormError(""); setSubmitted(false); }}
             >
@@ -338,8 +338,6 @@ export default function SupervisorEvaluations() {
                 </TableBody>
               </Table>
             </Box>
-
-            {/* Total + Chart */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="center" mb={1} mt={2}>
               <Box sx={{ minWidth: 230 }}>
                 <Typography fontWeight={700} className="total-marks">
@@ -391,7 +389,7 @@ export default function SupervisorEvaluations() {
             </Button>
           </>
         ) : (
-          <Typography color="#666" fontSize={15} my={3}>
+          <Typography color="#666" fontSize={20} my={3}>
             {submitted || alreadyEvaluated
               ? "Evaluation submitted for this group and milestone."
               : "Select a group and milestone to fill evaluation."}

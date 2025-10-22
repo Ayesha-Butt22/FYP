@@ -124,10 +124,8 @@ export default function SupervisorReports() {
 
   return (
       <Box mx="auto" py={3} mr={0} ml={0} pt={0}>
-        <DashboardSectionHeader>Evaluation Report</DashboardSectionHeader>
-
-        <div className="section-desc">
-          Here you can see preview evaluation & rubrics. Select "Particular Group" to view and respected group record will be displayed </div>
+        <DashboardSectionHeader
+        description={"Here you can see preview evaluation & rubrics. Select \"Particular Group\" to view and respected group record will be displayed "}>Evaluation Report</DashboardSectionHeader>
 
         <Paper className="reports-paper">
 
@@ -138,6 +136,7 @@ export default function SupervisorReports() {
                 label="Select Group"
                 onChange={(e) => setSelectedGroup(e.target.value)}
                 size="small"
+                style={{ height: '60px'}}
             >
               {GROUPS.map((g) => (
                   <MenuItem key={g.id} value={g.id}>
@@ -147,29 +146,27 @@ export default function SupervisorReports() {
             </Select>
           </FormControl>
 
-          {/* If no group is selected */}
           {!group ? (
-              <Typography color="#aaa" className="reports-placeholder">
+              <Typography color="#aaa" className="supervisor-reports-placeholder">
                 Select a group to view its report.
               </Typography>
           ) : (
               <div>
-                {/* Report Summary */}
                 <div className="report-summary">
-                  <Typography className="report-title">
+                  <Typography className="super-report-title">
                     {group.id} - {group.title}
                   </Typography>
-                  <Typography className="report-members">
+                  <Typography className="super-report-members">
                     <b>Members:</b> {group.members.join(", ")}
                   </Typography>
-                  <Stack direction="row" spacing={1} className="report-progress-summary">
-                    <Chip label={`Completed: ${completed}`} color="success"/>
-                    <Chip label={`In Progress: ${inProgress}`} color="info"/>
-                    <Chip label={`Pending: ${pending}`} color="warning"/>
-                    <Chip label={`Total: ${total}`} color="default"/>
-                    <Chip label={`Progress: ${percent}%`} color="primary"/>
+                  <Stack direction="row" spacing={1} className="super-report-progress-summary">
+                    <Chip label={`Completed: ${completed}`} color="success" style={{ width : '200px' , fontSize: '18px' }}/>
+                    <Chip label={`In Progress: ${inProgress}`} color="info" style={{ width : '200px' , fontSize: '18px' }}/>
+                    <Chip label={`Pending: ${pending}`} color="warning" style={{ width : '200px' , fontSize: '18px' }}/>
+                    <Chip label={`Total: ${total}`} color="secondary" style={{ width : '200px' , fontSize: '18px' }}/>
+                    <Chip label={`Progress: ${percent}%`} color="primary" style={{ width : '200px' , fontSize: '18px' }}/>
                   </Stack>
-                  <Typography className="report-total-score">
+                  <Typography className="super-report-total-score">
                     <b>Total Score:</b> {groupScore}/{groupMax}
                   </Typography>
                 </div>
@@ -197,7 +194,7 @@ export default function SupervisorReports() {
                 </div>
 
                 {/* Milestones Table */}
-                <Table className="report-table">
+                <Table className="super-report-table">
                   <TableHead>
                     <TableRow>
                       <TableCell>Milestone</TableCell>
@@ -215,6 +212,7 @@ export default function SupervisorReports() {
                             <Chip
                                 label={m.status}
                                 color={statusColor(m.status)}
+                                style={{ width : '150px' , fontSize: '18px' }}
                                 className="report-status-chip"
                             />
                           </TableCell>

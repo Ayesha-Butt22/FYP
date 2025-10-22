@@ -1,101 +1,227 @@
-/* --- Add Slot Button --- */
-.add-slot-btn {
-  margin-bottom: 16px !important;
+
+.supermeeting-add-slot-btn {
+  margin-bottom: 28px !important;
   border-radius: 100px !important;
   font-weight: 700 !important;
-  padding: 6px 24px !important;
-  box-shadow: 0 3px 10px #2563eb18 !important;
-  background-color: #01337a !important; 
-  color: #fff !important;               
-  border: 1px solid #2563eb !important; 
-  transition: all 0.3s ease !important; 
-  margin-bottom: 28px !important;
+  padding: 10px 32px !important;
+  font-size: 1.1rem !important;
+  background-color: #01337a !important;
+  color: #fff !important;
+  border: 1px solid #2563eb !important;
+  box-shadow: 0 4px 14px #2563eb1a !important;
+  transition: all 0.3s ease !important;
 }
 
-.add-slot-btn:hover {
-  background-color: #fff !important;   
-  color: #01337a!important;            
-  border: 1px solid #01337a!important;
+.supermeeting-add-slot-btn:hover {
+  background-color: #fff !important;
+  color: #01337a !important;
+  border: 1px solid #01337a !important;
+  box-shadow: 0 4px 18px #01337a1a !important;
 }
 
 
-.dialog-title {
+.supermeeting-dialog-title {
   display: flex;
   align-items: center;
-  font-weight: 700;
+  font-weight: 800 !important;
+  font-size: 1.3rem !important;
+  color: #01337a !important;
 }
-.dialog-icon {
-  margin-right: 6px;
+.supermeeting-dialog-icon {
+  margin-right: 10px;
+  font-size: 26px;
   color: #01337a;
 }
 
-/* --- Summary Cards --- */
-.summary-card {
-  padding: 20px !important;
-  border-radius: 12px !important;
+
+
+.supermeeting-summary-card {
   flex: 1;
   text-align: center;
-}
-.summary-label {
-  font-weight: 600;
-}
-.summary-value {
-  font-weight: 900;
-  font-size: 26px;
-}
-.summary-card.total {
-  background: #e9fbf0;
-  color: #219653;
-}
-.summary-card.available {
-  background: #fff7de;
-  color: #b97b16;
-}
-.summary-card.booked {
-  background: #e5f0ff;
-  color: #01337a;
+  padding: 34px 20px !important;
+  border-radius: 18px !important;
+  font-size: 1.1rem !important;
+  transition: all 0.25s ease-in-out;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(1, 51, 122, 0.08);
+  background: white;
 }
 
-/* --- Slots Section --- */
-.slots-paper {
-  padding: 24px !important;
-  margin-bottom: 24px !important;
-  border-radius: 16px !important;
+
+.supermeeting-summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(1, 51, 122, 0.15);
 }
-.section-title {
-  font-weight: 700;
+
+
+.supermeeting-summary-label {
+  font-weight: 600;
+  font-size: 1.15rem;
+  opacity: 0.9;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.supermeeting-summary-value {
+  font-weight: 800;
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+
+.supermeeting-summary-card.total {
+  background: linear-gradient(145deg, #01337a 0%, #0a4a9e 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.supermeeting-summary-card.available {
+  background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+
+.supermeeting-summary-card.booked {
+  background: linear-gradient(145deg, #2e7c32 0%, #1a7f04 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+
+.supermeeting-summary-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 85%;
+  height: 4px;
+  transform: translateX(-50%);
+  border-radius: 4px 4px 0 0;
+  opacity: 0.4;
+}
+
+.supermeeting-summary-card.total::after {
+  background: linear-gradient(90deg, transparent, #60a5fa, transparent);
+}
+
+.supermeeting-summary-card.available::after {
+  background: linear-gradient(90deg, transparent, #6ee7b7, transparent);
+}
+
+.supermeeting-summary-card.booked::after {
+  background: linear-gradient(90deg, transparent, #fcd34d, transparent);
+}
+
+
+.supermeeting-summary-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+
+
+.supermeeting-slots-paper {
+  padding: 28px !important;
+  margin-bottom: 28px !important;
+  border-radius: 18px !important;
+  font-size: 1.05rem !important;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  box-shadow: 0 8px 30px rgba(1, 51, 122, 0.06);
+  border: 1px solid #edf4ff;
+}
+
+
+.supermeeting-section-title {
+  font-weight: 800 !important;
+  font-size: 1.4rem !important;
   color: #01337a;
-  margin-bottom: 12px !important;
+  margin-bottom: 14px !important;
   display: flex;
   align-items: center;
 }
-.section-title.upcoming {
+.supermeeting-section-title.upcoming {
   color: #01337a;
 }
-.section-icon {
-  margin-right: 8px;
+.supermeeting-section-icon {
+  margin-right: 10px;
   color: #01337a;
+  font-size: 1.6rem;
 }
-.section-icon.upcoming {
+.supermeeting-section-icon.upcoming {
   color: #01337a;
-}
-.divider {
-  margin-bottom: 16px !important;
 }
 
-/* --- Table Rows --- */
-.slot-row.booked-row {
+
+.supermeeting-divider {
+  margin-bottom: 20px !important;
+  border-color: #eaf1ff !important;
+}
+
+
+.supermeeting-full-table {
+  width: 100% !important;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e6efff;
+  font-size: 1.05rem !important;
+}
+
+.supermeeting-full-table .MuiTableCell-root {
+  padding: 16px 14px !important;
+  font-size: 1.05rem !important;
+}
+
+.supermeeting-slot-row.booked-row {
   background: #f2fff7;
 }
-.no-slots {
-  color: #bbb;
+
+.supermeeting-no-slots {
+  color: #999;
   text-align: center;
+  font-size: 1.1rem;
+  padding: 10px 0;
 }
-.no-meetings {
-  color: #aaa;
-  padding: 12px 0;
+
+.supermeeting-no-meetings {
+  color: #888;
   text-align: center;
+  font-size: 1.1rem;
+  padding: 14px 0;
 }
-.inline-icon {
-  margin-right: 4px;
+
+.supermeeting-inline-icon {
+  margin-right: 6px;
+  vertical-align: middle;
+  font-size: 1.1rem;
+}
+
+
+.supermeeting-dialog .MuiButton-root {
+  font-size: 1.05rem !important;
+  padding: 10px 24px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+}
+
+@media (max-width: 900px) {
+  .supermeeting-section-title {
+    font-size: 1.2rem !important;
+  }
+  .supermeeting-full-table .MuiTableCell-root {
+    font-size: 0.95rem !important;
+  }
+  .supermeeting-summary-card {
+    padding: 22px 14px !important;
+  }
+  .supermeeting-summary-value {
+    font-size: 1.8rem;
+  }
 }

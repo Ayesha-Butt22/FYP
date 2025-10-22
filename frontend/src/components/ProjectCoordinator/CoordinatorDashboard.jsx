@@ -20,7 +20,7 @@ import Noticeboard from "../Admin/Noticeboard";
 import TemplateView from "./TemplateView"; // renamed component import
 
 const menu = [
-  { label: "Overview", icon: <DashboardIcon /> },
+  // { label: "Overview", icon: <DashboardIcon /> },
   { label: "Manage Deadlines", icon: <CalendarMonthIcon /> },
   { label: "Groups", icon: <GroupsIcon /> },
   { label: "Supervisor Slots", icon: <SettingsIcon /> },
