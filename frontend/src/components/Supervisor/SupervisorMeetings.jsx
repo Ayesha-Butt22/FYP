@@ -134,12 +134,11 @@ export default function SupervisorMeetings() {
               </DashboardSectionHeader>
 
         <Box width="100%">
-          {/* Add Slot Button */}
           <Button
               variant="contained"
               color="primary"
               startIcon={<AddCircleOutline/>}
-              className="add-slot-btn"
+              className="supermeeting-add-slot-btn"
               onClick={() => setOpenDialog(true)}
           >
             Add Available Slot
@@ -153,9 +152,9 @@ export default function SupervisorMeetings() {
               fullWidth
               maxWidth="sm"
           >
-            <DialogTitle className="dialog-title">
-              <EventAvailable className="dialog-icon"/>
-              Add New Meeting Slot
+            <DialogTitle className="supermeeting-dialog-title">
+              <EventAvailable className="supermeeting-dialog-icon"/>
+             <label>Add New Meeting Slot</label>
             </DialogTitle>
             <DialogContent>
               <Stack spacing={2} mt={1}>
@@ -190,49 +189,45 @@ export default function SupervisorMeetings() {
               <Button onClick={() => setOpenDialog(false)} color="inherit">
                 Cancel
               </Button>
-              <Button variant="contained" onClick={handleAddSlot}>
+              <Button variant="contained" style={{ backgroundColor: '#01337a'}} onClick={handleAddSlot}>
                 Add Slot
               </Button>
             </DialogActions>
           </Dialog>
-
-          {/* Slot Summary */}
           <Stack
               direction={{xs: "column", sm: "row"}}
               spacing={2}
               mb={4}
               justifyContent="center"
           >
-            <Paper className="summary-card total">
-              <Typography className="summary-label">Total Slots</Typography>
-              <Typography className="summary-value">{slots.length}</Typography>
+            <Paper className="supermeeting-summary-card total">
+              <Typography className="supermeeting-summary-label">Total Slots</Typography>
+              <Typography className="supermeeting-summary-value">{slots.length}</Typography>
             </Paper>
-            <Paper className="summary-card available">
-              <Typography className="summary-label">Available</Typography>
-              <Typography className="summary-value">
+            <Paper className="supermeeting-summary-card available">
+              <Typography className="supermeeting-summary-label">Available</Typography>
+              <Typography className="supermeeting-summary-value">
                 {slots.filter((s) => !s.bookedBy).length}
               </Typography>
             </Paper>
-            <Paper className="summary-card booked">
-              <Typography className="summary-label">Booked</Typography>
-              <Typography className="summary-value">
+            <Paper className="supermeeting-summary-card booked">
+              <Typography className="supermeeting-summary-label">Booked</Typography>
+              <Typography className="supermeeting-summary-value">
                 {slots.filter((s) => !!s.bookedBy).length}
               </Typography>
             </Paper>
           </Stack>
-
-          {/* All Slots */}
-          <Paper className="slots-paper">
-            <Typography className="section-title">
-              <EventBusy className="section-icon"/>
+          <Paper className="supermeeting-slots-paper">
+            <Typography className="supermeeting-section-title">
+              <EventBusy className="supermeeting-section-icon"/>
               All Slots
             </Typography>
-            <Divider className="divider"/>
-            <Table size="small" className="full-table">
+            <Divider className="supermeeting-divider"/>
+            <Table size="small" className="supermeeting-full-table">
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    <CalendarToday fontSize="small" className="inline-icon"/>
+                    <CalendarToday fontSize="small" className="supermeeting-inline-icon"/>
                     Date
                   </TableCell>
                   <TableCell>Time</TableCell>
@@ -252,7 +247,7 @@ export default function SupervisorMeetings() {
                       <TableCell>{formatTime(slot.time)}</TableCell>
                       <TableCell>{slot.duration} min</TableCell>
                       <TableCell>
-                        <Chip {...statusChipProps(slot.bookedBy)} />
+                        <Chip {...statusChipProps(slot.bookedBy)}  size="medium"  style={{ width: '180px' }}/>
                       </TableCell>
                       <TableCell align="center">
                         {!slot.bookedBy && (
@@ -274,7 +269,7 @@ export default function SupervisorMeetings() {
                 {sortedSlots.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={5}>
-                        <Typography className="no-slots">
+                        <Typography className="supermeeting-no-slots">
                           No slots available.
                         </Typography>
                       </TableCell>
@@ -285,16 +280,16 @@ export default function SupervisorMeetings() {
           </Paper>
 
           {/* Upcoming Meetings */}
-          <Paper className="slots-paper">
-            <Typography className="section-title upcoming">
-              <EventAvailable className="section-icon upcoming"/>
+          <Paper className="supermeeting-slots-paper">
+            <Typography className="supermeeting-section-title upcoming">
+              <EventAvailable className="supermeeting-section-icon upcoming"/>
               Upcoming Meetings
             </Typography>
-            <Divider className="divider"/>
+            <Divider className="supermeeting-divider"/>
             {upcomingMeetings.length === 0 ? (
-                <Typography className="no-meetings">No upcoming meetings.</Typography>
+                <Typography className="supermeeting-no-meetings">No upcoming meetings.</Typography>
             ) : (
-                <Table size="small" className="full-table">
+                <Table size="small" className="supermeeting-full-table">
                   <TableHead>
                     <TableRow>
                       <TableCell>Date</TableCell>
@@ -312,8 +307,9 @@ export default function SupervisorMeetings() {
                             <Chip
                                 label={slot.bookedBy}
                                 color="success"
+                                style={{ width: '150px' }}
                                 icon={<GroupIcon fontSize="small"/>}
-                                size="small"
+                                size="medium"
                             />
                           </TableCell>
                           <TableCell>{slot.duration} min</TableCell>
