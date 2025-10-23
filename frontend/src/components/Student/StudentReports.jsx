@@ -273,7 +273,7 @@ export default function StudentReports() {
 
       <div ref={reportRef} className="report-content">
         <Paper className="report-summary" elevation={1}>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: "#01337a" }}>Personal Progress Summary</Typography>
+          <label variant="label" sx={{ fontWeight: 800, color: "#01337a" }}>Personal Progress Summary</label>
           <Divider sx={{ my: 1 }} />
           <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
             <Box className="report-card">
@@ -296,7 +296,7 @@ export default function StudentReports() {
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Milestones</Typography>
+          <label variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Milestones</label>
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -318,7 +318,7 @@ export default function StudentReports() {
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Tasks</Typography>
+          <label variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Tasks</label>
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -340,7 +340,7 @@ export default function StudentReports() {
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Meetings</Typography>
+          <label  variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Meetings</label>
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -362,7 +362,7 @@ export default function StudentReports() {
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Feedback / Evaluations (comments)</Typography>
+          <label  variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Feedback / Evaluations (comments)</label>
           <Table size="small">
             <TableHead>
               <TableRow>

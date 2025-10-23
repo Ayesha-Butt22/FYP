@@ -310,14 +310,27 @@ export default function ManageAdmin() {
         </DashboardSectionHeader>
 
         <div style={{ display: "flex", justifyContent: "right", margin: "20px 0" }}>
-          <button
-            className="add-supervisor-btn"
-            onClick={openAddForm}
-            disabled={sideFormMode === 'add'}
-          >
-            + Add Admin
-          </button>
-        </div>
+  <button
+    style={{
+      background: "#01337a",
+      color: "#fff",
+      padding: "10px 28px",
+      border: "none",
+      borderRadius: "7px",
+      fontSize: "1.3rem",
+      fontWeight: "900",
+      letterSpacing: "-.2px",
+      boxShadow: "0 2px 10px #01337a22",
+      cursor: "pointer",
+      transition: "background 0.18s",
+    }}
+    onClick={openAddForm}
+    disabled={sideFormMode === "add"}
+  >
+    + Add Admin
+  </button>
+</div>
+
 
         {loading ? (
           <div style={{ textAlign: "center", padding: 20 }}>Loading admins...</div>
