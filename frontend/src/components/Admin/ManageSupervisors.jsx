@@ -35,6 +35,48 @@ const ALL_DESIGNATIONS = [
   "Teaching Fellow"
 ];
 
+/* Default slots by designation (normalized keys).
+   Matches the table you provided:
+   Dean:0, Professor:1, Associate Professor:2, Assistant Professor:3,
+   Lecturer/Sr Lecturer:3, Junior Lecturer:2, Research Associate/Assistant:1, Teaching Fellow:1
+*/
+const DESIGNATION_SLOTS = {
+  "dean": 0,
+  "professor": 1,
+  "associate professor": 2,
+  "associateprofessor": 2,
+  "assistant professor": 3,
+  "assistantprofessor": 3,
+  "lecturer": 3,
+  "sr lecturer": 3,
+  "sr.lecturer": 3,
+  "srlecturer": 3,
+  "lecturer/sr lecturer": 3,
+  "junior lecturer": 2,
+  "juniorlecturer": 2,
+  "research associate": 1,
+  "researchassociate": 1,
+  "research assistant": 1,
+  "researchassistant": 1,
+  "teaching fellow": 1,
+  "teachingfellow": 1,
+};
+
+function normalizeDesignation(str = "") {
+  return String(str).toLowerCase().replace(/[\.\s]+/g, " ").trim();
+}
+
+function getDefaultSlotsForDesignation(designation) {
+  if (!designation) return 0;
+  const norm = normalizeDesignation(designation);
+  // try direct match
+  if (DESIGNATION_SLOTS.hasOwnProperty(norm)) return DESIGNATION_SLOTS[norm];
+  // try removing spaces
+  const compact = norm.replace(/\s+/g, "");
+  if (DESIGNATION_SLOTS.hasOwnProperty(compact)) return DESIGNATION_SLOTS[compact];
+  // not found - fallback 0
+  return 0;
+}
 
 function StatusBadge({ text, color }) {
   const colorMap = {
@@ -199,12 +241,15 @@ export default function ManageSupervisors() {
 
   const handleEdit = (row, idx) => {
     setEditIndex(idx);
+    // if row designation exists, keep it and ensure available slots default if missing
+    const currentDesignation = row.Designation || "";
+    const defaultSlots = getDefaultSlotsForDesignation(currentDesignation);
     setFormData({
       Name: row.Name,
       Email: row.Email,
       Department: row.Department,
       Designation: row.Designation,
-      Available_Slots: row["Available Slots"],
+      Available_Slots: (typeof row["Available Slots"] !== "undefined" ? row["Available Slots"] : defaultSlots),
       Booked_Slots: row["Booked Slots"],
       Password: ""
     });
@@ -212,6 +257,7 @@ export default function ManageSupervisors() {
     setFormErrors({});
     setSideFormMode('edit');
   };
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -221,6 +267,19 @@ export default function ManageSupervisors() {
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: "" }));
     }
+  };
+
+  // New handler for designation selection that sets default available slots
+  const handleDesignationChange = (val) => {
+    const defaultSlots = getDefaultSlotsForDesignation(val);
+    setFormData(prev => ({
+      ...prev,
+      Designation: val,
+      Available_Slots: defaultSlots
+    }));
+    // clear potential designation error
+    if (formErrors.Designation) setFormErrors(prev => ({ ...prev, Designation: "" }));
+    if (formErrors.Available_Slots) setFormErrors(prev => ({ ...prev, Available_Slots: "" }));
   };
 
   const handleSubmit = async (e) => {
@@ -381,33 +440,37 @@ export default function ManageSupervisors() {
                     headers={headers}
                     rows={rows}
                     renderActions={(row, i) => (
-                        <>
-                          <button
-                              className="table-action-btn"
-                              onClick={() => handleEdit(row, i)}
-                              disabled={sideFormMode && editIndex === i}
-                          >
-                            {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
-                          </button>
-                          <button
-                              className="table-action-btn"
-                              style={{background: "#f43f5e"}}
-                              onClick={() => handleDelete(i)}
-                              disabled={sideFormMode}
-                          >
-                            Delete
-                          </button>
+  <>
+    <button
+      className="table-action-btn"
+      onClick={() => handleEdit(row, i)}
+      disabled={sideFormMode && editIndex === i}
+    >
+      {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
+    </button>
 
-                          <button
-                              className="table-action-btn"
-                              style={{ background: "#013379" }}
-                              onClick={() => handleMakeCoordinator(i)}
-                              disabled={sideFormMode}
-                          >
-                            Promote
-                          </button>
-                        </>
-                    )}
+    {!sideFormMode && (
+      <>
+        <button
+          className="table-action-btn"
+          style={{ background: "#f43f5e" }}
+          onClick={() => handleDelete(i)}
+        >
+          Delete
+        </button>
+
+        <button
+          className="table-action-btn"
+          style={{ background: "#013379" }}
+          onClick={() => handleMakeCoordinator(i)}
+        >
+          Promote
+        </button>
+      </>
+    )}
+  </>
+)}
+
                 />
               </div>
           )}
@@ -509,9 +572,7 @@ export default function ManageSupervisors() {
                   <DropdownSingleSelect
                       value={formData.Designation}
                       options={ALL_DESIGNATIONS}
-                      onChange={(val) =>
-                          setFormData(prev => ({...prev, Designation: val}))
-                      }
+                      onChange={handleDesignationChange}
                       placeholder="Select Designation"
                   />
                   {formErrors.Designation && (
