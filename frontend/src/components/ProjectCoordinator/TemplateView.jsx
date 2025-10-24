@@ -2,30 +2,13 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Paper,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
   Typography,
-  Tooltip,
   Modal,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  TextField,
   Button,
 } from "@mui/material";
 import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
+import AppTable from "../Admin/AppTable.jsx";
 import "./TemplateView.css";
-
-/**
- * TemplateView — updated so the top-level "View" button opens the Drive link directly.
- * - Clicking "View" on a group will open the group's Drive folder URL constructed from the groupId.
- * - If you prefer to open the first file's driveLink instead, I can adjust that easily.
- * - Modal for group details is still available (it opens via other UI if needed) — unchanged.
- */
 
 const STORAGE_KEY = "pc_student_templates";
 const DEADLINE_KEY = "pc_deadlines";
@@ -119,6 +102,7 @@ function checkOnTimeByGroup(template, deadlines) {
 export default function TemplateView() {
   const [templates, setTemplates] = useState([]);
   const [groupView, setGroupView] = useState(null); // { groupId, items: [...] }
+  // filters
   const [filterStatus, setFilterStatus] = useState("");
   const [filterGroup, setFilterGroup] = useState("");
   const [search, setSearch] = useState("");
@@ -200,7 +184,19 @@ export default function TemplateView() {
     return true;
   });
 
-  // open modal that lists all templates for a group (so user can see drive links)
+  // Build rows by unique groups (use first template for representative values)
+  const groups = Array.from(new Set(filtered.map((t) => t.groupId))).sort();
+  const tableRows = groups.map((g) => {
+    const rep = filtered.find((t) => t.groupId === g) || templates.find((t) => t.groupId === g) || {};
+    return {
+      Group: g,
+      "Supervised By": rep.supervisedBy || assignedSup[g] || "—",
+      Department: rep.department || "—",
+      Status: rep.status || "—",
+      __meta: { groupId: g, representative: rep },
+    };
+  });
+
   const openGroupView = (groupId) => {
     const items = templates.filter((t) => t.groupId === groupId);
     setGroupView({ groupId, items });
@@ -208,7 +204,6 @@ export default function TemplateView() {
 
   const closeGroupView = () => setGroupView(null);
 
-  // Open a file drive link (if present) or a fallback dummy url
   const openDriveFile = (driveLink, groupId) => {
     const url = driveLink && driveLink.trim()
       ? driveLink
@@ -216,11 +211,27 @@ export default function TemplateView() {
     window.open(url, "_blank", "noopener");
   };
 
-  // Open the group's Drive folder URL constructed from groupId (used by View)
   const openGroupDriveFolder = (groupId) => {
-    // If you have a real folder mapping, replace this construction with the actual folder URL.
     const folderUrl = `https://drive.google.com/drive/folders/${encodeURIComponent(groupId)}`;
     window.open(folderUrl, "_blank", "noopener");
+  };
+
+  const headers = ["Group", "Supervised By", "Department", "Status"];
+
+  const renderActions = (row) => {
+    const groupId = row.__meta?.groupId;
+    return (
+      <div style={{ display: "flex", gap: 8 }}>
+        <button className="mt-btn" onClick={() => openGroupDriveFolder(groupId)}>View</button>
+        <button className="mt-btn" onClick={() => openGroupView(groupId)} style={{ background: "#6c757d" }}>Details</button>
+      </div>
+    );
+  };
+
+  const clearFilters = () => {
+    setFilterStatus("");
+    setFilterGroup("");
+    setSearch("");
   };
 
   return (
@@ -230,78 +241,55 @@ export default function TemplateView() {
       </DashboardSectionHeader>
 
       <Paper className="stv-card">
-        <Box className="stv-controls">
-          <Box sx={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-            <FormControl size="small" sx={{ minWidth: 160 }}>
-              <InputLabel id="filter-status-label">Status</InputLabel>
-              <Select labelId="filter-status-label" value={filterStatus} label="Status" onChange={(e) => setFilterStatus(e.target.value)}>
-                <MenuItem value="">All</MenuItem>
-                {uniqStatus.concat(STATUS_OPTIONS.filter((s) => !uniqStatus.includes(s))).map((s) => (
-                  <MenuItem key={s} value={s}>{s}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+        {/* top controls: use StudentTemplates-style controls (st-controls) for visual parity */}
+        <Box className="st-controls" sx={{ mb: 1 }}>
+          <div className="st-filter">
+            <label>Status</label>
+            <select
+              className="st-dept-select"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">All</option>
+              {uniqStatus.concat(STATUS_OPTIONS.filter((s) => !uniqStatus.includes(s))).map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
 
-            <FormControl size="small" sx={{ minWidth: 140 }}>
-              <InputLabel id="filter-group-label">Group</InputLabel>
-              <Select labelId="filter-group-label" value={filterGroup} label="Group" onChange={(e) => setFilterGroup(e.target.value)}>
-                <MenuItem value="">All</MenuItem>
-                {uniqGroups.map((g) => <MenuItem key={g} value={g}>{g}</MenuItem>)}
-              </Select>
-            </FormControl>
+          <div className="st-filter">
+            <label>Group</label>
+            <select
+              className="st-dept-select"
+              value={filterGroup}
+              onChange={(e) => setFilterGroup(e.target.value)}
+            >
+              <option value="">All</option>
+              {uniqGroups.map((g) => <option key={g} value={g}>{g}</option>)}
+            </select>
+          </div>
 
-            <TextField size="small" placeholder="Search supervised by or group..." value={search} onChange={(e) => setSearch(e.target.value)} />
-          </Box>
+          <div className="st-filter" style={{ minWidth: 240 }}>
+            <label>Search</label>
+            <input
+              className="st-dept-select"
+              type="text"
+              placeholder="Search supervised by or group..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
-          <Box>
-            <Typography variant="body2" sx={{ color: "#64748b" }}>{filtered.length} files</Typography>
-          </Box>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+            <button className="st-clear-btn" onClick={clearFilters}>Clear filters</button>
+          </div>
         </Box>
 
-        <Table className="stv-table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Group</TableCell>
-              <TableCell>Supervised By</TableCell>
-              <TableCell>Department</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="right">View</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {filtered.map((t) => (
-              <TableRow key={t.groupId} hover>
-                <TableCell>{t.groupId}</TableCell>
-                <TableCell>{t.supervisedBy || assignedSup[t.groupId] || "—"}</TableCell>
-                <TableCell>{t.department || "—"}</TableCell>
-                <TableCell>
-                  <Typography className={`stv-status stv-status-${String(t.status).toLowerCase().replace(/\s+/g, "")}`}>{t.status}</Typography>
-                </TableCell>
-
-                <TableCell align="right">
-                  <Box style={{ display: "flex", justifyContent: "flex-end" }}>
-                    {/* View button now opens the group's Drive folder directly */}
-                    <Button variant="outlined" size="small" onClick={() => openGroupDriveFolder(t.groupId)}>
-                      View
-                    </Button>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-
-            {filtered.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} align="center" style={{ color: "#9aa4b2", padding: "28px 0" }}>
-                  No templates match your filters.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        <Box style={{ marginTop: 8 }}>
+          <AppTable headers={headers} rows={tableRows} renderActions={(r) => renderActions(r)} />
+        </Box>
       </Paper>
 
-      {/* Group modal: still available if you want to open via other UI (not used by the top View button now) */}
       <Modal open={Boolean(groupView)} onClose={closeGroupView} aria-labelledby="group-view-title">
         <Box className="stv-student-modal">
           {groupView && (
@@ -316,45 +304,27 @@ export default function TemplateView() {
                 </Box>
               </Box>
 
-              <Box className="stv-preview-body">
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Uploaded By</TableCell>
-                      <TableCell>Uploaded On</TableCell>
-                      <TableCell>On-time?</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell align="right">Drive</TableCell>
-                    </TableRow>
-                  </TableHead>
-
-                  <TableBody>
-                    {groupView.items.map((it) => {
-                      const onTime = checkOnTimeByGroup(it, deadlines);
+              <Box className="stv-preview-body" sx={{ mt: 2 }}>
+                <Box sx={{ width: "100%", overflowX: "auto" }}>
+                  <AppTable
+                    headers={["Uploaded By", "Uploaded On", "On-time?", "Status", "Drive"]}
+                    rows={groupView.items.map((it) => ({
+                      "Uploaded By": it.uploadedBy,
+                      "Uploaded On": it.uploadedAt ? formatDate(it.uploadedAt) : "—",
+                      "On-time?": checkOnTimeByGroup(it, deadlines) === null ? "No deadline" : (checkOnTimeByGroup(it, deadlines) ? "On time" : "Late"),
+                      Status: it.status,
+                      __meta: it,
+                    }))}
+                    renderActions={(row) => {
+                      const meta = row.__meta;
                       return (
-                        <TableRow key={it.id} hover>
-                          <TableCell>{it.uploadedBy}</TableCell>
-                          <TableCell>{formatDate(it.uploadedAt)}</TableCell>
-                          <TableCell>
-                            {onTime === null ? <Typography sx={{ color: "#64748b" }}>No deadline</Typography> : onTime ? <Typography className="stv-on-time">On time</Typography> : <Typography className="stv-late">Late</Typography>}
-                          </TableCell>
-
-                          <TableCell>
-                            <FormControl size="small" sx={{ minWidth: 160 }}>
-                              <Select value={it.status} onChange={(e) => updateStatus(it.id, e.target.value)}>
-                                {STATUS_OPTIONS.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-                              </Select>
-                            </FormControl>
-                          </TableCell>
-
-                          <TableCell align="right">
-                            <Button variant="outlined" size="small" onClick={() => openDriveFile(it.driveLink, it.groupId)}>Open in Drive</Button>
-                          </TableCell>
-                        </TableRow>
+                        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                          <button className="mt-btn" onClick={() => openDriveFile(meta.driveLink, meta.groupId)}>Open in Drive</button>
+                        </div>
                       );
-                    })}
-                  </TableBody>
-                </Table>
+                    }}
+                  />
+                </Box>
               </Box>
             </>
           )}

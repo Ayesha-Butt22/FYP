@@ -1,9 +1,11 @@
+/* Styles for SupervisorMilestones (keeps your original look) */
+
 .milestone-groups-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 32px;
-  align-items: start; 
-  margin-top: 30px;  
+  align-items: start;
+  margin-top: 30px;
 }
 
 /* Card design */
@@ -44,9 +46,9 @@
 
 .milestone-card-department,
 .milestone-card-members {
-      font-size: 20px;
-    color: #01337a;
-    margin-bottom: 6px;
+  font-size: 20px;
+  color: #01337a;
+  margin-bottom: 6px;
 }
 
 .milestone-template-link {
@@ -121,7 +123,7 @@
 }
 
 .milestone-th {
-  padding: 13px 10px;
+  padding: 5px 10px;
   text-align: left;
   color: #01337a;
   font-weight: 800;
@@ -160,4 +162,12 @@
 }
 .milestone-status-overdue {
   color: #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .milestone-card-header { height: auto; gap: 14px; }
+  .milestone-card-group { font-size: 28px; }
+  .milestone-card-title { font-size: 20px; }
+  .milestone-doughnut { width: 92px; height: 92px; }
 }

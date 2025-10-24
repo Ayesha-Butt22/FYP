@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaUsers, FaClipboardCheck, FaCalendarCheck, FaCheckCircle, FaStar, FaArrowRight, FaBookOpen, FaTasks, FaLightbulb } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import "./OverviewSupervisor.css";
+import { Dialog, DialogContent, DialogTitle, IconButton, Tooltip } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import StudentWhiteboard from "./StudentWhiteboard";
+import "./OverviewStudent.css";
 
 // Dummy Data
 const activities = [
@@ -19,10 +22,23 @@ const progress = [
 
 export default function OverviewStudent({ onTabChange }) {
   const navigate = useNavigate();
+  const [whiteboardOpen, setWhiteboardOpen] = useState(false);
 
   return (
     <div className="overview-container">
       <div className="welcome-banner">
+        {/* Floating whiteboard icon only (tooltip on hover) */}
+        <Tooltip title="Read instructions from supervisor" arrow>
+          <button
+            aria-label="Supervisor Notes"
+            className="whiteboard-fab"
+            onClick={() => setWhiteboardOpen(true)}
+            title="Supervisor Notes"
+          >
+            <FaBookOpen />
+          </button>
+        </Tooltip>
+
         <div className="banner-title">Welcome, Student!</div>
         <div className="banner-desc">
           All your FYP progress, group, supervisor, and tasks — in one place.<br />
@@ -117,6 +133,26 @@ export default function OverviewStudent({ onTabChange }) {
         <FaLightbulb style={{color: "#ffbf00"}}/>
         <span>Tip: Complete your checklist and upload all templates before final submission!</span>
       </div>
+
+      {/* Dialog / Modal that shows StudentWhiteboard content with a close (X) in the title */}
+      <Dialog
+        open={whiteboardOpen}
+        onClose={() => setWhiteboardOpen(false)}
+        fullWidth
+        maxWidth="md"
+        aria-labelledby="supervisor-notes-dialog"
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pr: 1 }}>
+          <span style={{ fontWeight: 800, color: "#01337a" }}>Supervisor Instructions</span>
+          <IconButton aria-label="close" onClick={() => setWhiteboardOpen(false)} size="large">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          <StudentWhiteboard />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

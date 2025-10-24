@@ -1,5 +1,5 @@
-/* TemplateView.css — adjusted for new column layout and buttons
-   Kept most existing styles; removed/unused preview modal styles can remain harmlessly.
+/* TemplateView.css — kept original styles and added StudentTemplates control styles
+   so the dropdowns look the same as StudentTemplates (st-controls classes).
 */
 
 .stv-card {
@@ -68,11 +68,58 @@
   font-weight: 700;
 }
 
-/* responsive */
+/* Responsive */
 @media (max-width: 720px) {
-  
   .stv-student-modal {
     width: 96vw;
     top: 4%;
   }
 }
+
+/* ---------- Copied StudentTemplates control styles ---------- */
+/* Controls wrapper (dropdown + clear) */
+.st-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+/* Filter (label + select) */
+.st-filter { display:flex; flex-direction:column; gap:6px; }
+.st-filter label { font-weight:700; color:#102a43; font-size:0.85rem; }
+
+/* Use same look for selects and simple text inputs */
+.st-dept-select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 2px solid #01337a;
+  background: #fff;
+  min-width: 180px;
+  box-shadow: 0 2px 6px rgba(1,51,122,0.02);
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+  font-weight: 700;
+  color: #0b3b69;
+}
+
+/* Clear button matching student styles */
+.st-clear-btn {
+  background: #01337a;
+  color: #fff;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -.2px;
+  box-shadow: 0 2px 10px #01337a22;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.st-clear-btn:hover { background: #022a57; }

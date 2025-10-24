@@ -1,4 +1,5 @@
 /* ManageTemplates styles (place at src/components/ProjectCoordinator/ManageTemplates.css) */
+/* -- existing styles preserved -- */
 
 .mt-root { padding-bottom: 18px; }
 
@@ -81,23 +82,57 @@
 /* List / table */
 .mt-list { margin-top: 12px; }
 
+/* header area for list + filter (stacked: heading then filter dropdown) */
+.mt-list-header {
+  display: flex;
+  flex-direction: column; /* stack vertically */
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
 /* ✅ Updated "Uploaded templates" styling */
 .mt-list h4 {
   font-weight: 700;       /* Bold */
   color: #01337a;         /* Dark blue */
-  margin-bottom: 14px;    /* Space below */
+  margin-bottom: 0;       /* keep tight with filter */
   font-size: 1.1rem;      /* Slightly prominent */
 }
 
+/* filter row below heading */
+.mt-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.mt-filter-label {
+  font-weight: 700;
+  color: #102a43;
+  margin-right: 6px;
+}
+
+.mt-filter-select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e6eef6;
+  background: #fff;
+  color: #0b3b69;
+  font-weight: 700;
+}
+
+/* Table styles */
 .mt-table { border-radius: 10px; overflow: hidden; border: 1px solid #eef3fb; }
 .mt-table-head {
   display: grid;
   grid-template-columns: 2fr 1fr 2fr 1.2fr 1fr;
   gap: 12px;
   padding: 12px;
-  background: #f8fafc;
+  background: #0b3b69; /* darker header for contrast */
+  color: #fff;
   font-weight: 700;
-  color: #0b3b69;
 }
 .mt-table-body { display: flex; flex-direction: column; }
 .mt-row {
@@ -147,11 +182,50 @@
   flex-direction: row;
 }
 
-/* Responsive */
-@media (max-width: 720px) {
-  .mt-quick { min-width: 100%; }
-  .mt-table-head, .mt-row { grid-template-columns: 1fr 1fr 1fr 1fr; }
-  .mt-quick-select { min-width: 100%; }
-  .mt-modal { width: 92%; }
+/* --- copied styles from StudentTemplates for the department dropdown & clear button --- */
+.st-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
 }
 
+/* Filter */
+.st-filter { display:flex; flex-direction:column; gap:6px; }
+.st-filter label { font-weight:700; color:#102a43; font-size:0.85rem; }
+.st-dept-select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 2px solid #01337a;
+  background: #fff;
+  min-width: 180px;
+  box-shadow: 0 2px 6px rgba(1,51,122,0.02);
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+}
+
+.st-clear-btn {
+    background: #01337a;
+    color: #fff;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -.2px;
+    box-shadow: 0 2px 10px #01337a22;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .st-controls { flex-direction: column; align-items: stretch; }
+  .st-dept-select { min-width: 100%; }
+  .mt-table-head, .mt-row { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .mt-modal { width: 92%; }
+}

@@ -1,5 +1,5 @@
 .student-journal-wrap {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto 48px;
   padding: 0 16px;
   font-family: Inter, Roboto, Arial, sans-serif;
@@ -15,42 +15,49 @@
   gap: 18px;
 }
 
-/* empty state */
-.journal-empty {
-  padding: 28px;
-  text-align: center;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid #eef6ff;
+/* grid of month cards, show three equal cards per row */
+.journal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  align-items: stretch;
 }
 
-/* week card */
-.journal-week-card {
-  padding: 18px;
+/* month card: equal size because grid rows are aligned */
+.journal-month-card {
   border-radius: 12px;
   background: #fff;
   border: 1px solid #eef6ff;
   box-shadow: 0 6px 20px rgba(1, 51, 122, 0.04);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
 }
 
-.journal-week-header {
+/* header */
+.journal-month-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 12px;
 }
-.journal-week-label {
+.journal-month-label {
   font-weight: 900;
   color: #01337a;
 }
 
-/* timeline list inside week */
-.journal-timeline {
+/* content area grows to keep cards equal height */
+.journal-month-content {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-right: 4px;
+  
 }
 
+/* activity item */
 .journal-activity {
   display: flex;
   gap: 12px;
@@ -59,10 +66,24 @@
   border-radius: 10px;
   background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
   border: 1px solid #eef6ff;
+  
 }
 
+/* placeholder styling for empty slots */
+.journal-activity.placeholder {
+  background: transparent;
+  border: 1px dashed #e6eef6;
+  opacity: 0.6;
+}
+.journal-activity.placeholder .placeholder-title {
+
+  color: #01337a;
+  font-weight: 700;
+}
+
+/* left column inside activity */
 .journal-activity-left {
-  width: 120px;
+  width: 110px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -76,7 +97,7 @@
 }
 
 .journal-activity-icon {
-  font-size: 18px;
+  font-size: 29px;
 }
 
 .journal-activity-right {
@@ -85,21 +106,26 @@
 
 .journal-activity-title {
   font-weight: 800;
-  font-size: 20px;
-  color: #0f172a;
+  font-size: 18px;
+  color: #01337a;
   margin-bottom: 6px;
 }
 
 .journal-activity-desc {
-  color: #64748b;
-  font-size: 16px;
+  
+  color: #01337a;
+  font-size: 18px;
 }
 
-/* responsive */
+/* responsive: collapse to 2 columns then 1 column */
+@media (max-width: 1050px) {
+  .journal-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 @media (max-width: 720px) {
-  .journal-activity {
-    flex-direction: column;
-    align-items: flex-start;
+  .journal-grid {
+    grid-template-columns: 1fr;
   }
   .journal-activity-left {
     width: 100%;
@@ -107,7 +133,10 @@
     justify-content: flex-start;
     gap: 12px;
   }
-  .journal-activity-date {
-    font-size: 12px;
+  .journal-activity-title {
+    font-size: 15px;
+  }
+  .journal-activity-desc {
+    font-size: 13px;
   }
 }

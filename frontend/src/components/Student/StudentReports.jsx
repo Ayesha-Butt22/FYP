@@ -4,11 +4,6 @@ import {
   Button,
   Typography,
   Paper,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
   Divider,
   Tooltip,
 } from "@mui/material";
@@ -16,27 +11,13 @@ import DownloadIcon from "@mui/icons-material/Download";
 import DescriptionIcon from "@mui/icons-material/Description";
 import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import { toastService } from "../ToastService/ToastService";
+import AppTable from "../Admin/AppTable.jsx";
 import "./StudentReports.css";
 
 /**
- * StudentReports
- * - Student-facing reporting view that aggregates the student's meetings, tasks, milestones and feedback.
- * - Shows quick summary cards and detailed tables.
- * - Export options: PDF (via jsPDF + html2canvas) and Excel (via SheetJS/xlsx).
- *
- * Data sources:
- * - LocalStorage keys used (adjust as needed): student_tasks_v1, student_milestones_v1, student_evaluations_v1, student_meetings_v1
- * - If keys are missing the component falls back to sensible demo data.
- *
- * Dependencies for export:
- *  - jspdf
- *  - html2canvas
- *  - xlsx (SheetJS)
- *
- * Install via:
- *   npm install jspdf html2canvas xlsx
- *
- * Replace demo data with API calls if you want server-driven reports.
+ * StudentReports (updated)
+ * - Replaced MUI Table blocks with AppTable usage.
+ * - Kept exportPDF / exportExcel and data-loading logic intact.
  */
 
 const STORAGE_KEYS = {
@@ -247,8 +228,56 @@ export default function StudentReports() {
     }
   }
 
+  // Build AppTable data for each section
+  const milestonesTable = {
+    headers: ["Milestone", "Submitted On", "Status"],
+    rows: milestones.map((m) => ({
+      Milestone: m.name || m.id || "-",
+      "Submitted On": m.submittedOn || "-",
+      Status: m.status || "Pending",
+      __meta: m,
+    })),
+  };
+
+  const tasksTable = {
+    headers: ["Title", "Status", "Completed / Due"],
+    rows: tasks.map((t) => ({
+      Title: t.title || "-",
+      Status: t.status || "-",
+      "Completed / Due": t.completedOn || t.due || "-",
+      __meta: t,
+    })),
+  };
+
+  const meetingsTable = {
+    headers: ["Meeting Date", "Time", "Supervisor"],
+    rows: meetings.map((m) => ({
+      "Meeting Date": m.meetingDate || "-",
+      Time: m.meetingTime || "-",
+      Supervisor: m.supervisor || "-",
+      __meta: m,
+    })),
+  };
+
+  const feedbackRows = evaluations.flatMap((ev) =>
+    (ev.milestones || []).flatMap((m) =>
+      (m.rubric || []).map((r) => ({
+        Project: ev.projectTitle || ev.projectId || "-",
+        Milestone: m.name || m.id || "-",
+        Feedback: r.feedback || "-",
+        "Evaluated On": ev.evaluatedOn || "-",
+        __meta: { evaluation: ev, milestone: m, rubric: r },
+      }))
+    )
+  );
+
+  const feedbackTable = {
+    headers: ["Project", "Milestone", "Feedback", "Evaluated On"],
+    rows: feedbackRows,
+  };
+
   return (
-   <Box>
+    <Box>
       <DashboardSectionHeader description="Generate and export your personal FYP reports (PDF / Excel). View milestones, tasks, meetings and feedback in one place.">
         Reports
       </DashboardSectionHeader>
@@ -277,121 +306,42 @@ export default function StudentReports() {
           <Divider sx={{ my: 1 }} />
           <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
             <Box className="report-card">
-              <Typography className="report-card-title">Milestones</Typography>
+              <label>Milestones</label>
               <Typography className="report-card-value">{summary.completedMilestones} completed • {summary.pendingMilestones} pending</Typography>
             </Box>
             <Box className="report-card">
-              <Typography className="report-card-title">Tasks</Typography>
+              <label>Tasks</label>
               <Typography className="report-card-value">{summary.tasksDone} done • {summary.tasksInProgress} in progress • {summary.tasksOverdue} overdue</Typography>
             </Box>
             <Box className="report-card">
-              <Typography className="report-card-title">Feedback</Typography>
+              <label>Feedback</label>
               <Typography className="report-card-value">{summary.feedbackCount} comments</Typography>
             </Box>
             <Box className="report-card">
-              <Typography className="report-card-title">Meetings</Typography>
+              <label>Meetings</label>
               <Typography className="report-card-value">{summary.totalMeetings} booked</Typography>
             </Box>
           </Box>
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <label variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Milestones</label>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Milestone</TableCell>
-                <TableCell>Submitted On</TableCell>
-                <TableCell>Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {milestones.map((m) => (
-                <TableRow key={m.id || m.name}>
-                  <TableCell>{m.name}</TableCell>
-                  <TableCell>{m.submittedOn || "-"}</TableCell>
-                  <TableCell>{m.status || "Pending"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <label>Milestones</label>
+          <AppTable headers={milestonesTable.headers} rows={milestonesTable.rows} />
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <label variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Tasks</label>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Title</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Completed / Due</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tasks.map((t) => (
-                <TableRow key={t.id || t.title}>
-                  <TableCell>{t.title}</TableCell>
-                  <TableCell>{t.status}</TableCell>
-                  <TableCell>{t.completedOn || t.due || "-"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+               <label>Milestones</label>
+          <AppTable headers={tasksTable.headers} rows={tasksTable.rows} />
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <label  variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Meetings</label>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Meeting Date</TableCell>
-                <TableCell>Time</TableCell>
-                <TableCell>Supervisor</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {meetings.map((m) => (
-                <TableRow key={m.id || (m.meetingDate + m.meetingTime)}>
-                  <TableCell>{m.meetingDate}</TableCell>
-                  <TableCell>{m.meetingTime || "-"}</TableCell>
-                  <TableCell>{m.supervisor || "-"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                <label>Meetings</label>
+          <AppTable headers={meetingsTable.headers} rows={meetingsTable.rows} />
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <label  variant="subtitle1" sx={{ fontWeight: 800, color: "#01337a", mb: 1 }}>Feedback / Evaluations (comments)</label>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Project</TableCell>
-                <TableCell>Milestone</TableCell>
-                <TableCell>Feedback</TableCell>
-                <TableCell>Evaluated On</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {evaluations.flatMap((ev) =>
-                (ev.milestones || []).flatMap((m) =>
-                  (m.rubric || []).map((r) => ({
-                    projectTitle: ev.projectTitle || ev.projectId,
-                    milestoneName: m.name || m.id,
-                    feedback: r.feedback || "",
-                    evaluatedOn: ev.evaluatedOn || "",
-                  }))
-                )
-              ).map((row, i) => (
-                <TableRow key={i}>
-                  <TableCell>{row.projectTitle}</TableCell>
-                  <TableCell>{row.milestoneName}</TableCell>
-                  <TableCell>{row.feedback || "-"}</TableCell>
-                  <TableCell>{row.evaluatedOn || "-"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <labe>Feedback / Evaluations (comments)</labe>
+          <AppTable headers={feedbackTable.headers} rows={feedbackTable.rows} />
         </Paper>
       </div>
     </Box>

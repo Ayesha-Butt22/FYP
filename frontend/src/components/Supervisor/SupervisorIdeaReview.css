@@ -11,6 +11,7 @@
   max-width: 1500px;
   margin: 0 auto;
 }
+
 .review-table-row {
   background: #fff !important;
   font-family: inherit;
@@ -20,6 +21,7 @@
 .review-table-row:hover {
   background: #f3f7fb !important;
 }
+
 .review-table-collapse-cell {
   padding: 0 !important;
   border: 0 !important;
@@ -27,12 +29,8 @@
   font-family: inherit;
   text-align: left;
 }
-.section-desc {
-  font-family: inherit;
-  text-align: left;
-}
 
-/* Increased base font-size inside details by ~12% for readability */
+/* Increased base font-size inside details for readability */
 .idea-details-box {
   background: #f9fafb;
   border-radius: 0;
@@ -81,7 +79,6 @@
   line-height: 1.4;
 }
 
-
 .members-section-align {
   min-width: 170px;
   margin-left: 36px;
@@ -99,6 +96,7 @@
     padding-right: 0;
   }
 }
+
 .member-row-enhanced {
   margin-bottom: 2px;
   font-size: 14px;
@@ -131,13 +129,19 @@
 }
 
 .idea-feedback-row {
-    display: flex
-;
-    align-items: center;
-    gap: 7px;
-    font-size: 26px;
-    font-weight: 600;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  justify-content: center;
+}
+
+/* Modal responsive tweaks (Modal uses MUI sx, these are fallback) */
+@media (max-width: 600px) {
+  .review-table-box { padding: 14px 8px; }
+  .idea-detail-label { font-size: 18px; }
+  .idea-detail-value { font-size: 16px; }
 }

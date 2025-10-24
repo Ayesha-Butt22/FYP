@@ -17,7 +17,7 @@ import SupervisorSlots from "./SupervisorSlots";
 import ManageTemplates from "./ManageTemplates";
 import SupervisorArchive from "../Supervisor/SupervisorArchive";
 import Noticeboard from "../Admin/Noticeboard";
-import TemplateView from "./TemplateView"; // renamed component import
+import TemplateView from "./TemplateView";
 
 const menu = [
   // { label: "Overview", icon: <DashboardIcon /> },

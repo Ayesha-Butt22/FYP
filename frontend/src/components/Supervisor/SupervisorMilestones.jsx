@@ -6,11 +6,29 @@ import "./SupervisorMilestones.css";
 
 Chart.register(ArcElement, Tooltip, Legend);
 
+/**
+ * Updated SupervisorMilestones
+ * - Shows the fixed week-based milestone names the user provided:
+ *   "Week 1", "Week 2", "Week 4", "Week 6", "13th Week before Final Exams"
+ * - For each group we map those week names into the timeline. If the original
+ *   GROUPS data contains milestone statuses/dates at the same index we reuse them,
+ *   otherwise the milestone defaults to "pending" with a dash for the date.
+ */
+
+const WEEKS = [
+  "Week 1",
+  "Week 2",
+  "Week 4",
+  "Week 6",
+  "13th Week before Final Exams",
+];
+
 const GROUPS = [
   {
     group: "Group 1",
     title: "Smart Attendance System",
     department: "Software Engineering",
+    // existing milestone statuses/dates (kept for mapping if available)
     milestones: [
       { name: "Proposal", status: "completed", due: "2025-09-10" },
       { name: "SRS", status: "pending", due: "2025-09-20" },
@@ -24,7 +42,6 @@ const GROUPS = [
     group: "Group 2",
     title: "AI-Based Disease Prediction",
     department: "Computer Science",
-   
     milestones: [
       { name: "Proposal", status: "completed", due: "2025-09-11" },
       { name: "SRS", status: "completed", due: "2025-09-19" },
@@ -69,10 +86,21 @@ export default function SupervisorMilestones() {
 
       <div className="milestone-groups-row">
         {GROUPS.map((group) => {
-          const completed = group.milestones.filter(m => m.status === "completed").length;
-          const pending = group.milestones.filter(m => m.status === "pending").length;
-          const overdue = group.milestones.filter(m => m.status === "overdue").length;
-          const total = group.milestones.length;
+          // Build displayed milestones using the WEEKS list.
+          // If the original group.milestones has data at the same index we reuse status/due.
+          const displayedMilestones = WEEKS.map((wk, idx) => {
+            const original = (group.milestones && group.milestones[idx]) || null;
+            return {
+              name: wk,
+              status: original ? original.status : "pending",
+              due: original ? original.due : "—",
+            };
+          });
+
+          const completed = displayedMilestones.filter(m => m.status === "completed").length;
+          const pending = displayedMilestones.filter(m => m.status === "pending").length;
+          const overdue = displayedMilestones.filter(m => m.status === "overdue").length;
+          const total = displayedMilestones.length;
           const percent = Math.round((completed / total) * 100);
 
           const doughnutData = {
@@ -102,7 +130,6 @@ export default function SupervisorMilestones() {
                   <div className="milestone-card-members">
                     <b>Members:</b> {group.members.join(", ")}
                   </div>
-                  
                 </div>
 
                 <div className="milestone-card-progress">
@@ -137,7 +164,7 @@ export default function SupervisorMilestones() {
                       </tr>
                     </thead>
                     <tbody>
-                      {group.milestones.map((m) => (
+                      {displayedMilestones.map((m) => (
                         <tr key={m.name}>
                           <td className="milestone-td">{m.name}</td>
                           <td className="milestone-td">{m.due}</td>

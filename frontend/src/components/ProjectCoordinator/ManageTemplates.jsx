@@ -42,6 +42,9 @@ export default function ManageTemplates() {
   const [uploadedList, setUploadedList] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // New: filter for department in the uploaded templates list
+  const [deptFilter, setDeptFilter] = useState("All");
+
   useEffect(() => {
     fetchUploadedFiles();
   }, []);
@@ -218,7 +221,15 @@ export default function ManageTemplates() {
 
   // Prepare rows for AppTable
   const headers = ["Template", "Department", "Filename", "Uploaded At"];
-  const rows = uploadedList.map((r) => ({
+
+  // Filter uploadedList by deptFilter
+  const filteredUploadedList = uploadedList.filter((r) => {
+    if (!deptFilter || deptFilter === "All") return true;
+    // departments are stored as "CS", "SE", "CA"
+    return String(r.department || "").toUpperCase() === String(deptFilter).toUpperCase();
+  });
+
+  const rows = filteredUploadedList.map((r) => ({
     Template: TEMPLATES.find((t) => t.id === r.template)?.label || r.template,
     Department: r.department,
     Filename: r.originalName,
@@ -229,15 +240,16 @@ export default function ManageTemplates() {
   const renderActions = (row) => {
     const meta = row.__meta;
     return (
-
       <>
-      <div className = "render-actions-btn">
-        <button className="table-action-btn" onClick={() => handleDownload(meta)}>Download</button>
-        <button className="table-action-btn" style={{ background: "#f43f5e" }} onClick={() => handleRemove(meta)}>Remove</button>
+        <div className="render-actions-btn">
+          <button className="table-action-btn" onClick={() => handleDownload(meta)}>Download</button>
+          <button className="table-action-btn" style={{ background: "#f43f5e" }} onClick={() => handleRemove(meta)}>Remove</button>
         </div>
       </>
     );
   };
+
+  const clearFilters = () => setDeptFilter("All");
 
   return (
     <div className="mt-root">
@@ -252,6 +264,23 @@ export default function ManageTemplates() {
       </div>
 
       {loading && <div style={{ color: "#666", marginBottom: 8 }}>Loading…</div>}
+
+      {/* --- DEPARTMENT FILTER + CLEAR BUTTON (copied style from StudentTemplates) --- */}
+      <div className="st-controls" style={{ marginTop: 8, marginBottom: 12 }}>
+        <div className="st-filter">
+          <label>Department</label>
+          <select className="st-dept-select" value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
+            <option value="All">All</option>
+            <option value="SE">SE</option>
+            <option value="CS">CS</option>
+            <option value="CA">CA</option>
+          </select>
+        </div>
+
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <button className="st-clear-btn" onClick={clearFilters}>Clear filters</button>
+        </div>
+      </div>
 
       <div className="mt-list">
         <h4>Uploaded templates</h4>

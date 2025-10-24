@@ -1,0 +1,46 @@
+.admin-profile-card {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.admin-profile-avatar {
+  width: 100px !important;
+  height: 100px !important;
+  margin: 0 auto 1.5rem !important;
+  border: 3px solid #01337a;
+}
+
+.admin-profile-details {
+  margin-bottom: 2rem;
+}
+
+.admin-profile-details .detail-item {
+  margin-bottom: 0.6rem;
+  font-size: 1rem;
+  color: #222;
+}
+
+.admin-profile-section-title {
+  font-weight: 600;
+  text-align: left;
+  margin-bottom: 1rem;
+  color: #01337a;
+}
+
+.admin-update-btn {
+  width: 100%;
+  margin-top: 0.5rem !important;
+  background-color: #01337a !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+}
+
+.admin-update-btn:hover {
+  background-color: #002a61 !important;
+}

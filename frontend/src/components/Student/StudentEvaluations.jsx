@@ -1,20 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Paper,
-  Typography,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  LinearProgress,
-  Button,
-  Chip,
-  Divider,
-  Collapse,
-} from "@mui/material";
-import CommentIcon from "@mui/icons-material/Comment";
+import { Box, Typography, LinearProgress, Chip } from "@mui/material";
 import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import AppTable from "../Admin/AppTable.jsx";
 import { toastService } from "../ToastService/ToastService";
@@ -76,32 +61,6 @@ function writeEvals(data) {
   } catch {}
 }
 
-function callToast(message, type = "success") {
-  try {
-    if (toastService) {
-      if (type === "success" && typeof toastService.success === "function") {
-        toastService.success(message);
-        return;
-      }
-      if (type === "error" && typeof toastService.error === "function") {
-        toastService.error(message);
-        return;
-      }
-      if (typeof toastService.show === "function") {
-        toastService.show(message, { type });
-        return;
-      }
-      if (typeof toastService === "function") {
-        toastService(message);
-        return;
-      }
-    }
-  } catch (e) {
-    console.warn("toastService call failed", e);
-  }
-  alert(message);
-}
-
 function computeRubricTotal(rubric) {
   const max = rubric.reduce((s, r) => s + (r.max || 0), 0);
   const scored = rubric.reduce((s, r) => s + (r.score || 0), 0);
@@ -124,7 +83,7 @@ function computeFinalWeighted(milestones) {
 
 export default function StudentEvaluations() {
   const [evals, setEvals] = useState(() => readEvals());
-  const [openRow, setOpenRow] = useState(null);
+  const [openProjectId, setOpenProjectId] = useState(null);
 
   useEffect(() => {
     writeEvals(evals);
@@ -145,22 +104,20 @@ export default function StudentEvaluations() {
   const renderSummaryActions = (rowObj) => {
     const pid = rowObj["Project ID"];
     return (
-      <Button
-        size="small"
-        variant="outlined"
+      <button
+        className="st-clear-btn"
         onClick={() => {
-          setOpenRow(openRow === pid ? null : pid);
-          callToast(`Opened evaluation for ${pid}`, "success");
+          setOpenProjectId(openProjectId === pid ? null : pid);
         }}
       >
         Open
-      </Button>
+      </button>
     );
   };
 
   return (
     <Box>
-      <DashboardSectionHeader description="View rubric-based evaluations from your supervisors. See per-milestone breakdowns, feedback and weighted final score.">
+      <DashboardSectionHeader description="View rubric-based evaluations from your supervisors. See per-milestone breakdowns and weighted final score.">
         Evaluations
       </DashboardSectionHeader>
 
@@ -168,137 +125,31 @@ export default function StudentEvaluations() {
         <AppTable headers={summaryHeaders} rows={summaryRows} renderActions={renderSummaryActions} />
       </Box>
 
-      <Box display="grid" gridTemplateColumns="1fr" gap={20}>
+      <Box display="grid" gridTemplateColumns="1fr" gap={12}>
         {evals.map((rec) => {
-          const finalPercent = computeFinalWeighted(rec.milestones);
-          const gradedMilestones = rec.milestones.map((m) => ({
-            ...m,
-            summary: computeRubricTotal(m.rubric),
-          }));
+          if (openProjectId !== rec.projectId) return null;
+
+          const rubricRows = rec.milestones.flatMap((m) =>
+            m.rubric.map((r) => ({
+              Milestone: m.name,
+              Criterion: r.criterion,
+              Score: r.score,
+              Max: r.max,
+              Feedback: r.feedback || "—",
+              __meta: { projectId: rec.projectId, milestoneId: m.id, rubricId: r.id },
+            }))
+          );
 
           return (
-            <Paper key={rec.projectId} className="eval-card" elevation={2}>
-              <Box className="eval-card-header">
-                <Box>
-                  <Typography variant="h5" className="eval-project-title">
-                    {rec.projectTitle}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Supervisor: {rec.supervisor} • Evaluated: {rec.evaluatedOn}
-                  </Typography>
-                </Box>
-
-                <Box textAlign="right">
-                  {finalPercent !== null ? (
-                    <>
-                      <Typography variant="h6" className="eval-final-percent">
-                        {finalPercent}%
-                      </Typography>
-                      <Typography variant="caption" color="textSecondary">
-                        Weighted Final
-                      </Typography>
-                    </>
-                  ) : (
-                    <Chip label="In Progress" color="warning" />
-                  )}
-                </Box>
-              </Box>
-
-              <Divider sx={{ my: 1 }} />
-
-              <Box className="eval-milestones-row">
-                {gradedMilestones.map((m) => (
-                  <Box key={m.id} className="milestone-summary">
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                      {m.name}
-                    </Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      {m.summary.scored}/{m.summary.max} points
-                    </Typography>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={m.summary.percent}
-                        sx={{ width: 160, height: 10, borderRadius: 2 }}
-                      />
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                        {m.summary.percent}%
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
-
-              <Divider sx={{ my: 1 }} />
-
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Button
-                  startIcon={<CommentIcon />}
-                  variant="outlined"
-                  size="small"
-                  onClick={() => setOpenRow(openRow === rec.projectId ? null : rec.projectId)}
-                >
-                  View Rubric & Feedback
-                </Button>
-
-                <Box>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      const msg =
-                        finalPercent !== null
-                          ? `Final grade: ${finalPercent}%`
-                          : "Detailed evaluation not complete yet";
-                      callToast(msg, "success");
-                    }}
-                    className="eval-download-btn"
-                  >
-                    View Detailed
-                  </Button>
-                </Box>
-              </Box>
-
-              <Collapse in={openRow === rec.projectId} timeout="auto" unmountOnExit>
-                <Box className="eval-rubric-wrap">
-                  {rec.milestones.map((m) => (
-                    <Box key={m.id} className="eval-rubric-card">
-                      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                          {m.name} — Weight: {Math.round(m.weight * 100)}%
-                        </Typography>
-                        <Typography variant="subtitle2" color="textSecondary">
-                          {computeRubricTotal(m.rubric).scored}/{computeRubricTotal(m.rubric).max} pts
-                        </Typography>
-                      </Box>
-
-                      <Table size="small" className="rubric-table">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Criterion</TableCell>
-                            <TableCell>Score</TableCell>
-                            <TableCell>Max</TableCell>
-                            <TableCell>Feedback</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {m.rubric.map((r) => (
-                            <TableRow key={r.id}>
-                              <TableCell>{r.criterion}</TableCell>
-                              <TableCell>{r.score}</TableCell>
-                              <TableCell>{r.max}</TableCell>
-                              <TableCell>
-                                {r.feedback || <em style={{ color: "#94a3b8" }}>No comment</em>}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </Box>
-                  ))}
-                </Box>
-              </Collapse>
-            </Paper>
+            <Box key={rec.projectId} className="eval-expanded-wrap">
+              <label>{rec.projectTitle} — Details</label>
+              <div style={{ marginTop: 12 }}>
+                <AppTable
+                  headers={["Milestone", "Criterion", "Score", "Max", "Feedback"]}
+                  rows={rubricRows}
+                />
+              </div>
+            </Box>
           );
         })}
       </Box>
