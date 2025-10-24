@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FaUserTie, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle, FaEnvelope, FaPercentage, FaUserGraduate, FaUsers, FaTools } from "react-icons/fa";
 import { Button, Chip, Box, CircularProgress } from "@mui/material";
 import DashboardSectionHeader from "../Student/DashboardSectionHeader";
 import { toastService } from "../ToastService/ToastService";
 
-// Dummy supervisor data for demo/testing
+// Updated supervisor data with profilePic, department, designation, specialization
 const SUPERVISOR_LIST = [
   {
     supervisorId: "sup1",
@@ -14,6 +14,10 @@ const SUPERVISOR_LIST = [
     max_limit: 5,
     current_load: 2,
     skills: ["Python", "React"],
+    profilePic: "https://ui-avatars.com/api/?name=Dr.+Ali&size=128&background=2563eb&color=ffffff",
+    department: "Computer Science Department",
+    designation: "Associate Professor",
+    specialization: "Artificial Intelligence & Web Development",
   },
   {
     supervisorId: "sup2",
@@ -23,6 +27,10 @@ const SUPERVISOR_LIST = [
     max_limit: 3,
     current_load: 3,
     skills: ["ML", "Cybersecurity"],
+    profilePic: "https://ui-avatars.com/api/?name=Dr.+Sana&size=128&background=8b5cf6&color=ffffff",
+    department: "Computer Science Department",
+    designation: "Assistant Professor",
+    specialization: "Machine Learning & Cybersecurity",
   },
   {
     supervisorId: "sup3",
@@ -32,6 +40,10 @@ const SUPERVISOR_LIST = [
     max_limit: 4,
     current_load: 1,
     skills: ["Node.js", "Web3"],
+    profilePic: "https://ui-avatars.com/api/?name=Dr.+Usman&size=128&background=10b981&color=ffffff",
+    department: "Information Technology Department",
+    designation: "Professor",
+    specialization: "Web Technologies & Blockchain",
   },
 ];
 
@@ -50,7 +62,6 @@ export default function StudentSupervisorSelection() {
   useEffect(() => {
     // Simulate backend filter & ranking
     const enrich = SUPERVISOR_LIST.map((sup) => {
-      // Domain match: percent of group domains present in supervisor's expertise_tags
       const domainMatches = GROUP_DOMAINS.filter((d) =>
         sup.expertise_tags.includes(d)
       ).length;
@@ -64,9 +75,7 @@ export default function StudentSupervisorSelection() {
         available,
       };
     })
-      // Only available supervisors
       .filter((sup) => sup.available)
-      // Sort: highest domain match, then lowest load
       .sort((a, b) =>
         b.domainMatchPercent !== a.domainMatchPercent
           ? b.domainMatchPercent - a.domainMatchPercent
@@ -81,9 +90,7 @@ export default function StudentSupervisorSelection() {
     setSelected(supId);
     setStatus("pending");
     toastService.info("Supervisor request sent. Waiting for response.");
-    // Simulate backend response after 2.2s
     setTimeout(() => {
-      // For demo, always accept first supervisor, reject others
       if (supId === "sup1") {
         setStatus("accepted");
         setAssignedSupervisor(supervisors.find((s) => s.supervisorId === supId));
@@ -101,38 +108,34 @@ export default function StudentSupervisorSelection() {
     <>
       <DashboardSectionHeader>Supervisor Selection</DashboardSectionHeader>
 
-      <Box sx={{ width: "100%", margin: "0 auto", maxWidth: "1100px" }}>
-        <div
-          style={{
-            margin: "36px auto 32px auto",
-            color: "#01337a",
-            fontWeight: 900,
-            fontSize: "2rem",
-            textAlign: "center",
-          }}
-        >
-          Select a Supervisor for your Project
-        </div>
+      <div style={{ color: "#01337a", fontSize: "1rem", marginBottom: 16, marginLeft: 24, maxWidth: "800px", textAlign: "left" }}>
+        Here you can view and select a supervisor for your project based on their expertise and availability.
+      </div>
 
+      <Box sx={{ width: "100%", margin: "0 auto", maxWidth: "1200px", padding: "0 24px", display: "flex", flexDirection: "column", alignItems: "center" }}>
         {/* If already assigned */}
         {status === "accepted" && assignedSupervisor && (
           <Box
             sx={{
-              background: "#e3fce3",
+              background: "linear-gradient(135deg, #e3fce3, #d1f5d3)",
               border: "2px solid #16a34a",
-              borderRadius: "16px",
-              maxWidth: "580px",
-              margin: "0 auto 38px auto",
-              padding: "30px 22px",
+              borderRadius: "20px",
+              maxWidth: "600px",
+              margin: "24px auto",
+              padding: "20px 24px",
               textAlign: "center",
-              boxShadow: "0 2px 12px #16a34a23",
+              boxShadow: "0 6px 24px rgba(22, 163, 74, 0.15)",
               fontSize: "1.2rem",
-              fontWeight: 900,
+              fontWeight: 700,
               color: "#15803d",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
             }}
           >
-            <FaCheckCircle style={{ color: "#16a34a", fontSize: 28, marginBottom: -5, marginRight: 8 }} />
-            Supervisor Assigned: <span style={{ color: "#01337a" }}>{assignedSupervisor.name}</span>
+            <FaCheckCircle style={{ color: "#16a34a", fontSize: 28 }} />
+            Assigned Supervisor: <span style={{ color: "#1e3a8a", fontWeight: 800 }}>{assignedSupervisor.name}</span>
           </Box>
         )}
 
@@ -140,127 +143,277 @@ export default function StudentSupervisorSelection() {
         {status === "pending" && (
           <Box
             sx={{
-              background: "#fef9c3",
+              background: "linear-gradient(135deg, #fef9c3, #fef08a)",
               border: "2px solid #facc15",
-              borderRadius: "16px",
-              maxWidth: "500px",
-              margin: "0 auto 38px auto",
-              padding: "27px 22px",
+              borderRadius: "20px",
+              maxWidth: "520px",
+              margin: "24px auto",
+              padding: "18px 20px",
               textAlign: "center",
-              boxShadow: "0 2px 12px #facc1523",
-              fontSize: "1.15rem",
-              fontWeight: 800,
+              boxShadow: "0 6px 24px rgba(250, 204, 21, 0.15)",
+              fontSize: "1.1rem",
+              fontWeight: 700,
               color: "#a16207",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "12px",
+              gap: "10px",
             }}
           >
-            <CircularProgress size={28} color="inherit" />
-            Request Pending... Please wait for supervisor's response.
+            <CircularProgress size={24} sx={{ color: "#a16207" }} />
+            Request Pending... Awaiting Response
           </Box>
         )}
 
-        {/* Supervisor List */}
+        {/* Supervisor Card Section */}
         {status !== "accepted" && (
           <div
             style={{
               display: "flex",
-              flexWrap: "wrap",
-              gap: 30,
-              justifyContent: "center",
-              marginTop: 22,
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+              maxWidth: "800px",
+              marginTop: 16,
             }}
           >
             {supervisors.length === 0 ? (
-              <div style={{ fontSize: "1.15rem", color: "#444", marginTop: 16 }}>
-                No available supervisors for your project's domain(s). Contact coordinator.
+              <div style={{ fontSize: "1.1rem", color: "#475569", marginTop: 20, textAlign: "center", padding: "12px 20px", background: "#f8fafc", borderRadius: "8px" }}>
+                No supervisors available for your project domains. Please contact the coordinator.
               </div>
             ) : (
-              supervisors.map((sup) => (
+              supervisors.slice(0, 1).map((sup) => (
                 <div
                   key={sup.supervisorId}
                   style={{
-                    width: 330,
-                    background: "#f8fafc",
-                    border: "2.2px solid #2563eb33",
-                    borderRadius: "18px",
-                    boxShadow: "0 2px 12px #2563eb13",
-                    padding: "32px 20px 28px 20px",
-                    marginBottom: 10,
+                    width: "100%",
+                    maxWidth: 720,
+                    background: "linear-gradient(145deg, #ffffff, #f8fafc)",
+                    border: "2px solid #2563eb33",
+                    borderRadius: "20px",
+                    boxShadow: "0 8px 24px rgba(37, 99, 235, 0.12)",
+                    padding: "24px",
+                    marginBottom: 20,
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    opacity: selected && selected !== sup.supervisorId ? 0.6 : 1,
-                    transition: "opacity 0.25s",
+                    opacity: selected && selected !== sup.supervisorId ? 0.7 : 1,
+                    transition: "all 0.3s ease",
+                    transform: selected && selected !== sup.supervisorId ? "scale(0.98)" : "scale(1)",
                   }}
                 >
-                  <FaUserTie size={54} color="#2563eb" style={{ marginBottom: 13 }} />
-                  <div style={{ fontWeight: 900, fontSize: 22, color: "#01337a", marginBottom: 2 }}>
-                    {sup.name}
+                  {/* Profile Section */}
+                  <div style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
+                    <img
+                      src={sup.profilePic}
+                      alt={`${sup.name}'s profile`}
+                      style={{
+                        width: 100,
+                        height: 100,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border: "3px solid #2563eb1a",
+                        boxShadow: "0 4px 12px rgba(37, 99, 235, 0.15)",
+                        marginRight: 20,
+                      }}
+                    />
+                    <div style={{ textAlign: "left" }}>
+                      <div style={{ fontWeight: 900, fontSize: 24, color: "#1e3a8a", marginBottom: 4 }}>
+                        {sup.name}
+                      </div>
+                      <div style={{ fontWeight: 700, fontSize: 16, color: "#2563eb", marginBottom: 2 }}>
+                        {sup.designation}
+                      </div>
+                      <div style={{ fontWeight: 600, fontSize: 14, color: "#64748b" }}>
+                        {sup.department}
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ color: "#2563eb", fontWeight: 700, fontSize: 15, marginBottom: 10 }}>
+
+                  {/* Email */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: "#2563eb",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      marginBottom: 20,
+                      padding: "8px 16px",
+                      background: "#2563eb0f",
+                      borderRadius: "8px",
+                      border: "1px solid #2563eb1a",
+                      gap: 8,
+                    }}
+                  >
+                    <FaEnvelope style={{ fontSize: 14 }} />
                     {sup.email}
                   </div>
-                  <div style={{ marginBottom: 7, fontWeight: 700, color: "#222" }}>
-                    Domain Match:{" "}
-                    <span style={{ color: "#16a34a", fontWeight: 900 }}>
-                      {sup.domainMatchPercent}%
-                    </span>
+
+                  {/* Metrics Grid */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr 1fr",
+                      gap: 16,
+                      marginBottom: 20,
+                      width: "100%",
+                      textAlign: "center",
+                      padding: "0 8px",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 900, color: "#334155", fontSize: 18, marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                        <FaPercentage style={{ color: "#334155", fontSize: 16 }} /> Domain Match
+                      </div>
+                      <div style={{ color: "#16a34a", fontWeight: 800, fontSize: 18 }}>
+                        {sup.domainMatchPercent}%
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 900, color: "#334155", fontSize: 18, marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                        <FaUserGraduate style={{ color: "#334155", fontSize: 16 }} /> Specialization
+                      </div>
+                      <div style={{ color: "#8b5cf6", fontWeight: 700, fontSize: 14 }}>
+                        {sup.specialization}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 900, color: "#334155", fontSize: 18, marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                        <FaUsers style={{ color: "#334155", fontSize: 16 }} /> Current Load
+                      </div>
+                      <div style={{ color: "#1e3a8a", fontWeight: 800, fontSize: 16 }}>
+                        {sup.current_load}/{sup.max_limit}
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ marginBottom: 7, fontWeight: 700, color: "#222" }}>
-                    Load:{" "}
-                    <span style={{ color: "#01337a", fontWeight: 800 }}>
-                      {sup.current_load}/{sup.max_limit}
-                    </span>
-                  </div>
-                  <div style={{ marginBottom: 11 }}>
+
+                  {/* Availability Chip */}
+                  <div style={{ marginBottom: 20 }}>
                     {sup.available ? (
-                      <Chip label="Available" sx={{ bgcolor: "#e3fce3", color: "#16a34a", fontWeight: 900 }} icon={<FaCheckCircle color="#16a34a" />} />
+                      <Chip
+                        label="Available"
+                        sx={{
+                          bgcolor: "#e3fce3",
+                          color: "#16a34a",
+                          fontWeight: 700,
+                          fontSize: 13,
+                          padding: "4px 12px",
+                          borderRadius: "8px",
+                        }}
+                        icon={<FaCheckCircle style={{ color: "#16a34a", fontSize: 14 }} />}
+                      />
                     ) : (
-                      <Chip label="Full" sx={{ bgcolor: "#fee2e2", color: "#ef4444", fontWeight: 900 }} icon={<FaTimesCircle color="#ef4444" />} />
+                      <Chip
+                        label="Not Available"
+                        sx={{
+                          bgcolor: "#fee2e2",
+                          color: "#ef4444",
+                          fontWeight: 700,
+                          fontSize: 13,
+                          padding: "4px 12px",
+                          borderRadius: "8px",
+                        }}
+                        icon={<FaTimesCircle style={{ color: "#ef4444", fontSize: 14 }} />}
+                      />
                     )}
                   </div>
-                  <div style={{ marginBottom: 13 }}>
-                    {sup.expertise_tags.map((tag) => (
-                      <span
-                        key={tag}
-                        style={{
-                          background: "#2563eb11",
-                          color: "#2563eb",
-                          fontWeight: 800,
-                          borderRadius: 8,
-                          padding: "4px 14px",
-                          fontSize: 14,
-                          marginRight: 6,
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
+
+                  {/* Expertise Tags */}
+                  <div style={{ marginBottom: 20, width: "100%" }}>
+                    <div
+                      style={{
+                        fontWeight: 900,
+                        color: "#334155",
+                        marginBottom: 12,
+                        textAlign: "center",
+                        fontSize: 18,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <FaUserGraduate style={{ color: "#334155", fontSize: 16 }} /> Expertise Areas
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "center",
+                        gap: 8,
+                        padding: "0 8px",
+                      }}
+                    >
+                      {sup.expertise_tags.map((tag) => (
+                        <span
+                          key={tag}
+                          style={{
+                            background: "#2563eb11",
+                            color: "#2563eb",
+                            fontWeight: 700,
+                            borderRadius: "6px",
+                            padding: "4px 12px",
+                            fontSize: 12,
+                            margin: "0 4px 8px 4px",
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
-                    {sup.skills.map((skill, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          background: "#f1f5f9",
-                          color: "#01337a",
-                          fontWeight: 700,
-                          borderRadius: 7,
-                          padding: "3px 10px",
-                          fontSize: 13,
-                        }}
-                      >
-                        {skill}
-                      </span>
-                    ))}
+
+                  {/* Skills */}
+                  <div style={{ marginBottom: 20, width: "100%" }}>
+                    <div
+                      style={{
+                        fontWeight: 900,
+                        color: "#334155",
+                        marginBottom: 12,
+                        textAlign: "center",
+                        fontSize: 18,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <FaTools style={{ color: "#334155", fontSize: 16 }} /> Key Skills
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "center",
+                        gap: 8,
+                        padding: "0 8px",
+                      }}
+                    >
+                      {sup.skills.map((skill, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            background: "#f1f5f9",
+                            color: "#1e3a8a",
+                            fontWeight: 700,
+                            borderRadius: "6px",
+                            padding: "4px 12px",
+                            fontSize: 12,
+                            margin: "0 4px 8px 4px",
+                          }}
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
                   </div>
+
+                  {/* Request Button */}
                   <Button
                     variant="contained"
                     color="primary"
-                    size="large"
+                    size="medium"
                     fullWidth
                     disabled={
                       !sup.available ||
@@ -269,13 +422,18 @@ export default function StudentSupervisorSelection() {
                       loading
                     }
                     sx={{
-                      fontWeight: 900,
-                      fontSize: 17,
-                      bgcolor: "#01337a",
-                      mt: 1,
-                      borderRadius: 6,
-                      py: 1.1,
-                      "&:hover": { bgcolor: "#2563eb" },
+                      fontWeight: 700,
+                      fontSize: 16,
+                      bgcolor: "linear-gradient(135deg, #1e3a8a, #2b4cb9)",
+                      borderRadius: "10px",
+                      py: 1.5,
+                      "&:hover": {
+                        bgcolor: "linear-gradient(135deg, #2563eb, #3b82f6)",
+                        boxShadow: "0 6px 20px rgba(37, 99, 235, 0.3)",
+                      },
+                      boxShadow: "0 4px 12px rgba(30, 58, 138, 0.15)",
+                      transition: "all 0.3s ease",
+                      textTransform: "none",
                     }}
                     onClick={() => handleRequestSupervisor(sup.supervisorId)}
                   >
@@ -293,20 +451,25 @@ export default function StudentSupervisorSelection() {
         {status === "rejected" && (
           <div
             style={{
-              margin: "36px auto 0 auto",
+              margin: "20px auto",
               color: "#b91c1c",
-              fontWeight: 900,
-              fontSize: "1.13rem",
+              fontWeight: 700,
+              fontSize: "1.1rem",
               textAlign: "center",
-              background: "#fee2e2",
+              background: "linear-gradient(135deg, #fee2e2, #fecaca)",
               border: "2px solid #ef4444",
-              borderRadius: "14px",
-              padding: "18px 15px",
-              maxWidth: 500,
+              borderRadius: "12px",
+              padding: "16px",
+              maxWidth: 480,
+              boxShadow: "0 4px 16px rgba(239, 68, 68, 0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
             }}
           >
-            <FaTimesCircle style={{ color: "#ef4444", fontSize: 22, marginBottom: -4, marginRight: 6 }} />
-            Supervisor request was rejected. Please select another supervisor.
+            <FaTimesCircle style={{ color: "#ef4444", fontSize: 20 }} />
+            Request Rejected. Please Try Another Supervisor.
           </div>
         )}
       </Box>
