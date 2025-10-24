@@ -35,7 +35,7 @@ const MOCK_FILES = [
     _id: "m3",
     template: "t01",
     templateLabel: "Template-01: Project Team (MS Word)",
-    department: "CS",
+    department: "SE",
     filePath: "/Filesk/mock-team.docx",
     originalName: "mock-team.docx",
     createdAt: new Date().toISOString(),

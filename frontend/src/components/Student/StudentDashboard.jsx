@@ -11,7 +11,6 @@ import StudentChecklist from "./StudentChecklist";
 import StudentEvaluations from "./StudentEvaluations";
 import StudentJournal from "./StudentJournal";
 import StudentReports from "./StudentReports";
-
 import SupervisorArchive from "../Supervisor/SupervisorArchive";
 
 import {
