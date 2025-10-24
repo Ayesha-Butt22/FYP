@@ -304,7 +304,7 @@ export default function StudentReports() {
         <Paper className="report-summary" elevation={1}>
           <label variant="label" sx={{ fontWeight: 800, color: "#01337a" }}>Personal Progress Summary</label>
           <Divider sx={{ my: 1 }} />
-          <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+          <Box sx={{ display: "flex", gap: '200px', flexWrap: "wrap" }}>
             <Box className="report-card">
               <label>Milestones</label>
               <Typography className="report-card-value">{summary.completedMilestones} completed • {summary.pendingMilestones} pending</Typography>
@@ -340,7 +340,7 @@ export default function StudentReports() {
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <labe>Feedback / Evaluations (comments)</labe>
+          <label>Feedback / Evaluations (comments)</label>
           <AppTable headers={feedbackTable.headers} rows={feedbackTable.rows} />
         </Paper>
       </div>
