@@ -1,8 +1,7 @@
 :root {
-  /* Replace these variables with your project colors */
-  --primary: #01337a;           /* deep primary blue */
-  --primary-variant: #2563eb;   /* accent blue */
-  --accent: #06b6d4;            /* cyan accent */
+  --primary: #01337a;
+  --primary-variant: #2563eb;
+  --accent: #06b6d4;
   --accent-700: #0891b2;
   --bg-start: #f0f9ff;
   --bg-end: #e0f2fe;
@@ -100,7 +99,7 @@
   transform: scale(1.06);
 }
 
-/* Name & role */
+/* Name, Role & Department */
 .profile-name-role {
   text-align: center;
   margin-bottom: 2.5rem;
@@ -111,22 +110,39 @@
   color: var(--primary);
   margin-bottom: 0.5rem;
 }
+
+/* group role and department so layout stays consistent */
+.role-and-dept {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* role pill */
 .role-badge {
   display: inline-flex;
-  font-size: 20px;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1.25rem;
   border-radius: 9999px;
-  background: var(--primary);
+  background: linear-gradient(to right, var(--primary), var(--primary-variant));
   color: #fff;
   font-weight: 600;
-  -webkit-border-radius: 9999px;
-  -moz-border-radius: 9999px;
-  -ms-border-radius: 9999px;
-  -o-border-radius: 9999px;
 }
 
+/* department shown under role; subtle, doesn't break design */
+.department-badge {
+  display: inline-block;
+  margin-top: 0;
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  background: rgba(2, 75, 160, 0.06); /* very light tint */
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid rgba(1,51,122,0.06);
+}
 
 /* Personal info */
 .personal-info-section {
@@ -138,15 +154,11 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  
 }
 .personal-info-header h2 {
   margin: 0;
   color: var(--primary);
-
 }
-
-
 
 .personal-info-grid {
   display: grid;
@@ -167,14 +179,6 @@
   border: 3px solid var(--border);
   background: #f9fafb;
   transition: box-shadow 0.18s, border-color 0.18s;
-  -webkit-transition: box-shadow 0.18s, border-color 0.18s;
-  -moz-transition: box-shadow 0.18s, border-color 0.18s;
-  -ms-transition: box-shadow 0.18s, border-color 0.18s;
-  -o-transition: box-shadow 0.18s, border-color 0.18s;
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
 }
 .info-card:hover {
   border-color: rgba(99, 102, 241, 0.35);
@@ -203,7 +207,6 @@
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
-/* lock icon removed from markup so keep this hidden to avoid stray visuals */
 .password-header .icon {
   display: none;
 }
@@ -301,6 +304,10 @@
   background: linear-gradient(to right, var(--accent-700), var(--primary), #4f46e5);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
   transform: translateY(-2px);
+  -webkit-transform: translateY(-2px);
+  -moz-transform: translateY(-2px);
+  -ms-transform: translateY(-2px);
+  -o-transform: translateY(-2px);
 }
 
 /* generic icon size */

@@ -3,15 +3,16 @@ import DashboardLayout from "../DashboardLayout";
 import OverviewStudent from "./OverviewStudent";
 import StudentGroup from "./StudentGroup";
 import StudentIdeaProposal from "./StudentIdeaProposal";
-import StudentSupervisorSelection from "./StudentSupervisorSelection";
+import SelectedSupervisor from "./SelectedSupervisor";
 import StudentTemplates from "./StudentTemplates";
-import StudentTasks from "./StudentTasks";
+import StudentTasks from "./Tasks";
 import StudentMeetings from "./StudentMeetings";
 import StudentChecklist from "./StudentChecklist";
 import StudentEvaluations from "./StudentEvaluations";
 import StudentJournal from "./StudentJournal";
 import StudentReports from "./StudentReports";
 import SupervisorArchive from "../Supervisor/SupervisorArchive";
+import StudentProfile from "./StudentProfile";
 
 import {
   Dashboard as DashboardIcon,
@@ -33,7 +34,7 @@ const menu = [
   // { label: "Overview", icon: <DashboardIcon /> },
   { label: "My Group", icon: <GroupAddIcon /> },
   { label: "Idea & Proposal", icon: <AssignmentIcon /> },
-  { label: "Supervisor Selection", icon: <PersonSearchIcon /> },
+  { label: "Selected supervisor", icon: <PersonSearchIcon /> },
   { label: "Templates", icon: <DescriptionIcon /> },
   { label: "Tasks", icon: <ListAltIcon /> },
   { label: "Meetings", icon: <CalendarMonthIcon /> },
@@ -42,6 +43,7 @@ const menu = [
   { label: "Journal", icon: <BookIcon /> },
   { label: "Reports", icon: <DescriptionIcon /> },
   { label: "FYP Archive", icon: <LibraryBooksIcon /> },
+  { label: "Profile", icon: <AccountCircleIcon /> } // added Profile at the end
 ];
 
 const studentInfo = {
@@ -62,7 +64,7 @@ export default function StudentDashboard() {
     "Overview": <OverviewStudent onTabChange={setActiveTab} />,
     "My Group": <StudentGroup />,
     "Idea & Proposal": <StudentIdeaProposal />,
-    "Supervisor Selection": <StudentSupervisorSelection />,
+    "Selected supervisor": <SelectedSupervisor />,
     "Templates": <StudentTemplates />,
     "Tasks": <StudentTasks />,
     "Meetings": <StudentMeetings />,
@@ -71,6 +73,7 @@ export default function StudentDashboard() {
     "Journal": <StudentJournal />,
     "Reports": <StudentReports />,
     "FYP Archive": <SupervisorArchive />,
+    "Profile": <StudentProfile /> // Profile tab wired
   };
 
   return (

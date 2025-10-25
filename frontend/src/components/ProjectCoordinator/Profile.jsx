@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, Mail, Phone, Check, Eye, EyeOff, Camera } from 'lucide-react';
-import './AdminProfile.css';
+import { User, Mail, Phone, Eye, EyeOff, Camera } from 'lucide-react';
+import './Profile.css';
 
-export default function AdminProfile() {
+export default function Profile() {
   const [adminData] = useState({
-    name: 'Muhammad Ahmed Khan',
-    role: 'Admin',
-    email: 'ahmed.admin@company.com',
-    gender: 'Male',
+    name: 'Aleeha',
+    role: 'Project Coordinator',
+    department: 'Computer Science (CS)',
+    email: 'aleeha@riphah.edu.pk',
+    gender: 'Female',
     contact: '+92 300 1234567',
     avatar:
       'https://ui-avatars.com/api/?name=Muhammad+Ahmed&size=200&background=0891b2&color=fff&bold=true&font-size=0.4'
@@ -76,7 +77,7 @@ export default function AdminProfile() {
 
   return (
     <div className="admin-profile-container">
-      <div className="admin-profile-card" role="region" aria-label="Admin profile">
+      <div className="admin-profile-card" role="region" aria-label="Profile">
         {/* Top Decorative Section */}
         <div className="profile-decorative-bg">
           <div className="overlay" aria-hidden="true"></div>
@@ -103,18 +104,25 @@ export default function AdminProfile() {
           </div>
         </div>
 
-        {/* Name & Role */}
+        {/* Name, Role & Department */}
         <div className="profile-name-role">
           <h1>{adminData.name}</h1>
-          <div className="role-badge">
-            <User className="icon" aria-hidden="true" />
-            <span>{adminData.role}</span>
+
+          <div className="role-and-dept">
+            <div className="role-badge">
+              <User className="icon" aria-hidden="true" />
+              <span>{adminData.role}</span>
+            </div>
+
+            <div className="department-badge" aria-label={`Department ${adminData.department}`}>
+              {adminData.department}
+            </div>
           </div>
         </div>
 
         {/* Personal Info */}
         <div className="personal-info-section">
-          <div className="personal-info-header">
+          <div>
             <label>Personal Information</label>
           </div>
 
