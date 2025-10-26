@@ -216,7 +216,7 @@ export default function StudentMeetings() {
     const sideFormMode = false; // replace with prop if available
     return (
       <button
-        className="table-action-btn"
+        className="std-meeting-cancel-btn"
         style={{
           background: "#f43f5e",
           color: "#fff",
@@ -365,7 +365,7 @@ export default function StudentMeetings() {
           {/* Sticky footer with actions */}
           
           <div className="cnf-booking-btn-div">
-            <Button className="cancel-btn" onClick={handleClose}>Cancel</Button>
+            <Button className="std-meeting-cancel-btn" onClick={handleClose}>Cancel</Button>
             <Button
   className="confirm-btn-meetingmodal"
   disabled={!selectedSlot}

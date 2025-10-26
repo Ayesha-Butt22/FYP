@@ -47,6 +47,7 @@
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease !important;
 }
 
+
 .cancel-btn {
   background: rgb(244, 63, 94) !important;
   color: #fff !important;
@@ -55,6 +56,9 @@
   border-radius: 8px !important;
   border: 2px solid transparent !important;
 }
+.confirm-btn-meetingmodal:not(:disabled) {
+    color: white !important;
+}
 
 .confirm-btn-meetingmodal:hover:not(:disabled) {
   background: #fff !important;
@@ -62,6 +66,9 @@
   border-color: var(--main-blue) !important; /* visible border */
   transform: translateY(-2px) !important;
   box-shadow: 0 12px 36px rgba(1, 51, 122, 0.14) !important;
+}
+.std-meeting-cancel-btn{
+  color: white!important;
 }
 
 /* Disabled confirm style */

@@ -25,7 +25,7 @@ import Noticeboard from "./Noticeboard";
 import AdminProfile from "./AdminProfile"; // <-- new profile tab
 
 const menu = [
-  { label: "Dashboard", icon: <DashboardIcon /> },
+  // { label: "Dashboard", icon: <DashboardIcon /> },
   { label: "Manage Admin", icon: <PersonIcon /> },
   { label: "Manage Supervisors", icon: <GroupsIcon /> },
   { label: "Manage Project Coordinators", icon: <SupervisorAccountIcon /> },
