@@ -18,6 +18,7 @@ import "./StudentReports.css";
  * StudentReports (updated)
  * - Replaced MUI Table blocks with AppTable usage.
  * - Kept exportPDF / exportExcel and data-loading logic intact.
+ * - Added className on export buttons so CSS can apply your system colors.
  */
 
 const STORAGE_KEYS = {
@@ -285,7 +286,12 @@ export default function StudentReports() {
       <Box className="reports-controls" sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mb: 2 }}>
         <Tooltip title="Export Excel (SheetJS)">
           <span>
-            <Button variant="outlined" startIcon={<DescriptionIcon />} onClick={exportExcel}>
+            <Button
+              className="export-btn export-excel-btn"
+              variant="outlined"
+              startIcon={<DescriptionIcon />}
+              onClick={exportExcel}
+            >
               Export Excel
             </Button>
           </span>
@@ -293,7 +299,12 @@ export default function StudentReports() {
 
         <Tooltip title="Export PDF (jsPDF + html2canvas)">
           <span>
-            <Button variant="contained" startIcon={<DownloadIcon />} onClick={exportPDF}>
+            <Button
+              className="export-btn export-pdf-btn"
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              onClick={exportPDF}
+            >
               Export PDF
             </Button>
           </span>
@@ -330,12 +341,12 @@ export default function StudentReports() {
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-               <label>Milestones</label>
+          <label>Milestones</label>
           <AppTable headers={tasksTable.headers} rows={tasksTable.rows} />
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-                <label>Meetings</label>
+          <label>Meetings</label>
           <AppTable headers={meetingsTable.headers} rows={meetingsTable.rows} />
         </Paper>
 

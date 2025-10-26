@@ -35,11 +35,6 @@ const ALL_DESIGNATIONS = [
   "Teaching Fellow"
 ];
 
-/* Default slots by designation (normalized keys).
-   Matches the table you provided:
-   Dean:0, Professor:1, Associate Professor:2, Assistant Professor:3,
-   Lecturer/Sr Lecturer:3, Junior Lecturer:2, Research Associate/Assistant:1, Teaching Fellow:1
-*/
 const DESIGNATION_SLOTS = {
   "dean": 0,
   "professor": 1,
@@ -69,21 +64,18 @@ function normalizeDesignation(str = "") {
 function getDefaultSlotsForDesignation(designation) {
   if (!designation) return 0;
   const norm = normalizeDesignation(designation);
-  // try direct match
   if (DESIGNATION_SLOTS.hasOwnProperty(norm)) return DESIGNATION_SLOTS[norm];
-  // try removing spaces
   const compact = norm.replace(/\s+/g, "");
   if (DESIGNATION_SLOTS.hasOwnProperty(compact)) return DESIGNATION_SLOTS[compact];
-  // not found - fallback 0
   return 0;
 }
 
 function StatusBadge({ text, color }) {
   const colorMap = {
-    green: { background: '#dcfce7', text: '#166534' }, // Green
-    red: { background: '#fee2e2', text: '#991b1b' },   // Red
-    yellow: { background: '#fef9c3', text: '#854d0e' }, // Yellow
-    gray: { background: '#f1f5f9', text: '#334155' }    // Gray/Default
+    green: { background: '#dcfce7', text: '#166534' },
+    red: { background: '#fee2e2', text: '#991b1b' },
+    yellow: { background: '#fef9c3', text: '#854d0e' },
+    gray: { background: '#f1f5f9', text: '#334155' }
   };
 
   const style = {
@@ -121,7 +113,6 @@ const getSupervisorStatus = (available, booked) => {
   return <StatusBadge text="N/A" color="gray" />;
 };
 
-
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
@@ -138,7 +129,7 @@ const validateForm = (data, isEdit = false) => {
   if (!data.Department?.trim()) errors.Department = "Department is required";
   if (!data.Password?.trim() && !isEdit) errors.Password = "Password is required";
   if (data.Password && data.Password.length < 6) errors.Password = "Password must be at least 6 characters";
-  if (!data.Designation?.trim()) errors.Designation = "Designation is required"; // <-- ADD THIS
+  if (!data.Designation?.trim()) errors.Designation = "Designation is required";
 
   const availableSlots = Number(data["Available_Slots"] || data["Available Slots"]);
   const bookedSlots = Number(data["Booked_Slots"] || data["Booked Slots"]);
@@ -241,7 +232,6 @@ export default function ManageSupervisors() {
 
   const handleEdit = (row, idx) => {
     setEditIndex(idx);
-    // if row designation exists, keep it and ensure available slots default if missing
     const currentDesignation = row.Designation || "";
     const defaultSlots = getDefaultSlotsForDesignation(currentDesignation);
     setFormData({
@@ -269,7 +259,6 @@ export default function ManageSupervisors() {
     }
   };
 
-  // New handler for designation selection that sets default available slots
   const handleDesignationChange = (val) => {
     const defaultSlots = getDefaultSlotsForDesignation(val);
     setFormData(prev => ({
@@ -277,7 +266,6 @@ export default function ManageSupervisors() {
       Designation: val,
       Available_Slots: defaultSlots
     }));
-    // clear potential designation error
     if (formErrors.Designation) setFormErrors(prev => ({ ...prev, Designation: "" }));
     if (formErrors.Available_Slots) setFormErrors(prev => ({ ...prev, Available_Slots: "" }));
   };

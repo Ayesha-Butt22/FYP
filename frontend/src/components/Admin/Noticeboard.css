@@ -1,3 +1,7 @@
+:root{
+  --main-blue: #01337a; /* fallback for main blue used in hover */
+}
+
 /* Noticeboard improved clean layout */
 
 .nb-root {
@@ -83,18 +87,33 @@
   padding: 10px 16px;
   font-size: 0.95rem;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .mt-btn.primary {
   background: #01337a;
   color: #fff;
   font-size: 1.3rem;
+  /* stable border to prevent layout shift when hovering */
+  border: 2px solid transparent;
+  transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.12s;
 }
 
-.mt-btn.primary:hover {
-  background: #0a4599;
+/* Requested hover style for Post Notice button */
+.mt-btn.primary:hover:not(:disabled) {
+  background: #fff;
+  color: var(--main-blue);
+  border: 2px solid #fff;
+  transform: translateY(-2px);
 }
 
+/* keep an accessible focus style */
+.mt-btn.primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(1,51,122,0.12);
+}
+
+/* Cancel button */
 .mt-btn.cancel {
   background: #6c757d;
   color: #fff;

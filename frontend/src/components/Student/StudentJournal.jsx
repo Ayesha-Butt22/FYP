@@ -288,7 +288,8 @@ export default function StudentJournal() {
       <Box className="journal-controls" sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mb: 2 }}>
         <Tooltip title="Export journal as PDF (requires jspdf & html2canvas)">
           <span>
-            <Button variant="contained" startIcon={<DownloadIcon />} onClick={exportPDF} disabled={loading}>
+            {/* added className="export-btn" to target with CSS */}
+            <Button className="export-btn" variant="contained" startIcon={<DownloadIcon />} onClick={exportPDF} disabled={loading}>
               Export PDF
             </Button>
           </span>

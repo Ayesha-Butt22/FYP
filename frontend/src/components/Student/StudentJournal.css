@@ -1,3 +1,8 @@
+:root{
+  --main-blue: #01337a;
+}
+
+/* wrapper */
 .student-journal-wrap {
   max-width: 1200px;
   margin: 0 auto 48px;
@@ -5,10 +10,40 @@
   font-family: Inter, Roboto, Arial, sans-serif;
 }
 
+/* journal controls */
 .journal-controls {
   margin-bottom: 10px;
 }
 
+/* New: export button styling to match system dark-blue */
+.export-btn {
+  background: var(--main-blue) !important;
+  color: #fff !important;
+  border: 2px solid transparent !important; /* stable border */
+  padding: 8px 14px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  box-shadow: 0 8px 20px rgba(1,51,122,0.08) !important;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease !important;
+  border-radius: 8px !important;
+}
+
+/* Hover: subtle lift and inverted look (keeps style consistent with app) */
+.export-btn:hover:not(:disabled) {
+  background: #fff !important;
+  color: var(--main-blue) !important;
+  border-color: var(--main-blue) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 30px rgba(1,51,122,0.12) !important;
+}
+
+.export-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* rest of journal styles (unchanged) */
 .journal-body {
   display: flex;
   flex-direction: column;
@@ -23,7 +58,6 @@
   align-items: stretch;
 }
 
-/* month card: equal size because grid rows are aligned */
 .journal-month-card {
   border-radius: 12px;
   background: #fff;
@@ -34,7 +68,6 @@
   flex-direction: column;
 }
 
-/* header */
 .journal-month-header {
   display: flex;
   justify-content: space-between;
@@ -46,7 +79,6 @@
   color: #01337a;
 }
 
-/* content area grows to keep cards equal height */
 .journal-month-content {
   display: flex;
   flex-direction: column;
@@ -54,10 +86,8 @@
   flex: 1 1 auto;
   overflow: auto;
   padding-right: 4px;
-  
 }
 
-/* activity item */
 .journal-activity {
   display: flex;
   gap: 12px;
@@ -66,22 +96,18 @@
   border-radius: 10px;
   background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
   border: 1px solid #eef6ff;
-  
 }
 
-/* placeholder styling for empty slots */
 .journal-activity.placeholder {
   background: transparent;
   border: 1px dashed #e6eef6;
   opacity: 0.6;
 }
 .journal-activity.placeholder .placeholder-title {
-
   color: #01337a;
   font-weight: 700;
 }
 
-/* left column inside activity */
 .journal-activity-left {
   width: 110px;
   display: flex;
@@ -112,12 +138,11 @@
 }
 
 .journal-activity-desc {
-  
   color: #01337a;
   font-size: 18px;
 }
 
-/* responsive: collapse to 2 columns then 1 column */
+/* responsive */
 @media (max-width: 1050px) {
   .journal-grid {
     grid-template-columns: repeat(2, 1fr);

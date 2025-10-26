@@ -190,6 +190,10 @@ body {
   transition: background .15s, box-shadow .2s;
   box-shadow: 0 2px 10px #b9ccff18;
   letter-spacing: 0.04em;
+  -webkit-transition: background .15s, box-shadow .2s;
+  -moz-transition: background .15s, box-shadow .2s;
+  -ms-transition: background .15s, box-shadow .2s;
+  -o-transition: background .15s, box-shadow .2s;
 }
 .main-btn {
   background: var(--main-blue);
@@ -197,13 +201,14 @@ body {
   box-shadow: 0 4px 18px #b9ccff2f;
 }
 .main-btn:hover {
-  background: #5d7ad8;
-  color: #fff;
+  background: #fff;
+  color: var(--main-blue);
+  border: 2px solid #fff;
 }
 .alt-btn {
   background: transparent;
   color: #fff;
-  border: 2px solid #fff;
+  border: 2px solid #fff !important;
   width: 160px;
   margin: 0 auto 0 auto;
   box-shadow: none;

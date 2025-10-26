@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, Mail, Phone, Eye, EyeOff, Camera } from 'lucide-react';
 import './Profile.css';
+import DashboardSectionHeader from "./DashboardSectionHeader"
 
 export default function Profile() {
   const [adminData] = useState({
@@ -76,6 +77,11 @@ export default function Profile() {
   };
 
   return (
+    <>
+    <DashboardSectionHeader description={"Project Coordinator can view their own  Profile."}>
+        Profile
+      </DashboardSectionHeader>
+  
     <div className="admin-profile-container">
       <div className="admin-profile-card" role="region" aria-label="Profile">
         {/* Top Decorative Section */}
@@ -209,5 +215,6 @@ export default function Profile() {
         </div>
       </div>
     </div>
+      </>
   );
 }

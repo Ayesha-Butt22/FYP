@@ -1,3 +1,8 @@
+:root{
+  --main-blue: #01337a;
+}
+
+/* wrapper */
 .student-reports-wrap {
   max-width: 1100px;
   margin: 0 auto 48px;
@@ -55,7 +60,59 @@
   font-size: 13px;
 }
 
-/* buttons */
+/* Export buttons: apply system dark-blue styling
+   - export-pdf-btn (contained): dark-blue bg, white text
+   - export-excel-btn (outlined): white bg, dark-blue text and border
+   Both have hover states that invert to white bg + dark-blue text + visible main-blue border.
+   Use !important to override MUI styles.
+*/
+.export-btn {
+  border-radius: 8px !important;
+  text-transform: none !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 20px rgba(1,51,122,0.08) !important;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease !important;
+  border: 2px solid transparent !important; /* stable base border to avoid layout jumps */
+}
+
+/* PDF button (contained) */
+.export-pdf-btn {
+  background: var(--main-blue) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  padding: 8px 14px !important;
+}
+.export-pdf-btn:hover:not(:disabled) {
+  background: #fff !important;
+  color: var(--main-blue) !important;
+  border-color: var(--main-blue) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 30px rgba(1,51,122,0.12) !important;
+}
+
+/* Excel button (outlined) */
+.export-excel-btn {
+  background: #fff !important;
+  color: var(--main-blue) !important;
+  border-color: var(--main-blue) !important;
+  padding: 8px 14px !important;
+}
+.export-excel-btn:hover:not(:disabled) {
+  /* keep same hover as PDF for consistency */
+  background: #fff !important;
+  color: var(--main-blue) !important;
+  border-color: var(--main-blue) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 30px rgba(1,51,122,0.12) !important;
+}
+
+.export-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* report-controls button min-width */
 .report-controls button {
   min-width: 160px;
 }

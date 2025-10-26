@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, Mail, Phone, Check, Eye, EyeOff, Camera } from 'lucide-react';
+import { User, Mail, Phone, Eye, EyeOff, Camera } from 'lucide-react';
+import DashboardSectionHeader from './DashboardSectionHeader'; // added import
 import './AdminProfile.css';
 
 export default function AdminProfile() {
@@ -75,131 +76,139 @@ export default function AdminProfile() {
   };
 
   return (
-    <div className="admin-profile-container">
-      <div className="admin-profile-card" role="region" aria-label="Admin profile">
-        {/* Top Decorative Section */}
-        <div className="profile-decorative-bg">
-          <div className="overlay" aria-hidden="true"></div>
-          <svg viewBox="0 0 1440 120" className="wave" aria-hidden="true">
-            <path
-              fill="#ffffff"
-              d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
-            ></path>
-          </svg>
-        </div>
+    <>
+      {/* Dashboard Section Header */}
+      <DashboardSectionHeader description={"Admins can view their own Profile."}>
+        Profile
+      </DashboardSectionHeader>
 
-        {/* Profile Picture */}
-        <div className="profile-avatar-section">
-          <div className="avatar-wrapper">
-            <img src={adminData.avatar} alt={adminData.name} className="avatar" />
-            <button
-              type="button"
-              className="avatar-camera-btn"
-              aria-label="Change avatar"
-              title="Change avatar"
-            >
-              <Camera className="icon" aria-hidden="true" />
+      {/* Main Profile Container */}
+      <div className="admin-profile-container">
+        <div className="admin-profile-card" role="region" aria-label="Admin profile">
+          {/* Top Decorative Section */}
+          <div className="profile-decorative-bg">
+            <div className="overlay" aria-hidden="true"></div>
+            <svg viewBox="0 0 1440 120" className="wave" aria-hidden="true">
+              <path
+                fill="#ffffff"
+                d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
+              ></path>
+            </svg>
+          </div>
+
+          {/* Profile Picture */}
+          <div className="profile-avatar-section">
+            <div className="avatar-wrapper">
+              <img src={adminData.avatar} alt={adminData.name} className="avatar" />
+              <button
+                type="button"
+                className="avatar-camera-btn"
+                aria-label="Change avatar"
+                title="Change avatar"
+              >
+                <Camera className="icon" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+
+          {/* Name & Role */}
+          <div className="profile-name-role">
+            <h1>{adminData.name}</h1>
+            <div className="role-badge">
+              <User className="icon" aria-hidden="true" />
+              <span>{adminData.role}</span>
+            </div>
+          </div>
+
+          {/* Personal Info */}
+          <div className="personal-info-section">
+            <div className="personal-info-header">
+              <label>Personal Information</label>
+            </div>
+
+            <div className="personal-info-grid">
+              <div className="info-card email-card">
+                <Mail className="icon" aria-hidden="true" />
+                <span>{adminData.email}</span>
+              </div>
+              <div className="info-card gender-card">
+                <User className="icon" aria-hidden="true" />
+                <span>{adminData.gender}</span>
+              </div>
+              <div className="info-card contact-card">
+                <Phone className="icon" aria-hidden="true" />
+                <span>{adminData.contact}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="divider" aria-hidden="true"></div>
+
+          {/* Password Update */}
+          <div className="password-update-section">
+            <div className="password-header">
+              <label>Update Password</label>
+            </div>
+
+            {message.text && <div className={`message ${message.type}`}>{message.text}</div>}
+
+            <div className="password-grid">
+              <div className="password-field">
+                <label htmlFor="newPassword">New Password</label>
+                <div className="password-input">
+                  <input
+                    id="newPassword"
+                    type={showNewPassword ? 'text' : 'password'}
+                    name="newPassword"
+                    value={passwords.newPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="At least 8 characters"
+                    autoComplete="new-password"
+                    aria-label="New password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((s) => !s)}
+                    aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+                    title={showNewPassword ? 'Hide' : 'Show'}
+                  >
+                    {showNewPassword ? <EyeOff className="icon" aria-hidden="true" /> : <Eye className="icon" aria-hidden="true" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="password-field">
+                <label htmlFor="confirmPassword">Confirm Password</label>
+                <div className="password-input">
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={passwords.confirmPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Enter password again"
+                    autoComplete="new-password"
+                    aria-label="Confirm password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((s) => !s)}
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    title={showConfirmPassword ? 'Hide' : 'Show'}
+                  >
+                    {showConfirmPassword ? <EyeOff className="icon" aria-hidden="true" /> : <Eye className="icon" aria-hidden="true" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" className="update-btn" onClick={handleUpdatePassword}>
+              Update Password
             </button>
           </div>
         </div>
-
-        {/* Name & Role */}
-        <div className="profile-name-role">
-          <h1>{adminData.name}</h1>
-          <div className="role-badge">
-            <User className="icon" aria-hidden="true" />
-            <span>{adminData.role}</span>
-          </div>
-        </div>
-
-        {/* Personal Info */}
-        <div className="personal-info-section">
-          <div className="personal-info-header">
-            <label>Personal Information</label>
-          </div>
-
-          <div className="personal-info-grid">
-            <div className="info-card email-card">
-              <Mail className="icon" aria-hidden="true" />
-              <span>{adminData.email}</span>
-            </div>
-            <div className="info-card gender-card">
-              <User className="icon" aria-hidden="true" />
-              <span>{adminData.gender}</span>
-            </div>
-            <div className="info-card contact-card">
-              <Phone className="icon" aria-hidden="true" />
-              <span>{adminData.contact}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="divider" aria-hidden="true"></div>
-
-        {/* Password Update */}
-        <div className="password-update-section">
-          <div className="password-header">
-            <label>Update Password</label>
-          </div>
-
-          {message.text && <div className={`message ${message.type}`}>{message.text}</div>}
-
-          <div className="password-grid">
-            <div className="password-field">
-              <label htmlFor="newPassword">New Password</label>
-              <div className="password-input">
-                <input
-                  id="newPassword"
-                  type={showNewPassword ? 'text' : 'password'}
-                  name="newPassword"
-                  value={passwords.newPassword}
-                  onChange={handlePasswordChange}
-                  placeholder="At least 8 characters"
-                  autoComplete="new-password"
-                  aria-label="New password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword((s) => !s)}
-                  aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
-                  title={showNewPassword ? 'Hide' : 'Show'}
-                >
-                  {showNewPassword ? <EyeOff className="icon" aria-hidden="true" /> : <Eye className="icon" aria-hidden="true" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="password-field">
-              <label htmlFor="confirmPassword">Confirm Password</label>
-              <div className="password-input">
-                <input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  value={passwords.confirmPassword}
-                  onChange={handlePasswordChange}
-                  placeholder="Enter password again"
-                  autoComplete="new-password"
-                  aria-label="Confirm password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword((s) => !s)}
-                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-                  title={showConfirmPassword ? 'Hide' : 'Show'}
-                >
-                  {showConfirmPassword ? <EyeOff className="icon" aria-hidden="true" /> : <Eye className="icon" aria-hidden="true" />}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <button type="button" className="update-btn" onClick={handleUpdatePassword}>
-            Update Password
-          </button>
-        </div>
       </div>
-    </div>
+    </>
   );
 }

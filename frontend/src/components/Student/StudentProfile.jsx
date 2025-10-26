@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Camera, Mail, BookOpen, Calendar, Lock, Eye, EyeOff, User as UserIcon } from "lucide-react";
 import "./StudentProfile.css";
+import DashboardSectionHeader from "./DashboardSectionHeader"
 
 export default function StudentProfile() {
   const currentYear = new Date().getFullYear();
@@ -65,6 +66,10 @@ export default function StudentProfile() {
   };
 
   return (
+    <>
+     <DashboardSectionHeader description={"Students can view their  own profile."}>
+        Student Profile
+      </DashboardSectionHeader>
     <div className="student-profile-root min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="card">
@@ -204,5 +209,6 @@ export default function StudentProfile() {
         </div>
       </div>
     </div>
+    </>
   );
 }

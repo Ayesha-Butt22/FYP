@@ -205,11 +205,6 @@ export default function ManageAdmin() {
       }
       setLoading(false);
       return simulatedRes;
-
-      // Real API (kept for reference; not executed while simulating)
-      // const res = await adminSupervisorApi.updateAdmin(id, payload);
-      // setLoading(false);
-      // if (res.success) { ... }
     } catch (err) {
       setLoading(false);
       console.error("handleUpdate error:", err);
@@ -250,9 +245,6 @@ export default function ManageAdmin() {
       }
       setLoading(false);
       return simulatedRes;
-
-      // Real API (kept for reference; not executed while simulating)
-      // const res = await adminSupervisorApi.createAdmin(payload);
     } catch (err) {
       setLoading(false);
       console.error("handleAdd error:", err);
@@ -281,9 +273,6 @@ export default function ManageAdmin() {
       }
       setLoading(false);
       return simulatedRes;
-
-      // Real API (kept for reference; not executed while simulating)
-      // const res = await adminSupervisorApi.deleteAdmin(id);
     } catch (err) {
       setLoading(false);
       console.error("handleDelete error:", err);
@@ -303,34 +292,21 @@ export default function ManageAdmin() {
   return (
     <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
       <div style={{ flex: sideFormMode ? '2' : '1', transition: 'flex 0.3s ease' }}>
-        
        
         <DashboardSectionHeader description="Admins can view, add, update, and delete system administrators.">
           Manage Admin
         </DashboardSectionHeader>
 
         <div style={{ display: "flex", justifyContent: "right", margin: "20px 0" }}>
-  <button
-    style={{
-      background: "#01337a",
-      color: "#fff",
-      padding: "10px 28px",
-      border: "none",
-      borderRadius: "7px",
-      fontSize: "1.3rem",
-      fontWeight: "900",
-      letterSpacing: "-.2px",
-      boxShadow: "0 2px 10px #01337a22",
-      cursor: "pointer",
-      transition: "background 0.18s",
-    }}
-    onClick={openAddForm}
-    disabled={sideFormMode === "add"}
-  >
-    + Add Admin
-  </button>
-</div>
-
+          {/* Updated: use className for styling and hover behavior in CSS */}
+          <button
+            className="add-admin-btn"
+            onClick={openAddForm}
+            disabled={sideFormMode === "add"}
+          >
+            + Add Admin
+          </button>
+        </div>
 
         {loading ? (
           <div style={{ textAlign: "center", padding: 20 }}>Loading admins...</div>

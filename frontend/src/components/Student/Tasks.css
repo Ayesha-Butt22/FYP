@@ -1,3 +1,7 @@
+:root{
+  --main-blue: #01337a;
+}
+
 /* ===== ROOT ===== */
 .tasks-root {
   padding: 20px;
@@ -84,27 +88,44 @@
   margin-top: 6px;
 }
 
+/* Updated .create-btn: added stable transparent border to prevent layout shift;
+   hover turns background white and text to main blue with a visible border.
+*/
 .create-btn {
-    max-width: 127px;
+    max-width: 150px;
     height: 36px;
     padding: 6px 14px;
-    font-size: 16px;
+    font-size: 19px;
     background: #01337a;
     color: #fff;
-    /*textcolorsettowhite*/border-radius: 6px;
+    border-radius: 6px;
     box-shadow: 0 4px 10px rgba(1,51,122,0.10);
-    border: none;
+    border: 2px solid transparent; /* stable base border to avoid jump */
     cursor: pointer;
-    transition: transform .08s, box-shadow .12s;
-    -webkit-transition: transform .08s, box-shadow .12s;
-    -moz-transition: transform .08s, box-shadow .12s;
-    -ms-transition: transform .08s, box-shadow .12s;
-    -o-transition: transform .08s, box-shadow .12s;
+    transition: transform .12s ease, box-shadow .12s ease, background .16s ease, color .16s ease, border-color .16s ease;
+    -webkit-transition: transform .12s ease, box-shadow .12s ease, background .16s ease, color .16s ease, border-color .16s ease;
+    -moz-transition: transform .12s ease, box-shadow .12s ease, background .16s ease, color .16s ease, border-color .16s ease;
+    -o-transition: transform .12s ease, box-shadow .12s ease, background .16s ease, color .16s ease, border-color .16s ease;
 }
 
-.create-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(1,51,122,0.15);
+.create-btn:hover:not(:disabled) {
+    background: #fff;                          /* white bg on hover */
+    color: var(--main-blue);                   /* dark blue text on hover */
+    border-color: #fff;                        /* per requested hover (white border) */
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(1,51,122,0.12);
+}
+
+/* If you prefer the hover border to be visible on white background, replace the
+   border-color: #fff above with: border-color: var(--main-blue);
+   (This keeps a visible colored border against the white bg.)
+*/
+
+.create-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 /* ===== CARDS ===== */
@@ -115,7 +136,6 @@
   justify-content: flex-start;
   margin-top: 22px;
   max-width: 1100px;
- 
 }
 
 .no-tasks-note {
@@ -229,14 +249,22 @@
   transition: transform .08s, box-shadow .12s;
 }
 
+/* Updated .btn.primary to include stable border and requested hover style.
+   This affects the "Update Status" button which uses className="btn primary".
+*/
 .btn.primary {
   background:  #01337a;
   color: #fff;
+  border: 2px solid transparent; /* stable base border to avoid layout shift */
+  transition: background .16s ease, color .16s ease, border-color .16s ease, transform .12s ease, box-shadow .12s ease;
 }
 
-.btn.primary:hover {
+.btn.primary:hover:not(:disabled) {
+  background: #fff;                 /* white background on hover */
+  color: var(--main-blue);          /* dark blue text on hover */
+  border-color: #fff;               /* per your requested hover (white border) */
   transform: translateY(-1px);
-  box-shadow: white
+  box-shadow: 0 8px 20px rgba(1,51,122,0.10);
 }
 
 .btn.ghost {
@@ -264,7 +292,6 @@
   align-items: center;     /* vertical centering */
   z-index: 2000;
 }
-
 
 .modal {
   background: #fff;
