@@ -7,6 +7,7 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import "./DashboardLayout.css";
 import ToastService from "./ToastService/ToastService.jsx";
 import ProfileService from "./Api/ProfileService.jsx";
+import getUserInfoFromStorage from "./Auth/UserInfo.jsx";
 
 const fadeIn = keyframes`
   0% { opacity: 0; transform: translateY(20px);}
@@ -42,6 +43,7 @@ export default function DashboardLayout({
   const displayName = localStorage.getItem("name") || roleInfo.name || "User";
   const displayRole = localStorage.getItem("role") || "User";
   const email = localStorage.getItem("email");
+  const user = getUserInfoFromStorage();
 
   useEffect(() => {
     const loadProfilePic = async () => {
@@ -68,11 +70,26 @@ export default function DashboardLayout({
 
   const handleAvatarClick = () => fileInputRef.current.click();
 
+  const handleLogoClick = () => {
+    if (!user || !user.role) {
+      navigate("/auth");
+      return;
+    }
+    const dashboards = {
+      admin: "/dashboard/admin",
+      supervisor: "/dashboard/supervisor",
+      coordinator: "/dashboard/coordinator",
+      student: "/dashboard/student",
+    };
+    window.location.href = dashboards[user.role];
+  };
   return (
     <DashboardLayoutStyled>
       <aside className="sidebar">
-        <div className="logo-area">
-          <img src={roleInfo.logo} alt="Logo" draggable={false} />
+        <div className="logo-area" >
+          <img src={roleInfo.logo} alt="Logo" draggable={false}
+               onClick={handleLogoClick}
+               style={{ cursor: "pointer" }} />
           {roleInfo.title}
         </div>
         <ul className="sidebar-menu">

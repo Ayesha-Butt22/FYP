@@ -33,8 +33,6 @@ export default function StudentIdeaProposal() {
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [loadingTitle, setLoadingTitle] = useState(false);
 
-  // New states to represent submission result
-  // null = no submission yet, "selected" = supervisor selected, "not-selected" = not found / rejected
   const [submissionResult, setSubmissionResult] = useState(null);
   const [selectedSupervisor, setSelectedSupervisor] = useState(null);
 
@@ -62,7 +60,7 @@ export default function StudentIdeaProposal() {
   };
 
   const handleOpenSupervisorDialog = (e) => {
-    e.preventDefault(); // prevent page reload
+    e.preventDefault();
 
     if (!formData.title.trim()) {
       ToastService.error("Project title is required.");
@@ -148,22 +146,28 @@ export default function StudentIdeaProposal() {
 
       {/* If submissionResult is set, show a single result card and hide the form */}
       {submissionResult === "selected" ? (
-        <div className="result-card success">
-          <h2>Your project idea has been selected</h2>
-          <p>
-            Congratulations — your idea has been matched and <strong>{selectedSupervisor?.name}</strong> has been selected as
-            your supervisor.
-          </p>
-          <div className="result-actions">
-            <button className="submit-btn" onClick={() => resetForm()}>
-              OK
-            </button>
+          <div className="result-card success">
+            <h2>Your project idea has been submitted to supervisor successfully</h2>
+            <p>
+              Congratulations — your idea has been sent to <strong>{selectedSupervisor?.name}</strong>. Now wait for
+              supervisor action
+            </p>
+            <p>
+              Your proposal status is right now pending
+            </p>
+            <p>
+              Supervisor Comments: N/A
+            </p>
+            <div className="result-actions">
+              <button className="submit-btn" onClick={() => resetForm()}>
+                OK
+              </button>
+            </div>
           </div>
-        </div>
       ) : submissionResult === "not-selected" ? (
-        <div className="result-card failure">
-          <h2>Your idea has not been selected</h2>
-          <p>
+          <div className="result-card failure">
+            <h2>Your idea has not been selected</h2>
+            <p>
             Unfortunately we couldn't find a matching supervisor for the selected speciality.
             Please revise your idea or try different specialities and resubmit.
           </p>
@@ -181,7 +185,6 @@ export default function StudentIdeaProposal() {
           </div>
         </div>
       ) : (
-        // Default: show the form exactly as before
         <form onSubmit={handleOpenSupervisorDialog} className="proposal-form">
           <div className="form-group">
             <label>
