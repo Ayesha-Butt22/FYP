@@ -16,8 +16,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import "./StudentChecklist.css";
 
-
-
 const PREVIEW_ROW_LIMIT = 3;
 
 const DEMO_TEMPLATES = [
@@ -25,7 +23,7 @@ const DEMO_TEMPLATES = [
   { name: "Template-2", due: "2025-10-10", status: "Approved" },
   { name: "Template-3", due: "2025-10-18", status: "Overdue" },
   { name: "Template-4", due: "2025-11-01", status: "Pending" },
-   { name: "Template-5", due: "2025-16-01", status: "Pending" },
+  { name: "Template-5", due: "2025-16-01", status: "Pending" },
 ];
 
 const DEMO_TASKS = [
@@ -125,7 +123,7 @@ export default function StudentChecklist({
             <TableRow>
               <TableCell>Notice</TableCell>
               <TableCell>Posted Date</TableCell>
-              <TableCell>Status</TableCell>
+              {/* Status column removed for notices as requested */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -133,10 +131,10 @@ export default function StudentChecklist({
               <TableRow key={n.description + i} hover>
                 <TableCell>{n.description}</TableCell>
                 <TableCell>{n.posted}</TableCell>
-                <TableCell><StatusChip status={n.status} /></TableCell>
+               
               </TableRow>
             ))}
-            {notices.length === 0 && <TableRow><TableCell colSpan={3} align="center">No notices.</TableCell></TableRow>}
+            {notices.length === 0 && <TableRow><TableCell colSpan={2} align="center">No notices.</TableCell></TableRow>}
           </TableBody>
         </Table>
       );
@@ -219,10 +217,10 @@ export default function StudentChecklist({
           </Box>
         </Box>
 
-        {/* Notices */}
+        {/* Notices (whiteboard) — status column removed */}
         <Box className="checklist-card">
           <Box className="checklist-header">
-            <Typography className="checklist-title">Whiteboard Notices</Typography>
+            <Typography className="checklist-title">Whiteboard </Typography>
             <Typography variant="body2" className="checklist-count">{notices.length} total</Typography>
           </Box>
 
@@ -230,9 +228,9 @@ export default function StudentChecklist({
             <table className="small-table">
               <thead>
                 <tr>
-                  <th>Notice</th>
+                  <th>Post</th>
                   <th>Posted</th>
-                  <th>Status</th>
+                  {/* Status column intentionally removed */}
                 </tr>
               </thead>
               <tbody>
@@ -240,10 +238,10 @@ export default function StudentChecklist({
                   <tr key={n.description + i}>
                     <td>{n.description}</td>
                     <td>{n.posted}</td>
-                    <td><StatusChip status={n.status} /></td>
+                    {/* Status cell removed from preview */}
                   </tr>
                 ))}
-                {notices.length === 0 && <tr><td colSpan={3} className="empty">No notices.</td></tr>}
+                {notices.length === 0 && <tr><td colSpan={2} className="empty">No notices.</td></tr>}
               </tbody>
             </table>
           </Box>

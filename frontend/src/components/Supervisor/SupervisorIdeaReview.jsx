@@ -356,11 +356,11 @@ export default function SupervisorIdeaReview() {
                           <Box className="idea-details-box">
                             <Box className="idea-details-section">
                               <div className="idea-detail-row">
-                                <span className="idea-detail-label">Abstract:</span>
+                                <span className="idea-detail-label">Project Title:</span>
                                 <span className="idea-detail-value">{idea.abstract}</span>
                               </div>
                               <div className="idea-detail-row">
-                                <span className="idea-detail-label">Methodology:</span>
+                                <span className="idea-detail-label">Project Description:</span>
                                 <span className="idea-detail-value">{idea.methodology}</span>
                               </div>
                               <div className="idea-detail-row">

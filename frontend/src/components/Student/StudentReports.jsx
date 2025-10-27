@@ -18,7 +18,8 @@ import "./StudentReports.css";
  * StudentReports (updated)
  * - Replaced MUI Table blocks with AppTable usage.
  * - Kept exportPDF / exportExcel and data-loading logic intact.
- * - Added className on export buttons so CSS can apply your system colors.
+ * - Modified the "Tasks" table to be shown as "Milestone" with columns:
+ *   Templates, Status, DueDate (data sourced from tasks array).
  */
 
 const STORAGE_KEYS = {
@@ -30,9 +31,9 @@ const STORAGE_KEYS = {
 
 const DEMO = {
   tasks: [
-    { id: "T-01", title: "Collect dataset", status: "Completed", completedOn: "2025-10-05" },
-    { id: "T-02", title: "Preprocess data", status: "In Progress", due: "2025-10-11" },
-    { id: "T-03", title: "Write documentation", status: "Overdue", due: "2025-10-15" },
+    { id: "T-01", title: "Template-01: Project Team (MS Word)", status: "Completed", completedOn: "2025-10-05" },
+    { id: "T-02", title: "Template-02: Initial Proposal (MS Word)", status: "In Progress", due: "2025-10-11" },
+    { id: "T-03", title: "Template-03: Proposal Presentation (MS PowerPoint)", status: "Overdue", due: "2025-10-15" },
   ],
   milestones: [
     { id: "MS-01", name: "Proposal", submittedOn: "2025-10-04", status: "Completed" },
@@ -90,11 +91,8 @@ function callToast(message, type = "success") {
       }
     }
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.warn("toastService call failed", e);
   }
-  // final fallback
-  // eslint-disable-next-line no-alert
   alert(message);
 }
 
@@ -112,7 +110,6 @@ export default function StudentReports() {
     setMeetings(safeRead(STORAGE_KEYS.meetings) || DEMO.meetings);
   }, []);
 
-  // computed summaries
   const summary = useMemo(() => {
     const completedMilestones = milestones.filter((m) => (m.status || "").toLowerCase() === "completed").length;
     const pendingMilestones = milestones.length - completedMilestones;
@@ -162,7 +159,6 @@ export default function StudentReports() {
       pdf.save(`FYP-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
       callToast("PDF exported", "success");
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error(err);
       callToast("PDF export failed. Ensure jspdf and html2canvas are installed.", "error");
     }
@@ -173,23 +169,18 @@ export default function StudentReports() {
       const XLSX = await import("xlsx");
       const wb = XLSX.utils.book_new();
 
-      // Tasks sheet
       const tasksSheetData = [
         ["ID", "Title", "Status", "Completed / Due"],
         ...tasks.map((t) => [t.id || "", t.title || "", t.status || "", t.completedOn || t.due || ""]),
       ];
-      const wsTasks = XLSX.utils.aoa_to_sheet(tasksSheetData);
-      XLSX.utils.book_append_sheet(wb, wsTasks, "Tasks");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tasksSheetData), "Tasks");
 
-      // Milestones sheet
       const msData = [
         ["ID", "Name", "Submitted On", "Status"],
         ...milestones.map((m) => [m.id || "", m.name || "", m.submittedOn || "", m.status || ""]),
       ];
-      const wsMs = XLSX.utils.aoa_to_sheet(msData);
-      XLSX.utils.book_append_sheet(wb, wsMs, "Milestones");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(msData), "Milestones");
 
-      // Evaluations sheet (flattened)
       const evalRows = [
         ["Project ID", "Project Title", "Evaluated On", "Milestone", "Criterion", "Score", "Max", "Feedback"],
       ];
@@ -200,16 +191,13 @@ export default function StudentReports() {
           });
         });
       });
-      const wsEval = XLSX.utils.aoa_to_sheet(evalRows);
-      XLSX.utils.book_append_sheet(wb, wsEval, "Evaluations");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(evalRows), "Evaluations");
 
-      // Meetings sheet
       const meetingsData = [
         ["ID", "Meeting Date", "Time", "Supervisor", "Booked On"],
         ...meetings.map((m) => [m.id || "", m.meetingDate || "", m.meetingTime || "", m.supervisor || "", m.bookedOn || ""]),
       ];
-      const wsMeet = XLSX.utils.aoa_to_sheet(meetingsData);
-      XLSX.utils.book_append_sheet(wb, wsMeet, "Meetings");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(meetingsData), "Meetings");
 
       const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
       const blob = new Blob([wbout], { type: "application/octet-stream" });
@@ -223,29 +211,17 @@ export default function StudentReports() {
       URL.revokeObjectURL(url);
       callToast("Excel exported", "success");
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error(err);
       callToast("Excel export failed. Ensure xlsx (SheetJS) is installed.", "error");
     }
   }
 
-  // Build AppTable data for each section
-  const milestonesTable = {
-    headers: ["Milestone", "Submitted On", "Status"],
-    rows: milestones.map((m) => ({
-      Milestone: m.name || m.id || "-",
-      "Submitted On": m.submittedOn || "-",
-      Status: m.status || "Pending",
-      __meta: m,
-    })),
-  };
-
   const tasksTable = {
-    headers: ["Title", "Status", "Completed / Due"],
+    headers: ["Templates", "Status", "DueDate"],
     rows: tasks.map((t) => ({
-      Title: t.title || "-",
+      Templates: t.title || "-",
       Status: t.status || "-",
-      "Completed / Due": t.completedOn || t.due || "-",
+      DueDate: t.completedOn || t.due || "-",
       __meta: t,
     })),
   };
@@ -336,12 +312,7 @@ export default function StudentReports() {
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <label>Milestones</label>
-          <AppTable headers={milestonesTable.headers} rows={milestonesTable.rows} />
-        </Paper>
-
-        <Paper className="report-table-wrap" elevation={0}>
-          <label>Milestones</label>
+          <label>Milestone</label>
           <AppTable headers={tasksTable.headers} rows={tasksTable.rows} />
         </Paper>
 

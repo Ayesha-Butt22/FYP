@@ -18,6 +18,10 @@
   box-shadow: 0 2px 10px #01337a22;
   cursor: pointer;
   transition: background 0.18s, transform 0.12s;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 .st-clear-btn:hover {
   background: white;

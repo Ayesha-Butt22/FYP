@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, LinearProgress, Chip } from "@mui/material";
+import { Box } from "@mui/material";
 import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import AppTable from "../Admin/AppTable.jsx";
 import { toastService } from "../ToastService/ToastService";
@@ -11,6 +11,7 @@ const DEMO_EVALS = [
     projectTitle: "Smart Attendance System",
     supervisor: "Dr Ayesha",
     evaluatedOn: "2025-10-15",
+    members: ["Ali Raza", "Sana Tariq", "Bilal Khan"],
     milestones: [
       {
         id: "proposal",
@@ -42,6 +43,7 @@ const DEMO_EVALS = [
       },
     ],
   },
+  // you can add more demo evaluation objects here
 ];
 
 const STORAGE_KEY = "student_evaluations_v1";
@@ -129,24 +131,50 @@ export default function StudentEvaluations() {
         {evals.map((rec) => {
           if (openProjectId !== rec.projectId) return null;
 
-          const rubricRows = rec.milestones.flatMap((m) =>
-            m.rubric.map((r) => ({
-              Milestone: m.name,
-              Criterion: r.criterion,
-              Score: r.score,
-              Max: r.max,
-              Feedback: r.feedback || "—",
-              __meta: { projectId: rec.projectId, milestoneId: m.id, rubricId: r.id },
-            }))
+          // Compute group-level totals
+          const totals = rec.milestones.reduce(
+            (acc, m) => {
+              const rTotal = computeRubricTotal(m.rubric);
+              acc.scored += rTotal.scored;
+              acc.max += rTotal.max;
+              return acc;
+            },
+            { scored: 0, max: 0 }
           );
+
+          const scorePercent = totals.max > 0 ? Math.round((totals.scored / totals.max) * 100) : 0;
+
+          // Build one row per member (each member gets own row)
+          const memberRows = (Array.isArray(rec.members) && rec.members.length > 0)
+            ? rec.members.map((member) => ({
+                "FYP Year": "FYP1",
+                "Group Member": member,
+                Score: totals.scored,
+                Max: totals.max,
+                "Percentage": totals.max ? `${scorePercent}%` : "—",
+                __raw: rec,
+              }))
+            : [
+                {
+                  "FYP Year": "FYP1",
+                  "Group Member": "—",
+                  Score: totals.scored,
+                  Max: totals.max,
+                  "Percentage": totals.max ? `${scorePercent}%` : "—",
+                  __raw: rec,
+                },
+              ];
 
           return (
             <Box key={rec.projectId} className="eval-expanded-wrap">
-              <label>{rec.projectTitle} — Details</label>
-              <div style={{ marginTop: 12 }}>
+              <div className="eval-expanded-title" style={{ marginBottom: 18 }}>
+                {rec.projectTitle} — Members Summary
+              </div>
+
+              <div style={{ marginTop: 6 }}>
                 <AppTable
-                  headers={["Milestone", "Criterion", "Score", "Max", "Feedback"]}
-                  rows={rubricRows}
+                  headers={["FYP Year", "Group Member", "Score", "Max", "Percentage"]}
+                  rows={memberRows}
                 />
               </div>
             </Box>

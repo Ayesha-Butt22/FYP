@@ -5,6 +5,7 @@ import StudentGroup from "./StudentGroup";
 import StudentIdeaProposal from "./StudentIdeaProposal";
 import SelectedSupervisor from "./SelectedSupervisor";
 import StudentTemplates from "./StudentTemplates";
+import StudentUploads from "./StudentUploads";
 import StudentTasks from "./Tasks";
 import StudentMeetings from "./StudentMeetings";
 import StudentChecklist from "./StudentChecklist";
@@ -20,6 +21,7 @@ import {
   Assignment as AssignmentIcon,
   PersonSearch as PersonSearchIcon,
   Description as DescriptionIcon,
+  CloudUpload as UploadIcon,
   ListAlt as ListAltIcon,
   CalendarMonth as CalendarMonthIcon,
   Checklist as ChecklistIcon,
@@ -36,6 +38,7 @@ const menu = [
   { label: "Idea & Proposal", icon: <AssignmentIcon /> },
   { label: "Selected supervisor", icon: <PersonSearchIcon /> },
   { label: "Templates", icon: <DescriptionIcon /> },
+  { label: "Uploads", icon: <UploadIcon /> }, // <-- New tab inserted after Templates
   { label: "Tasks", icon: <ListAltIcon /> },
   { label: "Meetings", icon: <CalendarMonthIcon /> },
   { label: "Checklist", icon: <ChecklistIcon /> },
@@ -66,6 +69,7 @@ export default function StudentDashboard() {
     "Idea & Proposal": <StudentIdeaProposal />,
     "Selected supervisor": <SelectedSupervisor />,
     "Templates": <StudentTemplates />,
+    "Uploads": <StudentUploads />, // <-- new mapping
     "Tasks": <StudentTasks />,
     "Meetings": <StudentMeetings />,
     "Checklist": <StudentChecklist />,
