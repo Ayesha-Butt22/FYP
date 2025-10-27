@@ -25,70 +25,52 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "../Admin/AppTable.jsx";
 import "./SupervisorEvaluations.css";
 
-// Dummy Data
+
 const GROUPS = [
   { id: "G-101", name: "Group 1" },
   { id: "G-102", name: "Group 2" },
   { id: "G-103", name: "Group 3" }
 ];
 
-const MILESTONES = [
-  { id: "Proposal", name: "Proposal", weight: 0.2 },
-  { id: "Mid", name: "Mid Evaluation", weight: 0.3 },
-  { id: "Final", name: "Final Report/Defense", weight: 0.5 }
+const Year = [
+  { id: "fyp1", name: "FYP-1", weight: 0.2 },
+  { id: "fyp2", name: "FYP-2", weight: 0.3 },
 ];
 
 const RUBRICS = {
-  Proposal: [
-    { name: "Problem Statement", maxMarks: 5 },
-    { name: "Objectives", maxMarks: 5 },
-    { name: "Methodology", maxMarks: 10 }
+  fyp1: [
+    { name: "Ayesha", maxMarks: 50 },
+    { name: "Sana", maxMarks: 50 },
+    { name: "Eman", maxMarks: 50 },
   ],
-  Mid: [
-    { name: "Progress", maxMarks: 8 },
-    { name: "Implementation", maxMarks: 10 },
-    { name: "Presentation", maxMarks: 7 }
+
+  fyp2: [
+    { name: "Ayesha", maxMarks: 50 },
+    { name: "Sana", maxMarks: 50 },
   ],
-  Final: [
-    { name: "Final Report", maxMarks: 10 },
-    { name: "Defense", maxMarks: 10 },
-    { name: "Demo", maxMarks: 10 }
-  ]
 };
 
 const DUMMY_EVALUATIONS = [
   {
     groupId: "G-101",
-    milestone: "Proposal",
-    scores: [5, 4, 8],
-    feedback: ["Good", "Nice", "Improve methodology"],
     totalMarks: 17,
-    maxMarks: 20,
-    percentage: 85,
-    timestamp: "2025-09-13 10:30",
-    supervisor: true
+    name: 'Ayesha',
+    fypYear: 'fyp-1',
+    maxMarks: 50,
   },
   {
-    groupId: "G-102",
-    milestone: "Proposal",
-    scores: [4, 3, 8],
-    feedback: ["Ok", "Objectives missing", "Good"],
+    groupId: "G-101",
     totalMarks: 15,
-    maxMarks: 20,
-    percentage: 75,
-    timestamp: "2025-09-14 11:00",
-    supervisor: true
+    maxMarks: 50,
+    fypYear: 'fyp-1',
+    name: 'Sana',
   },
   {
     groupId: "G-103",
-    milestone: "Mid",
-    scores: [6, 6, 6],
-    feedback: ["", "", ""],
     totalMarks: 18,
-    maxMarks: 25,
-    percentage: 72,
-    timestamp: "2025-09-16 13:35",
-    supervisor: true
+    maxMarks: 50,
+    name: 'Eman',
+    fypYear: 'fyp-2',
   }
 ];
 
@@ -103,7 +85,6 @@ export default function SupervisorEvaluations() {
   const [formError, setFormError] = useState("");
   const [alreadyEvaluated, setAlreadyEvaluated] = useState(false);
 
-  // UI filters for All Evaluations table
   const [evalSearch, setEvalSearch] = useState("");
   const [evalMilestoneFilter, setEvalMilestoneFilter] = useState("All");
 
@@ -114,6 +95,7 @@ export default function SupervisorEvaluations() {
   useEffect(() => {
     if (selectedMilestone) {
       setRubric(RUBRICS[selectedMilestone] || []);
+      console.log(RUBRICS);
       setScores(Array((RUBRICS[selectedMilestone] || []).length).fill(""));
       setFeedback(Array((RUBRICS[selectedMilestone] || []).length).fill(""));
     } else {
@@ -178,7 +160,7 @@ export default function SupervisorEvaluations() {
     setFormError("");
   }, [selectedGroup, selectedMilestone]);
 
-  // All Evaluations table: apply filters and search
+
   const filteredEvaluations = useMemo(() => {
     const term = (evalSearch || "").trim().toLowerCase();
     return evaluations
@@ -193,27 +175,25 @@ export default function SupervisorEvaluations() {
         );
       })
       .map(ev => ({
-        Group: GROUPS.find(g => g.id === ev.groupId)?.name || ev.groupId,
-        Milestone: ev.milestone,
-        Score: `${ev.totalMarks}/${ev.maxMarks}`,
-        "%": `${ev.percentage}%`,
-        When: ev.timestamp.split(" ")[0],
-        __meta: ev
+        "Group#": GROUPS.find(g => g.id === ev.groupId)?.name || ev.groupId,
+        "FYP Year": ev.fypYear,
+        "Name": ev.name,
+        Score: ev.totalMarks,
+        Max: ev.maxMarks,
       }));
   }, [evaluations, evalSearch, evalMilestoneFilter]);
 
-  // CSV export (simple)
+
   const exportCSV = () => {
-    const headers = ["Group", "Milestone", "Total Marks", "Max Marks", "Percentage", "Timestamp"];
+    const headers = ["Group#", "FYP Year", "Name", "Score", "Max"];
     const rows = evaluations
       .filter(ev => ev.supervisor)
       .map(ev => [
         GROUPS.find(g => g.id === ev.groupId)?.name || ev.groupId,
-        ev.milestone,
+        ev.fypYear,
+        ev.name,
         ev.totalMarks,
         ev.maxMarks,
-        ev.percentage + "%",
-        ev.timestamp
       ]);
     const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -227,13 +207,13 @@ export default function SupervisorEvaluations() {
     URL.revokeObjectURL(url);
   };
 
-  // AppTable headers for All Evaluations
-  const evalHeaders = ["Group", "Milestone", "Score", "%", "When"];
+
+  const evalHeaders = ["Group#", "FYP Year", "Name", "Score", "Max"];
 
   return (
     <Box>
       <DashboardSectionHeader
-        description={`Here you can provide evaluations & rubrics. Select a group and milestone to fill marks, then submit, and see all evaluations.`}
+        description={`Here you can provide evaluations & rubrics. Select a group and names to fill marks, then submit, and see all evaluations.`}
       >
         Evaluation & Rubrics
       </DashboardSectionHeader>
@@ -257,16 +237,16 @@ export default function SupervisorEvaluations() {
 
           <Grid item xs={12} sm={6} md={4}>
             <FormControl fullWidth className="evaluation-form-control" variant="filled" size="small">
-              <InputLabel>Select Milestone</InputLabel>
+              <InputLabel>Select Year</InputLabel>
               <Select
                 value={selectedMilestone}
-                label="Select Milestone"
+                label="Select Year"
                 onChange={e => setSelectedMilestone(e.target.value)}
                 size="small"
                 style={{ height: '47px' , width: '250px'}}
               >
-                <MenuItem value=""><em>Choose milestone</em></MenuItem>
-                {MILESTONES.map(m => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
+                <MenuItem value=""><em>Choose Year</em></MenuItem>
+                {Year.map(m => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
@@ -304,7 +284,7 @@ export default function SupervisorEvaluations() {
               <Table size="small" className="rubric-table enhanced-table">
                 <TableHead>
                   <TableRow>
-                    <TableCell className="table-header">Criteria</TableCell>
+                    <TableCell className="table-header">Name</TableCell>
                     <TableCell className="table-header">Max Marks</TableCell>
                     <TableCell className="table-header">Marks</TableCell>
                     <TableCell className="table-header">Comments</TableCell>
@@ -391,8 +371,8 @@ export default function SupervisorEvaluations() {
         ) : (
           <Typography color="#666" fontSize={20} my={3}>
             {submitted || alreadyEvaluated
-              ? "Evaluation submitted for this group and milestone."
-              : "Select a group and milestone to fill evaluation."}
+              ? "Evaluation submitted for this group."
+              : "Select a group and name to fill evaluation."}
           </Typography>
         )}
 
@@ -417,32 +397,20 @@ export default function SupervisorEvaluations() {
           </Stack>
         )}
       </Paper>
-
-      {/* All Evaluations */}
       <Paper className="evaluation-table-paper" sx={{ mt: 3, p: 2 }}>
         <Stack direction={{ xs: "column", sm: "row" }} alignItems="center" spacing={2} mb={2}>
-          <Typography fontWeight={700} className="all-evals-title">All Evaluations Given</Typography>
+          <label fontWeight={700} className="all-evals-title">All Evaluations Given</label>
 
           <Box sx={{ display: "flex", gap: 2, marginLeft: "auto", alignItems: "center" }}>
             <TextField
               size="small"
-              placeholder="Search group / milestone"
+              placeholder="Search group"
               value={evalSearch}
               onChange={e => setEvalSearch(e.target.value)}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><SearchIcon color="primary" /></InputAdornment>
               }}
             />
-            <FormControl size="small">
-              <Select value={evalMilestoneFilter} onChange={e => setEvalMilestoneFilter(e.target.value)}>
-                <MenuItem value="All">All milestones</MenuItem>
-                {MILESTONES.map(m => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
-              </Select>
-            </FormControl>
-
-            <IconButton size="small" onClick={() => { setEvalSearch(""); setEvalMilestoneFilter("All"); }}>
-              <RestartAlt />
-            </IconButton>
           </Box>
         </Stack>
 

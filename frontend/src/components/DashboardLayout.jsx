@@ -122,19 +122,23 @@ export default function DashboardLayout({
         <header className="dashboard-header">
           <h1 className="dashboard-title">{headerTitle}</h1>
           <div className="dashboard-profile">
-            <Tooltip title="New Notification">
-              <NotificationsActiveIcon sx={{
-                width: 40,
-                height: 40,
-                marginRight: "10px",
-                color: '#01337a',
-                cursor: "pointer",
-                transition: "0.3s",
-                "&:hover": {
-                  transform: "scale(1.05)",
-                },
-              }} />
-            </Tooltip>
+            {displayRole !== "coordinator" && displayRole !== "admin" && (
+                <Tooltip title="New Notification">
+                  <NotificationsActiveIcon
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        marginRight: "10px",
+                        color: "#01337a",
+                        cursor: "pointer",
+                        transition: "0.3s",
+                        "&:hover": {
+                          transform: "scale(1.05)",
+                        },
+                      }}
+                  />
+                </Tooltip>
+            )}
             <Tooltip title="Click to change profile picture">
               <Avatar
                   src={profilePic || "/default-avatar.png"}

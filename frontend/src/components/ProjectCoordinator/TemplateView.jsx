@@ -222,8 +222,7 @@ export default function TemplateView() {
     const groupId = row.__meta?.groupId;
     return (
       <div style={{ display: "flex", gap: 8 }}>
-        <button className="mt-btn" onClick={() => openGroupDriveFolder(groupId)}>View</button>
-        <button className="mt-btn" onClick={() => openGroupView(groupId)} style={{ background: "#6c757d" }}>Details</button>
+        <button className="mt-btn" onClick={() => openGroupView(groupId)} style={{ background: "#01337a" }}>Details</button>
       </div>
     );
   };
