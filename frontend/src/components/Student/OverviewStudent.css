@@ -1,6 +1,87 @@
-/* Add or replace the whiteboard-related rules in OverviewStudent.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
-/* circular icon button (no label underneath) */
+:root{
+  --main-blue: #01337a;
+  --accent-blue: #2563eb;
+  --muted: #64748b;
+  --card-bg: #fff;
+  --soft-bg: #f8fafc;
+  --glass-border: #e2e8f0;
+  --shadow-weak: rgba(1, 51, 122, 0.04);
+}
+
+/* Base */
+.overview-container {
+  margin-top: 56px;
+  width: 100%;
+  padding: 0 32px 40px 32px;
+  position: relative;
+  z-index: 1;
+  animation: fadeInOverview 1.1s both;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+}
+@keyframes fadeInOverview {
+  0% { opacity: 0; transform: translateY(32px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 900px) {
+  .overview-container { padding: 0 12px 28px 12px; }
+}
+
+/* Welcome banner */
+.welcome-banner {
+  background: linear-gradient(90deg, var(--main-blue) 0%, var(--accent-blue) 100%);
+  color: #fff;
+  border-radius: 28px;
+  padding: 36px 28px 28px 32px;
+  margin-bottom: 36px;
+  box-shadow: 0 6px 36px rgba(37, 99, 235, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.banner-title {
+  font-size: 2.05rem;
+  font-weight: 900;
+  letter-spacing: -1.0px;
+  text-align: left;
+  margin: 0;
+}
+@media (max-width: 700px) { .banner-title { font-size: 1.35rem; } }
+.banner-desc {
+  font-size: 1.05rem;
+  font-weight: 400;
+  opacity: 0.98;
+  color: #e7ecff;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  line-height: 1.55;
+  text-align: left;
+}
+.banner-meta {
+  font-size: 1rem;
+  opacity: 0.85;
+  color: #d6ddff;
+  margin-bottom: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  display:flex;
+  gap: 12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+/* Floating whiteboard (FAB) inside banner */
 .whiteboard-fab {
   position: absolute;
   top: 18px;
@@ -9,26 +90,234 @@
   height: 48px;
   border-radius: 50%;
   background: #fff;
-  color: #01337a;
+  color: var(--main-blue);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid rgba(1,51,122,0.08);
-  box-shadow: 0 6px 18px rgba(1,51,122,0.12);
-  cursor: pointer;
   font-size: 20px;
-  transition: transform 0.12s ease, background 0.12s ease, color 0.12s ease;
-  z-index: 5;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(1,51,122,0.12);
+  transition: transform 150ms ease, box-shadow 150ms ease, background 120ms ease, color 120ms ease;
 }
-.whiteboard-fab:hover {
-  transform: translateY(-3px) scale(1.05);
-  background: #01337a;
+.whiteboard-fab:hover,
+.whiteboard-fab:focus {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(1,51,122,0.16);
+  outline: none;
+}
+.whiteboard-fab:active { transform: translateY(-1px); }
+
+/* Quick links */
+.quick-links {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+@media (max-width: 700px) {
+  .quick-links { flex-direction: column; gap: 9px; }
+}
+.quick-link-btn {
+  background: var(--accent-blue);
   color: #fff;
-  border-color: #01337a;
+  padding: 12px 20px;
+  border-radius: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1.04rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.18s, color 0.18s, box-shadow 0.21s, transform 0.15s;
+  font-family: inherit !important;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+}
+.quick-link-btn:hover,
+.quick-link-btn:focus {
+  background: #fff;
+  color: var(--main-blue);
+  box-shadow: 0 6px 20px rgba(1,51,122,0.12);
+  outline: none;
+  transform: translateY(-2px);
 }
 
-/* Ensure welcome-banner is position:relative so fab can be placed correctly */
-.welcome-banner {
+/* Section chip */
+.section-chip {
+  display: inline-block;
+  background: #e6eeff;
+  color: var(--main-blue);
+  font-weight: 700;
+  border-radius: 24px;
+  padding: 6px 20px;
+  font-size: 1.02rem;
+  margin: 20px auto;
+  width: 100%;
+  max-width: 1120px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+/* Cards grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 36px;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.stat-card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px var(--shadow-weak);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid var(--glass-border);
+}
+.stat-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.stat-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+  color: var(--main-blue);
+}
+.stat-value-studentonly {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--accent-blue);
+}
+
+/* Progress section */
+.progress-section-gap { height: 20px; }
+.progress-box {
+  margin-bottom: 36px;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.progress-bar {
+  background: #e9eef7;
+  border-radius: 8px;
+  height: 14px;
+  width: 100%;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.progress-fill {
+  background: var(--accent-blue);
+  height: 100%;
+  border-radius: 8px;
+  width: 0;
+  transition: width 700ms cubic-bezier(.2,.8,.2,1);
+}
+.progress-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--main-blue);
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Timeline / Activity */
+.activity-list {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  margin-bottom: 24px;
+}
+.timeline {
   position: relative;
-  /* existing styles remain */
+  margin-left: 8px;
+  padding-left: 18px;
+  border-left: 3px solid rgba(37,99,235,0.18);
+}
+.activity-item {
+  padding: 10px 0;
+  font-size: 1rem;
+  color: var(--main-blue);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+.activity-item::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  position: absolute;
+  left: -22px;
+  top: 12px;
+}
+.activity-item .time {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-left: auto;
+}
+
+/* Tip box */
+.fyp-tip {
+  background: #fff8e6;
+  color: #7a5800;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  margin: 28px 0 0 0;
+  padding: 12px 16px;
+  width: 100%;
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(250, 205, 105, 0.22);
+}
+
+/* Focus & accessibility helpers */
+.quick-link-btn:focus,
+.quick-link-btn:active,
+.whiteboard-fab:focus {
+  outline: 3px solid rgba(37,99,235,0.14);
+  outline-offset: 3px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 700px) {
+  .stat-value-studentonly { font-size: 1.35rem; }
+  .banner-desc { font-size: 0.98rem; }
+  .stat-card { padding: 16px; }
+  .welcome-banner { padding: 20px 18px 18px 18px; border-radius: 14px; }
+  .section-chip { padding: 6px 14px; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .overview-container, .progress-fill {
+    animation: none !important;
+    transition: none !important;
+  }
 }

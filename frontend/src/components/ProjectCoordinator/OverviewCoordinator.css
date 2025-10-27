@@ -89,14 +89,21 @@
   text-align: left;
   border: none;
   cursor: pointer;
+  -webkit-border-radius: 18px;
+  -moz-border-radius: 18px;
+  -ms-border-radius: 18px;
+  -o-border-radius: 18px;
+  -webkit-transition: background 0.18s, color 0.19s, box-shadow 0.21s, transform 0.15s;
+  -moz-transition: background 0.18s, color 0.19s, box-shadow 0.21s, transform 0.15s;
+  -ms-transition: background 0.18s, color 0.19s, box-shadow 0.21s, transform 0.15s;
+  -o-transition: background 0.18s, color 0.19s, box-shadow 0.21s, transform 0.15s;
 }
 .quick-link-btn:hover {
   background: white;
   color: #01337a;
   box-shadow: 0 5px 16px #01337a22;
-  transform: scale(1.03);
+  
 }
-
 .section-chip {
   display: inline-block;
   background: #e6eeff;

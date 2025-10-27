@@ -170,12 +170,16 @@
   transition: background 0.18s, color 0.19s, box-shadow 0.21s, transform 0.15s;
   font-family: inherit !important;
   text-align: left;
+  -webkit-transition: background 0.18s, color 0.19s, box-shadow 0.21s, transform 0.15s;
+  -moz-transition: background 0.18s, color 0.19s, box-shadow 0.21s, transform 0.15s;
+  -ms-transition: background 0.18s, color 0.19s, box-shadow 0.21s, transform 0.15s;
+  -o-transition: background 0.18s, color 0.19s, box-shadow 0.21s, transform 0.15s;
 }
 .quick-link-btn:hover {
   background: white;
   color: #01337a;
   box-shadow: 0 5px 16px #01337a22;
-  transform: scale(1.09) rotate(-2deg);
+
 }
 .stat-card {
   background: #fff;

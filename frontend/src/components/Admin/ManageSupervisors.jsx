@@ -416,7 +416,7 @@ export default function ManageSupervisors() {
                 onClick={() => setIsModalOpen(true)}
                 disabled={sideFormMode === 'add'}
             >
-              + upload Excel
+              + Upload Supervior
             </button>
           </div>
 
@@ -452,7 +452,7 @@ export default function ManageSupervisors() {
           style={{ background: "#013379" }}
           onClick={() => handleMakeCoordinator(i)}
         >
-          Promote
+          Make Coordinator
         </button>
       </>
     )}
@@ -528,7 +528,7 @@ export default function ManageSupervisors() {
                   </label>
                   <DropdownSingleSelect
                       value={formData.Department}
-                      options={["CS", "SE", "CA"]}
+                      options={["CS", "SE", "CA", "CyberSec"]}
                       onChange={(val) =>
                           setFormData(prev => ({...prev, Department: val}))
                       }

@@ -8,18 +8,23 @@ exports.getDeadLine = async (req, res) => {
                 milestone: "Attend Orientation Seminar",
                 submitTo: "Project Coordinator",
                 deliverables: "Submit Project Team List (HARD COPY – Use Template-01)",
+                evaluations:"Nill",
+                
             },
             {
                 week: "Week 2",
                 milestone: "Develop Project Ideas; Find a Supervisor",
                 submitTo: "Project Coordinator",
                 deliverables: "Submit Initial Proposal (HARD COPY – Use Template-02)",
+                evaluations:"Artifact Submission",
             },
             {
                 week: "Week 4",
                 milestone: "Defend Proposal",
                 submitTo: "Entire Faculty",
                 deliverables: "Project Proposal Presentation (SOFT COPY – Use Template-03)",
+                 evaluations:"Presentation Submission",
+
             },
             {
                 week: "Week 6",
@@ -27,13 +32,14 @@ exports.getDeadLine = async (req, res) => {
                 submitTo: "Project Coordinator",
                 deliverables:
                     "Submit Project Proposal & Plan (Both SOFT & HARD COPY – Use Template-04)",
+                     evaluations:"Artifact Submission",
             },
             {
                 week: "13th Week before Final Exams",
                 milestone: "Progress Presentation / Assessment",
                 submitTo: "Exam Committee / Supervisor",
-                deliverables:
-                    "Presentation (Use Template-07), Prototype, Project Report (SOFT COPY – First 5 Chapters – Use Template-05)",
+                deliverables:"Presentation (Use Template-07), Prototype, Project Report (SOFT COPY – First 5 Chapters – Use Template-05)",
+                     evaluations:"Artifact Submission",
             },
         ];
 
@@ -43,6 +49,7 @@ exports.getDeadLine = async (req, res) => {
                 milestone: "Submit Report",
                 submitTo: "Project Coordinator",
                 deliverables: "Complete Project Report (SOFT COPY – Use Template-05)",
+                evaluations:"Artifact Submission",
             },
             {
                 week: "Week 13",

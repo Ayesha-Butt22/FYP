@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../Api/authService";
 import { toastService } from "../ToastService/ToastService.jsx";
@@ -12,6 +12,8 @@ const STUDENT_FIELDS = [
   { name: "password", label: "Password", type: "password", required: true },
 ];
 
+const DEPARTMENT_OPTIONS = ["CS", "SE", "CA", "CyberSec"];
+
 const useQuery = () => new URLSearchParams(useLocation().search);
 
 export default function Auth() {
@@ -21,7 +23,6 @@ export default function Auth() {
   const [mode, setMode] = useState("register");
   const [registerData, setRegisterData] = useState({});
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [showPwd, setShowPwd] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -148,40 +149,53 @@ export default function Auth() {
     }
   };
 
-  // Student registration fields (no icons)
+  // Student registration fields (department rendered as a dropdown)
   const renderStudentFields = () => (
     <>
       {STUDENT_FIELDS.map(field => (
         <div className="input-box" key={field.name} style={{ position: "relative" }}>
-          <input
-            type={field.type === "password" ? (showPwd ? "text" : "password") : field.type}
-            name={field.name}
-            placeholder={field.label}
-            required={field.required}
-            value={registerData[field.name] || ""}
-            onChange={e => handleRegisterChange(field.name, e.target.value)}
-            disabled={isLoading}
-            style={{ paddingRight: field.type === "password" ? "70px" : "16px" }}
-          />
-          {field.type === "password" && (
-            <button
-              type="button"
-              className="show-btn"
-              tabIndex={-1}
-              onClick={() => setShowPwd(prev => !prev)}
-              disabled={isLoading}
-              style={{
-                position: "absolute",
-                right: 10,
-                top: "50%",
-                transform: "translateY(-50%)"
-              }}
-            >
-              {showPwd ? "Hide" : "Show"}
-            </button>
-          )}
-          {errors[field.name] && (
-            <div className="error-msg">{errors[field.name]}</div>
+          {field.name === "department" ? (
+            <>
+              <select
+                name="department"
+                aria-label="Department"
+                required={field.required}
+                value={registerData.department || ""}
+                onChange={e => handleRegisterChange("department", e.target.value)}
+                disabled={isLoading}
+                style={{
+                  width: "100%",
+                  padding: "14px 18px",
+                  borderRadius: "8px",
+                  border: "1.5px solid var(--input-border)",
+                  background: "var(--input-bg)",
+                  fontSize: "1.14rem",
+                  fontWeight: 500,
+                }}
+              >
+                <option value="">Select Department</option>
+                {DEPARTMENT_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+              {errors.department && <div className="error-msg">{errors.department}</div>}
+            </>
+          ) : (
+            <>
+              <input
+                type={field.type}
+                name={field.name}
+                placeholder={field.label}
+                required={field.required}
+                value={registerData[field.name] || ""}
+                onChange={e => handleRegisterChange(field.name, e.target.value)}
+                disabled={isLoading}
+                style={{ paddingRight: field.type === "password" ? "16px" : "16px" }}
+              />
+              {errors[field.name] && (
+                <div className="error-msg">{errors[field.name]}</div>
+              )}
+            </>
           )}
         </div>
       ))}
@@ -209,7 +223,7 @@ export default function Auth() {
 
             <div className="input-box">
               <input
-                type={showPwd ? "text" : "password"}
+                type="password"
                 placeholder="Password"
                 required
                 value={loginData.password}
@@ -217,16 +231,6 @@ export default function Auth() {
                 disabled={isLoading}
               />
               <span className="input-icon" role="img" aria-label="lock">🔒</span>
-              <button
-                type="button"
-                className="show-btn"
-                tabIndex={-1}
-                aria-label={showPwd ? "Hide password" : "Show password"}
-                onClick={() => setShowPwd(prev => !prev)}
-                disabled={isLoading}
-              >
-                {showPwd ? "Hide" : "Show"}
-              </button>
             </div>
             {errors.password && <div className="error-msg">{errors.password}</div>}
 
