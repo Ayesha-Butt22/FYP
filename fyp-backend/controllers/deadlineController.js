@@ -57,6 +57,7 @@ exports.getDeadLine = async (req, res) => {
                 submitTo: "Exam Committee / Supervisor",
                 deliverables:
                     "Final Presentation (Use Template-06), Full Working Demo",
+                      evaluations:"presentation Submission",
             },
             {
                 week: "Week 15",
@@ -64,6 +65,7 @@ exports.getDeadLine = async (req, res) => {
                 submitTo: "Industry, Faculty & Students",
                 deliverables:
                     "Banners, Posters, Brochure, Project Report, Final Presentation (Use Template-06), Full Working Demo",
+                    evaluations:"presentation Submission",
             },
             {
                 week: "Week After Finals",
@@ -71,6 +73,7 @@ exports.getDeadLine = async (req, res) => {
                 submitTo: "Project Coordinator",
                 deliverables:
                     "Documentation (Hard Binding – 3 Copies), CD (Including Software – Source Code, Appendix in PDF Format)",
+                    evaluations:"Artifact  and Code Submission ",
             },
         ];
 

@@ -5,7 +5,7 @@ import "./StudentIdeaProposal.css";
 import ToastService from "../ToastService/ToastService.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 import { studentsSupervisorApi } from "../Api/StudentApi/StudentSupervisorApi.jsx";
-import {GetTitle} from "../Api/AiService.jsx";
+import { GetTitle } from "../Api/AiService.jsx";
 
 const ALL_SPECIALITIES = [
   "AI",
@@ -32,6 +32,12 @@ export default function StudentIdeaProposal() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [loadingTitle, setLoadingTitle] = useState(false);
+
+  // New states to represent submission result
+  // null = no submission yet, "selected" = supervisor selected, "not-selected" = not found / rejected
+  const [submissionResult, setSubmissionResult] = useState(null);
+  const [selectedSupervisor, setSelectedSupervisor] = useState(null);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -39,6 +45,20 @@ export default function StudentIdeaProposal() {
 
   const handleSpecialityChange = (value) => {
     setFormData((prev) => ({ ...prev, speciality: value }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      tools: "",
+      speciality: [],
+    });
+    setSupervisors([]);
+    setAiSuggestions([]);
+    setIsModalOpen(false);
+    setSubmissionResult(null);
+    setSelectedSupervisor(null);
   };
 
   const handleOpenSupervisorDialog = (e) => {
@@ -66,19 +86,22 @@ export default function StudentIdeaProposal() {
 
   const checkSpeciality = async () => {
     const confirmed = await Confirm(
-        `Supervisor will be searched on this speciality "${formData.speciality}"? Are you Sure?`
+      `Supervisor will be searched on this speciality "${formData.speciality}"? Are you Sure?`
     );
     if (!confirmed) return;
 
     try {
       const response = await studentsSupervisorApi.getSupervisorOnSpeciality(
-          formData.speciality
+        formData.speciality
       );
-      if (response.count === 0) {
+      // If API returns count === 0 or empty data, we set "not-selected" so the user sees the card
+      if (!response || response.count === 0 || !Array.isArray(response.data) || response.data.length === 0) {
+        setSubmissionResult("not-selected");
         ToastService.error("No supervisor available for current speciality!");
         return;
       }
 
+      // Supervisors found — open modal to let the student select
       setSupervisors(response.data);
       setIsModalOpen(true);
     } catch (error) {
@@ -87,24 +110,78 @@ export default function StudentIdeaProposal() {
   };
 
   const handleSelectSupervisor = (supervisor) => {
-    ToastService.success(
-        `Supervisor "${supervisor.name}" selected successfully!`
-    );
+    // Mark idea as selected and show the success card; clear the form inputs as requested
+    setSelectedSupervisor(supervisor);
+    setSubmissionResult("selected");
     setIsModalOpen(false);
+
+    // Optionally persist selection to backend here (not implemented)
+    ToastService.success(`Supervisor "${supervisor.name}" selected successfully!`);
+  };
+
+  // AI Suggest button handler (keeps same behavior)
+  const handleAiSuggest = async () => {
+    if (!formData.title.trim()) {
+      ToastService.error("Please enter a project title first.");
+      return;
+    }
+    setLoadingTitle(true);
+    try {
+      const suggestions = await GetTitle(formData.title);
+      setAiSuggestions(suggestions || []);
+    } catch (err) {
+      ToastService.error("AI suggestion failed. Try again.");
+    } finally {
+      setLoadingTitle(false);
+    }
   };
 
   return (
-
-      <div>
-       
-<DashboardSectionHeader
-              description="Propose your FYP project, describe it briefly, list the tools you plan
+    <div className="idea-proposal-container">
+      <DashboardSectionHeader
+        description="Propose your FYP project, describe it briefly, list the tools you plan
           to use, and choose your speciality. Once done, select a supervisor to
           continue."
-            >
-          Idea & Proposal
-            </DashboardSectionHeader>
+      >
+        Idea & Proposal
+      </DashboardSectionHeader>
 
+      {/* If submissionResult is set, show a single result card and hide the form */}
+      {submissionResult === "selected" ? (
+        <div className="result-card success">
+          <h2>Your project idea has been selected</h2>
+          <p>
+            Congratulations — your idea has been matched and <strong>{selectedSupervisor?.name}</strong> has been selected as
+            your supervisor.
+          </p>
+          <div className="result-actions">
+            <button className="submit-btn" onClick={() => resetForm()}>
+              OK
+            </button>
+          </div>
+        </div>
+      ) : submissionResult === "not-selected" ? (
+        <div className="result-card failure">
+          <h2>Your idea has not been selected</h2>
+          <p>
+            Unfortunately we couldn't find a matching supervisor for the selected speciality.
+            Please revise your idea or try different specialities and resubmit.
+          </p>
+          <div className="result-actions">
+            <button
+              className="submit-btn"
+              onClick={() => {
+                // allow resubmit
+                setSubmissionResult(null);
+                setIsModalOpen(false);
+              }}
+            >
+              Resubmit Idea
+            </button>
+          </div>
+        </div>
+      ) : (
+        // Default: show the form exactly as before
         <form onSubmit={handleOpenSupervisorDialog} className="proposal-form">
           <div className="form-group">
             <label>
@@ -112,69 +189,39 @@ export default function StudentIdeaProposal() {
             </label>
             <div className="flex items-center gap-2">
               <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  placeholder="Enter your project title"
-                  required
-                  className="flex-1"
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={(e) => handleChange(e)}
+                placeholder="Enter your project title"
+                required
+                className="flex-1"
               />
               <button
-                  type="button"
-                  className={`px-6 py-2.5 font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ${
-                      loadingTitle
-                          ? "bg-gradient-to-r from-blue-400 to-indigo-400 text-white cursor-not-allowed opacity-80"
-                          : "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700"
-                  }`}
-                  onClick={async () => {
-                    if (!formData.title.trim()) {
-                      ToastService.error("Please enter a project title first.");
-                      return;
-                    }
-                    setLoadingTitle(true);
-                    const suggestions = await GetTitle(formData.title);
-                    setLoadingTitle(false);
-                    setAiSuggestions(suggestions);
-                  }}
+                type="button"
+                className={`ai-suggest-btn ${loadingTitle ? "loading" : ""}`}
+                onClick={handleAiSuggest}
+                disabled={loadingTitle}
               >
-                {loadingTitle ? (
-                    <span className="flex items-center gap-2">
-          AI Thinking...
-        </span>
-                ) : (
-                    <span className="flex items-center gap-2">
-            ✨ AI Suggest
-          </span>
-                )}
+                {loadingTitle ? "AI Thinking..." : "✨ AI Suggest"}
               </button>
             </div>
 
             {aiSuggestions.length > 0 && (
-                <div className="mt-4 p-5 border-2 border-indigo-200 rounded-2xl bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 shadow-lg relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full blur-3xl opacity-30"></div>
-                  <div className="relative z-10">
-                    <div className="flex flex-wrap gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-transparent">
-                      {aiSuggestions.map((title, i) => (
-                          <div
-                              key={i}
-                              onClick={() => setFormData((prev) => ({ ...prev, title }))}
-                              className="flex-shrink-0 px-5 py-3 bg-white rounded-xl shadow-md
-                       border border-transparent hover:border-indigo-300
-                       hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50
-                       transition-all duration-300 transform hover:-translate-y-1
-                       cursor-copy group"
-                              style={{ cursor: "copy" }}
-                          >
-            <span className="text-gray-700 group-hover:text-indigo-700 font-medium flex items-center gap-2 whitespace-nowrap">
-              <span className="text-indigo-500">💡</span>
-              {title}
-            </span>
-                          </div>
-                      ))}
-                    </div>
+              <div className="ai-suggestions">
+                {aiSuggestions.map((title, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setFormData((prev) => ({ ...prev, title }))}
+                    className="ai-suggestion-item"
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <span className="ai-emoji">💡</span>
+                    {title}
                   </div>
-                </div>
+                ))}
+              </div>
             )}
           </div>
 
@@ -183,12 +230,12 @@ export default function StudentIdeaProposal() {
               Project Description <span className="required">*</span>
             </label>
             <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Briefly describe your project idea"
-                rows="4"
-                required
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Briefly describe your project idea"
+              rows="4"
+              required
             ></textarea>
           </div>
 
@@ -197,12 +244,12 @@ export default function StudentIdeaProposal() {
               Tools / Technologies <span className="required">*</span>
             </label>
             <input
-                type="text"
-                name="tools"
-                value={formData.tools}
-                onChange={handleChange}
-                placeholder="e.g. React, Node.js, TensorFlow"
-                required
+              type="text"
+              name="tools"
+              value={formData.tools}
+              onChange={handleChange}
+              placeholder="e.g. React, Node.js, TensorFlow"
+              required
             />
           </div>
 
@@ -211,10 +258,10 @@ export default function StudentIdeaProposal() {
               Speciality <span className="required">*</span>
             </label>
             <DropdownMultiSelect
-                value={formData.speciality}
-                options={ALL_SPECIALITIES}
-                onChange={handleSpecialityChange}
-                placeholder="Select relevant specialities"
+              value={formData.speciality}
+              options={ALL_SPECIALITIES}
+              onChange={handleSpecialityChange}
+              placeholder="Select relevant specialities"
             />
           </div>
 
@@ -224,51 +271,45 @@ export default function StudentIdeaProposal() {
             </button>
           </div>
         </form>
+      )}
 
+      {/* Supervisor selection modal (only when supervisors are available) */}
+      {isModalOpen && supervisors && supervisors.length > 0 && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button onClick={() => setIsModalOpen(false)} className="modal-close-btn">
+              ✖
+            </button>
+            <h2 className="modal-title">Available Supervisors</h2>
 
-        {isModalOpen && (
-            <div className="modal-overlay">
-              <div className="modal-content">
-                <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="modal-close-btn"
-                >
-                  ✖
-                </button>
-                <h2 className="modal-title">Available Supervisors</h2>
-
-                <div className="supervisor-list">
-                  {supervisors.map((supervisor) => (
-                      <div key={supervisor._id} className="supervisor-card">
-                        <div>
-                          <h3>{supervisor.name}</h3>
-                          <p>
-                            <strong>Department:</strong> {supervisor.department}
-                          </p>
-                          <p>
-                            <strong>Specialization:</strong>{" "}
-                            {supervisor.specialization}
-                          </p>
-                          <p>
-                            <strong>Slots:</strong>{" "}
-                            <span className="slots">
-                        {supervisor.availableSlots - supervisor.bookedSlots}{" "}
-                              remaining
+            <div className="supervisor-list">
+              {supervisors.map((supervisor) => (
+                <div key={supervisor._id} className="supervisor-card">
+                  <div>
+                    <h3>{supervisor.name}</h3>
+                    <p>
+                      <strong>Department:</strong> {supervisor.department}
+                    </p>
+                    <p>
+                      <strong>Specialization:</strong> {supervisor.specialization}
+                    </p>
+                    <p>
+                      <strong>Slots:</strong>{" "}
+                      <span className="slots">
+                        {Math.max(0, (supervisor.availableSlots || 0) - (supervisor.bookedSlots || 0))}{" "}
+                        remaining
                       </span>
-                          </p>
-                        </div>
-                        <button
-                            onClick={() => handleSelectSupervisor(supervisor)}
-                            className="select-btn"
-                        >
-                          Select Supervisor
-                        </button>
-                      </div>
-                  ))}
+                    </p>
+                  </div>
+                  <button onClick={() => handleSelectSupervisor(supervisor)} className="select-btn">
+                    Select Supervisor
+                  </button>
                 </div>
-              </div>
+              ))}
             </div>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
