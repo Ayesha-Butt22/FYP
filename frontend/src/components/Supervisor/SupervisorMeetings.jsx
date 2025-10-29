@@ -1,4 +1,3 @@
-// components/SupervisorMeetings.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -32,6 +31,7 @@ import {
   AddCircleOutline,
   EventAvailable,
   EventBusy,
+  CheckCircleOutline,
 } from "@mui/icons-material";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import "./SupervisorMeetings.css";
@@ -67,6 +67,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 export default function SupervisorMeetings() {
   const [slots, setSlots] = useState([]);
+  // Meeting history to collect done/cancelled meetings
+  const [meetingHistory, setMeetingHistory] = useState([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState(30);
@@ -88,8 +90,8 @@ export default function SupervisorMeetings() {
       return;
     }
     const isoDate = new Date(date).toISOString().slice(0, 10);
-    setSlots([
-      ...slots,
+    setSlots((prev) => [
+      ...prev,
       {
         slotId: `slot${Math.random().toString(36).slice(2)}`,
         supervisorId: SUPERVISOR_ID,
@@ -108,7 +110,21 @@ export default function SupervisorMeetings() {
 
   // Delete slot
   const handleDeleteSlot = (slotId) => {
-    setSlots(slots.filter((s) => s.slotId !== slotId));
+    setSlots((prev) => prev.filter((s) => s.slotId !== slotId));
+  };
+
+  // Mark a slot as done -> move to meetingHistory and remove from slots
+  const handleMarkDone = (slotId) => {
+    const slot = slots.find((s) => s.slotId === slotId);
+    if (!slot) return;
+    const doneEntry = {
+      ...slot,
+      doneAt: new Date().toLocaleString(),
+      status: "Done",
+      notes: "",
+    };
+    setMeetingHistory((prev) => [doneEntry, ...prev]);
+    setSlots((prev) => prev.filter((s) => s.slotId !== slotId));
   };
 
   // Sort slots
@@ -125,10 +141,8 @@ export default function SupervisorMeetings() {
 
   return (
       <>
-        
         <DashboardSectionHeader
-                description={`Here you can see all your meetings. Click "Add available slot" to add the time you are free to reach,
-          and you can also see your past and upcoming meetings`}
+                description={`Here you can see all your meetings. Click "Add available slot" to add the time you are free, and you can also see your past and upcoming meetings`}
               >
                Meetings
               </DashboardSectionHeader>
@@ -194,6 +208,7 @@ export default function SupervisorMeetings() {
               </Button>
             </DialogActions>
           </Dialog>
+
           <Stack
               direction={{xs: "column", sm: "row"}}
               spacing={2}
@@ -217,6 +232,8 @@ export default function SupervisorMeetings() {
               </Typography>
             </Paper>
           </Stack>
+
+          {/* All Slots - DO NOT CHANGE (kept exactly structure/style) */}
           <Paper className="supermeeting-slots-paper">
             <Typography className="supermeeting-section-title">
               <EventBusy className="supermeeting-section-icon"/>
@@ -279,8 +296,8 @@ export default function SupervisorMeetings() {
             </Table>
           </Paper>
 
-          {/* Upcoming Meetings */}
-          <Paper className="supermeeting-slots-paper">
+          {/* Upcoming Meetings - ADD "Mark as done" action only (design preserved) */}
+          <Paper className="supermeeting-slots-paper" sx={{ mt: 3 }}>
             <Typography className="supermeeting-section-title upcoming">
               <EventAvailable className="supermeeting-section-icon upcoming"/>
               Upcoming Meetings
@@ -296,6 +313,7 @@ export default function SupervisorMeetings() {
                       <TableCell>Time</TableCell>
                       <TableCell>Group</TableCell>
                       <TableCell>Duration</TableCell>
+                      <TableCell align="center">Action</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -313,11 +331,63 @@ export default function SupervisorMeetings() {
                             />
                           </TableCell>
                           <TableCell>{slot.duration} min</TableCell>
+                          <TableCell align="center">
+                            <Button
+                              size="small"
+                              color="success"
+                              variant="contained"
+                              startIcon={<CheckCircleOutline />}
+                              onClick={() => handleMarkDone(slot.slotId)}
+                            >
+                              Mark as done
+                            </Button>
+                          </TableCell>
                         </TableRow>
                     ))}
                   </TableBody>
                 </Table>
             )}
+          </Paper>
+
+          {/* Meeting History - shows slots that were marked done (kept simple table, design consistent) */}
+          <Typography variant="h6" sx={{ mt: 4, mb: 1, fontWeight: 800, color: "#01337a" }}>
+            Meeting History
+          </Typography>
+          <Paper className="supermeeting-slots-paper">
+            <Table size="small" className="supermeeting-full-table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Slot ID</TableCell>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Time</TableCell>
+                  <TableCell>Group</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Done At</TableCell>
+                  <TableCell>Notes</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {meetingHistory.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} style={{ textAlign: "center", color: "#666" }}>
+                      No history yet.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  meetingHistory.map((h) => (
+                    <TableRow key={h.slotId}>
+                      <TableCell>{h.slotId}</TableCell>
+                      <TableCell>{formatDate(h.date)}</TableCell>
+                      <TableCell>{formatTime(h.time)}</TableCell>
+                      <TableCell>{h.bookedBy || "-"}</TableCell>
+                      <TableCell>{h.status}</TableCell>
+                      <TableCell>{h.doneAt}</TableCell>
+                      <TableCell>{h.notes || "-"}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </Paper>
         </Box>
       </>

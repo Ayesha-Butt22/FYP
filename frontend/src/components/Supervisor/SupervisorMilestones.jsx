@@ -41,7 +41,7 @@ const INITIAL_GROUPS = [
     milestones: [
       { name: "Proposal", status: "completed", due: "2025-09-10", uploadedFile: null, note: "" },
       { name: "SRS", status: "pending", due: "2025-09-20", uploadedFile: null, note: "" },
-      { name: "Design", status: "pending", due: "2025-09-28", uploadedFile: null, note: "" },
+      { name: "Design", status: "pending", due: "2025-09-28", uploadedFile: { name: "design.pptx", url: "#", uploadedAt: "2025-09-29T14:30:00Z" }, note: "" },
       { name: "Report", status: "pending", due: "2025-10-10", uploadedFile: null, note: "" },
       { name: "Defense", status: "pending", due: "2025-10-25", uploadedFile: null, note: "" },
     ],
@@ -75,6 +75,20 @@ const INITIAL_GROUPS = [
     members: ["Fatima Noor", "Usman Ghani", "Hira Qureshi"],
   },
 ];
+
+function formatDateTime(inp) {
+  if (!inp) return "—";
+  try {
+    const d = new Date(inp);
+    if (isNaN(d.getTime())) return String(inp);
+    // Format YYYY-MM-DD HH:MM (local)
+    const date = d.toLocaleDateString();
+    const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return `${date} ${time}`;
+  } catch {
+    return String(inp);
+  }
+}
 
 export default function SupervisorMilestones() {
   const [groups, setGroups] = useState(INITIAL_GROUPS);
@@ -164,6 +178,7 @@ export default function SupervisorMilestones() {
               due: original ? original.due : "—",
               status: original ? original.status : "pending",
               uploadedFile: original ? original.uploadedFile : null,
+              note: original ? original.note : "",
             };
           });
 
@@ -245,7 +260,7 @@ export default function SupervisorMilestones() {
         })}
       </div>
 
-      {/* Modal: simplified vertical layout (Week, Template, Template Link, Status dropdown, Update) */}
+      {/* Modal: simplified vertical layout (Week, Template, Uploaded File, Due Date/Time, Submission Date/Time, Status dropdown, Comment, Update) */}
       {modal.open && modal.gIndex != null && modal.mIndex != null && (
         <div className="mmodal-backdrop" role="dialog" aria-modal="true">
           <div className="mmodal modal-centered" role="document" aria-labelledby="milestone-details-title">
@@ -261,8 +276,35 @@ export default function SupervisorMilestones() {
                 const g = groups[modal.gIndex];
                 const m = g && g.milestones && g.milestones[modal.mIndex];
                 const templateLabel = TEMPLATE_LABELS[modal.mIndex] || `Template-${String(modal.mIndex + 1).padStart(2, "0")}`;
-                const templateLink = g.templateLink || (m && m.templateLink) || null;
                 const uploadedFile = m && m.uploadedFile ? m.uploadedFile : null;
+                const currentNote = m && m.note ? m.note : "";
+
+                // Prepare due date/time display and uploadedAt
+                const dueRaw = m && m.due ? m.due : null;
+                // treat dueRaw as date-only (YYYY-MM-DD) -> set to 23:59 local end of day for lateness check
+                let dueDateObj = null;
+                if (dueRaw) {
+                  const maybeIso = new Date(dueRaw);
+                  if (!isNaN(maybeIso.getTime())) {
+                    dueDateObj = maybeIso;
+                  } else {
+                    const parts = String(dueRaw).split("-");
+                    if (parts.length >= 3) {
+                      dueDateObj = new Date(parts[0], Number(parts[1]) - 1, parts[2], 23, 59, 59);
+                    }
+                  }
+                }
+
+                // uploadedAt may be in uploadedFile.uploadedAt or uploadedFile.timestamp (support both)
+                const uploadedAtRaw = uploadedFile && (uploadedFile.uploadedAt || uploadedFile.timestamp || uploadedFile.time);
+                const uploadedDateObj = uploadedAtRaw ? new Date(uploadedAtRaw) : null;
+
+                const isLate = uploadedDateObj && dueDateObj ? uploadedDateObj.getTime() > dueDateObj.getTime() : false;
+
+                // human readable strings
+                const dueDisplay =
+                  dueDateObj && !isNaN(dueDateObj.getTime()) ? formatDateTime(dueDateObj.toISOString()) : (dueRaw || "—");
+                const uploadedDisplay = uploadedDateObj && !isNaN(uploadedDateObj.getTime()) ? formatDateTime(uploadedDateObj.toISOString()) : (uploadedAtRaw ? String(uploadedAtRaw) : "No upload");
 
                 return (
                   <div className="modal-stack">
@@ -280,27 +322,53 @@ export default function SupervisorMilestones() {
                     </div>
 
                     <div className="stack-item">
-                      <div className="stack-label">Template Link</div>
+                      <div className="stack-label">Uploaded File</div>
                       <div className="stack-value">
-                        {templateLink ? (
-                          <a href={templateLink} target="_blank" rel="noreferrer" className="link-inline">
-                            Open Template Link
-                          </a>
+                        {uploadedFile && uploadedFile.url ? (
+                          <div>
+                            <a href={uploadedFile.url} target="_blank" rel="noreferrer" className="link-inline">
+                              {uploadedFile.name || "View uploaded file"}
+                            </a>
+                            <div className="muted" style={{ marginTop: 6 }}>Uploaded at: {uploadedDisplay}</div>
+                          </div>
                         ) : (
-                          <div className="muted">No template link provided</div>
+                          <div className="muted">No file uploaded yet</div>
                         )}
                       </div>
                     </div>
 
+                    {/* Due Date/Time */}
                     <div className="stack-item">
-                      <div className="stack-label">Uploaded File</div>
+                      <div className="stack-label">Due Date & Time</div>
                       <div className="stack-value">
-                        {uploadedFile && uploadedFile.url ? (
-                          <a href={uploadedFile.url} target="_blank" rel="noreferrer" className="link-inline">
-                            {uploadedFile.name || "View uploaded file"}
-                          </a>
+                        <div>{dueDisplay}</div>
+                      </div>
+                    </div>
+
+                    {/* Submission Date & Time (new field) */}
+                    <div className="stack-item">
+                      <div className="stack-label">Submission Date & Time</div>
+                      <div className="stack-value">
+                        {uploadedFile && uploadedDateObj ? (
+                          <div>{formatDateTime(uploadedDateObj.toISOString())}</div>
                         ) : (
-                          <div className="muted">No file uploaded yet</div>
+                          <div className="muted">No submission</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Submission Status (Late / On time / No submission) */}
+                    <div className="stack-item">
+                      <div className="stack-label">Submission Status</div>
+                      <div className="stack-value">
+                        {uploadedFile && uploadedDateObj ? (
+                          isLate ? (
+                            <div style={{ color: "#ef4444", fontWeight: 700 }}>Late submission ({formatDateTime(uploadedDateObj.toISOString())})</div>
+                          ) : (
+                            <div style={{ color: "#16a34a", fontWeight: 700 }}>On time ({formatDateTime(uploadedDateObj.toISOString())})</div>
+                          )
+                        ) : (
+                          <div className="muted">No submission yet</div>
                         )}
                       </div>
                     </div>
@@ -317,6 +385,16 @@ export default function SupervisorMilestones() {
                         <option value="unapprove">Unapprove</option>
                         <option value="pending">Pending</option>
                       </select>
+                    </div>
+
+                    <div className="stack-item">
+                      <div className="stack-label">Comment</div>
+                      <textarea
+                        className="mm-notes"
+                        placeholder="Add an optional comment for the student (e.g. required fixes)"
+                        value={currentNote}
+                        onChange={(e) => handleNoteChange(e.target.value)}
+                      />
                     </div>
 
                     <div className="stack-actions">

@@ -1,4 +1,3 @@
-// components/SupervisorWhiteboard.jsx
 import React, { useState } from "react";
 import {
   Box,
@@ -9,7 +8,7 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import { Delete, FileDownload } from "@mui/icons-material";
+import { Delete } from "@mui/icons-material";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
@@ -112,16 +111,7 @@ export default function SupervisorWhiteboard() {
           <Paper elevation={3} key={group.id} className="whiteboardsup-group-card">
             <Stack direction="row" alignItems="center" spacing={1} mb={2}>
               <Typography className="group-title">{group.name}</Typography>
-              <Tooltip title="Export notes as HTML file">
-                <IconButton
-                  onClick={() =>
-                    exportNotesAsHTML({ [group.id]: notesByGroup[group.id] })
-                  }
-                  size="small"
-                >
-                  <FileDownload />
-                </IconButton>
-              </Tooltip>
+              {/* Download icon removed as requested */}
             </Stack>
 
             <ReactQuill
@@ -195,8 +185,6 @@ export default function SupervisorWhiteboard() {
           </Paper>
         ))}
       </Stack>
-
-      
     </Box>
   );
 }
