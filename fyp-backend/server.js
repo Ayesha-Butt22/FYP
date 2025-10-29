@@ -9,7 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
@@ -30,6 +29,10 @@ app.use('/api/groups', require('./routes/studentgroup'));       // Group CRUD
 app.use('/api/proposals', require('./routes/studentproposal'));
 app.use("/api/student", require("./routes/student"));
 
+// === YAHAN PE REPORT ROUTES ADD KARO ===
+app.use('/api/reports', require('./routes/reports'));
+// ======================================
+
 /**
  * Files API: upload/list/get/delete
  * FileRouter at: fyp-backend/routes/FileRouter.js
@@ -37,8 +40,7 @@ app.use("/api/student", require("./routes/student"));
 app.use('/api/files', require('./routes/FileRouter'));
 app.use("/api/profile-pic", require("./routes/profile"));
 app.use("/api/deadline", require("./routes/deadline"));
-
-
+app.use('/api/proposals', require('./routes/studentproposal'));
 
 // Test route
 app.get('/', (req, res) => res.send('API Running'));
