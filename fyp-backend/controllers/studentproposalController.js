@@ -20,7 +20,7 @@ exports.createProposal = async (req, res) => {
 };
 
 exports.getProposalsByGroup = async (req, res) => {
-  try {
+   try {
     const proposals = await Proposal.find({ groupId: req.params.groupId }).populate("groupId");
     return res.json(proposals);
   } catch (err) {
