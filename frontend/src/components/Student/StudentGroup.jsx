@@ -57,14 +57,7 @@ export default function StudentGroup() {
       try {
         const res = await studentGroupApi.getGroupByEmail(CURRENT_USER_EMAIL);
         if (res && res.groupId) {
-          // persist group id and group code to localStorage
-          try {
-            if (res._id) localStorage.setItem("groupId", res._id);
-            if (res.groupId) localStorage.setItem("groupCode", res.groupId);
-          } catch (e) {
-            // ignore localStorage errors
-          }
-
+          localStorage.setItem("groupCode", res.groupId);
           setGroup({
             groupId: res.groupId,
             members: [
@@ -76,19 +69,9 @@ export default function StudentGroup() {
             _id: res._id,
           });
         } else {
-          // no group found -> ensure localStorage cleaned
-          try {
-            localStorage.removeItem("groupId");
-            localStorage.removeItem("groupCode");
-          } catch (e) {}
           setGroup(null);
         }
       } catch (err) {
-        // on error, do not leave stale localStorage
-        try {
-          localStorage.removeItem("groupId");
-          localStorage.removeItem("groupCode");
-        } catch (e) {}
         setGroup(null);
       } finally {
         setLoading(false);
