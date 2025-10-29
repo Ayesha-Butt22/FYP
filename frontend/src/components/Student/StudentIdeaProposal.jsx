@@ -65,7 +65,7 @@ export default function StudentIdeaProposal() {
 
         if (resp.ok) {
           const data = await resp.json();
-          // API returns proposals array (we take first one)
+          ToastService.success('Proposal found');
           if (!mounted) return;
           setExistingProposal(Array.isArray(data) ? data[0] || null : data);
           // optionally prefill the form with existing proposal (you can remove if not wanted)

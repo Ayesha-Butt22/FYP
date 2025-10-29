@@ -88,40 +88,27 @@ exports.reviewProposal = async (req, res) => {
 
 exports.getProposalsByGroup = async (req, res) => {
   const param = req.params.groupId;
-  console.log("[getProposalsByGroup] incoming param:", param);
 
   try {
     let proposals = [];
 
-    // If param is a valid ObjectId string, try lookup using ObjectId
     if (typeof param === "string" && mongoose.isValidObjectId(param)) {
       try {
-        // use `new` to construct ObjectId to avoid "cannot be invoked without 'new'" error
         const oid = new mongoose.Types.ObjectId(param);
         proposals = await Proposal.find({ groupId: oid }).populate("groupId");
-        console.log("[getProposalsByGroup] looked up by ObjectId, found:", (proposals || []).length);
       } catch (err) {
-        console.error("[getProposalsByGroup] error when searching by ObjectId:", err);
-        // continue to fallback below
       }
     }
-
-    // If nothing found by ObjectId, try searching by raw string (in case groupId stored as code)
     if (!proposals || proposals.length === 0) {
       proposals = await Proposal.find({ groupId: param }).populate("groupId");
-      console.log("[getProposalsByGroup] looked up by string, found:", (proposals || []).length);
     }
-
-    // If still nothing, return 404 so frontend can handle "no proposal"
     if (!proposals || proposals.length === 0) {
-      console.log("[getProposalsByGroup] no proposals found for:", param);
+
       return res.status(404).json({ error: "No proposal found for this group." });
     }
 
-    // Return found proposals
     return res.json(proposals);
   } catch (err) {
-    console.error("[getProposalsByGroup] unexpected error:", err);
     return res.status(500).json({ error: err.message || "Server error" });
   }
 };
