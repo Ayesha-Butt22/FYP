@@ -56,8 +56,9 @@ export default function StudentGroup() {
       setLoading(true);
       try {
         const res = await studentGroupApi.getGroupByEmail(CURRENT_USER_EMAIL);
-        if (res && res.groupId) {
-          localStorage.setItem("groupCode", res.groupId);
+        if (res && res.groupId) 
+          {
+          localStorage.setItem("groupId", res._id);
           setGroup({
             groupId: res.groupId,
             members: [

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardSectionHeader from "../Student/DashboardSectionHeader";
 import { DropdownMultiSelect } from "../Admin/DropDowns.jsx";
 import "./StudentIdeaProposal.css";
@@ -36,6 +36,79 @@ export default function StudentIdeaProposal() {
   const [submissionResult, setSubmissionResult] = useState(null);
   const [selectedSupervisor, setSelectedSupervisor] = useState(null);
 
+  // groupId from localStorage (as you already used elsewhere)
+  const groupId = localStorage.getItem("groupId") || null;
+  console.log("groupId:", groupId);
+
+  // NEW: state to hold existing proposal check result
+  const [existingProposal, setExistingProposal] = useState(null);
+  const [checkingProposal, setCheckingProposal] = useState(false);
+
+  // ---------- INSERTED useEffect: check if this group already has a proposal ----------
+  // Place this above handleChange as requested.
+  useEffect(() => {
+    if (!groupId) {
+      setExistingProposal(null);
+      return;
+    }
+
+    let mounted = true;
+    const checkExistingProposal = async () => {
+      setCheckingProposal(true);
+      try {
+        const resp = await fetch(`http://localhost:5000/api/proposals/${encodeURIComponent(groupId)}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (resp.ok) {
+          const data = await resp.json();
+          // API returns proposals array (we take first one)
+          if (!mounted) return;
+          setExistingProposal(Array.isArray(data) ? data[0] || null : data);
+          // optionally prefill the form with existing proposal (you can remove if not wanted)
+          const p = Array.isArray(data) ? data[0] : data;
+          if (p) {
+            setFormData((prev) => ({
+              ...prev,
+              title: p.projectTitle || prev.title,
+              description: p.projectDescription || prev.description,
+              tools: p.projectTools || prev.tools,
+            }));
+            setSubmissionResult("alreadySubmitted");
+          }
+        } else {
+          // If API returned 404 (no proposal), clear existingProposal
+          if (resp.status === 404) {
+            setExistingProposal(null);
+            setSubmissionResult(null);
+          } else {
+            // other server error: read message if possible
+            let errMsg = `Failed to check proposal (status ${resp.status})`;
+            try {
+              const j = await resp.json();
+              if (j && j.error) errMsg = j.error;
+            } catch {}
+            ToastService.error(errMsg);
+          }
+        }
+      } catch (err) {
+        ToastService.error("Unable to check existing proposal. Please check your connection.");
+      } finally {
+        if (mounted) setCheckingProposal(false);
+      }
+    };
+
+    checkExistingProposal();
+
+    return () => {
+      mounted = false;
+    };
+  }, [groupId]);
+  // ------------------------------------------------------------------------------------
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -57,10 +130,17 @@ export default function StudentIdeaProposal() {
     setIsModalOpen(false);
     setSubmissionResult(null);
     setSelectedSupervisor(null);
+    setExistingProposal(null);
   };
 
   const handleOpenSupervisorDialog = (e) => {
     e.preventDefault();
+
+    // If backend already reports a submitted proposal, block re-submission
+    if (existingProposal) {
+      ToastService.error("Your group already has a submitted proposal.");
+      return;
+    }
 
     if (!formData.title.trim()) {
       ToastService.error("Project title is required.");
