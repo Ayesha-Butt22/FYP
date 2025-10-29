@@ -10,6 +10,10 @@
   border: 1px solid #2563eb !important;
   box-shadow: 0 4px 14px #2563eb1a !important;
   transition: all 0.3s ease !important;
+  -webkit-border-radius: 100px !important;
+  -moz-border-radius: 100px !important;
+  -ms-border-radius: 100px !important;
+  -o-border-radius: 100px !important;
 }
 
 .supermeeting-add-slot-btn:hover {
@@ -144,6 +148,10 @@
   background: linear-gradient(180deg, #ffffff, #f8fbff);
   box-shadow: 0 8px 30px rgba(1, 51, 122, 0.06);
   border: 1px solid #edf4ff;
+  -webkit-border-radius: 18px !important;
+  -moz-border-radius: 18px !important;
+  -ms-border-radius: 18px !important;
+  -o-border-radius: 18px !important;
 }
 
 

@@ -57,6 +57,14 @@ export default function StudentGroup() {
       try {
         const res = await studentGroupApi.getGroupByEmail(CURRENT_USER_EMAIL);
         if (res && res.groupId) {
+          // persist group id and group code to localStorage
+          try {
+            if (res._id) localStorage.setItem("groupId", res._id);
+            if (res.groupId) localStorage.setItem("groupCode", res.groupId);
+          } catch (e) {
+            // ignore localStorage errors
+          }
+
           setGroup({
             groupId: res.groupId,
             members: [
@@ -68,9 +76,19 @@ export default function StudentGroup() {
             _id: res._id,
           });
         } else {
+          // no group found -> ensure localStorage cleaned
+          try {
+            localStorage.removeItem("groupId");
+            localStorage.removeItem("groupCode");
+          } catch (e) {}
           setGroup(null);
         }
       } catch (err) {
+        // on error, do not leave stale localStorage
+        try {
+          localStorage.removeItem("groupId");
+          localStorage.removeItem("groupCode");
+        } catch (e) {}
         setGroup(null);
       } finally {
         setLoading(false);
@@ -121,7 +139,7 @@ export default function StudentGroup() {
     try {
       const res = await studentGroupApi.createGroup(groupObj);
       if (res && res.group) {
-        setGroup({
+        const newGroup = {
           members: [
             { ...groupObj.leader, isLeader: true },
             ...(groupObj.member2?.sapId ? [{ ...groupObj.member2, isLeader: false }] : []),
@@ -129,7 +147,18 @@ export default function StudentGroup() {
           ],
           leader: groupObj.leader,
           _id: res.group._id,
-        });
+          groupId: res.group.groupId || groupObj.groupId,
+        };
+
+        // save group id to localStorage
+        try {
+          if (res.group._id) localStorage.setItem("groupId", res.group._id);
+          if (res.group.groupId || groupObj.groupId) localStorage.setItem("groupCode", res.group.groupId || groupObj.groupId);
+        } catch (e) {
+          // ignore localStorage errors
+        }
+
+        setGroup(newGroup);
         setOpen(false);
         setStep(1);
         setGroupChanged(c => c + 1);
@@ -151,6 +180,11 @@ export default function StudentGroup() {
       const res = await studentGroupApi.deleteGroup(group._id);
       if (res && res.message) {
         setGroup(null);
+        // reset local storage keys
+        try {
+          localStorage.removeItem("groupId");
+          localStorage.removeItem("groupCode");
+        } catch (e) {}
         setMembers([
           { sapid: CURRENT_USER_SAPID, email: sapidToEmail(CURRENT_USER_SAPID), isLeader: true },
           { sapid: "", email: "", isLeader: false },
