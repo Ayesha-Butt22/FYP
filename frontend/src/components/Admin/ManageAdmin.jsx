@@ -212,7 +212,6 @@ export default function ManageAdmin() {
     }
   };
 
-  // NOTE: We short-circuit create to return a simulated successful response
   const handleAdd = async () => {
     setLoading(true);
     try {
@@ -221,10 +220,14 @@ export default function ManageAdmin() {
         email: formData.Email,
         gender: formData.Gender,
         contactNumber: formData.ContactNumber,
+        role: "admin",
         password: formData.Password
       };
 
+
+
       // Simulated API response (temporary)
+
       const newId = "adm-" + String(Math.floor(Math.random() * 10000)).padStart(4, "0");
       const simulatedRes = { success: true, data: { _id: newId, ...payload } };
 
