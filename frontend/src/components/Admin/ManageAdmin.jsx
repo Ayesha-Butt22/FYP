@@ -213,7 +213,7 @@ export default function ManageAdmin() {
   };
 
   const handleAdd = async () => {
-    setLoading(true);
+    setLoading(true); 
     try {
       const payload = {
         name: formData.Name,
