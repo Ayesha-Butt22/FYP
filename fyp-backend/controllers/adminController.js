@@ -2,12 +2,17 @@ const bcrypt = require('bcryptjs');
 const xlsx = require("xlsx");
 const User = require('../models/User');
 const Group = require('../models/StudentGroup');
+
 const isValidOfficialEmail = email => /^[a-zA-Z0-9._]+@riphah\.edu\.pk$/.test(email);
 
-// CREATE ANY USER (Admin, Supervisor, Coordinator)
+// CREATE USER (Admin, Supervisor, Coordinator)
 exports.createUser = async (req, res) => {
   try {
-    const { name, email, password, role, department, specialization, availableSlots, bookedSlots } = req.body;
+    const { 
+      name, email, password, role, 
+      department, specialization, availableSlots, bookedSlots,
+      gender, contactNumber 
+    } = req.body;
 
     if (!name || !email || !password || !role)
       return res.status(400).json({ error: "Name, email, password and role are required" });
@@ -32,9 +37,17 @@ exports.createUser = async (req, res) => {
       specialization,
       availableSlots,
       bookedSlots,
+      gender: gender ? gender.toLowerCase() : null,
+      contactNumber: contactNumber || null,
       mustChangePassword: true,
       first_login: true
     });
+
+    // Auto Admin ID
+    if (role === 'admin') {
+      const count = await User.countDocuments({ role: 'admin', studentId: { $ne: null } });
+      newUser.studentId = `adm-${String(count + 1).padStart(3, '0')}`; // adm-001
+    }
 
     await newUser.save();
     const u = newUser.toObject();
@@ -56,17 +69,19 @@ exports.getCoordinators = async (req, res) => {
   }
 };
 
-// GET ADMINS (for other modules)
+// GET ADMINS
 exports.getAdmins = async (req, res) => {
   try {
-    const list = await User.find({ role: 'admin' }).select('-password');
+    const list = await User.find({ role: 'admin' })
+      .select('studentId name email gender contactNumber department designation')
+      .sort({ createdAt: -1 });
     return res.json(list);
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
 
-// GET SUPERVISORS (for other modules)
+// GET SUPERVISORS
 exports.getSupervisors = async (req, res) => {
   try {
     const list = await User.find({ role: 'supervisor' }).select('-password');
@@ -76,7 +91,7 @@ exports.getSupervisors = async (req, res) => {
   }
 };
 
-// GET ALL STUDENTS (for admin)
+// GET ALL STUDENTS
 exports.getAllStudents = async (req, res) => {
   try {
     const students = await User.find({ role: "student" }).select('-password');
@@ -86,10 +101,9 @@ exports.getAllStudents = async (req, res) => {
   }
 };
 
-// APPROVE STUDENT (admin action)
+// APPROVE STUDENT
 exports.approveStudent = async (req, res) => {
   try {
-    // If using POST, student id should come in body
     const { id } = req.body;
     const student = await User.findById(id);
     if (!student) return res.status(404).json({ error: "Student not found" });
@@ -110,6 +124,8 @@ exports.getAllUsers = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+// GET ALL GROUPS
 exports.getAllGroups = async (req, res) => {
   try {
     const list = await Group.find({});
@@ -118,10 +134,16 @@ exports.getAllGroups = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
 // UPDATE USER
+// UPDATE USER — FULLY FIXED
 exports.updateUser = async (req, res) => {
   try {
-    const { name, email, department, specialization, password, availableSlots, bookedSlots } = req.body;
+    const { 
+      name, email, department, specialization, password, 
+      availableSlots, bookedSlots, 
+      gender, contactNumber 
+    } = req.body;
     const user = await User.findById(req.params.id);
 
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -138,10 +160,13 @@ exports.updateUser = async (req, res) => {
     if (typeof bookedSlots !== "undefined") user.bookedSlots = bookedSlots;
     if (typeof availableSlots !== "undefined") user.availableSlots = availableSlots;
 
+    if (gender !== undefined) user.gender = gender ? gender.toLowerCase() : null;
+    if (contactNumber !== undefined) user.contactNumber = contactNumber || null;
+
     if (password) {
       user.password = await bcrypt.hash(password, 10);
       user.mustChangePassword = true;
-      user.first_login = true;
+      user.first_login = true;   // ← YEH SAHI HAI
     }
 
     await user.save();
@@ -166,12 +191,12 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-
+// GET SYSTEM STATS
 exports.getSystemStats = async (req, res) => {
   try {
-    const totalStudents = await User.countDocuments({role: "student"});
-    const totalSupervisors = await User.countDocuments({role: "supervisor"});
-    const totalCoordinators = await User.countDocuments({role: "coordinator"});
+    const totalStudents = await User.countDocuments({ role: "student" });
+    const totalSupervisors = await User.countDocuments({ role: "supervisor" });
+    const totalCoordinators = await User.countDocuments({ role: "coordinator" });
     const totalGroups = await Group.countDocuments();
 
     res.status(200).json({
@@ -185,12 +210,12 @@ exports.getSystemStats = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching system stats:", error);
-    res.status(500).json({success: false, message: "Server Error"});
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
-
-exports.makeCoordinator = async (req , res ) => {
+// PROMOTE TO COORDINATOR
+exports.makeCoordinator = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -200,105 +225,139 @@ exports.makeCoordinator = async (req , res ) => {
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
+};
 
-}
+// UPLOAD EXCEL & CREATE SUPERVISORS
+exports.uploadExcelAndCreateUsers = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-  exports.uploadExcelAndCreateUsers = async (req, res) => {
-    try {
-      if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-      const workbook = xlsx.readFile(req.file.path);
-      const sheetName = workbook.SheetNames[0];
-      const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    if (sheetData.length === 0)
+      return res.status(400).json({ error: "Empty Excel file" });
 
-      if (sheetData.length === 0)
-        return res.status(400).json({ error: "Empty Excel file" });
+    let createdUsers = [];
+    let skippedUsers = [];
+    const designationSlotsMap = {
+      'dean': 0,
+      'professor': 1,
+      'associateprofessor': 2,
+      'assistantprofessor': 3,
+      'lecturer': 3,
+      'sr.lecturer': 3,
+      'srlecturer': 3,
+      'juniorlecturer': 2,
+      'researchassociate': 1,
+      'researchassistant': 1,
+      'teachingfellow': 1
+    };
 
-      let createdUsers = [];
-      let skippedUsers = [];
-      const designationSlotsMap = {
-        'dean': 0,
-        'professor': 1,
-        'associateprofessor': 2,
-        'assistantprofessor': 3,
-        'lecturer': 3,
-        'sr.lecturer': 3,
-        'srlecturer': 3,
-        'juniorlecturer': 2,
-        'researchassociate': 1,
-        'researchassistant': 1,
-        'teachingfellow': 1
-      };
+    for (const row of sheetData) {
+      const { id, name, email, password, department, specialization, designation, bookedSlots } = row;
 
-
-      for (const row of sheetData) {
-        const { id , name, email, password, department, specialization, designation, bookedSlots } = row;
-
-        if (!name || !email || !password) {
-          skippedUsers.push({ email, reason: "Missing required fields" });
-          continue;
-        }
-
-        if (!isValidOfficialEmail(email)) {
-          skippedUsers.push({ email, reason: "Invalid email format" });
-          continue;
-        }
-
-        const existing = await User.findOne({ email });
-        if (existing) {
-          skippedUsers.push({ email, reason: "Already exists" });
-          continue;
-        }
-
-        let availableSlots = 0;
-        let normalizedDesignation = '';
-
-        if (designation) {
-          normalizedDesignation = designation.toString().toLowerCase().replace(/\s+/g, '');
-          if (designationSlotsMap.hasOwnProperty(normalizedDesignation)) {
-            availableSlots = designationSlotsMap[normalizedDesignation];
-          } else {
-            skippedUsers.push({
-              email,
-              reason: `Invalid designation: ${designation}`
-            });
-            continue;
-          }
-        } else {
-          skippedUsers.push({ email, reason: "Missing designation" });
-          continue;
-        }
-
-        const hashed = await bcrypt.hash(password.toString(), 10);
-
-        const newUser = new User({
-          studentId: id,
-          name,
-          email,
-          password: hashed,
-          role: 'supervisor',
-          department,
-          specialization,
-          designation: designation,
-          availableSlots: availableSlots,
-          bookedSlots: bookedSlots || 0,
-          mustChangePassword: true,
-          first_login: true,
-        });
-
-        await newUser.save();
-        createdUsers.push(email);
+      if (!name || !email || !password) {
+        skippedUsers.push({ email, reason: "Missing required fields" });
+        continue;
       }
 
-      return res.status(201).json({
-        message: "Excel processed successfully",
-        createdCount: createdUsers.length,
-        skippedCount: skippedUsers.length,
-        createdUsers,
-        skippedUsers,
-      });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ error: err.message });
-    }
-  };
+      if (!isValidOfficialEmail(email)) {
+        skippedUsers.push({ email, reason: "Invalid email format" });
+        continue;
+      }
 
+      const existing = await User.findOne({ email });
+      if (existing) {
+        skippedUsers.push({ email, reason: "Already exists" });
+        continue;
+      }
+
+      let availableSlots = 0;
+      let normalizedDesignation = '';
+
+      if (designation) {
+        normalizedDesignation = designation.toString().toLowerCase().replace(/\s+/g, '');
+        if (designationSlotsMap.hasOwnProperty(normalizedDesignation)) {
+          availableSlots = designationSlotsMap[normalizedDesignation];
+        } else {
+          skippedUsers.push({ email, reason: `Invalid designation: ${designation}` });
+          continue;
+        }
+      } else {
+        skippedUsers.push({ email, reason: "Missing designation" });
+        continue;
+      }
+
+      const hashed = await bcrypt.hash(password.toString(), 10);
+
+      const newUser = new User({
+        studentId: id,
+        name,
+        email,
+        password: hashed,
+        role: 'supervisor',
+        department,
+        specialization,
+        designation: designation,
+        availableSlots: availableSlots,
+        bookedSlots: bookedSlots || 0,
+        mustChangePassword: true,
+        first_login: true,
+      });
+
+      await newUser.save();
+      createdUsers.push(email);
+    }
+
+    return res.status(201).json({
+      message: "Excel processed successfully",
+      createdCount: createdUsers.length,
+      skippedCount: skippedUsers.length,
+      createdUsers,
+      skippedUsers,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+// TOGGLE STUDENT APPROVAL (Approve / Unapprove)
+exports.toggleStudentApproval = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await User.findById(id);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    if (student.role !== "student") {
+      return res.status(400).json({ error: "This action is only for students" });
+    }
+
+    // Toggle approval
+    student.IsApproved = !student.IsApproved;
+    await student.save();
+
+    return res.json({
+      success: true,
+      message: student.IsApproved 
+        ? "Student approved successfully" 
+        : "Student unapproved successfully",
+      data: {
+        _id: student._id,
+        name: student.name,
+        email: student.email,
+        IsApproved: student.IsApproved
+      }
+    });
+
+  } catch (err) {
+    console.error("Toggle approval error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      error: "Server error" 
+    });
+  }
+};
