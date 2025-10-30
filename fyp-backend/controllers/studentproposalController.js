@@ -52,7 +52,6 @@ exports.getMyProposals = async (req, res) => {
 };
 
 
-// NAYA: Supervisor review kare
 exports.reviewProposal = async (req, res) => {
   try {
     const { id } = req.params;
@@ -67,19 +66,21 @@ exports.reviewProposal = async (req, res) => {
     }
 
     if (projectStatus !== undefined) proposal.projectStatus = projectStatus;
-    if (projectSupervisorComments) proposal.projectSupervisorComments = projectSupervisorComments;
+    if (projectSupervisorComments)
+      proposal.projectSupervisorComments = projectSupervisorComments;
 
     await proposal.save();
 
     res.json({
       success: true,
       message: "Proposal reviewed successfully",
-      proposal
+      proposal,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 exports.getProposalsByGroup = async (req, res) => {
   const param = req.params.groupId;
