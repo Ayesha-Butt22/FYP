@@ -6,8 +6,18 @@ exports.createProposal = async (req, res) => {
   try {
     const { groupId, projectTitle, projectDescription, projectTools, projectSupervisor } = req.body;
 
-    if (!groupId || !projectTitle || !projectDescription) {
-      return res.status(400).json({ error: "groupId, projectTitle aur projectDescription zaroori hain" });
+    // collect missing required fields
+    const missing = [];
+    if (!groupId) missing.push("groupId");
+    if (!projectTitle) missing.push("projectTitle");
+    if (!projectDescription) missing.push("projectDescription");
+
+    if (missing.length > 0) {
+      // Urdu message + structured list of missing fields
+      return res.status(400).json({
+        error: "groupId, projectTitle aur projectDescription zaroori hain",
+        missingFields: missing,
+      });
     }
 
     const proposal = new Proposal({
@@ -16,7 +26,8 @@ exports.createProposal = async (req, res) => {
       projectDescription,
       projectTools,
       projectSupervisor,
-      projectStatus: 1
+      projectStatus: 0,
+      projectSupervisorComments:null,
     });
 
     await proposal.save();
@@ -30,57 +41,61 @@ exports.createProposal = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-exports.getMyProposals = async (req, res) => {
-  const supervisorEmail = req.user.email;
-  const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
-    .populate({
-      path: 'groupId',
-      select: 'groupId leader member2 member3',
-      populate: {
-        path: 'leader member2 member3',
-        select: 'name email studentId'
-      }
-    })
-    .sort({ createdAt: -1 });
-
-  res.json({
-    success: true,
-    count: proposals.length,
-    data: proposals
-  });
-};
-
-
 exports.reviewProposal = async (req, res) => {
   try {
     const { id } = req.params;
-    const { projectStatus, projectSupervisorComments } = req.body;
+    const { projectStatus, projectSupervisorComments, projectSupervisor } = req.body;
     const supervisorEmail = req.user.email;
 
     const proposal = await Proposal.findById(id);
     if (!proposal) return res.status(404).json({ error: "Proposal not found" });
 
-    if (proposal.projectSupervisor !== supervisorEmail) {
+    // ensure only the assigned supervisor can review OR allow assign if none set and this user is the supervisor?
+    // If you require that only assigned supervisor can review:
+    if (proposal.projectSupervisor && proposal.projectSupervisor !== supervisorEmail) {
       return res.status(403).json({ error: "You can only review your assigned proposals" });
     }
 
     if (projectStatus !== undefined) proposal.projectStatus = projectStatus;
-    if (projectSupervisorComments)
-      proposal.projectSupervisorComments = projectSupervisorComments;
+    if (projectSupervisorComments !== undefined) proposal.projectSupervisorComments = projectSupervisorComments;
+    // Accept projectSupervisor in body to let students or supervisor assignment persist
+    if (projectSupervisor !== undefined) proposal.projectSupervisor = projectSupervisor;
 
     await proposal.save();
 
     res.json({
       success: true,
-      message: "Proposal reviewed successfully",
-      proposal,
+      message: "Proposal reviewed/updated successfully",
+      proposal
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+exports.getMyProposals = async (req, res) => {
+  try {
+    const supervisorEmail = req.user.email;
+    const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
+      .populate({
+        path: 'groupId',
+        select: 'groupId leader member2 member3',
+        populate: {
+          path: 'leader member2 member3',
+          select: 'name email studentId sapId'
+        }
+      })
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: proposals.length,
+      data: proposals
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.getProposalsByGroup = async (req, res) => {
   const param = req.params.groupId;
