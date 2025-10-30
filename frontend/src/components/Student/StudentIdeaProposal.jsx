@@ -271,7 +271,6 @@ export default function StudentIdeaProposal() {
         setSelectingSupervisor(false);
         return;
       }
-
       // No existing proposal -> create new proposal and assign supervisor
       const payload = {
         groupId: groupId,
@@ -279,9 +278,10 @@ export default function StudentIdeaProposal() {
         projectDescription: formData.description,
         projectTools: formData.tools,
         specialization: Array.isArray(formData.speciality) ? formData.speciality[0] : formData.speciality,
-        projectSupervisor: supervisor.email || supervisor._id || supervisor.name,
-        projectStatus: 1, // submitted
+        projectSupervisor: supervisor.email,
+        projectStatus: 0,
       };
+      console.log(payload)
 
       console.debug("[StudentIdeaProposal] creating proposal payload:", payload);
 

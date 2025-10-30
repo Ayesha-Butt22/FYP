@@ -14,7 +14,7 @@ exports.getAvailableSupervisors = async (req, res) => {
   }
   try {
     const supervisors = await User.find(query)
-        .select("name department specialization availableSlots bookedSlots");
+        .select("name department specialization availableSlots bookedSlots email");
 
     res.status(200).json({
       success: true,

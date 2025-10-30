@@ -6,8 +6,9 @@ const proposalSchema = new mongoose.Schema({
   projectDescription: { type: String, required: true },
   projectTools: { type: String },
   projectSupervisor: { type: String },
+  projectSpecialization: { type: String },
   projectSupervisorComments: { type: String },
-  projectStatus: { type: Number, default: 0 } // 0 = draft, 1 = submitted, etc.
+  projectStatus: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Proposal", proposalSchema);

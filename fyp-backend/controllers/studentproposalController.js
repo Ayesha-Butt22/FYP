@@ -4,9 +4,9 @@ const Proposal = require("../models/StudentProposal");
 
 exports.createProposal = async (req, res) => {
   try {
-    const { groupId, projectTitle, projectDescription, projectTools, projectSupervisor } = req.body;
+    const { groupId, projectTitle, projectDescription, projectTools, specialization , projectSupervisor ,projectStatus } = req.body;
 
-    // collect missing required fields
+
     const missing = [];
     if (!groupId) missing.push("groupId");
     if (!projectTitle) missing.push("projectTitle");
@@ -25,6 +25,7 @@ exports.createProposal = async (req, res) => {
       projectTitle,
       projectDescription,
       projectTools,
+      projectSpecialization : specialization,
       projectSupervisor,
       projectStatus: 0,
       projectSupervisorComments:null,
