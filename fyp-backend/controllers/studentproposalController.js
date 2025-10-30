@@ -1,6 +1,8 @@
 // controllers/studentproposalController.js
 const mongoose = require("mongoose");
 const Proposal = require("../models/StudentProposal");
+const User = require('../models/User');
+
 
 exports.createProposal = async (req, res) => {
   try {
@@ -50,16 +52,12 @@ exports.reviewProposal = async (req, res) => {
 
     const proposal = await Proposal.findById(id);
     if (!proposal) return res.status(404).json({ error: "Proposal not found" });
-
-    // ensure only the assigned supervisor can review OR allow assign if none set and this user is the supervisor?
-    // If you require that only assigned supervisor can review:
     if (proposal.projectSupervisor && proposal.projectSupervisor !== supervisorEmail) {
       return res.status(403).json({ error: "You can only review your assigned proposals" });
     }
 
     if (projectStatus !== undefined) proposal.projectStatus = projectStatus;
     if (projectSupervisorComments !== undefined) proposal.projectSupervisorComments = projectSupervisorComments;
-    // Accept projectSupervisor in body to let students or supervisor assignment persist
     if (projectSupervisor !== undefined) proposal.projectSupervisor = projectSupervisor;
 
     await proposal.save();
@@ -74,20 +72,48 @@ exports.reviewProposal = async (req, res) => {
   }
 };
 
+exports.deleteProposal = async (req , res) => {
+  const { id } = req.params;
+    try {
+      const proposal =  await Proposal.findById(id);
+      if (!proposal) return res.status(404).json({ error: "Proposal not found" });
+      await proposal.deleteOne();
+      return res.json({ message: "Proposal deleted successfully" });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+};
+
+
 exports.getMyProposals = async (req, res) => {
   try {
     const supervisorEmail = req.user.email;
     const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
-      .populate({
-        path: 'groupId',
-        select: 'groupId leader member2 member3',
-        populate: {
-          path: 'leader member2 member3',
-          select: 'name email studentId sapId'
-        }
-      })
-      .sort({ createdAt: -1 });
+        .populate({
+          path: 'groupId',
+          select: 'groupId leader member2 member3'
+        })
+        .sort({ createdAt: -1 });
 
+
+    for (const proposal of proposals) {
+      const group = proposal.groupId;
+      if (group) {
+        const emails = [group.leader?.email, group.member2?.email, group.member3?.email].filter(Boolean);
+        const users = await User.find({ email: { $in: emails } }, 'name email sapId');
+        for (const u of users) {
+          if (group.leader?.email === u.email) {
+            group.leader.name = u.name
+          }
+          if (group.member2?.email === u.email) {
+            group.member2.name = u.name
+          }
+          if (group.member3?.email === u.email) {
+            group.member3.name = u.name
+          };
+        }
+      }
+    }
     res.json({
       success: true,
       count: proposals.length,

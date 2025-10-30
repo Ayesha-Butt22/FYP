@@ -31,9 +31,12 @@ import {
 } from "@mui/icons-material";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import { toastService } from "../ToastService/ToastService.jsx";
+import {
+  fetchSupervisorProposals,
+  updateProposalStatus,
+} from "../Api/Proposals/supervisorReviewApi.jsx";
 import "./SupervisorIdeaReview.css";
-
-const STATUS = {
+const STATUS_CONFIG = {
   approved: {
     label: "Accepted",
     icon: <CheckCircleOutline style={{ color: "#219653" }} />,
@@ -66,10 +69,81 @@ const STATUS = {
   },
 };
 
-const FEEDBACK_ICON_ONLY = {
+const FEEDBACK_ICONS = {
   "❌": <CancelOutlined sx={{ color: "#e74c3c", fontSize: 23, mr: 1 }} />,
   "✅": <CheckCircleOutline sx={{ color: "#219653", fontSize: 23, mr: 1 }} />,
   "⚠️": <WarningAmber sx={{ color: "#f2994a", fontSize: 23, mr: 1 }} />,
+};
+
+const TABLE_STYLES = {
+  header: {
+    fontWeight: 800,
+    fontSize: 22,
+    color: "#01337a",
+    background: "#f4f6fa",
+    fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
+  },
+  cell: {
+    fontSize: 20,
+    color: "#22223b",
+    fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
+  },
+};
+
+const getStatusKey = (projectStatus) => {
+  const status = Number(projectStatus || 0);
+  if (status === 1) return "approved";
+  if (status === 2) return "rejected";
+  return "pending";
+};
+
+const getFeedbackSeverity = (projectStatus) => {
+  const status = Number(projectStatus || 0);
+  if (status === 1) return "✅";
+  if (status === 2) return "❌";
+  return "⚠️";
+};
+
+const extractMemberInfo = (member, defaultName) => {
+  if (!member) return null;
+  return {
+    name:
+        member.name ||
+        member.sapId ||
+        member.studentId ||
+        defaultName,
+    email: member.email || "",
+  };
+};
+
+const mapProposalToIdea = (proposal) => {
+  const projectStatus = Number(proposal.projectStatus || 0);
+  const statusKey = getStatusKey(projectStatus);
+  const group = proposal.groupId || {};
+
+  const members = [
+    extractMemberInfo(group.leader, "Leader"),
+    extractMemberInfo(group.member2, "Member 2"),
+    extractMemberInfo(group.member3, "Member 3"),
+  ].filter(Boolean);
+
+  return {
+    ideaId: proposal._id,
+    groupName: group.groupId || "Group",
+    title: proposal.projectTitle || "Untitled",
+    abstract: proposal.projectDescription || "",
+    methodology: proposal.projectTools || "",
+    tools: proposal.projectTools || "",
+    domain: proposal.specialization || "",
+    status: statusKey,
+    members,
+    feedback: proposal.projectSupervisorComments
+        ? {
+          severity: getFeedbackSeverity(projectStatus),
+          comment: proposal.projectSupervisorComments,
+        }
+        : null,
+  };
 };
 
 export default function SupervisorIdeaReview() {
@@ -82,131 +156,49 @@ export default function SupervisorIdeaReview() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
-  const thStyle = {
-    fontWeight: 800,
-    fontSize: 22,
-    color: "#01337a",
-    background: "#f4f6fa",
-    fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
-  };
-  const tdStyle = {
-    fontSize: 20,
-    color: "#22223b",
-    fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
-  };
-
-  // Helper: derive a readable name from email if name missing
-  const emailToName = (email) => {
-    if (!email || typeof email !== "string") return "";
-    const local = email.split("@")[0] || "";
-    // split by dot/underscore/hyphen and capitalize parts
-    const parts = local.split(/[._-]+/).filter(Boolean);
-    if (parts.length === 0) return local;
-    return parts
-      .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
-      .join(" ");
-  };
-
-  // ✅ Fetch proposals for supervisor
   useEffect(() => {
     let mounted = true;
-    const fetchMyProposals = async () => {
+
+    const loadProposals = async () => {
       setLoading(true);
       setLoadError(null);
-      try {
-        const token = localStorage.getItem("token");
-        const headers = { "Content-Type": "application/json" };
-        if (token) headers["Authorization"] = `Bearer ${token}`;
 
-        const resp = await fetch("http://localhost:5000/api/proposals/supervisor", {
-          method: "GET",
-          headers,
-        });
+      try {
+        const proposals = await fetchSupervisorProposals();
 
         if (!mounted) return;
-        if (resp.ok) {
-          const json = await resp.json();
-          const proposals = Array.isArray(json.data) ? json.data : [];
-          if (!proposals.length) {
-            setIdeas([]);
-            setLoading(false);
-            return;
-          }
 
-          const mapped = proposals.map((p) => {
-            const projStatus = Number(p.projectStatus || 0);
-            const statusKey =
-              projStatus === 1 ? "approved" : projStatus === 2 ? "rejected" : "pending";
-
-            const g = p.groupId || {};
-            const members = [];
-            // Build member objects to include name, email and sapId (fallbacks)
-            if (g.leader) {
-              const leader = g.leader;
-              const name = leader.name || emailToName(leader.email) || leader.sapId || leader.studentId || "Leader";
-              members.push({
-                name,
-                email: leader.email || "",
-                sapId: leader.sapId || leader.studentId || "",
-              });
-            }
-            if (g.member2) {
-              const m2 = g.member2;
-              const name = m2.name || emailToName(m2.email) || m2.sapId || m2.studentId || "Member 2";
-              members.push({
-                name,
-                email: m2.email || "",
-                sapId: m2.sapId || m2.studentId || "",
-              });
-            }
-            if (g.member3) {
-              const m3 = g.member3;
-              const name = m3.name || emailToName(m3.email) || m3.sapId || m3.studentId || "Member 3";
-              members.push({
-                name,
-                email: m3.email || "",
-                sapId: m3.sapId || m3.studentId || "",
-              });
-            }
-
-            return {
-              ideaId: p._id,
-              groupName: g.groupId || "Group",
-              title: p.projectTitle || "Untitled",
-              abstract: p.projectDescription || "",
-              methodology: p.projectTools || "",
-              tools: p.projectTools || "",
-              domain: p.specialization || "",
-              status: statusKey,
-              members,
-              feedback: p.projectSupervisorComments
-                ? {
-                    severity: projStatus === 1 ? "✅" : projStatus === 2 ? "❌" : "⚠️",
-                    comment: p.projectSupervisorComments,
-                  }
-                : null,
-            };
-          });
-
-          setIdeas(mapped);
+        if (proposals.length === 0) {
+          setIdeas([]);
         } else {
-          if (resp.status === 404) {
-            setIdeas([]);
-          } else {
-            const err = await resp.json().catch(() => ({}));
-            setLoadError(err.error || "Failed to load proposals");
-          }
+          const mappedIdeas = proposals.map(mapProposalToIdea);
+          setIdeas(mappedIdeas);
         }
-      } catch (err) {
-        console.error("Fetch error:", err);
-        setLoadError("Network or authorization error");
+      } catch (error) {
+        console.error("[SupervisorIdeaReview] Load proposals error:", error);
+        if (mounted) {
+          setLoadError(error.message || "Network or authorization error");
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
-    fetchMyProposals();
-    return () => (mounted = false);
+
+    loadProposals();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
+
+  const toggleExpanded = (ideaId) => {
+    setExpanded((prev) => ({
+      ...prev,
+      [ideaId]: !prev[ideaId],
+    }));
+  };
 
   const openStatusModal = (ideaId) => {
     setModalIdeaId(ideaId);
@@ -221,262 +213,293 @@ export default function SupervisorIdeaReview() {
     setModalComment("");
   };
 
-  // ✅ Save updated status via backend + toast
   const handleModalSave = async () => {
     if (!modalIdeaId) return;
+
     try {
-      const token = localStorage.getItem("token");
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
       const statusCode = modalStatus === "approved" ? 1 : 2;
-      const resp = await fetch(
-        `http://localhost:5000/api/proposals/${modalIdeaId}/review`,
-        {
-          method: "PUT",
-          headers,
-          body: JSON.stringify({
-            projectStatus: statusCode,
-            projectSupervisorComments: modalComment.trim(),
-          }),
-        }
-      );
+      await updateProposalStatus(modalIdeaId, statusCode, modalComment.trim());
 
-      if (!resp.ok) {
-        const err = await resp.json().catch(() => ({}));
-        toastService.error(err.error || "Failed to update proposal.");
-        return;
-      }
-
-      // Update UI instantly
       const newFeedback = {
         severity: modalStatus === "approved" ? "✅" : "❌",
         comment: modalComment.trim(),
       };
+
       setIdeas((prev) =>
-        prev.map((idea) =>
-          idea.ideaId === modalIdeaId
-            ? { ...idea, status: modalStatus, feedback: newFeedback }
-            : idea
-        )
+          prev.map((idea) =>
+              idea.ideaId === modalIdeaId
+                  ? { ...idea, status: modalStatus, feedback: newFeedback }
+                  : idea
+          )
       );
 
       toastService.success("Proposal reviewed successfully!");
       closeStatusModal();
-    } catch (err) {
-      console.error("Error updating proposal:", err);
-      toastService.error("Network error while reviewing proposal.");
+    } catch (error) {
+      console.error("[SupervisorIdeaReview] Update status error:", error);
+      toastService.error(error.message || "Failed to update proposal status");
     }
   };
 
   if (loading) {
     return (
-      <>
-        <DashboardSectionHeader description="Here you can review FYP group ideas and proposals. Use Update Status for pending groups (modal).">
-          FYP Idea & Proposal Review
-        </DashboardSectionHeader>
-        <Box display="flex" justifyContent="center" sx={{ mt: 6 }}>
-          <CircularProgress />
-        </Box>
-      </>
+        <>
+          <DashboardSectionHeader description="Here you can review FYP group ideas and proposals. Use Update Status for pending groups (modal).">
+            FYP Idea & Proposal Review
+          </DashboardSectionHeader>
+          <Box display="flex" justifyContent="center" sx={{ mt: 6 }}>
+            <CircularProgress />
+          </Box>
+        </>
     );
   }
 
   return (
-    <>
-      <DashboardSectionHeader description="Here you can review FYP group ideas and proposals. Use Update Status for pending groups (modal).">
-        FYP Idea & Proposal Review
-      </DashboardSectionHeader>
+      <>
+        <DashboardSectionHeader description="Here you can review FYP group ideas and proposals. Use Update Status for pending groups (modal).">
+          FYP Idea & Proposal Review
+        </DashboardSectionHeader>
 
-      <Box maxWidth={1500} mx="auto" my={4}>
-        {loadError ? (
-          <Box sx={{ color: "error.main", textAlign: "center", py: 6 }}>{loadError}</Box>
-        ) : ideas.length === 0 ? (
-          <Box sx={{ textAlign: "center", py: 8, color: "#666" }}>
-            You don't have any idea proposal
-          </Box>
-        ) : (
-          <Box className="review-table-box">
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={thStyle}>
-                    <GroupOutlined sx={{ verticalAlign: "middle", color: "white", mr: 1, fontSize: 28 }} />
-                    Group
-                  </TableCell>
-                  <TableCell sx={thStyle}>Title</TableCell>
-                  <TableCell sx={thStyle}>Status</TableCell>
-                  <TableCell sx={thStyle} align="center">
-                    Action
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+        <Box maxWidth={1500} mx="auto" my={4}>
+          {loadError ? (
+              <ErrorMessage message={loadError} />
+          ) : ideas.length === 0 ? (
+              <EmptyState />
+          ) : (
+              <ProposalTable
+                  ideas={ideas}
+                  expanded={expanded}
+                  onToggleExpanded={toggleExpanded}
+                  onOpenStatusModal={openStatusModal}
+              />
+          )}
+        </Box>
 
-              <TableBody>
-                {ideas.map((idea) => {
-                  const isExpanded = expanded[idea.ideaId];
-                  const status = STATUS[idea.status] || STATUS.pending;
-                  return (
-                    <React.Fragment key={idea.ideaId}>
-                      <TableRow
-                        hover
-                        className="review-table-row"
-                        sx={idea.status === "pending" ? { backgroundColor: "#fff9e6" } : {}}
-                      >
-                        <TableCell sx={tdStyle}>
-                          <Stack direction="row" gap={1.5} alignItems="center">
-                            <Typography fontWeight={700} fontSize={20}>
-                              {idea.groupName}
-                            </Typography>
-                          </Stack>
-                        </TableCell>
+        <StatusUpdateModal
+            open={statusModalOpen}
+            status={modalStatus}
+            comment={modalComment}
+            onClose={closeStatusModal}
+            onStatusChange={setModalStatus}
+            onCommentChange={setModalComment}
+            onSave={handleModalSave}
+        />
+      </>
+  );
+}
 
-                        <TableCell sx={tdStyle}>
-                          <Tooltip title={idea.title}>
-                            <Typography
-                              fontWeight={600}
-                              color="#01337a"
-                              sx={{ cursor: "pointer", fontSize: 20 }}
-                              onClick={() =>
-                                setExpanded((exp) => ({
-                                  ...exp,
-                                  [idea.ideaId]: !exp[idea.ideaId],
-                                }))
-                              }
-                            >
-                              {idea.title}
-                            </Typography>
-                          </Tooltip>
-                        </TableCell>
+// Sub-components
+const ErrorMessage = ({ message }) => (
+    <Box sx={{ color: "error.main", textAlign: "center", py: 6 }}>{message}</Box>
+);
 
-                        <TableCell sx={tdStyle}>
-                          <Chip
-                            icon={status.icon}
-                            label={status.label}
-                            sx={{
-                              px: 1.5,
-                              ...status.chipStyle,
-                              borderRadius: 25,
-                              fontWeight: 700,
-                              fontSize: 17,
-                              height: 36,
-                              minWidth: 130,
-                              justifyContent: "left",
-                            }}
-                          />
-                        </TableCell>
+const EmptyState = () => (
+    <Box sx={{ textAlign: "center", py: 8, color: "#666" }}>
+      You don't have any idea proposals
+    </Box>
+);
 
-                        <TableCell sx={tdStyle} align="center">
-                          <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
-                            {idea.status === "pending" && (
-                              <Button
-                                variant="contained"
-                                size="small"
-                                onClick={() => openStatusModal(idea.ideaId)}
-                                sx={{
-                                  fontWeight: 700,
-                                  bgcolor: "#01337a",
-                                  color: "#ffffff",
-                                  textTransform: "none",
-                                  border: "1px solid #01337a",
-                                  "&:hover": {
-                                    bgcolor: "#ffffff",
-                                    color: "#01337a",
-                                    border: "1px solid #01337a",
-                                  },
-                                }}
-                              >
-                                Update Status
-                              </Button>
-                            )}
-                            <IconButton
-                              color="primary"
-                              onClick={() =>
-                                setExpanded((exp) => ({
-                                  ...exp,
-                                  [idea.ideaId]: !exp[idea.ideaId],
-                                }))
-                              }
-                            >
-                              {isExpanded ? <ExpandLess /> : <ExpandMore />}
-                            </IconButton>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
+const ProposalTable = ({ ideas, expanded, onToggleExpanded, onOpenStatusModal }) => (
+    <Box className="review-table-box">
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell sx={TABLE_STYLES.header}>
+              <GroupOutlined
+                  sx={{ verticalAlign: "middle", color: "white", mr: 1, fontSize: 28 }}
+              />
+              Group
+            </TableCell>
+            <TableCell sx={TABLE_STYLES.header}>Title</TableCell>
+            <TableCell sx={TABLE_STYLES.header}>Status</TableCell>
+            <TableCell sx={TABLE_STYLES.header} align="center">
+              Action
+            </TableCell>
+          </TableRow>
+        </TableHead>
 
-                      <TableRow>
-                        <TableCell colSpan={4} className="review-table-collapse-cell">
-                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                            <Box className="idea-details-box">
-                              <Box className="idea-details-section">
-                                <div className="idea-detail-row">
-                                  <span className="idea-detail-label">Project Title:</span>
-                                  <span className="idea-detail-value">{idea.abstract}</span>
-                                </div>
-                                <div className="idea-detail-row">
-                                  <span className="idea-detail-label">Project Description:</span>
-                                  <span className="idea-detail-value">{idea.methodology}</span>
-                                </div>
-                                <div className="idea-detail-row">
-                                  <span className="idea-detail-label">Tools:</span>
-                                  <span className="idea-detail-value">{idea.tools}</span>
-                                </div>
-                                <div className="idea-detail-row">
-                                  <span className="idea-detail-label">Domain:</span>
-                                  <span className="idea-detail-value">{idea.domain}</span>
-                                </div>
-                              </Box>
+        <TableBody>
+          {ideas.map((idea) => (
+              <ProposalRow
+                  key={idea.ideaId}
+                  idea={idea}
+                  isExpanded={expanded[idea.ideaId]}
+                  onToggleExpanded={onToggleExpanded}
+                  onOpenStatusModal={onOpenStatusModal}
+              />
+          ))}
+        </TableBody>
+      </Table>
+    </Box>
+);
 
-                              <Box className="members-section-align">
-                                <span className="idea-detail-label" style={{ marginBottom: 5 }}>
-                                  Members:
-                                </span>
-                                {idea.members.map((m, midx) => (
-                                  <div className="member-row-enhanced" key={midx}>
-                                    <div>
-                                      <span className="member-name">{m.name}</span>
-                                      {m.email ? (
-                                        <div className="member-email" style={{ fontSize: 13, color: "#666" }}>
-                                          {m.email}
-                                        </div>
-                                      ) : null}
-                                    </div>
-                                    <span className="member-sapid" style={{ marginLeft: 8 }}>
-                                      {m.sapId}
-                                    </span>
-                                  </div>
-                                ))}
-                              </Box>
-                            </Box>
+const ProposalRow = ({ idea, isExpanded, onToggleExpanded, onOpenStatusModal }) => {
+  const status = STATUS_CONFIG[idea.status] || STATUS_CONFIG.pending;
 
-                            {idea.status !== "pending" ? (
-                              <div className="idea-feedback-row">
-                                <b>Feedback:</b>
-                                {idea.feedback ? (
-                                  <>
-                                    {FEEDBACK_ICON_ONLY[idea.feedback.severity]}
-                                    <span>{idea.feedback.comment}</span>
-                                  </>
-                                ) : (
-                                  <span style={{ color: "#aaa" }}>No feedback</span>
-                                )}
-                              </div>
-                            ) : null}
-                          </Collapse>
-                        </TableCell>
-                      </TableRow>
-                    </React.Fragment>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </Box>
-        )}
+  return (
+      <>
+        <TableRow
+            hover
+            className="review-table-row"
+            sx={idea.status === "pending" ? { backgroundColor: "#fff9e6" } : {}}
+        >
+          <TableCell sx={TABLE_STYLES.cell}>
+            <Stack direction="row" gap={1.5} alignItems="center">
+              <Typography fontWeight={700} fontSize={20}>
+                {idea.groupName}
+              </Typography>
+            </Stack>
+          </TableCell>
+
+          <TableCell sx={TABLE_STYLES.cell}>
+            <Tooltip title={idea.title}>
+              <Typography
+                  fontWeight={600}
+                  color="#01337a"
+                  sx={{ cursor: "pointer", fontSize: 20 }}
+                  onClick={() => onToggleExpanded(idea.ideaId)}
+              >
+                {idea.title}
+              </Typography>
+            </Tooltip>
+          </TableCell>
+
+          <TableCell sx={TABLE_STYLES.cell}>
+            <Chip
+                icon={status.icon}
+                label={status.label}
+                sx={{
+                  px: 1.5,
+                  ...status.chipStyle,
+                  borderRadius: 25,
+                  fontWeight: 700,
+                  fontSize: 17,
+                  height: 36,
+                  minWidth: 130,
+                  justifyContent: "left",
+                }}
+            />
+          </TableCell>
+
+          <TableCell sx={TABLE_STYLES.cell} align="center">
+            <Stack
+                direction="row"
+                spacing={1}
+                justifyContent="flex-end"
+                alignItems="center"
+            >
+              {idea.status === "pending" && (
+                  <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => onOpenStatusModal(idea.ideaId)}
+                      sx={{
+                        fontWeight: 700,
+                        bgcolor: "#01337a",
+                        color: "#ffffff",
+                        textTransform: "none",
+                        border: "1px solid #01337a",
+                        "&:hover": {
+                          bgcolor: "#ffffff",
+                          color: "#01337a",
+                          border: "1px solid #01337a",
+                        },
+                      }}
+                  >
+                    Update Status
+                  </Button>
+              )}
+              <IconButton
+                  color="primary"
+                  onClick={() => onToggleExpanded(idea.ideaId)}
+              >
+                {isExpanded ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            </Stack>
+          </TableCell>
+        </TableRow>
+
+        <TableRow>
+          <TableCell colSpan={4} className="review-table-collapse-cell">
+            <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+              <ProposalDetails idea={idea} />
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      </>
+  );
+};
+
+const ProposalDetails = ({ idea }) => (
+    <Box className="idea-details-box">
+      <Box className="idea-details-section">
+        <DetailRow label="Project Title" value={idea.abstract} />
+        <DetailRow label="Project Description" value={idea.methodology} />
+        <DetailRow label="Tools" value={idea.tools} />
+        <DetailRow label="Domain" value={idea.domain} />
+          {idea.status !== "pending" && <FeedbackSection feedback={idea.feedback} />}
+
       </Box>
+      <MembersSection members={idea.members} />
 
-      {/* ✅ Modal for update status */}
-      <Modal open={statusModalOpen} onClose={closeStatusModal} aria-labelledby="update-status-modal">
-        <Box
+    </Box>
+);
+
+const DetailRow = ({ label, value }) => (
+    <div className="idea-detail-row">
+      <span className="idea-detail-label">{label}:</span>
+      <span className="idea-detail-value">{value}</span>
+    </div>
+);
+
+const MembersSection = ({ members }) => (
+    <Box className="members-section-align">
+    <span className="idea-detail-label" style={{ marginBottom: 5 }}>
+      Members:
+    </span>
+      {members.map((member, idx) => (
+          <div className="member-row-enhanced" key={idx}>
+            <div>
+              <span className="member-name">{member.name}</span>
+              {member.email && (
+                  <div className="member-email" style={{ fontSize: 13, color: "#666" }}>
+                    {member.email}
+                  </div>
+              )}
+            </div>
+            <span className="member-sapid" style={{ marginLeft: 8 }}>
+          {member.sapId}
+        </span>
+          </div>
+      ))}
+    </Box>
+);
+
+const FeedbackSection = ({ feedback }) => (
+    <div className="idea-feedback-row">
+      <b>Feedback:</b>
+      {feedback ? (
+          <>
+            {FEEDBACK_ICONS[feedback.severity]}
+            <span>{feedback.comment}</span>
+          </>
+      ) : (
+          <span style={{ color: "#aaa" }}>No feedback</span>
+      )}
+    </div>
+);
+
+const StatusUpdateModal = ({
+                             open,
+                             status,
+                             comment,
+                             onClose,
+                             onStatusChange,
+                             onCommentChange,
+                             onSave,
+                           }) => (
+    <Modal open={open} onClose={onClose} aria-labelledby="update-status-modal">
+      <Box
           sx={{
             position: "absolute",
             top: "50%",
@@ -488,61 +511,63 @@ export default function SupervisorIdeaReview() {
             boxShadow: 24,
             p: 3,
           }}
+      >
+        <Typography
+            id="update-status-modal"
+            variant="h6"
+            sx={{ mb: 2, color: "#01337a", fontWeight: 800 }}
         >
-          <Typography id="update-status-modal" variant="h6" sx={{ mb: 2, color: "#01337a", fontWeight: 800 }}>
-            Update Group Status
-          </Typography>
+          Update Group Status
+        </Typography>
 
-          <Typography sx={{ mb: 1, fontWeight: 700 }}>Select Status</Typography>
-          <RadioGroup
+        <Typography sx={{ mb: 1, fontWeight: 700 }}>Select Status</Typography>
+        <RadioGroup
             row
-            value={modalStatus}
-            onChange={(e) => setModalStatus(e.target.value)}
+            value={status}
+            onChange={(e) => onStatusChange(e.target.value)}
             sx={{ mb: 2 }}
-          >
-            <FormControlLabel
+        >
+          <FormControlLabel
               value="approved"
               control={<Radio sx={{ "&.Mui-checked": { color: "#219653" } }} />}
               label="Approve"
-            />
-            <FormControlLabel
+          />
+          <FormControlLabel
               value="rejected"
               control={<Radio sx={{ "&.Mui-checked": { color: "#e74c3c" } }} />}
               label="Reject"
-            />
-          </RadioGroup>
+          />
+        </RadioGroup>
 
-          <Typography sx={{ mb: 1, fontWeight: 700 }}>Feedback</Typography>
-          <TextField
+        <Typography sx={{ mb: 1, fontWeight: 700 }}>Feedback</Typography>
+        <TextField
             placeholder="Write feedback for the students..."
             fullWidth
             multiline
             minRows={3}
-            value={modalComment}
-            onChange={(e) => setModalComment(e.target.value)}
+            value={comment}
+            onChange={(e) => onCommentChange(e.target.value)}
             sx={{ mb: 2 }}
-          />
+        />
 
-          <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-            <Button variant="outlined" onClick={closeStatusModal}>
-              Cancel
-            </Button>
-            <Button
+        <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
+          <Button variant="outlined" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
               variant="contained"
-              onClick={handleModalSave}
-              disabled={!modalComment.trim()}
+              onClick={onSave}
+              disabled={!comment.trim()}
               sx={{
                 bgcolor: "#01337a",
                 color: "#fff",
                 textTransform: "none",
                 "&:hover": { bgcolor: "#012a4a" },
               }}
-            >
-              Save
-            </Button>
-          </Box>
+          >
+            Save
+          </Button>
         </Box>
-      </Modal>
-    </>
-  );
-}
+      </Box>
+    </Modal>
+);

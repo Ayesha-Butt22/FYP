@@ -66,7 +66,7 @@ export default function StudentDashboard() {
   const tabComponents = {
     "Overview": <OverviewStudent onTabChange={setActiveTab} />,
     "My Group": <StudentGroup />,
-    "Idea & Proposal": <StudentIdeaProposal />,
+    "Idea & Proposal": <StudentIdeaProposal onTabChange={setActiveTab} />,
     "Selected supervisor": <SelectedSupervisor />,
     "Templates": <StudentTemplates />,
     "Uploads": <StudentUploads />, // <-- new mapping
