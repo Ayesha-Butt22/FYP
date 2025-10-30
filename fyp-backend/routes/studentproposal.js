@@ -8,8 +8,8 @@ const router = express.Router();
 
 router.post("/submit", protect, isStudent, proposalController.createProposal);
 
-
 router.get("/supervisor", protect, isSupervisor, proposalController.getMyProposals);
+
 
 
 router.put("/:id/review", protect, isSupervisor, proposalController.reviewProposal);

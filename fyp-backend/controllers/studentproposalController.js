@@ -31,31 +31,26 @@ exports.createProposal = async (req, res) => {
   }
 };
 
-// NAYA: Supervisor apne proposals dekhe
 exports.getMyProposals = async (req, res) => {
-  try {
-    const supervisorEmail = req.user.email;
+  const supervisorEmail = req.user.email;
+  const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
+    .populate({
+      path: 'groupId',
+      select: 'groupId leader member2 member3',
+      populate: {
+        path: 'leader member2 member3',
+        select: 'name email studentId'
+      }
+    })
+    .sort({ createdAt: -1 });
 
-    const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
-      .populate({
-        path: 'groupId',
-        select: 'groupId leader member2 member3',
-        populate: {
-          path: 'leader member2 member3',
-          select: 'name email studentId'
-        }
-      })
-      .sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      count: proposals.length,
-      data: proposals
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  res.json({
+    success: true,
+    count: proposals.length,
+    data: proposals
+  });
 };
+
 
 // NAYA: Supervisor review kare
 exports.reviewProposal = async (req, res) => {
