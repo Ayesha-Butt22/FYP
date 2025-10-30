@@ -30,6 +30,7 @@ import {
   WarningAmber,
 } from "@mui/icons-material";
 import DashboardSectionHeader from "./DashboardSectionHeader";
+import { toastService } from "../ToastService/ToastService.jsx";
 import "./SupervisorIdeaReview.css";
 
 const STATUS = {
@@ -74,14 +75,10 @@ const FEEDBACK_ICON_ONLY = {
 export default function SupervisorIdeaReview() {
   const [ideas, setIdeas] = useState([]);
   const [expanded, setExpanded] = useState({});
-  const [feedback, setFeedback] = useState({});
-
-  // Modal
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [modalIdeaId, setModalIdeaId] = useState(null);
   const [modalStatus, setModalStatus] = useState("approved");
   const [modalComment, setModalComment] = useState("");
-
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
@@ -98,7 +95,19 @@ export default function SupervisorIdeaReview() {
     fontFamily: "'Inter', 'Roboto', Arial, sans-serif",
   };
 
-  // ✅ Fetch all proposals assigned to this supervisor
+  // Helper: derive a readable name from email if name missing
+  const emailToName = (email) => {
+    if (!email || typeof email !== "string") return "";
+    const local = email.split("@")[0] || "";
+    // split by dot/underscore/hyphen and capitalize parts
+    const parts = local.split(/[._-]+/).filter(Boolean);
+    if (parts.length === 0) return local;
+    return parts
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  // ✅ Fetch proposals for supervisor
   useEffect(() => {
     let mounted = true;
     const fetchMyProposals = async () => {
@@ -131,21 +140,34 @@ export default function SupervisorIdeaReview() {
 
             const g = p.groupId || {};
             const members = [];
-            if (g.leader)
+            // Build member objects to include name, email and sapId (fallbacks)
+            if (g.leader) {
+              const leader = g.leader;
+              const name = leader.name || emailToName(leader.email) || leader.sapId || leader.studentId || "Leader";
               members.push({
-                name: g.leader.name || "Leader",
-                sapId: g.leader.studentId || "",
+                name,
+                email: leader.email || "",
+                sapId: leader.sapId || leader.studentId || "",
               });
-            if (g.member2)
+            }
+            if (g.member2) {
+              const m2 = g.member2;
+              const name = m2.name || emailToName(m2.email) || m2.sapId || m2.studentId || "Member 2";
               members.push({
-                name: g.member2.name || "Member 2",
-                sapId: g.member2.studentId || "",
+                name,
+                email: m2.email || "",
+                sapId: m2.sapId || m2.studentId || "",
               });
-            if (g.member3)
+            }
+            if (g.member3) {
+              const m3 = g.member3;
+              const name = m3.name || emailToName(m3.email) || m3.sapId || m3.studentId || "Member 3";
               members.push({
-                name: g.member3.name || "Member 3",
-                sapId: g.member3.studentId || "",
+                name,
+                email: m3.email || "",
+                sapId: m3.sapId || m3.studentId || "",
               });
+            }
 
             return {
               ideaId: p._id,
@@ -159,8 +181,7 @@ export default function SupervisorIdeaReview() {
               members,
               feedback: p.projectSupervisorComments
                 ? {
-                    severity:
-                      projStatus === 1 ? "✅" : projStatus === 2 ? "❌" : "⚠️",
+                    severity: projStatus === 1 ? "✅" : projStatus === 2 ? "❌" : "⚠️",
                     comment: p.projectSupervisorComments,
                   }
                 : null,
@@ -200,7 +221,7 @@ export default function SupervisorIdeaReview() {
     setModalComment("");
   };
 
-  // ✅ Connect Update Status button to backend API
+  // ✅ Save updated status via backend + toast
   const handleModalSave = async () => {
     if (!modalIdeaId) return;
     try {
@@ -209,7 +230,6 @@ export default function SupervisorIdeaReview() {
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const statusCode = modalStatus === "approved" ? 1 : 2;
-
       const resp = await fetch(
         `http://localhost:5000/api/proposals/${modalIdeaId}/review`,
         {
@@ -224,11 +244,11 @@ export default function SupervisorIdeaReview() {
 
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));
-        alert(`❌ Failed: ${err.error || "Unable to update proposal"}`);
+        toastService.error(err.error || "Failed to update proposal.");
         return;
       }
 
-      // Update local UI instantly
+      // Update UI instantly
       const newFeedback = {
         severity: modalStatus === "approved" ? "✅" : "❌",
         comment: modalComment.trim(),
@@ -241,11 +261,11 @@ export default function SupervisorIdeaReview() {
         )
       );
 
-      alert("✅ Proposal reviewed successfully!");
+      toastService.success("Proposal reviewed successfully!");
       closeStatusModal();
     } catch (err) {
       console.error("Error updating proposal:", err);
-      alert("❌ Network error while reviewing proposal.");
+      toastService.error("Network error while reviewing proposal.");
     }
   };
 
@@ -270,9 +290,7 @@ export default function SupervisorIdeaReview() {
 
       <Box maxWidth={1500} mx="auto" my={4}>
         {loadError ? (
-          <Box sx={{ color: "error.main", textAlign: "center", py: 6 }}>
-            {loadError}
-          </Box>
+          <Box sx={{ color: "error.main", textAlign: "center", py: 6 }}>{loadError}</Box>
         ) : ideas.length === 0 ? (
           <Box sx={{ textAlign: "center", py: 8, color: "#666" }}>
             You don't have any idea proposal
@@ -283,14 +301,7 @@ export default function SupervisorIdeaReview() {
               <TableHead>
                 <TableRow>
                   <TableCell sx={thStyle}>
-                    <GroupOutlined
-                      sx={{
-                        verticalAlign: "middle",
-                        color: "white",
-                        mr: 1,
-                        fontSize: 28,
-                      }}
-                    />
+                    <GroupOutlined sx={{ verticalAlign: "middle", color: "white", mr: 1, fontSize: 28 }} />
                     Group
                   </TableCell>
                   <TableCell sx={thStyle}>Title</TableCell>
@@ -310,11 +321,7 @@ export default function SupervisorIdeaReview() {
                       <TableRow
                         hover
                         className="review-table-row"
-                        sx={
-                          idea.status === "pending"
-                            ? { backgroundColor: "#fff9e6" }
-                            : {}
-                        }
+                        sx={idea.status === "pending" ? { backgroundColor: "#fff9e6" } : {}}
                       >
                         <TableCell sx={tdStyle}>
                           <Stack direction="row" gap={1.5} alignItems="center">
@@ -360,12 +367,7 @@ export default function SupervisorIdeaReview() {
                         </TableCell>
 
                         <TableCell sx={tdStyle} align="center">
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            justifyContent="flex-end"
-                            alignItems="center"
-                          >
+                          <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
                             {idea.status === "pending" && (
                               <Button
                                 variant="contained"
@@ -408,53 +410,38 @@ export default function SupervisorIdeaReview() {
                             <Box className="idea-details-box">
                               <Box className="idea-details-section">
                                 <div className="idea-detail-row">
-                                  <span className="idea-detail-label">
-                                    Project Title:
-                                  </span>
-                                  <span className="idea-detail-value">
-                                    {idea.abstract}
-                                  </span>
+                                  <span className="idea-detail-label">Project Title:</span>
+                                  <span className="idea-detail-value">{idea.abstract}</span>
                                 </div>
                                 <div className="idea-detail-row">
-                                  <span className="idea-detail-label">
-                                    Project Description:
-                                  </span>
-                                  <span className="idea-detail-value">
-                                    {idea.methodology}
-                                  </span>
+                                  <span className="idea-detail-label">Project Description:</span>
+                                  <span className="idea-detail-value">{idea.methodology}</span>
                                 </div>
                                 <div className="idea-detail-row">
-                                  <span className="idea-detail-label">
-                                    Tools:
-                                  </span>
-                                  <span className="idea-detail-value">
-                                    {idea.tools}
-                                  </span>
+                                  <span className="idea-detail-label">Tools:</span>
+                                  <span className="idea-detail-value">{idea.tools}</span>
                                 </div>
                                 <div className="idea-detail-row">
-                                  <span className="idea-detail-label">
-                                    Domain:
-                                  </span>
-                                  <span className="idea-detail-value">
-                                    {idea.domain}
-                                  </span>
+                                  <span className="idea-detail-label">Domain:</span>
+                                  <span className="idea-detail-value">{idea.domain}</span>
                                 </div>
                               </Box>
 
                               <Box className="members-section-align">
-                                <span
-                                  className="idea-detail-label"
-                                  style={{ marginBottom: 5 }}
-                                >
+                                <span className="idea-detail-label" style={{ marginBottom: 5 }}>
                                   Members:
                                 </span>
                                 {idea.members.map((m, midx) => (
                                   <div className="member-row-enhanced" key={midx}>
-                                    <span className="member-name">{m.name}</span>
-                                    <span
-                                      className="member-sapid"
-                                      style={{ marginLeft: 8 }}
-                                    >
+                                    <div>
+                                      <span className="member-name">{m.name}</span>
+                                      {m.email ? (
+                                        <div className="member-email" style={{ fontSize: 13, color: "#666" }}>
+                                          {m.email}
+                                        </div>
+                                      ) : null}
+                                    </div>
+                                    <span className="member-sapid" style={{ marginLeft: 8 }}>
                                       {m.sapId}
                                     </span>
                                   </div>
@@ -471,9 +458,7 @@ export default function SupervisorIdeaReview() {
                                     <span>{idea.feedback.comment}</span>
                                   </>
                                 ) : (
-                                  <span style={{ color: "#aaa" }}>
-                                    No feedback
-                                  </span>
+                                  <span style={{ color: "#aaa" }}>No feedback</span>
                                 )}
                               </div>
                             ) : null}
@@ -490,11 +475,7 @@ export default function SupervisorIdeaReview() {
       </Box>
 
       {/* ✅ Modal for update status */}
-      <Modal
-        open={statusModalOpen}
-        onClose={closeStatusModal}
-        aria-labelledby="update-status-modal"
-      >
+      <Modal open={statusModalOpen} onClose={closeStatusModal} aria-labelledby="update-status-modal">
         <Box
           sx={{
             position: "absolute",
@@ -508,11 +489,7 @@ export default function SupervisorIdeaReview() {
             p: 3,
           }}
         >
-          <Typography
-            id="update-status-modal"
-            variant="h6"
-            sx={{ mb: 2, color: "#01337a", fontWeight: 800 }}
-          >
+          <Typography id="update-status-modal" variant="h6" sx={{ mb: 2, color: "#01337a", fontWeight: 800 }}>
             Update Group Status
           </Typography>
 
