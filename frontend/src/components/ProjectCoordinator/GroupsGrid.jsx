@@ -45,13 +45,92 @@ export default function GroupsGrid() {
   const [groups, setGroups] = useState([]);
 
   useEffect(() => {
-    setGroups(sampleGroups);
+    // Attempt to fetch real data from backend and map it to the same shape as sampleGroups.
+    // If the API call fails or data shape is unexpected, keep using sampleGroups (no UI change).
+    let mounted = true;
+
+    const mapApiGroupToUi = (g) => {
+      // g expected shape from GroupsInfoController:
+      // { _id, groupId, members: [{ role, name, email, sapId }], proposals: [ { projectTitle, projectDescription, projectTools, ... } ] }
+      const id = g.groupId || (g._id ? String(g._id) : "unknown");
+      // pick first proposal if available
+      const p = Array.isArray(g.proposals) && g.proposals.length > 0 ? g.proposals[0] : null;
+      const title = (p && p.projectTitle) || "Untitled Project";
+      const description = (p && p.projectDescription) || "";
+      // projectTools may be stored as a comma-separated string; convert to array
+      let tools = [];
+      if (p && p.projectTools) {
+        if (Array.isArray(p.projectTools)) {
+          tools = p.projectTools;
+        } else if (typeof p.projectTools === "string") {
+          tools = p.projectTools.split(",").map((t) => t.trim()).filter(Boolean);
+        }
+      }
+
+      // members come from controller as array with fields name, email, sapId
+      const members =
+        Array.isArray(g.members) && g.members.length > 0
+          ? g.members.map((m) => ({
+              name: m.name || (m.email ? m.email.split("@")[0] : "Student"),
+              sap: m.sapId || m.sap || "",
+              email: m.email || "",
+            }))
+          : [];
+
+      return {
+        id,
+        title,
+        description,
+        tools,
+        members,
+      };
+    };
+
+    const fetchGroups = async () => {
+      try {
+        const token = localStorage.getItem("token"); // include token if available
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const resp = await fetch("http://localhost:5173/api/groups/info", { method: "GET", headers });
+        if (!mounted) return;
+
+        if (!resp.ok) {
+          // server error or not available -- keep sample data
+          console.warn("Failed to fetch groups/info, status:", resp.status);
+          setGroups(sampleGroups);
+          return;
+        }
+
+        const json = await resp.json().catch(() => null);
+        if (!json || !json.success || !Array.isArray(json.data)) {
+          // Unexpected response shape -- keep sample
+          console.warn("Unexpected groups/info response shape, falling back to sampleGroups", json);
+          setGroups(sampleGroups);
+          return;
+        }
+
+        const mapped = json.data.map(mapApiGroupToUi);
+        setGroups(mapped);
+      } catch (err) {
+        console.error("Error fetching groups/info:", err);
+        // fallback to sample groups (do not break UI)
+        setGroups(sampleGroups);
+      }
+    };
+
+    fetchGroups();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return (
     <div>
-      
-      <DashboardSectionHeader description={"View all department groups, check members, project details and manage them from here"}>Groups</DashboardSectionHeader>
+      <DashboardSectionHeader description={"View all department groups, check members, project details and manage them from here"}>
+        Groups
+      </DashboardSectionHeader>
       <GroupInfoCard groups={groups} />
     </div>
   );

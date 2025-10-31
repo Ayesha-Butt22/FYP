@@ -20,27 +20,27 @@ mongoose.connect(process.env.MONGO_URI)
  */
 app.use('/Filesk', express.static(path.join(__dirname, 'Filesk')));
 
-/**
- * Existing API routes - keep these as in your project
- */
+// Route mounts
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
-app.use('/api/groups', require('./routes/studentgroup'));       // Group CRUD
+
+// Group CRUD routes
+app.use('/api/groups', require('./routes/studentgroup'));
+
+// Groups info route (groups + members + proposals)
+app.use('/api/groups', require('./routes/groupsInfoRoutes'));
+
+// Proposals routes (studentproposal)
 app.use('/api/proposals', require('./routes/studentproposal'));
+
+// Student routes
 app.use("/api/student", require("./routes/student"));
 
-// === YAHAN PE REPORT ROUTES ADD KARO ===
+// Other feature routes
 app.use('/api/reports', require('./routes/reports'));
-// ======================================
-
-/**
- * Files API: upload/list/get/delete
- * FileRouter at: fyp-backend/routes/FileRouter.js
- */
 app.use('/api/files', require('./routes/FileRouter'));
 app.use("/api/profile-pic", require("./routes/profile"));
 app.use("/api/deadline", require("./routes/deadline"));
-app.use('/api/proposals', require('./routes/studentproposal'));
 
 // Test route
 app.get('/', (req, res) => res.send('API Running'));
