@@ -29,7 +29,7 @@ app.use('/api/groups', require('./routes/studentgroup'));
 
 // Groups info route (groups + members + proposals)
 
-app.use("/api/groups", require("./routes/groupsInfoRoutes"));
+app.use("/api/groupsinfo", require("./routes/groupsInfoRoutes"));
 
 
 // Proposals routes (studentproposal)

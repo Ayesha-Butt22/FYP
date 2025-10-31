@@ -39,7 +39,7 @@ exports.getGroupsWithMembersAndProposals = async (req, res) => {
     users.forEach((u) => (userByEmail[u.email] = u));
 
     const proposals = await Proposal.find({
-      groupId: { $in: groupIds.map((id) => mongoose.Types.ObjectId(id)) },
+      groupId: { $in: groupIds.map((id) => new mongoose.Types.ObjectId(id)) },
     }).lean();
 
     const proposalsByGroup = {};
