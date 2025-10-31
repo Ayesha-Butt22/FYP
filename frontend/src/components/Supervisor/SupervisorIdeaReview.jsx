@@ -131,10 +131,10 @@ const mapProposalToIdea = (proposal) => {
     ideaId: proposal._id,
     groupName: group.groupId || "Group",
     title: proposal.projectTitle || "Untitled",
-    abstract: proposal.projectDescription || "",
-    methodology: proposal.projectTools || "",
+    abstract: proposal.projectTitle || "",
+    methodology: proposal.projectDescription || "",
     tools: proposal.projectTools || "",
-    domain: proposal.specialization || "",
+    domain: proposal.projectSpecialization || "",
     status: statusKey,
     members,
     feedback: proposal.projectSupervisorComments
@@ -433,8 +433,8 @@ const ProposalRow = ({ idea, isExpanded, onToggleExpanded, onOpenStatusModal }) 
 const ProposalDetails = ({ idea }) => (
     <Box className="idea-details-box">
       <Box className="idea-details-section">
-        <DetailRow label="Project Title" value={idea.abstract} />
-        <DetailRow label="Project Description" value={idea.methodology} />
+        <DetailRow label="Project Desc" value={idea.methodology} />
+        
         <DetailRow label="Tools" value={idea.tools} />
         <DetailRow label="Domain" value={idea.domain} />
           {idea.status !== "pending" && <FeedbackSection feedback={idea.feedback} />}
@@ -460,9 +460,9 @@ const MembersSection = ({ members }) => (
       {members.map((member, idx) => (
           <div className="member-row-enhanced" key={idx}>
             <div>
-              <span className="member-name">{member.name}</span>
+              <span className="member-name-idea">{member.name}</span>
               {member.email && (
-                  <div className="member-email" style={{ fontSize: 13, color: "#666" }}>
+                  <div className="member-email" style={{ fontSize: 20, color: "#000000" }}>
                     {member.email}
                   </div>
               )}
@@ -477,11 +477,11 @@ const MembersSection = ({ members }) => (
 
 const FeedbackSection = ({ feedback }) => (
     <div className="idea-feedback-row">
-      <b>Feedback:</b>
+      <label>Feedback:</label>
       {feedback ? (
           <>
-            {FEEDBACK_ICONS[feedback.severity]}
-            <span>{feedback.comment}</span>
+           {FEEDBACK_ICONS[feedback.severity]}
+            <span style={{fontSize:25}}>{feedback.comment}</span>
           </>
       ) : (
           <span style={{ color: "#aaa" }}>No feedback</span>

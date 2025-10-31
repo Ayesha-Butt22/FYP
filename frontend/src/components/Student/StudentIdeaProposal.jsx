@@ -313,7 +313,7 @@ export default function StudentIdeaProposal({onTabChange}) {
 
 const ExistingProposalCard = ({ proposal, onReset }) => (
     <div className="result-card info">
-      <label>Proposal Details</label>
+      <p style={{fontSize:35, color:"#01337a" , fontWeight:700 }}>Proposal Details</p>
 
       <ProposalDetail label="Project Title" value={proposal.projectTitle} />
       <ProposalDetail
@@ -350,8 +350,8 @@ const ExistingProposalCard = ({ proposal, onReset }) => (
 );
 const ProposalDetail = ({ label, value, preWrap = false }) => (
     <div style={{ marginTop: 12 }}>
-      <strong>{label}:</strong>
-      <div style={{ marginTop: 6, whiteSpace: preWrap ? "pre-wrap" : "normal" }}>
+      <label>{label}:</label>
+      <div style={{ marginTop: 6, fontSize:22, whiteSpace: preWrap ? "pre-wrap" : "normal" }}>
         {value || "-"}
       </div>
     </div>

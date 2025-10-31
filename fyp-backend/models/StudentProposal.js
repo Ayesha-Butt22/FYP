@@ -1,3 +1,4 @@
+//models/StudentProposal.js
 const mongoose = require("mongoose");
 
 const proposalSchema = new mongoose.Schema({

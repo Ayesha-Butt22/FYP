@@ -39,6 +39,10 @@
   padding: 0.8rem 1rem;
   font-size: 15px;
   transition: all 0.2s ease;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
 }
 .proposal-form input:focus,
 .proposal-form textarea:focus {
@@ -66,6 +70,14 @@
   cursor: pointer;
   transition: all 160ms ease;
   box-shadow: 0 8px 20px rgba(1,51,122,0.08);
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+  -webkit-transition: all 160ms ease;
+  -moz-transition: all 160ms ease;
+  -ms-transition: all 160ms ease;
+  -o-transition: all 160ms ease;
 }
 .submit-btn:hover:not(:disabled) {
   background: #fff;
@@ -73,6 +85,10 @@
   border-color: var(--main-blue);
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(1,51,122,0.1);
+  -webkit-transform: translateY(-2px);
+  -moz-transform: translateY(-2px);
+  -ms-transform: translateY(-2px);
+  -o-transform: translateY(-2px);
 }
 .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
@@ -93,6 +109,10 @@
   border: 1px solid rgba(37,99,235,0.06);
   box-shadow: 0 6px 18px rgba(37,99,235,0.04);
   cursor: pointer;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
 }
 .ai-suggestion-item:hover { transform: translateY(-4px); }
 

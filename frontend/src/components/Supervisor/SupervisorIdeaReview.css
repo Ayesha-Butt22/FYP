@@ -47,14 +47,14 @@
 }
 .idea-detail-label {
   min-width: 88px;
-  font-size: 22px;
+  font-size: 25px;
   font-weight: 700;
   color: #01337a;
   margin-right: 7px;
 }
 .idea-detail-value {
   font-size: 22px;
- color: #01337a;
+ color: #020202;
   font-weight: 500;
   word-break: break-word;
 }
@@ -104,12 +104,14 @@
   align-items: center;
   gap: 6px;
 }
-.member-name {
-  font-weight: 700;
-  color: #01337a;
+.member-name-idea
+{color: #01337a;
+  font-weight: 500;
+  font-size: 20px;
+
 }
 .member-sapid {
-  color: #64748b;
+  color: #01337a;
   font-weight: 500;
   font-size: 13px;
 }
