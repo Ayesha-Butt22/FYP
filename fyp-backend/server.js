@@ -28,7 +28,9 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/groups', require('./routes/studentgroup'));
 
 // Groups info route (groups + members + proposals)
-app.use('/api/groups', require('./routes/groupsInfoRoutes'));
+
+app.use("/api/groups", require("./routes/groupsInfoRoutes"));
+
 
 // Proposals routes (studentproposal)
 app.use('/api/proposals', require('./routes/studentproposal'));
