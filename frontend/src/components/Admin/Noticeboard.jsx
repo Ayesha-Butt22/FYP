@@ -3,6 +3,7 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable.jsx";
 import { toastService } from "../ToastService/ToastService.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
+import noticeboardApi from "../Api/NoticeboardApi.jsx";  // ✅ correct path
 import "./Noticeboard.css";
 
 const AUDIENCE = [
@@ -13,55 +14,49 @@ const AUDIENCE = [
 ];
 
 const DEPARTMENTS = [
-  { value: "", label: "All departments (optional)" },
+  { value: "All", label: "All departments" },
   { value: "CS", label: "CS — Computer Science" },
   { value: "SE", label: "SE — Software Engineering" },
   { value: "CA", label: "CA — Computer Arts" },
+  { value: "CyberSec", label: "CyberSec — Cyber Security" },
 ];
 
 export default function Noticeboard() {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState(null); // null | 'add' | 'edit'
-  const [editIndex, setEditIndex] = useState(null);
+  const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
     audience: "All",
-    department: "",
+    department: "All",
   });
 
+  // ✅ Fetch all notices when component loads
   useEffect(() => {
-    const demo = [
-      {
-        id: "n-" + Date.now(),
-        title: "Semester Deadlines Published",
-        description: "Coordinator has published milestone deadlines for Fall 2025.",
-        audience: "All",
-        department: "",
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: "n-" + (Date.now() + 1),
-        title: "Template Updated (Proposal)",
-        description: "New proposal template uploaded for SE department.",
-        audience: "Coordinator",
-        department: "SE",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-      },
-    ];
-    setNotices(demo);
+    fetchNotices();
   }, []);
+
+  const fetchNotices = async () => {
+    try {
+      const data = await noticeboardApi.getAll();
+      setNotices(data);
+    } catch (error) {
+      console.error("Fetch notices error:", error);
+      toastService.error("Failed to load notices");
+    }
+  };
 
   const resetForm = () => {
     setForm({
       title: "",
       description: "",
       audience: "All",
-      department: "",
+      department: "All",
     });
     setMode(null);
-    setEditIndex(null);
+    setEditId(null);
   };
 
   const handleChange = (e) => {
@@ -69,41 +64,24 @@ export default function Noticeboard() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ✅ Create or update notice
   const handlePost = async (e) => {
     e.preventDefault();
-    if (!form.title.trim())
-      return toastService.error("Title is required");
+    if (!form.title.trim()) return toastService.error("Title is required");
     if (!form.description.trim())
       return toastService.error("Description is required");
 
     setLoading(true);
     try {
-      if (mode === "edit" && editIndex != null) {
-        const id = notices[editIndex].id;
-        const updated = {
-          ...notices[editIndex],
-          title: form.title,
-          description: form.description,
-          audience: form.audience,
-          department: form.department,
-        };
-        setNotices((prev) =>
-          prev.map((n) => (n.id === id ? updated : n))
-        );
+      if (mode === "edit" && editId) {
+        await noticeboardApi.update(editId, form);
         toastService.success("Notice updated");
       } else {
-        const newNotice = {
-          id: "n-" + Date.now(),
-          title: form.title,
-          description: form.description,
-          audience: form.audience,
-          department: form.department,
-          createdAt: new Date().toISOString(),
-        };
-        setNotices((prev) => [newNotice, ...prev]);
+        await noticeboardApi.create(form);
         toastService.success("Notice posted");
       }
       resetForm();
+      fetchNotices(); // reload data
     } catch (err) {
       console.error("Notice post error", err);
       toastService.error("Could not post notice");
@@ -112,46 +90,51 @@ export default function Noticeboard() {
     }
   };
 
-  const handleEdit = (row, idx) => {
+  // ✅ Edit notice
+  const handleEdit = (row) => {
     setMode("edit");
-    setEditIndex(idx);
+    setEditId(row.__meta._id);
     setForm({
       title: row.Title,
       description: row.__meta.description || "",
       audience: row.__meta.audience || "All",
-      department: row.__meta.department || "",
+      department: row.__meta.department || "All",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleDelete = async (row, idx) => {
+  // ✅ Delete notice
+  const handleDelete = async (row) => {
     const ok = await Confirm(`Delete notice "${row.Title}"?`);
     if (!ok) return;
-    setNotices((prev) => prev.filter((_, i) => i !== idx));
-    toastService.success("Notice deleted");
+    try {
+      await noticeboardApi.remove(row.__meta._id);
+      toastService.success("Notice deleted");
+      fetchNotices();
+    } catch (error) {
+      console.error("Delete error:", error);
+      toastService.error("Failed to delete notice");
+    }
   };
 
+  // ✅ Table setup
   const headers = ["Title", "Target Role", "Date"];
   const rows = notices.map((n) => ({
     Title: n.title,
-    "Target Role":
-      n.audience + (n.department ? ` — ${n.department}` : ""),
+    "Target Role": n.audience + (n.department ? ` — ${n.department}` : ""),
     Date: new Date(n.createdAt).toLocaleString(),
     __meta: n,
   }));
 
-  const renderActions = (row, i) => (
+  const renderActions = (row) => (
     <>
-      <button
-        className="table-action-btn"
-        onClick={() => handleEdit(row, i)}
-      >
+      <button className="table-action-btn" onClick={() => handleEdit(row)}>
         Edit
       </button>
       <button
         className="table-action-btn"
         style={{ background: "#f43f5e" }}
-        onClick={() => handleDelete(row, i)}
+        onClick={() => handleDelete(row)}
       >
         Delete
       </button>
@@ -159,97 +142,89 @@ export default function Noticeboard() {
   );
 
   return (
-      <div className="nb-root">
-        <DashboardSectionHeader
-            description="Post important announcements in one centralized space."
-        >
-          Noticeboard
-        </DashboardSectionHeader>
+    <div className="nb-root">
+      <DashboardSectionHeader description="Post important announcements in one centralized space.">
+        Noticeboard
+      </DashboardSectionHeader>
 
-        <div className="noticeboard-form-outer">
+      <div className="noticeboard-form-outer">
         <form onSubmit={handlePost} className="nb-form">
           <div className="nb-left">
             <div className="nb-row">
               <label>Title</label>
               <input
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  placeholder="Enter title"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="Enter title"
               />
             </div>
 
             <div className="nb-row">
               <label>Audience</label>
               <select
-                  name="audience"
-                  value={form.audience}
-                  onChange={handleChange}
+                name="audience"
+                value={form.audience}
+                onChange={handleChange}
               >
                 {AUDIENCE.map((a) => (
-                    <option key={a.value} value={a.value}>
-                      {a.label}
-                    </option>
+                  <option key={a.value} value={a.value}>
+                    {a.label}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div className="nb-row">
-              <label>Department (optional)</label>
+              <label>Department</label>
               <select
-                  name="department"
-                  value={form.department}
-                  onChange={handleChange}
+                name="department"
+                value={form.department}
+                onChange={handleChange}
               >
                 {DEPARTMENTS.map((d) => (
-                    <option key={d.value} value={d.value}>
-                      {d.label}
-                    </option>
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Right column */}
           <div className="nb-right">
-            <div className="nb-row" style={{height: "100%"}}>
+            <div className="nb-row" style={{ height: "100%" }}>
               <label>Description</label>
               <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  placeholder="Enter full description or instructions"
-                  rows={9}
-                  style={{height: "100%"}}
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                placeholder="Enter full description or instructions"
+                rows={9}
+                style={{ height: "100%" }}
               />
             </div>
           </div>
 
-
-          <div className="nb-actions" style={{gridColumn: "1 / -1"}}>
+          <div className="nb-actions" style={{ gridColumn: "1 / -1" }}>
             <button type="submit" className="mt-btn primary" disabled={loading}>
               {mode === "edit" ? "Update Notice" : "Post Notice"}
             </button>
             <button
-                type="button"
-                className="mt-btn cancel"
-                onClick={resetForm}
-                disabled={loading}
+              type="button"
+              className="mt-btn cancel"
+              onClick={resetForm}
+              disabled={loading}
             >
               Clear
             </button>
           </div>
         </form>
-        </div>
-
-        <div style={{marginTop: 20}}>
-          <label>Posted notices</label>
-          <AppTable
-              headers={headers}
-              rows={rows}
-              renderActions={renderActions}
-          />
-        </div>
       </div>
+
+      <div style={{ marginTop: 20 }}>
+        <label>Posted notices</label>
+        <AppTable headers={headers} rows={rows} renderActions={renderActions} />
+      </div>
+    </div>
   );
 }

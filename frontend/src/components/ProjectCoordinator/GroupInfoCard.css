@@ -1,7 +1,7 @@
 .group-cards-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 24px;
   padding: 20px;
 }
@@ -17,6 +17,10 @@
   overflow: hidden;
   transition: all 0.3s ease;
   min-height: 600px;
+  -webkit-border-radius: 16px;
+  -moz-border-radius: 16px;
+  -ms-border-radius: 16px;
+  -o-border-radius: 16px;
 }
 
 .group-card:hover {

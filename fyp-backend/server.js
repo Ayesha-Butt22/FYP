@@ -13,6 +13,10 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
 
+
+  const NoticeboardRoutes = require("./routes/NoticeboardRoutes")
+
+
 /**
  * Serve uploaded files statically from /Filesk
  * Ensure the folder fyp-backend/Filesk exists (the FileRouter will create it if needed),
@@ -44,6 +48,7 @@ app.use('/api/files', require('./routes/FileRouter'));
 app.use("/api/profile-pic", require("./routes/profile"));
 app.use("/api/deadline", require("./routes/deadline"));
 
+app.use("/api/noticeboard", NoticeboardRoutes);
 // Test route
 app.get('/', (req, res) => res.send('API Running'));
 
