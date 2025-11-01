@@ -15,6 +15,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 
   const NoticeboardRoutes = require("./routes/NoticeboardRoutes")
+  const SupervisorWhiteboardRoutes = require("./routes/SupervisorWhiteboardRoutes");
 
 
 /**
@@ -49,6 +50,7 @@ app.use("/api/profile-pic", require("./routes/profile"));
 app.use("/api/deadline", require("./routes/deadline"));
 
 app.use("/api/noticeboard", NoticeboardRoutes);
+app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);
 // Test route
 app.get('/', (req, res) => res.send('API Running'));
 
