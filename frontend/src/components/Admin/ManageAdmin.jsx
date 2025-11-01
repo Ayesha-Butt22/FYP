@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
 import AppTable from "./AppTable.jsx";
-import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 
-// --- Reusable input for form fields ---
+-
 function FormInput({ label, error, ...props }) {
   return (
     <div className="form-group">
@@ -212,22 +211,19 @@ export default function ManageAdmin() {
     }
   };
 
+  // NOTE: We short-circuit create to return a simulated successful response
   const handleAdd = async () => {
-    setLoading(true); 
+    setLoading(true);
     try {
       const payload = {
         name: formData.Name,
         email: formData.Email,
         gender: formData.Gender,
         contactNumber: formData.ContactNumber,
-        role: "admin",
         password: formData.Password
       };
 
-
-
       // Simulated API response (temporary)
-
       const newId = "adm-" + String(Math.floor(Math.random() * 10000)).padStart(4, "0");
       const simulatedRes = { success: true, data: { _id: newId, ...payload } };
 

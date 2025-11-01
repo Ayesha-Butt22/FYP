@@ -15,7 +15,7 @@ exports.createProposal = async (req, res) => {
     if (!projectDescription) missing.push("projectDescription");
 
     if (missing.length > 0) {
-      // Urdu message + structured list of missing fields
+      
       return res.status(400).json({
         error: "groupId, projectTitle aur projectDescription zaroori hain",
         missingFields: missing,

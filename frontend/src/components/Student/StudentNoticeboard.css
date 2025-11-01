@@ -1,0 +1,37 @@
+.student-noticeboard-root {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  font-family: Inter, Roboto, Arial, sans-serif;
+  color: #0f172a;
+}
+
+.nb-card {
+  border-radius: 10px;
+  border: 1px solid #e7eefc;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+}
+
+.nb-avatar {
+  background: linear-gradient(135deg, #01337a 0%, #2563eb 100%);
+  color: #fff;
+}
+
+.nb-date {
+  color: #6b7280;
+}
+
+.nb-description {
+  margin-top: 4px;
+  color: #01337a;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .student-noticeboard-root {
+    padding: 8px 12px;
+  }
+  .nb-description {
+    font-size: 14px;
+  }
+}

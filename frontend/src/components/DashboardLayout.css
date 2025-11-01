@@ -42,6 +42,10 @@
   background: #fff;
   margin-right: 4px;
   box-shadow: 0 2px 10px #fff4;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
 }
 
 .sidebar-menu {
