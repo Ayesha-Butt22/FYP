@@ -49,7 +49,7 @@ exports.getPresentation = async (req, res) => {
         const { week, fypPart } = req.query;
         const schedule = await PresentationSchedule.findOne({ week, fypPart })
             .populate("facultyPanels", "name email")
-            .populate("slots.bookedBy", "leader member2 member3");
+            .populate("slots.bookedBy", "groupId");
 
         if (!schedule) return res.json({ success: true, data: null });
         res.json({ success: true, data: schedule });

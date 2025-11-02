@@ -116,7 +116,7 @@ export default function PresentationModal({ week, onClose , year}) {
                                 <li key={i}>
                                     {new Date(s.startTime).toLocaleString()} -{" "}
                                     {new Date(s.endTime).toLocaleString()}{" "}
-                                    {s.bookedBy ? "(Booked)" : "(Available)"}
+                                    {s.bookedBy ? `(${s.bookedBy.groupId})` : "(Available)"}
                                 </li>
                             ))}
                         </ul>
