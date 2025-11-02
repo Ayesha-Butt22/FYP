@@ -13,9 +13,10 @@ import {
 } from "@mui/material";
 import ToastService from "../../ToastService/ToastService.jsx";
 
-export default function SlotBookingModal({ open, onClose, slots = [], groupId, scheduleId }) {
+export default function SlotBookingModal({ open, onClose, slots = [], groupId, scheduleId , data}) {
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [loading, setLoading] = useState(false);
+    console.log(data);
 
     const handleBook = async () => {
         if (!selectedSlot) return ToastService.error("Please select a slot");
@@ -54,9 +55,8 @@ export default function SlotBookingModal({ open, onClose, slots = [], groupId, s
                     borderBottom: "1px solid #e0e0e0",
                 }}
             >
-                📅 Select a Presentation Slot
+                📅 Select  a Presentation Slot for {data.week} at {data.venue}
             </DialogTitle>
-
             <DialogContent dividers sx={{ backgroundColor: "#fafafa", p: 3 }}>
                 {slots.length === 0 ? (
                     <Typography color="textSecondary" align="center">

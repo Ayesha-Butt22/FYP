@@ -17,6 +17,7 @@ const SupervisorWhiteboardApi = {
     }
   },
 
+
   // Get all notes grouped by groupId
   getAllByGroups: async () => {
     try {
@@ -42,6 +43,18 @@ const SupervisorWhiteboardApi = {
       return null;
     }
   },
+
+  StudentWhiteboard: async (email) => {
+    try {
+      const res = await fetch(`${API_BASE}/studentWhiteboard/${email}`);
+      if (!res.ok) throw new Error("Failed to fetch student notes");
+      return await res.json();
+    } catch (error) {
+      console.error("Error fetching student notes:", error);
+      return { success: false, notes: [] };
+    }
+  },
+
 };
 
 export default SupervisorWhiteboardApi;

@@ -131,6 +131,7 @@ exports.checkSlot = async (req, res) => {
             alreadyBooked: false,
             scheduleId: schedule._id,
             groupId:group._id,
+            wholeData :schedule,
             availableSlots,
         });
     } catch (err) {

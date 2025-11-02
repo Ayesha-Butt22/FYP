@@ -192,6 +192,7 @@ export default function OverviewStudent({ onTabChange }) {
               slots={availableSlots.availableSlots}
               groupId={availableSlots.groupId}
               scheduleId={availableSlots.scheduleId}
+              data={availableSlots.wholeData }
           />
       )}
 

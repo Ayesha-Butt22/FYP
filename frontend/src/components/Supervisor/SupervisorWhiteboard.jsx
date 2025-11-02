@@ -16,7 +16,6 @@ import { fetchSupervisorProposals } from "../Api/Proposals/supervisorReviewApi.j
 import SupervisorWhiteboardApi from "../Api/Proposals/supervisorWhiteboardApi.jsx";
 import "./SupervisorWhiteboard.css";
 
-// Export notes as HTML
 function exportNotesAsHTML(notesByGroup) {
   const html =
     `<html><head><title>Supervisor Whiteboard Notes</title></head><body>` +
@@ -51,10 +50,10 @@ export default function SupervisorWhiteboard() {
   const [inputs, setInputs] = useState({});
   const [errors, setErrors] = useState({});
 
-  // Fetch groups and initialize state
   useEffect(() => {
-    const fetchGroups = async () => {
+    const fetchGroupsAndNotes = async () => {
       const data = await fetchSupervisorProposals();
+
       const filteredGroups = data.map((proposal) => {
         const group = proposal.groupId;
         return {
@@ -81,35 +80,27 @@ export default function SupervisorWhiteboard() {
       setNotesByGroup(notesInit);
       setInputs(inputsInit);
       setErrors(errorsInit);
-    };
-    fetchGroups();
-  }, []);
+      try {
+        const groupedNotes = await SupervisorWhiteboardApi.getAllByGroups();
+        console.log("Fetched grouped notes:", groupedNotes);
 
- useEffect(() => {
-  const fetchAllNotes = async () => {
-    try {
-      const groupedNotes = await SupervisorWhiteboardApi.getAllByGroups();
-      console.log("Fetched grouped notes:", groupedNotes);
-
-      // Merge only if the API actually returned something
-      if (groupedNotes && typeof groupedNotes === "object") {
         setNotesByGroup((prev) => {
           const updated = { ...prev };
-          Object.keys(groupedNotes).forEach((groupId) => {
-            updated[groupId] = groupedNotes[groupId];
-          });
+          for (const groupId in groupedNotes) {
+            if (Array.isArray(groupedNotes[groupId])) {
+              updated[groupId] = groupedNotes[groupId];
+            }
+          }
           return updated;
         });
+      } catch (err) {
+        console.error("Error fetching notes:", err);
       }
-    } catch (err) {
-      console.error("Error fetching notes:", err);
-    }
-  };
-  fetchAllNotes();
-}, []);
+    };
 
+    fetchGroupsAndNotes();
+  }, []);
 
-  // Post a new note
   const handlePost = async (groupId) => {
     if (!inputs[groupId] || inputs[groupId] === "<p><br></p>") {
       setErrors((e) => ({ ...e, [groupId]: "Please write a note." }));
@@ -157,16 +148,6 @@ export default function SupervisorWhiteboard() {
         Whiteboard
       </DashboardSectionHeader>
 
-      <Box mb={2} textAlign="center">
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={() => exportNotesAsHTML(notesByGroup)}
-        >
-          Export Notes
-        </Button>
-      </Box>
-
       <Stack direction="row" spacing={3} justifyContent="center" alignItems="flex-start" className="group-stack">
         {groups.map((group) => (
           <Paper key={group.id} elevation={3} className="whiteboardsup-group-card">
@@ -174,11 +155,13 @@ export default function SupervisorWhiteboard() {
               <Typography className="group-title">{group.projectTitle}</Typography>
             </Stack>
 
-            <Typography variant="body2" color="textSecondary" mb={1}>
+            <Box mb={1}>
               {group.members.map((member, index) => (
-                <div style={{ fontSize: 18, color: "#000" }} key={index}>{member}</div>
+                  <Typography key={index} sx={{ fontSize: 18, color: "#000" }}>
+                    {member}
+                  </Typography>
               ))}
-            </Typography>
+            </Box>
 
             <ReactQuill
               value={inputs[group.id]}
@@ -222,6 +205,16 @@ export default function SupervisorWhiteboard() {
           </Paper>
         ))}
       </Stack>
+      <Box mb={2} mt={5} textAlign="center">
+        <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => exportNotesAsHTML(notesByGroup)}
+        >
+          Export Notes
+        </Button>
+      </Box>
     </Box>
+
   );
 }
