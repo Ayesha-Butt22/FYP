@@ -73,6 +73,9 @@ export default function ManageDeadlines() {
                             <strong>Deliverables:</strong> {d.deliverables}
                         </p>
                     )}
+                    <p className="tooltip-line">
+                        <strong>Evaluation:</strong> {d.evaluations}
+                    </p>
                     <p className="tooltip-date">📅 {d.dateLabel}</p>
                 </div>
             );
@@ -81,7 +84,7 @@ export default function ManageDeadlines() {
     };
 
 
-    const CustomDot = ({ cx, cy, payload }) => (
+    const CustomDot = ({cx, cy, payload}) => (
         <g>
             <circle cx={cx} cy={cy} r={9} fill="#01337a" stroke="#fff" strokeWidth={3} />
 
