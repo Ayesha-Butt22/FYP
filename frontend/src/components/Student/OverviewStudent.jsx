@@ -7,7 +7,36 @@ import StudentWhiteboard from "./StudentWhiteboard";
 import "./OverviewStudent.css";
 import ToastService from "../ToastService/ToastService.jsx";
 import SlotBookingModal from "./Modal/SlotsBookingModal.jsx";
+import styled, {css, keyframes} from "styled-components";
 
+const glow = keyframes`
+  0% {
+    box-shadow: 0 0 5px #2196f3, 0 0 10px #2196f3, 0 0 20px #2196f3;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px #64b5f6, 0 0 40px #2196f3, 0 0 60px #1976d2;
+    transform: scale(1.1);
+  }
+  100% {
+    box-shadow: 0 0 5px #2196f3, 0 0 10px #2196f3, 0 0 20px #2196f3;
+    transform: scale(1);
+  }
+`;
+
+
+const GlowingIconWrapper = styled.div`
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s;
+  ${(props) =>
+    props.glow &&
+    css`
+      animation: ${glow} 1.5s infinite;
+    `}
+`;
 
 const activities = [
   { type: "group", text: "Invited Ali Raza to your group", time: "2 hours ago" },
@@ -28,6 +57,7 @@ export default function OverviewStudent({ onTabChange }) {
   const studentEmail = localStorage.getItem("email");
   const [slotModalOpen, setSlotModalOpen] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
+  const [hasNewNotification ,setHasNewNotification] = useState(true);
 
   useEffect(() => {
     const checkSlotBooking = async () => {
@@ -60,13 +90,19 @@ export default function OverviewStudent({ onTabChange }) {
     <div className="overview-container">
       <div className="welcome-banner">
         <Tooltip title="Read instructions from supervisor" arrow>
+
           <button
             aria-label="Supervisor Notes"
             className="whiteboard-fab"
-            onClick={() => setWhiteboardOpen(true)}
+            onClick={() => {
+              setWhiteboardOpen(true);
+              setHasNewNotification(false);
+            }}
             title="Supervisor Notes"
           >
+            <GlowingIconWrapper glow={hasNewNotification}>
             <FaBookOpen />
+            </GlowingIconWrapper>
           </button>
         </Tooltip>
 
