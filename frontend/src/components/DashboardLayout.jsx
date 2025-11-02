@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import styled, { keyframes } from "styled-components";
-import { IconButton, Tooltip, Dialog, DialogTitle, DialogContent } from "@mui/material";
+import styled, { keyframes , css } from "styled-components";
+import {IconButton, Tooltip, Dialog, DialogTitle, DialogContent} from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
 import Avatar from "@mui/material/Avatar";
@@ -9,11 +9,31 @@ import "./DashboardLayout.css";
 import ToastService from "./ToastService/ToastService.jsx";
 import ProfileService from "./Api/ProfileService.jsx";
 import getUserInfoFromStorage from "./Auth/UserInfo.jsx";
-import StudentNoticeboard from "./Student/StudentNoticeboard.jsx"; 
+import StudentNoticeboard from "./Student/StudentNoticeboard.jsx";
+import {useNavigate} from "react-router-dom";
 
 const fadeIn = keyframes`
   0% { opacity: 0; transform: translateY(20px);}
   100% { opacity: 1; transform: translateY(0);}
+`;
+
+const glow = keyframes`
+  0% { box-shadow: 0 0 5px #1976d2; }
+  50% { box-shadow: 0 0 20px #1976d2; }
+  100% { box-shadow: 0 0 5px #1976d2; }
+`;
+
+const GlowingIconWrapper = styled.div`
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s;
+  ${(props) =>
+    props.glow &&
+    css`
+      animation: ${glow} 1.5s infinite;
+    `}
 `;
 
 const DashboardLayoutStyled = styled.div`
@@ -48,8 +68,11 @@ export default function DashboardLayout({
   const displayRole = localStorage.getItem("role") || "User";
   const email = localStorage.getItem("email");
   const user = getUserInfoFromStorage();
+  const [hasNewNotification, setHasNewNotification] = useState(true);
+  const navigate = useNavigate();
 
-  const [noticeboardOpen, setNoticeboardOpen] = useState(false);
+
+    const [noticeboardOpen, setNoticeboardOpen] = useState(false);
 
   useEffect(() => {
     const loadProfilePic = async () => {
@@ -92,6 +115,7 @@ export default function DashboardLayout({
 
   const handleNotificationClick = () => {
     setNoticeboardOpen(true);
+    setHasNewNotification(false);
   };
 
   return (
@@ -129,18 +153,20 @@ export default function DashboardLayout({
           <h1 className="dashboard-title">{headerTitle}</h1>
           <div className="dashboard-profile">
             <Tooltip title="Notifications">
-              <NotificationsActiveIcon
-                sx={{
-                  width: 40,
-                  height: 40,
-                  marginRight: "10px",
-                  color: "#01337a",
-                  cursor: "pointer",
-                  transition: "0.3s",
-                  "&:hover": { transform: "scale(1.05)" },
-                }}
-                onClick={handleNotificationClick}
-              />
+                <GlowingIconWrapper glow={hasNewNotification}>
+                    <NotificationsActiveIcon
+                        sx={{
+                            width: 40,
+                            height: 40,
+                            marginRight: "2px",
+                            color: "#01337a",
+                            cursor: "pointer",
+                            transition: "0.3s",
+                            "&:hover": { transform: "scale(1.05)" },
+                        }}
+                        onClick={handleNotificationClick}
+                    />
+                </GlowingIconWrapper>
             </Tooltip>
 
             <Tooltip title="Click to change profile picture">

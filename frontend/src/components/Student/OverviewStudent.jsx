@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { FaUsers, FaClipboardCheck, FaCalendarCheck, FaCheckCircle, FaStar, FaArrowRight, FaBookOpen, FaTasks, FaLightbulb } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogTitle, IconButton, Tooltip } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import StudentWhiteboard from "./StudentWhiteboard";
 import "./OverviewStudent.css";
+import ToastService from "../ToastService/ToastService.jsx";
+import SlotBookingModal from "./Modal/SlotsBookingModal.jsx";
 
-// Dummy Data
+
 const activities = [
   { type: "group", text: "Invited Ali Raza to your group", time: "2 hours ago" },
   { type: "proposal", text: "Submitted Project Proposal", time: "Yesterday" },
@@ -23,11 +25,40 @@ const progress = [
 export default function OverviewStudent({ onTabChange }) {
   const navigate = useNavigate();
   const [whiteboardOpen, setWhiteboardOpen] = useState(false);
+  const studentEmail = localStorage.getItem("email");
+  const [slotModalOpen, setSlotModalOpen] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
+
+  useEffect(() => {
+    const checkSlotBooking = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/deadlineSchedule/getSlots/${studentEmail}`);
+        const data = await res.json();
+
+        if (!data.success) return;
+
+        if (!data.alreadyBooked && data.availableSlots.length > 0) {
+          ToastService.info("Please Book a slot");
+          setAvailableSlots(data);
+          setSlotModalOpen(true);
+        }
+        if (data.alreadyBooked && data.details) {
+          const msg = `Your slot is booked for ${data.details?.week || "this week"} at venue ${data.details?.venue || "TBD"} — be ready!`;
+          ToastService.success(msg);
+        }
+
+      } catch (err) {
+        console.error("Error checking slot booking:", err);
+      }
+    };
+
+    if (studentEmail) checkSlotBooking();
+  }, [studentEmail]);
+
 
   return (
     <div className="overview-container">
       <div className="welcome-banner">
-        {/* Floating whiteboard icon only (tooltip on hover) */}
         <Tooltip title="Read instructions from supervisor" arrow>
           <button
             aria-label="Supervisor Notes"
@@ -153,6 +184,17 @@ export default function OverviewStudent({ onTabChange }) {
           <StudentWhiteboard />
         </DialogContent>
       </Dialog>
+
+      {slotModalOpen && (
+          <SlotBookingModal
+              open={slotModalOpen}
+              onClose={() => setSlotModalOpen(false)}
+              slots={availableSlots.availableSlots}
+              groupId={availableSlots.groupId}
+              scheduleId={availableSlots.scheduleId}
+          />
+      )}
+
     </div>
   );
 }

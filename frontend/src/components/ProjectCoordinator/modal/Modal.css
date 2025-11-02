@@ -1,0 +1,195 @@
+/* Global styles for the modal */
+.modal-overlay-week {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    animation: fadeIn 0.3s forwards;
+}
+
+.modal-content {
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    width: 600px;
+    max-width: 90%;
+    transform: scale(0.95);
+    animation: slideIn 0.3s forwards cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: scale(0.9) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Modal Header */
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a202c;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    color: #4a5568;
+    margin-bottom: 6px;
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box; /* Important for 100% width */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
+}
+
+.form-select[multiple] {
+    padding: 8px;
+    min-height: 120px; /* Give the multi-select box some height */
+}
+
+/* Slot Adder Section */
+.slot-adder {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end; /* Aligns button with bottom of inputs */
+}
+
+.input-group {
+    flex: 1; /* Makes input groups take equal space */
+}
+
+/* Use form-label and form-input for consistency */
+.input-group .form-label {
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+
+/* Slot List */
+.slot-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.slot-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background-color: #f7fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.slot-item:last-child {
+    border-bottom: none;
+}
+
+.slot-item span {
+    font-size: 0.9rem;
+    color: #2d3748;
+}
+
+.slot-remove-btn {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 4px;
+    transition: color 0.2s;
+}
+
+.slot-remove-btn:hover {
+    color: #c53030;
+}
+
+/* Modal Footer */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary {
+    background-color: #3182ce;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2b6cb0;
+    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
+}
+
+.btn-primary:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background-color: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-secondary:hover {
+    background-color: #cbd5e0;
+}
+
+.btn-success {
+    background-color: #38a169;
+    color: white;
+    font-size: 1.1rem;
+    padding: 8px 14px; /* Slightly different padding for the small add button */
+}
+
+.btn-success:hover {
+    background-color: #2f855a;
+}

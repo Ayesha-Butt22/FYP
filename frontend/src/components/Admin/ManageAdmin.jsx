@@ -171,8 +171,6 @@ export default function ManageAdmin() {
     }
   };
 
-  // NOTE: We short-circuit update to return a simulated successful response
-  // before executing any real API call. This keeps the UI working offline.
   const handleUpdate = async () => {
     setLoading(true);
     try {
@@ -211,7 +209,7 @@ export default function ManageAdmin() {
     }
   };
 
-  // NOTE: We short-circuit create to return a simulated successful response
+
   const handleAdd = async () => {
     setLoading(true);
     try {
