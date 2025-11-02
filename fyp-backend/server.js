@@ -15,6 +15,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 
   const NoticeboardRoutes = require("./routes/NoticeboardRoutes")
+  const SupervisorWhiteboardRoutes = require("./routes/SupervisorWhiteboardRoutes");
 
 app.use('/Filesk', express.static(path.join(__dirname, 'Filesk')));
 app.use('/api/auth', require('./routes/auth'));
@@ -31,6 +32,8 @@ app.use("/api/noticeboard", NoticeboardRoutes);
 app.use("/api/deadlineSchedule" , require("./routes/deadlineSchedule"))
 
 
+app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);
+// Test route
 app.get('/', (req, res) => res.send('API Running'));
 
 const PORT = process.env.PORT || 5000;
