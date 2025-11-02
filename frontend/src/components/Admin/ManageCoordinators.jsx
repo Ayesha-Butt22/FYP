@@ -17,7 +17,7 @@ function FormInput({ label, error, ...props }) {
   );
 }
 
-const headers = ["Name", "Email", "Department", "Gender", "Contact number"];
+const headers = ["Name", "Email", "Department"];
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -32,12 +32,6 @@ const validateForm = (data, showPassword) => {
     errors.Email = "Invalid email format";
   }
   if (!data.Department?.trim()) errors.Department = "Department is required";
-  if (data.ContactNumber && data.ContactNumber.length < 7) {
-    errors.ContactNumber = "Contact number seems too short";
-  }
-  if (data.Gender && !["Male", "Female", "Other"].includes(data.Gender)) {
-    errors.Gender = "Invalid gender selection";
-  }
   if (showPassword) {
     if (!data.Password?.trim()) errors.Password = "Password is required";
     if (data.Password && data.Password.length < 6) errors.Password = "Password must be at least 6 characters";
@@ -54,8 +48,6 @@ export default function ManageCoordinators() {
     Name: "",
     Email: "",
     Department: "",
-    Gender: "",
-    ContactNumber: "",
     Password: ""
   });
   const [formErrors, setFormErrors] = useState({});
@@ -64,35 +56,26 @@ export default function ManageCoordinators() {
   useEffect(() => {
     const fetchCoordinators = async () => {
       setLoading(true);
-      try {
-        const res = await adminSupervisorApi.getCoordinators();
-        if (res && res.success) {
-          const coordinators = res.data.map(coord => ({
-            ID: coord._id,
-            Name: coord.name,
-            Email: coord.email,
-            Department: coord.department || "",
-            Gender: coord.gender ? (typeof coord.gender === "string" ? coord.gender.charAt(0).toUpperCase() + coord.gender.slice(1) : coord.gender) : "",
-            ContactNumber: coord.contactNumber || ""
-          }));
-          setRows(coordinators);
-        } else {
-          setRows([]);
-          toastService.error("Failed to fetch coordinators. Please try again.");
-        }
-      } catch (err) {
-        console.error("fetchCoordinators error:", err);
+      const res = await adminSupervisorApi.getCoordinators();
+      if (res.success) {
+        const coordinators = res.data.map(coord => ({
+          ID: coord._id,
+          Name: coord.name,
+          Email: coord.email,
+          Department: coord.department || ""
+        }));
+        setRows(coordinators);
+      } else {
         setRows([]);
         toastService.error("Failed to fetch coordinators. Please try again.");
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
     fetchCoordinators();
   }, []);
 
   const resetForm = () => {
-    setFormData({ Name: "", Email: "", Department: "", Gender: "", ContactNumber: "", Password: "" });
+    setFormData({ Name: "", Email: "", Department: "", Password: "" });
     setFormErrors({});
     setSideFormMode(null);
     setEditIndex(null);
@@ -112,21 +95,13 @@ export default function ManageCoordinators() {
         await handleAdd();
       }
     } catch (err) {
-      console.error("handleSubmit error:", err);
       toastService.error('An error occurred. Please try again.');
     }
   };
 
   const handleEdit = (row, idx) => {
     setEditIndex(idx);
-    setFormData({
-      Name: row.Name,
-      Email: row.Email,
-      Department: row.Department,
-      Gender: row.Gender || "",
-      ContactNumber: row.ContactNumber || "",
-      Password: ""
-    });
+    setFormData({ Name: row.Name, Email: row.Email, Department: row.Department, Password: "" });
     setFormErrors({});
     setSideFormMode('edit');
   };
@@ -141,97 +116,69 @@ export default function ManageCoordinators() {
 
   const handleUpdate = async () => {
     setLoading(true);
-    try {
-      const id = rows[editIndex].ID;
-      const payload = {
-        name: formData.Name,
-        email: formData.Email,
-        department: formData.Department,
-        gender: formData.Gender,
-        contactNumber: formData.ContactNumber,
-        ...(formData.Password ? { password: formData.Password } : {})
-      };
-      const res = await adminSupervisorApi.updateCoordinator(id, payload);
-      if (res && res.success) {
-        toastService.success('Coordinator updated successfully!');
-        resetForm();
-        // refetch list
-        const refreshed = await adminSupervisorApi.getCoordinators();
-        if (refreshed && refreshed.success) {
-          setRows(refreshed.data.map(coord => ({
-            ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || "", Gender: coord.gender || "", ContactNumber: coord.contactNumber || ""
-          })));
-        }
-      } else {
-        toastService.error("Update failed: " + (res?.error || res?.data?.message || 'Unknown error'));
-      }
-    } catch (err) {
-      console.error("handleUpdate error:", err);
-      toastService.error("Update failed: " + (err.message || ""));
-    } finally {
-      setLoading(false);
+    const id = rows[editIndex].ID;
+    const payload = {
+      name: formData.Name,
+      email: formData.Email,
+      department: formData.Department,
+      ...(formData.Password ? { password: formData.Password } : {})
+    };
+    const res = await adminSupervisorApi.updateCoordinator(id, payload);
+    setLoading(false);
+    if (res.success) {
+      toastService.success('Coordinator updated successfully!');
+      resetForm();
+      // refetch list
+      const refreshed = await adminSupervisorApi.getCoordinators();
+      setRows(refreshed.data.map(coord => ({
+        ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || ""
+      })));
+    } else {
+      toastService.error("Update failed: " + (res.error || res.data?.message || 'Unknown error'));
     }
   };
 
   const handleAdd = async () => {
     setLoading(true);
-    try {
-      const payload = {
-        name: formData.Name,
-        email: formData.Email,
-        password: formData.Password,
-        department: formData.Department,
-        gender: formData.Gender,
-        contactNumber: formData.ContactNumber
-      };
-      const res = await adminSupervisorApi.createCoordinator(payload);
-      if (res && res.success) {
-        toastService.success('Coordinator added successfully!');
-        resetForm();
-        const refreshed = await adminSupervisorApi.getCoordinators();
-        if (refreshed && refreshed.success) {
-          setRows(refreshed.data.map(coord => ({
-            ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || "", Gender: coord.gender || "", ContactNumber: coord.contactNumber || ""
-          })));
-        }
-      } else {
-        toastService.error("Add failed: " + (res?.error || res?.data?.message || 'Unknown error'));
-      }
-    } catch (err) {
-      console.error("handleAdd error:", err);
-      toastService.error("Add failed: " + (err.message || ""));
-    } finally {
-      setLoading(false);
+    const payload = {
+      name: formData.Name,
+      email: formData.Email,
+      password: formData.Password,
+      department: formData.Department
+    };
+    const res = await adminSupervisorApi.createCoordinator(payload);
+    setLoading(false);
+    if (res.success) {
+      toastService.success('Coordinator added successfully!');
+      resetForm();
+      const refreshed = await adminSupervisorApi.getCoordinators();
+      setRows(refreshed.data.map(coord => ({
+        ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || ""
+      })));
+    } else {
+      toastService.error("Add failed: " + (res.error || res.data?.message || 'Unknown error'));
     }
   };
 
   const handleDelete = async (idx) => {
-    const confirmed = await Confirm("Are you sure you want to delete this coordinator?");
+    const confirmed = await Confirm("Are you sure you want to delete this coordinator??");
     if (!confirmed) {
       return;
     }
     setLoading(true);
-    try {
-      const id = rows[idx].ID;
-      const res = await adminSupervisorApi.deleteCoordinator(id);
-      if (res && res.success) {
-        toastService.success('Coordinator deleted successfully!');
-        resetForm();
-        // refetch list
-        const refreshed = await adminSupervisorApi.getCoordinators();
-        if (refreshed && refreshed.success) {
-          setRows(refreshed.data.map(coord => ({
-            ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || "", Gender: coord.gender || "", ContactNumber: coord.contactNumber || ""
-          })));
-        }
-      } else {
-        toastService.error("Delete failed: " + (res?.error || res?.data?.message || 'Unknown error'));
-      }
-    } catch (err) {
-      console.error("handleDelete error:", err);
-      toastService.error("Delete failed: " + (err.message || ""));
-    } finally {
-      setLoading(false);
+    const id = rows[idx].ID;
+    const res = await adminSupervisorApi.deleteCoordinator(id);
+    setLoading(false);
+    if (res.success) {
+      toastService.success('Coordinator deleted successfully!');
+      resetForm();
+      // refetch list
+      const refreshed = await adminSupervisorApi.getCoordinators();
+      setRows(refreshed.data.map(coord => ({
+        ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || ""
+      })));
+    } else {
+      toastService.error("Delete failed: " + (res.error || res.data?.message || 'Unknown error'));
     }
   };
 
@@ -262,7 +209,7 @@ export default function ManageCoordinators() {
           <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
             <AppTable
               headers={headers}
-              rows={rows.map(({ Name, Email, Department, Gender, ContactNumber }) => ({ Name, Email, Department, Gender, "Contact number": ContactNumber }))}
+              rows={rows.map(({ Name, Email, Department }) => ({ Name, Email, Department }))}
               renderActions={(row, i) => (
                 <>
                   <button
@@ -353,33 +300,6 @@ export default function ManageCoordinators() {
               error={formErrors.Department}
               placeholder="Enter department"
             />
-
-            <div className="form-group">
-              <label>Gender</label>
-              <select
-                name="Gender"
-                value={formData.Gender}
-                onChange={handleFormChange}
-                style={{ padding: '8px', borderRadius: '6px', border: `1px solid ${formErrors.Gender ? '#f43f5e' : '#dbdbec'}`, width: '100%' }}
-              >
-                <option value="">-- Select gender --</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-              {formErrors.Gender && <span className="error-text">{formErrors.Gender}</span>}
-            </div>
-
-            <FormInput
-              label="Contact number"
-              name="ContactNumber"
-              value={formData.ContactNumber}
-              onChange={handleFormChange}
-              type="text"
-              placeholder="+92-300-1234567"
-              error={formErrors.ContactNumber}
-            />
-
             {sideFormMode === 'add' && (
               <FormInput
                 label="Password"
@@ -422,4 +342,4 @@ export default function ManageCoordinators() {
       )}
     </div>
   );
-}
+} 
