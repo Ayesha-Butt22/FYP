@@ -17,13 +17,13 @@ function FormInput({ label, error, ...props }) {
   );
 }
 
-// Updated headers to include Admin id, Name, Email, Gender, Contact number
 const headers = ["Admin id", "Name", "Email", "Gender", "Contact number"];
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
+
 const validateForm = (data, showPassword) => {
   const errors = {};
   if (!data.Name?.trim()) errors.Name = "Name is required";
@@ -32,7 +32,7 @@ const validateForm = (data, showPassword) => {
   } else if (!validateEmail(data.Email)) {
     errors.Email = "Invalid email format";
   }
-  // optional: basic contact number check (not strict)
+  if (!data.Gender) errors.Gender = "Gender is required";
   if (data.ContactNumber && data.ContactNumber.length < 7) {
     errors.ContactNumber = "Contact number seems too short";
   }
@@ -44,45 +44,22 @@ const validateForm = (data, showPassword) => {
   return errors;
 };
 
-/**
- * TEMPORARY: Use dummy admins array and short-circuit update/delete/add calls
- * Do not change API implementation files. This component will simulate responses
- * locally and not actually call the backend for list/add/update/delete operations.
- *
- * To re-enable real API behavior, remove the short-circuit returns in handleAdd/handleUpdate/handleDelete
- * and allow adminSupervisorApi.* to run as before.
- */
-const DUMMY_ADMINS = [
-  {
-    _id: "adm-001",
-    name: "Ayesha Butt",
-    email: "ayesha.butt@example.com",
-    gender: "Female",
-    contactNumber: "+92-300-1112223",
-    password: "secret1"
-  },
-  {
-    _id: "adm-002",
-    name: "Madiha Sumbal",
-    email: "madiha.sumbal@example.com",
-    gender: "Female",
-    contactNumber: "+92-300-4445556",
-    password: "secret2"
-  },
-  {
-    _id: "adm-003",
-    name: "Zain Ali",
-    email: "zain.ali@example.com",
-    gender: "Male",
-    contactNumber: "+92-300-7778889",
-    password: "secret3"
-  }
-];
+// Function to convert gender for display
+const getDisplayGender = (gender) => {
+  if (!gender) return "";
+  return gender.charAt(0).toUpperCase() + gender.slice(1);
+};
+
+// Function to convert gender for backend
+const getBackendGender = (gender) => {
+  if (!gender) return "";
+  return gender.toLowerCase();
+};
 
 export default function ManageAdmin() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sideFormMode, setSideFormMode] = useState(null); // 'add' or 'edit'
+  const [sideFormMode, setSideFormMode] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
   const [formData, setFormData] = useState({
     ID: "",
@@ -93,32 +70,37 @@ export default function ManageAdmin() {
     ContactNumber: ""
   });
   const [formErrors, setFormErrors] = useState({});
+  const [processing, setProcessing] = useState(false);
 
-  // Fetch admins from DUMMY instead of backend while testing
+  // Fetch admins from backend
   useEffect(() => {
     const fetchAdmins = async () => {
       setLoading(true);
       try {
-        // Use dummy data here (simulate API response)
-        const res = { success: true, data: DUMMY_ADMINS };
-        if (res.success) {
+        const res = await adminSupervisorApi.getAdmins();
+        console.log("Fetch Admins Response:", res);
+        
+        if (res.success && res.data) {
           const admins = res.data.map(adm => ({
-            ID: adm._id,
+            ID: adm.studentId || adm._id,
             Name: adm.name,
             Email: adm.email,
-            Gender: adm.gender,
+            Gender: getDisplayGender(adm.gender), // Convert to display format
             ContactNumber: adm.contactNumber,
-            Password: adm.password
+            Password: "******",
+            _id: adm._id,
+            originalGender: adm.gender // Store original for editing
           }));
           setRows(admins);
         } else {
           setRows([]);
-          toastService.error("Failed to fetch admins. Please try again.");
+          const errorMsg = res.data?.error || res.data?.message || "Failed to fetch admins";
+          toastService.error(errorMsg);
         }
       } catch (err) {
         console.error("fetchAdmins error:", err);
         setRows([]);
-        toastService.error("Failed to fetch admins. Please try again.");
+        toastService.error("Network error: Failed to fetch admins");
       } finally {
         setLoading(false);
       }
@@ -146,7 +128,7 @@ export default function ManageAdmin() {
         await handleAdd();
       }
     } catch (err) {
-      toastService.error('An error occurred. Please try again.');
+      toastService.error('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -156,9 +138,9 @@ export default function ManageAdmin() {
       ID: row.ID || "",
       Name: row.Name || "",
       Email: row.Email || "",
-      Password: "",
-      Gender: row.Gender || "",
-      ContactNumber: row["Contact number"] || row.ContactNumber || ""
+      Password: "", // Reset password field when editing
+      Gender: row.Gender || "", // Display format already
+      ContactNumber: row.ContactNumber || ""
     });
     setFormErrors({});
     setSideFormMode('edit');
@@ -172,118 +154,153 @@ export default function ManageAdmin() {
     }
   };
 
-  // NOTE: We short-circuit update to return a simulated successful response
-  // before executing any real API call. This keeps the UI working offline.
+  const getErrorMessage = (res) => {
+    if (res.data?.error) return res.data.error;
+    if (res.data?.message) return res.data.message;
+    if (res.error) return res.error;
+    if (res.data?.errors) {
+      return res.data.errors.map(err => err.msg).join(', ');
+    }
+    return "Unknown error occurred";
+  };
+
   const handleUpdate = async () => {
-    setLoading(true);
+    setProcessing(true);
     try {
-      const id = rows[editIndex].ID;
+      const actualId = rows[editIndex]._id;
       const payload = {
         name: formData.Name,
         email: formData.Email,
-        gender: formData.Gender,
-        contactNumber: formData.ContactNumber,
-        ...(formData.Password ? { password: formData.Password } : {})
+        gender: getBackendGender(formData.Gender), // Convert to backend format
+        contactNumber: formData.ContactNumber
+        // Password field removed from update payload
       };
 
-      // Simulated API response (temporary)
-      const simulatedRes = { success: true, data: { _id: id, ...payload } };
-      // Return simulated response BEFORE calling real API
-      if (simulatedRes.success) {
-        toastService.success('Admin updated successfully! (simulated)');
-        // update local rows: preserve ID and update fields
-        setRows(prev => prev.map(r => r.ID === id ? {
-          ...r,
-          Name: payload.name,
-          Email: payload.email,
-          Gender: payload.gender,
-          ContactNumber: payload.contactNumber
-        } : r));
+      console.log("Update Payload:", payload);
+      const res = await adminSupervisorApi.updateAdmin(actualId, payload);
+      console.log("Update Response:", res);
+      
+      if (res.success) {
+        toastService.success('Admin updated successfully!');
+        
+        // Refresh the admin list
+        const adminsRes = await adminSupervisorApi.getAdmins();
+        if (adminsRes.success) {
+          const admins = adminsRes.data.map(adm => ({
+            ID: adm.studentId || adm._id,
+            Name: adm.name,
+            Email: adm.email,
+            Gender: getDisplayGender(adm.gender), // Convert to display format
+            ContactNumber: adm.contactNumber,
+            Password: "******",
+            _id: adm._id
+          }));
+          setRows(admins);
+        }
+        
         resetForm();
       } else {
-        toastService.error("Update failed: " + (simulatedRes.error || simulatedRes.data?.message || 'Unknown error'));
+        const errorMsg = getErrorMessage(res);
+        toastService.error(`Update failed: ${errorMsg}`);
       }
-      setLoading(false);
-      return simulatedRes;
     } catch (err) {
-      setLoading(false);
       console.error("handleUpdate error:", err);
-      toastService.error("Update failed: " + (err.message || ""));
+      toastService.error(`Update failed: ${err.message}`);
+    } finally {
+      setProcessing(false);
     }
   };
 
-  // NOTE: We short-circuit create to return a simulated successful response
   const handleAdd = async () => {
-    setLoading(true);
+    setProcessing(true);
     try {
       const payload = {
         name: formData.Name,
         email: formData.Email,
-        gender: formData.Gender,
+        gender: getBackendGender(formData.Gender), // Convert to backend format
         contactNumber: formData.ContactNumber,
         password: formData.Password
       };
 
-      // Simulated API response (temporary)
-      const newId = "adm-" + String(Math.floor(Math.random() * 10000)).padStart(4, "0");
-      const simulatedRes = { success: true, data: { _id: newId, ...payload } };
-
-      if (simulatedRes.success) {
-        toastService.success('Admin added successfully! (simulated)');
-        // add to local rows (keep same shape used by table)
-        setRows(prev => [{
-          ID: simulatedRes.data._id,
-          Name: simulatedRes.data.name,
-          Email: simulatedRes.data.email,
-          Gender: simulatedRes.data.gender || "",
-          ContactNumber: simulatedRes.data.contactNumber || "",
-          Password: simulatedRes.data.password || ""
-        }, ...prev]);
+      console.log("Add Payload:", payload);
+      const res = await adminSupervisorApi.createAdmin(payload);
+      console.log("Add Response:", res);
+      
+      if (res.success) {
+        toastService.success('Admin added successfully!');
+        
+        // Refresh the admin list from backend
+        const adminsRes = await adminSupervisorApi.getAdmins();
+        if (adminsRes.success) {
+          const admins = adminsRes.data.map(adm => ({
+            ID: adm.studentId || adm._id,
+            Name: adm.name,
+            Email: adm.email,
+            Gender: getDisplayGender(adm.gender), // Convert to display format
+            ContactNumber: adm.contactNumber,
+            Password: "******",
+            _id: adm._id
+          }));
+          setRows(admins);
+        }
+        
         resetForm();
       } else {
-        toastService.error("Add failed: " + (simulatedRes.error || simulatedRes.data?.message || 'Unknown error'));
+        const errorMsg = getErrorMessage(res);
+        toastService.error(`Add failed: ${errorMsg}`);
       }
-      setLoading(false);
-      return simulatedRes;
     } catch (err) {
-      setLoading(false);
       console.error("handleAdd error:", err);
-      toastService.error("Add failed: " + (err.message || ""));
+      toastService.error(`Add failed: ${err.message}`);
+    } finally {
+      setProcessing(false);
     }
   };
 
-  // NOTE: We short-circuit delete to return a simulated successful response
   const handleDelete = async (idx) => {
     const confirmed = await Confirm("Are you sure you want to delete this admin?");
     if (!confirmed) return;
 
-    setLoading(true);
+    setProcessing(true);
     try {
-      const id = rows[idx].ID;
+      const actualId = rows[idx]._id;
 
-      // Simulated API response (temporary)
-      const simulatedRes = { success: true };
-      // Return simulated response BEFORE calling real API
-      if (simulatedRes.success) {
-        toastService.success('Admin deleted successfully! (simulated)');
-        setRows(prev => prev.filter((r, i) => i !== idx));
+      const res = await adminSupervisorApi.deleteAdmin(actualId);
+      console.log("Delete Response:", res);
+      
+      if (res.success) {
+        toastService.success('Admin deleted successfully!');
+        
+        // Refresh the admin list
+        const adminsRes = await adminSupervisorApi.getAdmins();
+        if (adminsRes.success) {
+          const admins = adminsRes.data.map(adm => ({
+            ID: adm.studentId || adm._id,
+            Name: adm.name,
+            Email: adm.email,
+            Gender: getDisplayGender(adm.gender), // Convert to display format
+            ContactNumber: adm.contactNumber,
+            Password: "******",
+            _id: adm._id
+          }));
+          setRows(admins);
+        }
+        
         resetForm();
       } else {
-        toastService.error("Delete failed: " + (simulatedRes.error || simulatedRes.data?.message || 'Unknown error'));
+        const errorMsg = getErrorMessage(res);
+        toastService.error(`Delete failed: ${errorMsg}`);
       }
-      setLoading(false);
-      return simulatedRes;
     } catch (err) {
-      setLoading(false);
       console.error("handleDelete error:", err);
-      toastService.error("Delete failed: " + (err.message || ""));
+      toastService.error(`Delete failed: ${err.message}`);
+    } finally {
+      setProcessing(false);
     }
   };
 
   const openAddForm = () => {
-    // generate a provisional ID for display (not required)
-    const provisionalId = "adm-" + String(Math.floor(Math.random() * 10000)).padStart(4, "0");
-    setFormData({ ID: provisionalId, Name: "", Email: "", Password: "", Gender: "", ContactNumber: "" });
+    setFormData({ ID: "Auto-generated", Name: "", Email: "", Password: "", Gender: "", ContactNumber: "" });
     setFormErrors({});
     setSideFormMode('add');
     setEditIndex(null);
@@ -298,11 +315,10 @@ export default function ManageAdmin() {
         </DashboardSectionHeader>
 
         <div style={{ display: "flex", justifyContent: "right", margin: "20px 0" }}>
-          {/* Updated: use className for styling and hover behavior in CSS */}
           <button
             className="add-admin-btn"
             onClick={openAddForm}
-            disabled={sideFormMode === "add"}
+            disabled={sideFormMode === "add" || processing}
           >
             + Add Admin
           </button>
@@ -326,15 +342,15 @@ export default function ManageAdmin() {
                   <button
                     className="table-action-btn"
                     onClick={() => handleEdit(rows[i], i)}
-                    disabled={sideFormMode && editIndex === i}
+                    disabled={sideFormMode || processing}
                   >
-                    {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
+                    Edit
                   </button>
                   <button
                     className="table-action-btn"
                     style={{ background: "#f43f5e" }}
                     onClick={() => handleDelete(i)}
-                    disabled={sideFormMode}
+                    disabled={sideFormMode || processing}
                   >
                     Delete
                   </button>
@@ -370,6 +386,7 @@ export default function ManageAdmin() {
             </h3>
             <button
               onClick={resetForm}
+              disabled={processing}
               style={{
                 background: 'none',
                 border: 'none',
@@ -383,7 +400,6 @@ export default function ManageAdmin() {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {/* Admin ID - readonly when editing, visible when adding */}
             <FormInput
               label="Admin id"
               name="ID"
@@ -391,10 +407,9 @@ export default function ManageAdmin() {
               onChange={handleFormChange}
               type="text"
               required
-              placeholder="Admin id"
+              placeholder="Auto-generated"
               error={formErrors.ID}
-              // allow editing only in add mode (for convenience), readonly in edit
-              readOnly={sideFormMode === "edit"}
+              readOnly={true}
             />
 
             <FormInput
@@ -406,6 +421,7 @@ export default function ManageAdmin() {
               required
               error={formErrors.Name}
               placeholder="Enter admin name"
+              disabled={processing}
             />
             <FormInput
               label="Email"
@@ -416,21 +432,28 @@ export default function ManageAdmin() {
               required
               error={formErrors.Email}
               placeholder="Enter admin email"
+              disabled={processing}
             />
 
-            {/* Gender: changed to a select (scrollable dropdown) for both Add and Edit */}
             <div className="form-group">
-              <label>Gender</label>
+              <label>Gender {<span style={{ color: '#f43f5e' }}>*</span>}</label>
               <select
                 name="Gender"
                 value={formData.Gender}
                 onChange={handleFormChange}
-                style={{ padding: '8px', borderRadius: '6px', border: `1px solid ${formErrors.Gender ? '#f43f5e' : '#dbdbec'}`, width: '100%' }}
+                required
+                disabled={processing}
+                style={{ 
+                  padding: '8px', 
+                  borderRadius: '6px', 
+                  border: `1px solid ${formErrors.Gender ? '#f43f5e' : '#dbdbec'}`, 
+                  width: '100%' 
+                }}
               >
                 <option value="">-- Select gender --</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
               </select>
               {formErrors.Gender && <span className="error-text">{formErrors.Gender}</span>}
             </div>
@@ -443,8 +466,10 @@ export default function ManageAdmin() {
               type="text"
               placeholder="+92-300-1234567"
               error={formErrors.ContactNumber}
+              disabled={processing}
             />
 
+            {/* Password field only shown for Add mode */}
             {sideFormMode === "add" && (
               <FormInput
                 label="Password"
@@ -455,8 +480,10 @@ export default function ManageAdmin() {
                 required
                 error={formErrors.Password}
                 placeholder="Enter admin password"
+                disabled={processing}
               />
             )}
+
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
               <button
                 type="submit"
@@ -466,8 +493,9 @@ export default function ManageAdmin() {
                   fontWeight: 800,
                   backgroundColor: '#01337a'
                 }}
+                disabled={processing}
               >
-                {sideFormMode === 'edit' ? 'Update' : 'Save'}
+                {processing ? 'Processing...' : (sideFormMode === 'edit' ? 'Update' : 'Save')}
               </button>
               <button
                 type="button"
@@ -478,6 +506,7 @@ export default function ManageAdmin() {
                   fontWeight: 800
                 }}
                 onClick={resetForm}
+                disabled={processing}
               >
                 Cancel
               </button>

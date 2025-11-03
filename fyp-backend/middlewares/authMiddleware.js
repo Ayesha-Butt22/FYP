@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+
 const protect = async (req, res, next) => {
   try {
     let token;
@@ -9,7 +10,6 @@ const protect = async (req, res, next) => {
         req.headers.authorization.startsWith("Bearer")
     ) {
       token = req.headers.authorization.split(" ")[1];
-
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -30,14 +30,12 @@ const protect = async (req, res, next) => {
   }
 };
 
-
 const isAdmin = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     return next();
   }
   return res.status(403).json({ error: "Access denied. Admin only." });
 };
-
 
 const isStudent = (req, res, next) => {
   if (req.user && req.user.role === "student") {
@@ -46,14 +44,12 @@ const isStudent = (req, res, next) => {
   return res.status(403).json({ error: "Access denied. Students only." });
 };
 
-
 const isSupervisor = (req, res, next) => {
   if (req.user && req.user.role === "supervisor") {
     return next();
   }
   return res.status(403).json({ error: "Access denied. Supervisors only." });
 };
-
 
 const isCoordinator = (req, res, next) => {
   if (req.user && req.user.role === "coordinator") {

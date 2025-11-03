@@ -4,7 +4,6 @@ const { protect, isAdmin } = require('../middlewares/authMiddleware');
 const adminController = require('../controllers/adminController');
 const multer = require("multer");
 
-
 const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
@@ -15,7 +14,6 @@ const validate = (req, res, next) => {
     }
     next();
 };
-
 
 // CREATE USER (Admin, Supervisor, Coordinator)
 router.post(
@@ -28,7 +26,6 @@ router.post(
         body('role').isIn(['supervisor', 'coordinator', 'admin']).withMessage('Role must be supervisor, coordinator, or admin'),
         body('department').optional().isString(),
         body('specialization').optional().isString(),
-        
         body('gender').optional().isIn(['male', 'female', 'other']).withMessage('Gender must be male, female, or other'),
         body('contactNumber').optional().matches(/^\+?[\d\s-]{10,15}$/).withMessage('Invalid contact number')
     ],
@@ -37,7 +34,6 @@ router.post(
 );
 
 router.post("/upload-excel", protect, isAdmin, upload.single("file"), adminController.uploadExcelAndCreateUsers);
-
 
 // GET COORDINATORS
 router.get('/coordinators', protect, isAdmin, adminController.getCoordinators);
@@ -56,9 +52,9 @@ router.post('/approve-students', protect, isAdmin, adminController.approveStuden
 
 // GET ALL USERS
 router.get('/all', protect, isAdmin, adminController.getAllUsers);
-router.get('/all-groups',protect, isAdmin, adminController.getAllGroups);
+router.get('/all-groups', protect, isAdmin, adminController.getAllGroups);
 
-// UPDATE USER — REPLACE YEH
+// UPDATE USER
 router.put(
     '/:id',
     protect,
@@ -74,8 +70,13 @@ router.put(
 
 // DELETE USER
 router.delete('/:id', protect, isAdmin, adminController.deleteUser);
+
+// REMOVE COORDINATOR (convert to supervisor)
+router.patch('/remove-coordinator/:id', protect, isAdmin, adminController.removeCoordinator);
+
 router.get('/stats', protect, isAdmin, adminController.getSystemStats);
 router.post('/promote/:id', protect, isAdmin, adminController.makeCoordinator);
+
 // TOGGLE STUDENT APPROVAL  
 router.patch(
   '/toggle-approval/:id',
@@ -83,4 +84,5 @@ router.patch(
   isAdmin,
   adminController.toggleStudentApproval
 );
+
 module.exports = router;

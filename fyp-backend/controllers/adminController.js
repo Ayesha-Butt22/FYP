@@ -45,15 +45,18 @@ exports.createUser = async (req, res) => {
 
     // Auto Admin ID
     if (role === 'admin') {
-      const count = await User.countDocuments({ role: 'admin', studentId: { $ne: null } });
-      newUser.studentId = `adm-${String(count + 1).padStart(3, '0')}`; // adm-001
+      const count = await User.countDocuments({ role: 'admin' });
+      newUser.studentId = `adm-${String(count + 1).padStart(3, '0')}`;
     }
 
     await newUser.save();
     const u = newUser.toObject();
     delete u.password;
 
-    return res.status(201).json({ message: `${role} created successfully`, user: u });
+    return res.status(201).json({ 
+      message: `${role} created successfully`, 
+      user: u 
+    });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -136,7 +139,6 @@ exports.getAllGroups = async (req, res) => {
 };
 
 // UPDATE USER
-// UPDATE USER — FULLY FIXED
 exports.updateUser = async (req, res) => {
   try {
     const { 
@@ -166,7 +168,7 @@ exports.updateUser = async (req, res) => {
     if (password) {
       user.password = await bcrypt.hash(password, 10);
       user.mustChangePassword = true;
-      user.first_login = true;   // ← YEH SAHI HAI
+      user.first_login = true;
     }
 
     await user.save();
@@ -186,6 +188,32 @@ exports.deleteUser = async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
     await user.deleteOne();
     return res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// REMOVE COORDINATOR (convert to supervisor)
+exports.removeCoordinator = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    
+    if (user.role !== "coordinator") {
+      return res.status(400).json({ error: "User is not a coordinator" });
+    }
+
+    // Change role to supervisor
+    user.role = "supervisor";
+    await user.save();
+    
+    const u = user.toObject();
+    delete u.password;
+
+    return res.json({ 
+      message: "Coordinator removed and converted to supervisor successfully", 
+      user: u 
+    });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -322,6 +350,7 @@ exports.uploadExcelAndCreateUsers = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
 // TOGGLE STUDENT APPROVAL (Approve / Unapprove)
 exports.toggleStudentApproval = async (req, res) => {
   try {
@@ -361,3 +390,4 @@ exports.toggleStudentApproval = async (req, res) => {
     });
   }
 };
+

@@ -182,22 +182,21 @@ export default function ManageCoordinators() {
     }
   };
 
-  // NEW: Remove Coordinator handler (uses same backend delete endpoint here)
+  // UPDATED: Remove Coordinator handler (converts to supervisor instead of deleting)
   const handleRemove = async (idx) => {
-    const confirmed = await Confirm("Are you sure you want to remove this coordinator?");
+    const confirmed = await Confirm("Are you sure you want to remove this coordinator? This will convert them to a supervisor role.");
     if (!confirmed) {
       return;
     }
     setLoading(true);
     const id = rows[idx].ID;
-    // Using the same API call as delete; if you have a dedicated 'remove' endpoint (soft-delete),
-    // replace the call below with adminSupervisorApi.removeCoordinator(id)
-    const res = await adminSupervisorApi.deleteCoordinator(id);
+    // Using the new removeCoordinator API instead of delete
+    const res = await adminSupervisorApi.removeCoordinator(id);
     setLoading(false);
     if (res.success) {
-      toastService.success('Coordinator removed successfully!');
+      toastService.success('Coordinator removed successfully! Converted to supervisor.');
       resetForm();
-      // refetch list
+      // refetch coordinators list
       const refreshed = await adminSupervisorApi.getCoordinators();
       setRows(refreshed.data.map(coord => ({
         ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || ""
@@ -215,9 +214,7 @@ export default function ManageCoordinators() {
   return (
     <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
       <div style={{ flex: sideFormMode ? '2' : '1', transition: 'flex 0.3s ease' }}>
-        
-
-  <DashboardSectionHeader description={" Admins can view the list of coordinators, add new coordinators, update existing coordinator details, and delete coordinators from the system."}>Manage Project Coordinators</DashboardSectionHeader>
+        <DashboardSectionHeader description={" Admins can view the list of coordinators, add new coordinators, update existing coordinator details, and delete coordinators from the system."}>Manage Project Coordinators</DashboardSectionHeader>
                   
         <div style={{ display: "flex", justifyContent: "right", margin: "20px 0" }}>
           <button
@@ -254,13 +251,13 @@ export default function ManageCoordinators() {
                     Delete
                   </button>
 
-                  {/* MOVED: Remove Coordinator button (now after Delete) with updated color */}
+                  {/* UPDATED: Remove Coordinator button with new functionality */}
                   <button
                     className="table-action-btn"
                     style={{ background: "rgb(1 51 122)", color: "#fff", marginLeft: 8 }}
                     onClick={() => handleRemove(i)}
                     disabled={sideFormMode}
-                    title="Remove Coordinator"
+                    title="Remove Coordinator (Convert to Supervisor)"
                   >
                     Remove Coordinator
                   </button>
