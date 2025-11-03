@@ -14,6 +14,7 @@ import StudentJournal from "./StudentJournal";
 import StudentReports from "./StudentReports";
 import SupervisorArchive from "../Supervisor/SupervisorArchive";
 import StudentProfile from "./StudentProfile";
+import StudentEvaluationResults from "./StudentEvaluationResults";
 
 import {
   Dashboard as DashboardIcon,
@@ -38,11 +39,12 @@ const menu = [
   { label: "Idea & Proposal", icon: <AssignmentIcon /> },
   { label: "Selected supervisor", icon: <PersonSearchIcon /> },
   { label: "Templates", icon: <DescriptionIcon /> },
-  { label: "Uploads", icon: <UploadIcon /> }, // <-- New tab inserted after Templates
+  { label: "Uploads", icon: <UploadIcon /> },
   { label: "Tasks", icon: <ListAltIcon /> },
   { label: "Meetings", icon: <CalendarMonthIcon /> },
   { label: "Checklist", icon: <ChecklistIcon /> },
   { label: "Evaluations", icon: <FeedbackIcon /> },
+  { label: "Final Results", icon: <BookIcon /> }, // <-- new tab for final results (read-only)
   { label: "Journal", icon: <BookIcon /> },
   { label: "Reports", icon: <DescriptionIcon /> },
   { label: "FYP Archive", icon: <LibraryBooksIcon /> },
@@ -69,11 +71,12 @@ export default function StudentDashboard() {
     "Idea & Proposal": <StudentIdeaProposal onTabChange={setActiveTab} />,
     "Selected supervisor": <SelectedSupervisor />,
     "Templates": <StudentTemplates />,
-    "Uploads": <StudentUploads />, // <-- new mapping
+    "Uploads": <StudentUploads />,
     "Tasks": <StudentTasks />,
     "Meetings": <StudentMeetings />,
     "Checklist": <StudentChecklist />,
     "Evaluations": <StudentEvaluations />,
+    "Final Results": <StudentEvaluationResults />, // <-- mapped read-only final results
     "Journal": <StudentJournal />,
     "Reports": <StudentReports />,
     "FYP Archive": <SupervisorArchive />,
