@@ -13,9 +13,8 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
 
-
-  const NoticeboardRoutes = require("./routes/NoticeboardRoutes")
-  const SupervisorWhiteboardRoutes = require("./routes/SupervisorWhiteboardRoutes");
+const NoticeboardRoutes = require("./routes/NoticeboardRoutes")
+const SupervisorWhiteboardRoutes = require("./routes/SupervisorWhiteboardRoutes");
 
 app.use('/Filesk', express.static(path.join(__dirname, 'Filesk')));
 app.use('/api/auth', require('./routes/auth'));
@@ -31,8 +30,8 @@ app.use("/api/deadline", require("./routes/deadline"));
 app.use("/api/noticeboard", NoticeboardRoutes);
 app.use("/api/deadlineSchedule" , require("./routes/deadlineSchedule"))
 
-
 app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);
+
 // Test route
 app.get('/', (req, res) => res.send('API Running'));
 

@@ -4,6 +4,8 @@ class AdminApis {
     async makeAPICall(endpoint, payload = {}, options = {}) {
         try {
             const token = localStorage.getItem("token");
+            console.log(`Making API call to: ${API_BASE_URL}/${endpoint}`, payload);
+            
             const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
                 method: options.method || "POST",
                 headers: {
@@ -15,7 +17,23 @@ class AdminApis {
                 ...options,
             });
 
-            const data = await response.json();
+            let data;
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                console.warn("Non-JSON response:", text);
+                data = { message: text };
+            }
+
+            console.log("API Response:", {
+                endpoint,
+                status: response.status,
+                success: response.ok,
+                data
+            });
+
             return {
                 success: response.ok,
                 data,
@@ -23,6 +41,7 @@ class AdminApis {
                 statusText: response.statusText,
             };
         } catch (error) {
+            console.error("API Call Error:", error);
             return {
                 success: false,
                 error: error.message,
@@ -53,6 +72,11 @@ class AdminApis {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
 
+    // --- REMOVE COORDINATOR (convert to supervisor) ---
+    async removeCoordinator(id) {
+        return await this.makeAPICall(`admin/${id}`, { role: "supervisor" }, { method: "PUT" });
+    }
+
     // --- Admin CRUD ---
     async createAdmin(adminData) {
         return await this.makeAPICall("admin/create", { ...adminData, role: "admin" }, { method: "POST" });
@@ -61,7 +85,7 @@ class AdminApis {
         return await this.makeAPICall("admin/alladmins", {}, { method: "GET" });
     }
     async updateAdmin(id, updates) {
-        return await this.makeAPICall(`admin/${id}`, { ...updates, role: "admin" }, { method: "PUT" });
+        return await this.makeAPICall(`admin/${id}`, updates, { method: "PUT" });
     }
     async deleteAdmin(id) {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
@@ -86,7 +110,6 @@ class AdminApis {
     async getstats() {
         return await this.makeAPICall("admin/stats", {}, { method: "GET" });
     }
-
 
     // --- Utility ---
     async getAllUsers() {
