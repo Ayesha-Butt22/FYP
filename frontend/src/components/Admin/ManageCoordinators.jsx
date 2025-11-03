@@ -257,7 +257,7 @@ export default function ManageCoordinators() {
                   {/* MOVED: Remove Coordinator button (now after Delete) with updated color */}
                   <button
                     className="table-action-btn"
-                    style={{ background: "#0d6efd", color: "#fff", marginLeft: 8 }}
+                    style={{ background: "rgb(1 51 122)", color: "#fff", marginLeft: 8 }}
                     onClick={() => handleRemove(i)}
                     disabled={sideFormMode}
                     title="Remove Coordinator"
