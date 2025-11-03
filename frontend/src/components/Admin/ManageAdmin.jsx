@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
 import AppTable from "./AppTable.jsx";
+import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 
--
+// --- Reusable input for form fields ---
 function FormInput({ label, error, ...props }) {
   return (
     <div className="form-group">
@@ -171,6 +172,8 @@ export default function ManageAdmin() {
     }
   };
 
+  // NOTE: We short-circuit update to return a simulated successful response
+  // before executing any real API call. This keeps the UI working offline.
   const handleUpdate = async () => {
     setLoading(true);
     try {
@@ -209,7 +212,7 @@ export default function ManageAdmin() {
     }
   };
 
-
+  // NOTE: We short-circuit create to return a simulated successful response
   const handleAdd = async () => {
     setLoading(true);
     try {
