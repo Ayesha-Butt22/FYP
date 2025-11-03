@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable";
 import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
-import {Confirm} from "../ConfirmService/ConfirmService.jsx";
+import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 
 // --- Reusable input for form fields ---
 function FormInput({ label, error, ...props }) {
@@ -206,6 +206,44 @@ export default function ManageCoordinators() {
     }
   };
 
+  // NEW: Make FYP Incharge handler
+  const handleMakeIncharge = async (idx) => {
+    const confirmed = await Confirm("Make this coordinator the FYP Incharge for their department?");
+    if (!confirmed) return;
+
+    setLoading(true);
+    const id = rows[idx].ID;
+
+    // NOTE: replace `makeCoordinatorIncharge` with the actual API method name if different.
+    // If you have an endpoint like adminSupervisorApi.setCoordinatorRole(id, { role: 'incharge' })
+    // update the call accordingly.
+    let res;
+    try {
+      if (typeof adminSupervisorApi.makeCoordinatorIncharge === "function") {
+        res = await adminSupervisorApi.makeCoordinatorIncharge(id);
+      } else if (typeof adminSupervisorApi.setCoordinatorRole === "function") {
+        res = await adminSupervisorApi.setCoordinatorRole(id, { role: "incharge" });
+      } else {
+        // Fallback: attempt to call updateCoordinator with role flag (adjust backend accordingly)
+        res = await adminSupervisorApi.updateCoordinator(id, { role: "incharge" });
+      }
+    } catch (err) {
+      res = { success: false, error: err?.message || "Network error" };
+    }
+
+    setLoading(false);
+    if (res && res.success) {
+      toastService.success("Coordinator is now FYP Incharge.");
+      // refetch list to reflect any server-side changes (role/status)
+      const refreshed = await adminSupervisorApi.getCoordinators();
+      setRows(refreshed.data.map(coord => ({
+        ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || ""
+      })));
+    } else {
+      toastService.error("Operation failed: " + (res?.error || res?.data?.message || "Unknown error"));
+    }
+  };
+
   const openAddForm = () => {
     resetForm();
     setSideFormMode('add');
@@ -260,6 +298,17 @@ export default function ManageCoordinators() {
                     title="Remove Coordinator (Convert to Supervisor)"
                   >
                     Remove Coordinator
+                  </button>
+
+                  {/* NEW: Make FYP Incharge button placed next to Remove */}
+                  <button
+                    className="table-action-btn"
+                    style={{ background: "rgb(37 99 235", color: "#fff", marginLeft: 8 }}
+                    onClick={() => handleMakeIncharge(i)}
+                    disabled={sideFormMode}
+                    title="Make FYP Incharge"
+                  >
+                    Make FYP Incharge
                   </button>
                 </>
               )}

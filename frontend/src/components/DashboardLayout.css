@@ -1,10 +1,15 @@
+:root{
+  --main-blue: #01337a;
+}
+
+/* Sidebar (left) */
 .sidebar {
   width: 250px;
-  background: #01337a;
+  background: var(--main-blue);
   color: #fff;
   display: flex;
   flex-direction: column;
-  padding: 32px 0 24px 0;
+  padding: 32px 0 16px 0;
   box-shadow: 2px 0 18px #01337a16;
   z-index: 100;
   position: fixed;
@@ -14,6 +19,7 @@
   min-height: 100vh;
 }
 
+/* spacer to offset the fixed sidebar in main flow */
 .spacer {
   width: 250px;
   flex-shrink: 0;
@@ -24,11 +30,12 @@
   }
 }
 
+/* logo */
 .logo-area {
   display: flex;
   align-items: center;
   gap: 13px;
-  margin-bottom: 36px;
+  margin-bottom: 20px;
   padding-left: 30px;
   font-size: 1.55rem;
   font-weight: 900;
@@ -42,22 +49,32 @@
   background: #fff;
   margin-right: 4px;
   box-shadow: 0 2px 10px #fff4;
-  -webkit-border-radius: 10px;
-  -moz-border-radius: 10px;
-  -ms-border-radius: 10px;
-  -o-border-radius: 10px;
 }
 
+/* Sidebar menu: make it take remaining vertical space and scroll independently */
 .sidebar-menu {
   list-style: none;
   padding: 0 0 0 8px;
   margin: 0;
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  /* IMPORTANT: allow scrolling when menu is long */
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+  padding-bottom: 96px; /* room for logout button so last items aren't hidden */
+
+  /* Hide native scrollbar but keep scrolling functional */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+.sidebar-menu::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
+/* items */
 .sidebar-item {
   padding: 12px 32px 12px 20px;
   cursor: pointer;
@@ -75,37 +92,41 @@
 
 .sidebar-item.active {
   background: #fff;
-  color: #01337a;
+  color: var(--main-blue);
   font-weight: 800;
-  border-left: 5px solid #01337a;
+  border-left: 5px solid var(--main-blue);
 }
 
 .sidebar-item:hover {
   background: #e8eafc;
-  color: #01337a;
+  color: var(--main-blue);
 }
 
+/* Logout area: pinned to the bottom of the fixed sidebar */
 .logout-area {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
   display: flex;
   justify-content: center;
-  margin: 18px 0 0 0;
+  padding: 0 20px;
+  pointer-events: auto;
 }
 
+/* logout button styling */
 .logout-area .MuiIconButton-root {
   background: #fff !important;
-  color: #01337a !important;
+  color: var(--main-blue) !important;
   transition: background 0.18s, color 0.19s;
   box-shadow: 0 2px 12px #0001;
-  -webkit-transition: background 0.18s, color 0.19s;
-  -moz-transition: background 0.18s, color 0.19s;
-  -ms-transition: background 0.18s, color 0.19s;
-  -o-transition: background 0.18s, color 0.19s;
 }
 .logout-area .MuiIconButton-root:hover {
   background: #e8eafc !important;
-  color: #01337a  !important;
+  color: var(--main-blue)  !important;
 }
 
+/* Header */
 .dashboard-header {
   margin-top: -28px;
   position: sticky;
@@ -122,9 +143,9 @@
   margin-bottom: 20px;
 }
 .dashboard-title {
-     font-size: 3rem !important;
+  font-size: 3rem !important;
   font-weight: 900 !important;
-  color: #01337a !important;
+  color: var(--main-blue) !important;
   margin: 0 !important;
 }
 .dashboard-profile {
@@ -139,15 +160,11 @@
   border-radius: 50%;
   box-shadow: 0 2px 12px #01337a22;
   background: #fff;
-  -webkit-border-radius: 50%;
-  -moz-border-radius: 50%;
-  -ms-border-radius: 50%;
-  -o-border-radius: 50%;
 }
 .name-text { 
   font-weight: 700;
   font-size: 1.13rem;
-  color: #01337a;
+  color: var(--main-blue);
   text-align: right;
 }
 .name-text span {
@@ -158,4 +175,20 @@
   display: block;
   text-transform: capitalize;
   opacity: 0.8;
+}
+
+/* Make sure main content does not go under the fixed sidebar on wide screens */
+.main-panel {
+  margin-left: 250px; /* should match .sidebar width */
+}
+
+/* Small screens: allow sidebar to collapse (you already handle spacer) */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 220px;
+  }
+  .sidebar-menu {
+    padding-bottom: 84px;
+  }
+  .main-panel { margin-left: 0; }
 }
