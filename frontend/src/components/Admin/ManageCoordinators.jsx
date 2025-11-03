@@ -182,6 +182,31 @@ export default function ManageCoordinators() {
     }
   };
 
+  // NEW: Remove Coordinator handler (uses same backend delete endpoint here)
+  const handleRemove = async (idx) => {
+    const confirmed = await Confirm("Are you sure you want to remove this coordinator?");
+    if (!confirmed) {
+      return;
+    }
+    setLoading(true);
+    const id = rows[idx].ID;
+    // Using the same API call as delete; if you have a dedicated 'remove' endpoint (soft-delete),
+    // replace the call below with adminSupervisorApi.removeCoordinator(id)
+    const res = await adminSupervisorApi.deleteCoordinator(id);
+    setLoading(false);
+    if (res.success) {
+      toastService.success('Coordinator removed successfully!');
+      resetForm();
+      // refetch list
+      const refreshed = await adminSupervisorApi.getCoordinators();
+      setRows(refreshed.data.map(coord => ({
+        ID: coord._id, Name: coord.name, Email: coord.email, Department: coord.department || ""
+      })));
+    } else {
+      toastService.error("Remove failed: " + (res.error || res.data?.message || 'Unknown error'));
+    }
+  };
+
   const openAddForm = () => {
     resetForm();
     setSideFormMode('add');
@@ -219,13 +244,25 @@ export default function ManageCoordinators() {
                   >
                     {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
                   </button>
+
                   <button
                     className="table-action-btn"
-                    style={{ background: "#f43f5e" }}
+                    style={{ background: "#f43f5e", marginLeft: 8 }}
                     onClick={() => handleDelete(i)}
                     disabled={sideFormMode}
                   >
                     Delete
+                  </button>
+
+                  {/* MOVED: Remove Coordinator button (now after Delete) with updated color */}
+                  <button
+                    className="table-action-btn"
+                    style={{ background: "#0d6efd", color: "#fff", marginLeft: 8 }}
+                    onClick={() => handleRemove(i)}
+                    disabled={sideFormMode}
+                    title="Remove Coordinator"
+                  >
+                    Remove Coordinator
                   </button>
                 </>
               )}
@@ -342,4 +379,4 @@ export default function ManageCoordinators() {
       )}
     </div>
   );
-} 
+}
