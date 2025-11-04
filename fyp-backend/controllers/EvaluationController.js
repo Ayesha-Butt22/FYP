@@ -1,14 +1,10 @@
 const User = require("../models/User");
 const PresentationSchedule = require("../models/DeadlineSchedule"); // or PresentationSchedule depending on your file name
 
-// @desc Check if supervisor/coordinator exists and is already in a published panel
-// @route POST /api/evaluation/checkFaculty
-// @access Public or Protected (as you prefer)
 exports.checkFacultyInPublishedPanel = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // 1️⃣ Check if user exists and is supervisor or coordinator
     const user = await User.findOne({
       email,
       role: { $in: ["supervisor", "coordinator"] },
@@ -21,7 +17,6 @@ exports.checkFacultyInPublishedPanel = async (req, res) => {
       });
     }
 
-    // 2️⃣ Check in PresentationSchedule if faculty already assigned in published panels
     const alreadyAssigned = await PresentationSchedule.findOne({
       isPublish: true,
       facultyPanels: user._id,
@@ -30,15 +25,15 @@ exports.checkFacultyInPublishedPanel = async (req, res) => {
     if (alreadyAssigned) {
       return res.status(200).json({
         success: true,
-        message: "Faculty is already assigned in a published panel",
+        message: "You are listed for panel",
         facultyId: user._id,
         scheduleId: alreadyAssigned._id,
         week: alreadyAssigned.week,
+        venue: alreadyAssigned.venue,
         fypPart: alreadyAssigned.fypPart,
       });
     }
 
-    // 3️⃣ Not assigned yet
     res.status(200).json({
       success: true,
       message: "Faculty is not yet assigned in any published panel",

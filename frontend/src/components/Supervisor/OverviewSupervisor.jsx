@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaUsers, FaClipboardCheck, FaCalendarCheck, FaStar, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./OverviewSupervisor.css";
+import ToastService from "../ToastService/ToastService.jsx";
 
 const activities = [
   { type: "proposal", text: "Reviewed Proposal for Group G-101", time: "2 hours ago" },
@@ -16,24 +17,28 @@ const progress = [
 ];
 
 export default function OverviewSupervisor({ onTabChange }) {
-  const navigate = useNavigate();
   const [facultyStatus, setFacultyStatus] = useState(null);
+
 
   // ✅ API integration (runs once when page loads)
   useEffect(() => {
     const fetchFacultyStatus = async () => {
+      const email = localStorage.getItem('email');
+      if (!email) return false;
       try {
         const response = await fetch("http://localhost:5000/api/evaluation/checkFaculty", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: "supervisor1@university.edu", // 👉 yahan apna supervisor email lagao
+            email: email,
           }),
         });
-
         const data = await response.json();
         setFacultyStatus(data);
-        console.log("Faculty status:", data);
+        if (data && data.scheduleId){
+          const msg = `Your are listed as panel member for ${data.week || "this week"} at venue ${data.venue || "TBD"} — be ready!`;
+          ToastService.info(msg);
+        }
       } catch (error) {
         console.error("Error fetching faculty status:", error);
       }
