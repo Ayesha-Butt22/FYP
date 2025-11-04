@@ -1,20 +1,18 @@
 const express = require("express");
 const router = express.Router();
+
 const {
-    createOrUpdatePresentation,
-    getPresentation,
-    bookSlot,
-    getFaculty,
-    checkSlot,
+  createOrUpdatePresentationBatch,
+  getPresentation,
+  publishSchedule,
+  getFaculty,
+  bookSlot,
 } = require("../controllers/deadlineScheduleController");
 
-
-router.post("/create", createOrUpdatePresentation);
-
+router.post("/createBatch", createOrUpdatePresentationBatch);
 router.get("/get", getPresentation);
-router.get("/getSlots/:email", checkSlot);
+router.post("/publish/:id", publishSchedule);
 router.get("/getfaculty", getFaculty);
-
-router.post("/book", bookSlot);
+router.post("/book/:slotId/:groupId", bookSlot);
 
 module.exports = router;
