@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
     createOrUpdatePresentation,
+    createOrUpdatePresentationBatch,
     getPresentation,
     bookSlot,
     getFaculty,
@@ -10,6 +11,7 @@ const {
 
 
 router.post("/create", createOrUpdatePresentation);
+router.post("/createBatch", createOrUpdatePresentationBatch);
 
 router.get("/get", getPresentation);
 router.get("/getSlots/:email", checkSlot);

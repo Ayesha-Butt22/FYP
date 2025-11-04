@@ -17,6 +17,16 @@ const PresentationService = {
         return res.json();
     },
 
+      async createBatch(payload) {
+    const res = await fetch(`${API_BASE_URL}/createBatch`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    return res.json();
+  },
+
+
     async bookSlot(slotId, groupId) {
         const res = await fetch(`${API_BASE_URL}/book/${slotId}/${groupId}`, {
             method: "POST",

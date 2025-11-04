@@ -21,6 +21,8 @@ import SupervisorMilestones from "./SupervisorMilestones";
 import SupervisorWhiteboard from "./SupervisorWhiteboard";
 import SupervisorMeetings from "./SupervisorMeetings";
 import SupervisorEvaluations from "./SupervisorEvaluations";
+import CommitteeEvaluation from "./CommitteeEvaluation.jsx"; // existing committee-eval UI
+import SupervisorCommitteeResults from "./SupervisorCommitteeResults.jsx"; // new read-only results view
 import SupervisorReports from "./SupervisorReports";
 import SupervisorArchive from "./SupervisorArchive";
 import SupervisorAnalytics from "./SupervisorAnalytics";
@@ -29,19 +31,19 @@ import SupervisorProfile from "./SupervisorProfile";
 import StudentTemplates from "../Student/StudentTemplates.jsx";
 
 const menu = [
-  // { label: "Overview", icon: <DashboardIcon /> },
   { label: "Idea & Proposal Review", icon: <AssignmentIcon /> },
   { label: "My Groups", icon: <GroupsIcon /> },
-  // Templates tab inserted after "My Groups"
   { label: "Templates", icon: <DescriptionIcon /> },
   { label: "Milestones", icon: <StarIcon /> },
   { label: "Whiteboard", icon: <CampaignIcon /> },
   { label: "Meetings", icon: <CalendarMonthIcon /> },
   { label: "Evaluations", icon: <EmojiObjectsIcon /> },
+  { label: "Commitee Eval", icon: <EmojiObjectsIcon /> }, // existing committee evaluation form
+  { label: "Committee Results", icon: <GroupsIcon /> }, // <-- added for SupervisorCommitteeResults
   { label: "Reports", icon: <DescriptionIcon /> },
   { label: "Analytics", icon: <BarChartIcon /> },
   { label: "FYP Archive", icon: <LibraryBooksIcon /> },
-  { label: "Profile", icon: <PersonIcon /> }, // Profile tab at end
+  { label: "Profile", icon: <PersonIcon /> },
 ];
 
 const supervisorInfo = {
@@ -61,19 +63,20 @@ export default function SupervisorDashboard() {
   };
 
   const tabComponents = {
-    "Overview": <OverviewSupervisor onTabChange={setActiveTab} />,
+    Overview: <OverviewSupervisor onTabChange={setActiveTab} />,
     "Idea & Proposal Review": <SupervisorIdeaReview />,
     "My Groups": <SupervisorGroups />,
-    // Templates tab component (uses StudentTemplates component)
-    "Templates": <StudentTemplates />,
-    "Milestones": <SupervisorMilestones />,
-    "Whiteboard": <SupervisorWhiteboard />,
-    "Meetings": <SupervisorMeetings />,
-    "Evaluations": <SupervisorEvaluations />,
-    "Reports": <SupervisorReports />,
-    "Analytics": <SupervisorAnalytics />,
+    Templates: <StudentTemplates />,
+    Milestones: <SupervisorMilestones />,
+    Whiteboard: <SupervisorWhiteboard />,
+    Meetings: <SupervisorMeetings />,
+    Evaluations: <SupervisorEvaluations />,
+    "Commitee Eval": <CommitteeEvaluation />, // committee evaluation form (for submitting)
+    "Committee Results": <SupervisorCommitteeResults />, // read-only results tab for supervisors
+    Reports: <SupervisorReports />,
+    Analytics: <SupervisorAnalytics />,
     "FYP Archive": <SupervisorArchive />,
-    "Profile": <SupervisorProfile supervisorInfo={supervisorInfo} />,
+    Profile: <SupervisorProfile supervisorInfo={supervisorInfo} />,
   };
 
   return (
