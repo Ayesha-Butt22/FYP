@@ -1,6 +1,6 @@
 const PresentationSchedule = require("../models/DeadlineSchedule");
 const User = require("../models/User");
-const Group = require("../models/StudentGroup"); // ensure this file exists
+const Group = require("../models/StudentGroup");
 const mongoose = require("mongoose");
 
 // ---------------- Helper functions ---------------- //
@@ -133,11 +133,12 @@ exports.publishSchedule = async (req, res) => {
   }
 };
 
-// ---------------- GET PRESENTATIONS ---------------- //
+// ---------------- GET PRESENTATIONS (only published) ---------------- //
 exports.getPresentation = async (req, res) => {
   try {
     const { week, fypPart } = req.query;
-    const filter = {};
+    const filter = { isPublish: true }; // ✅ only published
+
     if (week) filter.week = week;
     if (fypPart) filter.fypPart = fypPart;
 
@@ -185,7 +186,7 @@ exports.bookSlot = async (req, res) => {
   }
 };
 
-
+// ---------------- CHECK SLOT (only published schedules) ---------------- //
 exports.checkSlot = async (req, res) => {
   try {
     const { email } = req.params;
@@ -202,14 +203,21 @@ exports.checkSlot = async (req, res) => {
       return res.status(404).json({ success: false, message: "Group not found" });
     }
 
+    // ✅ check in published only
     const booked = await PresentationSchedule.findOne({
       "slots.bookedBy": group._id,
+      isPublish: true,
     });
 
     if (booked) {
-      return res.json({ success: true, alreadyBooked: true, groupId: group._id , details: booked  });
+      return res.json({ success: true, alreadyBooked: true, groupId: group._id, details: booked });
     }
-    const schedule = await PresentationSchedule.findOne({ fypPart: "fyp-1" });
+
+    // ✅ find available published schedule
+    const schedule = await PresentationSchedule.findOne({
+      fypPart: "fyp-1",
+      isPublish: true,
+    });
 
     if (!schedule) {
       return res.json({ success: true, alreadyBooked: false, availableSlots: [] });
@@ -221,8 +229,8 @@ exports.checkSlot = async (req, res) => {
       success: true,
       alreadyBooked: false,
       scheduleId: schedule._id,
-      groupId:group._id,
-      wholeData :schedule,
+      groupId: group._id,
+      wholeData: schedule,
       availableSlots,
     });
   } catch (err) {
