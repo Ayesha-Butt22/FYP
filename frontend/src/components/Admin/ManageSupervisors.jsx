@@ -117,6 +117,7 @@ const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
+
 const validateForm = (data, isEdit = false) => {
   const errors = {};
 
@@ -146,13 +147,16 @@ const validateForm = (data, isEdit = false) => {
 
   return errors;
 };
+
 function splitSpeciality(str) {
   if (!str) return [];
   return str.split(",").map(s => s.trim()).filter(Boolean);
 }
+
 function joinSpeciality(arr) {
   return arr.join(", ");
 }
+
 function FormInput({ label, error, ...props }) {
   return (
       <div className="form-group">
@@ -162,6 +166,7 @@ function FormInput({ label, error, ...props }) {
       </div>
   );
 }
+
 export default function ManageSupervisors() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -179,6 +184,7 @@ export default function ManageSupervisors() {
   const [formSpeciality, setFormSpeciality] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const resetForm = () => {
     setFormData({
       Name: "",
@@ -228,7 +234,6 @@ export default function ManageSupervisors() {
   useEffect(() => {
     fetchSupervisors();
   }, [fetchSupervisors]);
-
 
   const handleEdit = (row, idx) => {
     setEditIndex(idx);
@@ -291,39 +296,53 @@ export default function ManageSupervisors() {
       toastService.error('An error occurred. Please try again.');
     }
   };
+
   const handleUpdate = async () => {
     setLoading(true);
-    const updated = {
-      ...formData,
-      Speciality: joinSpeciality(formSpeciality),
-      "Available Slots": formData.Available_Slots,
-      "Booked Slots": formData.Booked_Slots
-    };
-    const id = rows[editIndex].ID;
+    try {
+      const updated = {
+        ...formData,
+        Speciality: joinSpeciality(formSpeciality),
+        "Available Slots": formData.Available_Slots,
+        "Booked Slots": formData.Booked_Slots
+      };
+      const id = rows[editIndex].ID;
 
-    const payload = {
-      name: updated.Name,
-      email: updated.Email,
-      department: updated.Department,
-      designation: updated.Designation,
-      specialization: updated.Speciality,
-      availableSlots: updated["Available Slots"],
-      bookedSlots: updated["Booked Slots"],
-      role: 'supervisor',
-    };
-    const res = await adminSupervisorApi.updateSupervisor(id, payload);
-    if (res.success) {
-      const updatedRows = [...rows];
-      updatedRows[editIndex] = { ...rows[editIndex], ...updated };
-      setRows(updatedRows);
-      resetForm();
+      const payload = {
+        name: updated.Name,
+        email: updated.Email,
+        department: updated.Department,
+        designation: updated.Designation,
+        specialization: updated.Speciality,
+        availableSlots: updated["Available Slots"],
+        bookedSlots: updated["Booked Slots"],
+        role: 'supervisor',
+      };
+      
+      console.log("Update Payload:", payload);
+      
+      const res = await adminSupervisorApi.updateSupervisor(id, payload);
+      if (res.success) {
+        const updatedRows = [...rows];
+        updatedRows[editIndex] = { 
+          ...rows[editIndex], 
+          ...updated,
+          Designation: updated.Designation
+        };
+        setRows(updatedRows);
+        resetForm();
+        await fetchSupervisors();
+        toastService.success('Supervisor updated successfully!');
+      } else {
+        toastService.error("Update failed: " + (res.error || res.data?.message || 'Unknown error'));
+      }
+    } catch (error) {
+      toastService.error("Error updating supervisor: " + error.message);
+    } finally {
       setLoading(false);
-      await fetchSupervisors();
-      toastService.success('Supervisor updated successfully!');
-    } else {
-      toastService.error("Update failed: " + (res.error || res.data?.message || 'Unknown error'));
     }
   };
+
   const handleAdd = async () => {
     setLoading(true);
     const payload = {
@@ -332,10 +351,13 @@ export default function ManageSupervisors() {
       password: formData.Password,
       role: "supervisor",
       department: formData.Department,
+      designation: formData.Designation, // FIXED: Added designation
       specialization: joinSpeciality(formSpeciality),
       availableSlots: formData.Available_Slots,
       bookedSlots: formData.Booked_Slots,
     };
+
+    console.log("Create Supervisor Payload:", payload); // Debug log
 
     const res = await adminSupervisorApi.createSupervisor(payload);
     if (res.success) {
@@ -344,6 +366,7 @@ export default function ManageSupervisors() {
         Name: formData.Name,
         Email: formData.Email,
         Department: formData.Department,
+        Designation: formData.Designation, // FIXED: Added designation
         Speciality: joinSpeciality(formSpeciality),
         "Available Slots": formData.Available_Slots,
         "Booked Slots": formData.Booked_Slots
@@ -357,8 +380,8 @@ export default function ManageSupervisors() {
       toastService.error("Add failed: " + (res.error || res.data?.message || 'Unknown error'));
     }
   };
-  const handleDelete = async (idx) => {
 
+  const handleDelete = async (idx) => {
     const confirmed = await Confirm("Are you sure you want to delete this supervisor??");
     if (!confirmed) {
       return;
@@ -374,7 +397,6 @@ export default function ManageSupervisors() {
     }
   };
 
-
   const handleMakeCoordinator = async (idx) => {
     const confirmed = await Confirm("Are you sure you want to make this user Coordinator?");
     if (!confirmed) {
@@ -387,21 +409,21 @@ export default function ManageSupervisors() {
       if (editIndex === idx) resetForm();
       toastService.success('Promoted to Coordinator successfully!');
     } else {
-      toastService.error("Coordinator role assigning  failed: " + (res.error || res.data?.message || 'Unknown error'));
+      toastService.error("Coordinator role assigning failed: " + (res.error || res.data?.message || 'Unknown error'));
     }
+  };
 
-  }
   const openAddForm = () => {
     resetForm();
     setSideFormMode('add');
   };
+
   return (
       <>
       <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
         <div style={{ flex: sideFormMode ? '2' : '1', transition: 'flex 0.3s ease' }}>
           <DashboardSectionHeader description={"Admins can view the list of supervisors, add new supervisors, update existing supervisor details, and delete supervisors from the system."}>Manage Supervisors</DashboardSectionHeader>
           
-
           <div style={{display: "flex", justifyContent: "right", margin: "20px 0" , gap: "20px"}}>
             <button
                 className="add-supervisor-btn"
@@ -416,7 +438,7 @@ export default function ManageSupervisors() {
                 onClick={() => setIsModalOpen(true)}
                 disabled={sideFormMode === 'add'}
             >
-              + Upload Supervior
+              + Upload Supervisor
             </button>
           </div>
 
@@ -428,37 +450,36 @@ export default function ManageSupervisors() {
                     headers={headers}
                     rows={rows}
                     renderActions={(row, i) => (
-  <>
-    <button
-      className="table-action-btn"
-      onClick={() => handleEdit(row, i)}
-      disabled={sideFormMode && editIndex === i}
-    >
-      {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
-    </button>
+                      <>
+                        <button
+                          className="table-action-btn"
+                          onClick={() => handleEdit(row, i)}
+                          disabled={sideFormMode && editIndex === i}
+                        >
+                          {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
+                        </button>
 
-    {!sideFormMode && (
-      <>
-        <button
-          className="table-action-btn"
-          style={{ background: "#f43f5e" }}
-          onClick={() => handleDelete(i)}
-        >
-          Delete
-        </button>
+                        {!sideFormMode && (
+                          <>
+                            <button
+                              className="table-action-btn"
+                              style={{ background: "#f43f5e" }}
+                              onClick={() => handleDelete(i)}
+                            >
+                              Delete
+                            </button>
 
-        <button
-          className="table-action-btn"
-          style={{ background: "#013379" }}
-          onClick={() => handleMakeCoordinator(i)}
-        >
-          Make Coordinator
-        </button>
-      </>
-    )}
-  </>
-)}
-
+                            <button
+                              className="table-action-btn"
+                              style={{ background: "#013379" }}
+                              onClick={() => handleMakeCoordinator(i)}
+                            >
+                              Make Coordinator
+                            </button>
+                          </>
+                        )}
+                      </>
+                    )}
                 />
               </div>
           )}
@@ -538,7 +559,6 @@ export default function ManageSupervisors() {
                       <span className="error-text">{formErrors.Department}</span>
                   )}
                 </div>
-
 
                 <div className="form-group">
                   <label>
@@ -637,6 +657,5 @@ export default function ManageSupervisors() {
             onClose={() => setIsModalOpen(false)}
         />
       </>
-
   );
 }

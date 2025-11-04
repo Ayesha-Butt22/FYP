@@ -74,7 +74,13 @@ router.delete('/:id', protect, isAdmin, adminController.deleteUser);
 // REMOVE COORDINATOR (convert to supervisor)
 router.patch('/remove-coordinator/:id', protect, isAdmin, adminController.removeCoordinator);
 
+// MAKE FYP INCHARGE
+router.post('/make-fyp-incharge/:id', protect, isAdmin, adminController.makeFYPIncharge);
+
+// SYSTEM STATS
 router.get('/stats', protect, isAdmin, adminController.getSystemStats);
+
+// PROMOTE TO COORDINATOR
 router.post('/promote/:id', protect, isAdmin, adminController.makeCoordinator);
 
 // TOGGLE STUDENT APPROVAL  
