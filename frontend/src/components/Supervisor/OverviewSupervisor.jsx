@@ -1,14 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaUsers, FaClipboardCheck, FaCalendarCheck, FaStar, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./OverviewSupervisor.css";
-
 
 const activities = [
   { type: "proposal", text: "Reviewed Proposal for Group G-101", time: "2 hours ago" },
   { type: "meeting", text: "Scheduled meeting with Group G-102", time: "Yesterday" },
   { type: "evaluation", text: "Evaluated Milestone for G-101", time: "3 days ago" },
 ];
+
 const progress = [
   { label: "Proposal Reviews", percent: 50, color: "#2563eb" },
   { label: "Meetings Booked", percent: 75, color: "#fbc73d" },
@@ -16,9 +16,33 @@ const progress = [
 ];
 
 export default function OverviewSupervisor({ onTabChange }) {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [facultyStatus, setFacultyStatus] = useState(null);
 
-     return (
+  // ✅ API integration (runs once when page loads)
+  useEffect(() => {
+    const fetchFacultyStatus = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/evaluation/checkFaculty", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: "supervisor1@university.edu", // 👉 yahan apna supervisor email lagao
+          }),
+        });
+
+        const data = await response.json();
+        setFacultyStatus(data);
+        console.log("Faculty status:", data);
+      } catch (error) {
+        console.error("Error fetching faculty status:", error);
+      }
+    };
+
+    fetchFacultyStatus();
+  }, []);
+
+  return (
     <div className="overview-container">
       <div className="welcome-banner">
         <div className="banner-title">Welcome, Supervisor!</div>
@@ -55,22 +79,30 @@ export default function OverviewSupervisor({ onTabChange }) {
       <div className="section-chip">Overview</div>
       <div className="card-grid">
         <div className="stat-card">
-          <div className="stat-icon-circle" style={{background: "#2563eb"}}><FaUsers /></div>
+          <div className="stat-icon-circle" style={{ background: "#2563eb" }}>
+            <FaUsers />
+          </div>
           <div className="stat-title">Groups Assigned</div>
           <div className="stat-value">3</div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon-circle" style={{background: "#fbc73d"}}><FaClipboardCheck /></div>
+          <div className="stat-icon-circle" style={{ background: "#fbc73d" }}>
+            <FaClipboardCheck />
+          </div>
           <div className="stat-title">Pending Proposals</div>
           <div className="stat-value">2</div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon-circle" style={{background: "#16a34a"}}><FaCalendarCheck /></div>
+          <div className="stat-icon-circle" style={{ background: "#16a34a" }}>
+            <FaCalendarCheck />
+          </div>
           <div className="stat-title">Upcoming Meetings</div>
           <div className="stat-value">3</div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon-circle" style={{background: "#f43f5e"}}><FaStar /></div>
+          <div className="stat-icon-circle" style={{ background: "#f43f5e" }}>
+            <FaStar />
+          </div>
           <div className="stat-title">Evaluations Due</div>
           <div className="stat-value">1</div>
         </div>
@@ -86,7 +118,10 @@ export default function OverviewSupervisor({ onTabChange }) {
               <span>{p.percent}%</span>
             </div>
             <div className="progress-bar">
-              <div className="progress-fill" style={{width: `${p.percent}%`, background: p.color}} />
+              <div
+                className="progress-fill"
+                style={{ width: `${p.percent}%`, background: p.color }}
+              />
             </div>
           </div>
         ))}
@@ -105,8 +140,13 @@ export default function OverviewSupervisor({ onTabChange }) {
         </div>
       </div>
       <div className="fyp-tip">
-        <span role="img" aria-label="bulb">💡</span>
-        <span>FYP Tip: Giving clear, constructive feedback helps students deliver high quality projects!</span>
+        <span role="img" aria-label="bulb">
+          💡
+        </span>
+        <span>
+          FYP Tip: Giving clear, constructive feedback helps students deliver high
+          quality projects!
+        </span>
       </div>
     </div>
   );
