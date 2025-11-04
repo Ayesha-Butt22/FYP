@@ -144,7 +144,7 @@ exports.getPresentation = async (req, res) => {
 
     const schedules = await PresentationSchedule.find(filter)
       .populate("facultyPanels", "name email")
-      .populate("slots.bookedBy", "name groupNumber");
+      .populate("slots.bookedBy","groupId");
 
     res.json({ success: true, data: schedules });
   } catch (err) {

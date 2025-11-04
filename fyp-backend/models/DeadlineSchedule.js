@@ -5,7 +5,7 @@ const SlotSchema = new mongoose.Schema({
   endTime: { type: Date, required: true },
   bookedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "StudentGroup",
+    ref: "Group",
     default: null,
   },
 });
