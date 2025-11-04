@@ -43,7 +43,8 @@ export default function PresentationModal({ week, onClose, year }) {
     async function load() {
       try {
         const f = await PresentationService.getFaculty();
-        setFaculty(Array.isArray(f) ? f : []);
+        const data =  f.data;
+        setFaculty(data || []);
       } catch (err) {
         console.error(err);
       }
