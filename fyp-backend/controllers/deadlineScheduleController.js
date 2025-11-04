@@ -137,8 +137,8 @@ exports.publishSchedule = async (req, res) => {
 exports.getPresentation = async (req, res) => {
   try {
     const { week, fypPart } = req.query;
-    const filter = { isPublish: true }; // ✅ only published
 
+    const filter = {};
     if (week) filter.week = week;
     if (fypPart) filter.fypPart = fypPart;
 
