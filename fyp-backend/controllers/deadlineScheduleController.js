@@ -184,3 +184,49 @@ exports.bookSlot = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+
+exports.checkSlot = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const group = await Group.findOne({
+      $or: [
+        { "leader.email": email },
+        { "member2.email": email },
+        { "member3.email": email },
+      ],
+    });
+
+    if (!group) {
+      return res.status(404).json({ success: false, message: "Group not found" });
+    }
+
+    const booked = await PresentationSchedule.findOne({
+      "slots.bookedBy": group._id,
+    });
+
+    if (booked) {
+      return res.json({ success: true, alreadyBooked: true, groupId: group._id , details: booked  });
+    }
+    const schedule = await PresentationSchedule.findOne({ fypPart: "fyp-1" });
+
+    if (!schedule) {
+      return res.json({ success: true, alreadyBooked: false, availableSlots: [] });
+    }
+
+    const availableSlots = schedule.slots.filter((slot) => !slot.bookedBy);
+
+    return res.json({
+      success: true,
+      alreadyBooked: false,
+      scheduleId: schedule._id,
+      groupId:group._id,
+      wholeData :schedule,
+      availableSlots,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
