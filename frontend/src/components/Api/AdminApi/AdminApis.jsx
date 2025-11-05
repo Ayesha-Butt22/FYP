@@ -72,10 +72,10 @@ class AdminApis {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
 
-    // --- REMOVE COORDINATOR (convert to supervisor) ---
-    async removeCoordinator(id) {
-        return await this.makeAPICall(`admin/${id}`, { role: "supervisor" }, { method: "PUT" });
-    }
+   // --- REMOVE COORDINATOR (convert to supervisor) ---
+async removeCoordinator(id) {
+  return await this.makeAPICall(`admin/remove-coordinator/${id}`, {}, { method: 'PATCH' });
+}
 
     // --- Admin CRUD ---
     async createAdmin(adminData) {
@@ -111,6 +111,15 @@ class AdminApis {
         return await this.makeAPICall("admin/stats", {}, { method: "GET" });
     }
 
+     // TOGGLE STUDENT APPROVAL - YE ADD KAREN
+    async toggleStudentApproval(id) {
+        return await this.makeAPICall(`admin/toggle-approval/${id}`, {}, { method: 'PATCH' });
+    }
+    
+    // MAKE FYP INCHARGE
+async makeFYPIncharge(id) {
+  return await this.makeAPICall(`admin/make-fyp-incharge/${id}`, {}, { method: 'POST' });
+}
     // --- Utility ---
     async getAllUsers() {
         return await this.makeAPICall("admin/all", {}, { method: "GET" });

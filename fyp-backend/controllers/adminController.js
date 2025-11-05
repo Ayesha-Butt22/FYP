@@ -11,7 +11,7 @@ exports.createUser = async (req, res) => {
     const { 
       name, email, password, role, 
       department, specialization, availableSlots, bookedSlots,
-      gender, contactNumber 
+      gender, contactNumber, designation // ADDED: designation
     } = req.body;
 
     if (!name || !email || !password || !role)
@@ -34,6 +34,7 @@ exports.createUser = async (req, res) => {
       password: hashed,
       role,
       department,
+      designation, // ADDED: designation
       specialization,
       availableSlots,
       bookedSlots,
@@ -84,10 +85,12 @@ exports.getAdmins = async (req, res) => {
   }
 };
 
-// GET SUPERVISORS
+// GET SUPERVISORS - DESIGNATION INCLUDED
 exports.getSupervisors = async (req, res) => {
   try {
-    const list = await User.find({ role: 'supervisor' }).select('-password');
+    const list = await User.find({ role: 'supervisor' })
+      .select('name email department specialization availableSlots bookedSlots designation')
+      .sort({ createdAt: -1 });
     return res.json(list);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -143,9 +146,10 @@ exports.updateUser = async (req, res) => {
   try {
     const { 
       name, email, department, specialization, password, 
-      availableSlots, bookedSlots, 
-      gender, contactNumber 
+      availableSlots, bookedSlots, designation, // ADDED: designation
+      gender, contactNumber, isProjectHead
     } = req.body;
+    
     const user = await User.findById(req.params.id);
 
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -159,8 +163,25 @@ exports.updateUser = async (req, res) => {
     if (name && name.trim() !== "") user.name = name;
     if (department) user.department = department;
     if (specialization) user.specialization = specialization;
+    if (designation) user.designation = designation; // ADDED: designation handling
     if (typeof bookedSlots !== "undefined") user.bookedSlots = bookedSlots;
     if (typeof availableSlots !== "undefined") user.availableSlots = availableSlots;
+
+    // isProjectHead handle karen
+    if (typeof isProjectHead !== "undefined") {
+      // Agar isProjectHead true set ho raha hai, toh pehle same department ke existing head ko reset karen
+      if (isProjectHead === true) {
+        await User.updateMany(
+          { 
+            department: user.department, 
+            isProjectHead: true,
+            _id: { $ne: user._id }
+          },
+          { isProjectHead: false }
+        );
+      }
+      user.isProjectHead = isProjectHead;
+    }
 
     if (gender !== undefined) user.gender = gender ? gender.toLowerCase() : null;
     if (contactNumber !== undefined) user.contactNumber = contactNumber || null;
@@ -327,7 +348,7 @@ exports.uploadExcelAndCreateUsers = async (req, res) => {
         role: 'supervisor',
         department,
         specialization,
-        designation: designation,
+        designation: designation, // ADDED: designation
         availableSlots: availableSlots,
         bookedSlots: bookedSlots || 0,
         mustChangePassword: true,
@@ -391,3 +412,44 @@ exports.toggleStudentApproval = async (req, res) => {
   }
 };
 
+// MAKE FYP INCHARGE
+exports.makeFYPIncharge = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    if (user.role !== "coordinator") {
+      return res.status(400).json({ error: "Only coordinators can be made FYP Incharge" });
+    }
+
+    // Pehle existing FYP Incharge ko reset karen same department mein
+    await User.updateMany(
+      { 
+        department: user.department, 
+        isProjectHead: true,
+        _id: { $ne: id } // Current user ko exclude karen
+      },
+      { isProjectHead: false }
+    );
+
+    // Naya FYP Incharge set karen
+    user.isProjectHead = true;
+    await user.save();
+
+    const u = user.toObject();
+    delete u.password;
+
+    return res.json({
+      success: true,
+      message: `${user.name} is now FYP Incharge for ${user.department} department`,
+      user: u
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};

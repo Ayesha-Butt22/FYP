@@ -17,7 +17,11 @@ const userSchema = new mongoose.Schema({
   bookedSlots: { type: Number, default: 0 },
   availableSlots: { type: Number, default: 0 },
   IsApproved: { type: Boolean, default: true },
-  designation: { type: String, default: null },
+  designation: { 
+    type: String, 
+    enum: ['Dean', 'Professor', 'Associate Professor', 'Assistant Professor', 'Lecturer', 'Sr Lecturer', 'Junior Lecturer', 'Research Associate', 'Research Assistant', 'Teaching Fellow'],
+    default: null 
+  },
   isGroupMade: { type: Boolean, default: false },
   gender: { 
     type: String, 
@@ -28,7 +32,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     match: [/^\+?[\d\s-]{10,15}$/, 'Invalid contact number format'],
     default: null 
-  }
+  },
+  isProjectHead: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
