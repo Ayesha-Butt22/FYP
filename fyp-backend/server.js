@@ -16,6 +16,7 @@ mongoose.connect(process.env.MONGO_URI)
 const NoticeboardRoutes = require("./routes/NoticeboardRoutes")
 const SupervisorWhiteboardRoutes = require("./routes/SupervisorWhiteboardRoutes");
 const evaluationRoutes = require("./routes/evaluationRoutes");
+const committeeevaluationRoutes = require("./routes/committeEvalution");
 
 
 
@@ -35,6 +36,7 @@ app.use("/api/deadlineSchedule", require("./routes/deadlineSchedule"));
 
 app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);
 app.use("/api/evaluation", evaluationRoutes);
+app.use("/api/committee-evaluation", committeeevaluationRoutes);
 
 
 

@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const Group = require("../models/StudentGroup");
-const PresentationSchedule = require("../models/DeadlineSchedule"); // Adjust if your file name differs
+const PresentationSchedule = require("../models/DeadlineSchedule");
+const Proposal = require("../models/StudentProposal");
 
 /**
  * POST /api/evaluation/checkFaculty
@@ -139,33 +140,45 @@ exports.getBookedGroupsForSchedule = async (req, res) => {
       if (u.studentId) userByStudentId[String(u.studentId)] = u;
     });
 
+
     // Build result array
-    const result = groups.map(g => {
-      const members = [];
-      ["leader", "member2", "member3"].forEach(k => {
-        const m = g[k];
-        if (!m) return;
-        const email = m.email ? String(m.email).toLowerCase() : null;
-        const sap = m.sapId ? String(m.sapId) : null;
-        const matchedUser = (email && userByEmail[email]) || (sap && userByStudentId[sap]) || null;
+    const result = await Promise.all(
+        groups.map(async (g) => {
+          const members = [];
 
-        members.push({
-          role: k === "leader" ? "leader" : "member",
-          name: matchedUser?.name || m.name || null,
-          email: matchedUser?.email || m.email || null,
-          studentId: matchedUser?.studentId || m.sapId || null,
-          userId: matchedUser?._id || null,
-        });
-      });
+          ["leader", "member2", "member3"].forEach((k) => {
+            const m = g[k];
+            if (!m) return;
+            const email = m.email ? String(m.email).toLowerCase() : null;
+            const sap = m.sapId ? String(m.sapId) : null;
+            const matchedUser =
+                (email && userByEmail[email]) ||
+                (sap && userByStudentId[sap]) ||
+                null;
 
-      return {
-        groupId: g.groupId || null,
-        groupMongoId: g._id,
-        proposalTitle: g.proposalTitle || g.projectTitle || null,
-        members,
-        raw: g,
-      };
-    });
+            members.push({
+              role: k === "leader" ? "leader" : "member",
+              name: matchedUser?.name || m.name || null,
+              email: matchedUser?.email || m.email || null,
+              studentId: matchedUser?.studentId || m.sapId || null,
+              userId: matchedUser?._id || null,
+            });
+          });
+
+          // ✅ await the DB call
+          const project = await Proposal.findOne({ groupId: g._id }).lean();
+
+          return {
+            groupId: g.groupId || null,
+            groupMongoId: g._id,
+            proposalTitle: g.proposalTitle || g.projectTitle || null,
+            members,
+            raw: g,
+            project: project || null,
+          };
+        })
+    );
+
 
     return res.json({ success: true, data: result });
   } catch (err) {
