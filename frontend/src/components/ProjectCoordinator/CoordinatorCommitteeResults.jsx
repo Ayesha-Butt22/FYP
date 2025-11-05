@@ -17,76 +17,96 @@ import SearchIcon from "@mui/icons-material/Search";
 import FileDownload from "@mui/icons-material/FileDownload";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "../Admin/AppTable.jsx";
-import { toastService } from '../ToastService/ToastService.jsx';
+import { toastService } from "../ToastService/ToastService.jsx";
+import axios from "axios";
 import "../CommitteeResults.css";
-
-/**
- * CoordinatorCommitteeResults.jsx
- * Coordinator sees all groups, can Finalize / Reopen (simulated locally), and export CSV.
- *
- * Replace demo data with API calls:
- * - GET /api/coordinator/committee-results
- * - POST /api/coordinator/committee-results/:id/finalize
- */
-
-const DEMO_GROUP_SUMMARIES = [
-  {
-    id: "s-9001",
-    groupId: "G-101",
-    year: "FYP-1",
-    committeeMembers: ["Dr. Ayesha Butt", "Dr. Bilal Khan"],
-    individualTotals: [
-      { student: "Ali Khan", total: 38, max: 50 },
-      { student: "Sara Ahmed", total: 42, max: 50 }
-    ],
-    groupTotal: 80,
-    maxTotal: 100,
-    average: 80,
-    status: "Pending",
-    timestamp: "2025-11-02 10:00:00"
-  },
-  {
-    id: "s-9002",
-    groupId: "G-102",
-    year: "FYP-2",
-    committeeMembers: ["Dr. Maria Tariq"],
-    individualTotals: [
-      { student: "Madiha Sumbal", total: 45, max: 50 },
-      { student: "Hamza Shah", total: 40, max: 50 }
-    ],
-    groupTotal: 85,
-    maxTotal: 100,
-    average: 85,
-    status: "Finalized",
-    timestamp: "2025-11-02 12:00:00"
-  }
-];
 
 export default function CoordinatorCommitteeResults() {
   const [summaries, setSummaries] = useState([]);
   const [filterYear, setFilterYear] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
 
+  // ✅ Fetch from API
   useEffect(() => {
-    // replace with real fetch for coordinator
-    setSummaries(DEMO_GROUP_SUMMARIES);
+    const fetchEvaluations = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/committee-evaluation"); // or your route
+        if (res.data.success && Array.isArray(res.data.data)) {
+          const formatted = res.data.data.map((item) => {
+            const group = item.groupId || {};
+            const evaluations = item.evaluations || [];
+
+            // flatten student totals if structure allows
+            const individualTotals = evaluations.map((ev) => ({
+              student: ev.studentName || ev.studentId?.name || "N/A",
+              total: ev.totalMarks || 0,
+              max: ev.maxMarks || 50,
+            }));
+
+            const groupTotal = individualTotals.reduce((a, b) => a + (b.total || 0), 0);
+            const maxTotal = individualTotals.reduce((a, b) => a + (b.max || 50), 0);
+            const avg = maxTotal ? ((groupTotal / maxTotal) * 100).toFixed(1) : 0;
+
+            return {
+              id: item._id,
+              groupId: group.groupName || group.title || "Unknown Group",
+              year: group.fypPart || "FYP-1",
+              committeeMembers:
+                (item.evaluations || [])
+                  .map((e) => e.evaluatedBy?.name)
+                  .filter(Boolean) || [],
+              individualTotals,
+              groupTotal,
+              maxTotal,
+              average: avg,
+              status: item.status || "Pending",
+              timestamp: new Date(item.createdAt).toLocaleString(),
+            };
+          });
+          setSummaries(formatted);
+        } else {
+          toastService.error("No data found.");
+        }
+      } catch (err) {
+        console.error(err);
+        toastService.error("Failed to load committee results.");
+      }
+    };
+
+    fetchEvaluations();
   }, []);
 
-  const finalize = (id) => {
-    setSummaries(prev => prev.map(s => s.id === id ? { ...s, status: "Finalized" } : s));
-    toastService.success("Finalized.");
+  const finalize = async (id) => {
+    try {
+      // Optional: API call (if endpoint exists)
+      // await axios.post(`/api/coordinator/committee-results/${id}/finalize`);
+      setSummaries((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, status: "Finalized" } : s))
+      );
+      toastService.success("Finalized.");
+    } catch {
+      toastService.error("Error finalizing.");
+    }
   };
 
-  const reopen = (id) => {
-    setSummaries(prev => prev.map(s => s.id === id ? { ...s, status: "Pending" } : s));
-    toastService.info("Reopened.");
+  const reopen = async (id) => {
+    try {
+      // Optional: API call (if endpoint exists)
+      // await axios.post(`/api/coordinator/committee-results/${id}/reopen`);
+      setSummaries((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, status: "Pending" } : s))
+      );
+      toastService.info("Reopened.");
+    } catch {
+      toastService.error("Error reopening.");
+    }
   };
 
   const rows = useMemo(() => {
     const term = (searchTerm || "").trim().toLowerCase();
     return summaries
-      .filter(s => filterYear === "All" ? true : s.year === filterYear)
-      .filter(s => {
+      .filter((s) => (filterYear === "All" ? true : s.year === filterYear))
+      .filter((s) => {
         if (!term) return true;
         return (
           s.groupId.toLowerCase().includes(term) ||
@@ -94,41 +114,78 @@ export default function CoordinatorCommitteeResults() {
           (s.status || "").toLowerCase().includes(term)
         );
       })
-      .map(s => ({
+      .map((s) => ({
         "Group#": s.groupId,
-        "Year": s.year,
+        Year: s.year,
         "Committee Members": s.committeeMembers.join(", "),
-        "Individual Marks": s.individualTotals.map(it => `${it.student}: ${it.total}/${it.max}`).join(" | "),
+        "Individual Marks": s.individualTotals
+          .map((it) => `${it.student}: ${it.total}/${it.max}`)
+          .join(" | "),
         "Group Total": s.groupTotal,
-        "Average": s.average + "%",
-        "Status": s.status,
-        "Time": s.timestamp,
-        "Actions": s.status === "Pending"
-          ? (<Button size="small" variant="contained" onClick={() => finalize(s.id)}>Finalize</Button>)
-          : (<Button size="small" variant="outlined" onClick={() => reopen(s.id)}>Reopen</Button>)
+        Average: s.average + "%",
+        Status: s.status,
+        Time: s.timestamp,
+        Actions:
+          s.status === "Pending" ? (
+            <Button size="small" variant="contained" onClick={() => finalize(s.id)}>
+              Finalize
+            </Button>
+          ) : (
+            <Button size="small" variant="outlined" onClick={() => reopen(s.id)}>
+              Reopen
+            </Button>
+          ),
       }));
   }, [summaries, filterYear, searchTerm]);
 
   function exportCSV() {
-    const headers = ["Group#", "Year", "Committee Members", "Individual Marks", "Group Total", "Average", "Status", "Time"];
-    const csvRows = [headers.join(",")].concat(summaries.map(s =>
-      headers.map(h => {
-        switch (h) {
-          case "Group#": return `"${s.groupId}"`;
-          case "Year": return `"${s.year}"`;
-          case "Committee Members": return `"${s.committeeMembers.join("; ")}"`;
-          case "Individual Marks": return `"${s.individualTotals.map(it => `${it.student}:${it.total}/${it.max}`).join("; ")}"`;
-          case "Group Total": return `"${s.groupTotal}"`;
-          case "Average": return `"${s.average}%"`;
-          case "Status": return `"${s.status}"`;
-          case "Time": return `"${s.timestamp}"`;
-          default: return '""';
-        }
-      }).join(",")
-    ));
+    const headers = [
+      "Group#",
+      "Year",
+      "Committee Members",
+      "Individual Marks",
+      "Group Total",
+      "Average",
+      "Status",
+      "Time",
+    ];
+    const csvRows = [headers.join(",")].concat(
+      summaries.map((s) =>
+        headers
+          .map((h) => {
+            switch (h) {
+              case "Group#":
+                return `"${s.groupId}"`;
+              case "Year":
+                return `"${s.year}"`;
+              case "Committee Members":
+                return `"${s.committeeMembers.join("; ")}"`;
+              case "Individual Marks":
+                return `"${s.individualTotals
+                  .map((it) => `${it.student}:${it.total}/${it.max}`)
+                  .join("; ")}"`;
+              case "Group Total":
+                return `"${s.groupTotal}"`;
+              case "Average":
+                return `"${s.average}%"`;
+              case "Status":
+                return `"${s.status}"`;
+              case "Time":
+                return `"${s.timestamp}"`;
+              default:
+                return '""';
+            }
+          })
+          .join(",")
+      )
+    );
     const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `coordinator_results_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `coordinator_results_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -142,7 +199,7 @@ export default function CoordinatorCommitteeResults() {
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth size="small" variant="filled">
               <InputLabel>Year</InputLabel>
-              <Select value={filterYear} onChange={e => setFilterYear(e.target.value)}>
+              <Select value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
                 <MenuItem value="All">All Years</MenuItem>
                 <MenuItem value="FYP-1">FYP-1</MenuItem>
                 <MenuItem value="FYP-2">FYP-2</MenuItem>
@@ -156,10 +213,18 @@ export default function CoordinatorCommitteeResults() {
                 size="small"
                 placeholder="Search"
                 value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
               />
-              <Button variant="outlined" startIcon={<FileDownload />} onClick={exportCSV}>Export CSV</Button>
+              <Button variant="outlined" startIcon={<FileDownload />} onClick={exportCSV}>
+                Export CSV
+              </Button>
             </Stack>
           </Grid>
         </Grid>
@@ -167,7 +232,17 @@ export default function CoordinatorCommitteeResults() {
 
       <Paper className="evaluation-table-paper">
         <AppTable
-          headers={["Group#", "Year", "Committee Members", "Individual Marks", "Group Total", "Average", "Status", "Time", "Actions"]}
+          headers={[
+            "Group#",
+            "Year",
+            "Committee Members",
+            "Individual Marks",
+            "Group Total",
+            "Average",
+            "Status",
+            "Time",
+            "Actions",
+          ]}
           rows={rows}
         />
       </Paper>
