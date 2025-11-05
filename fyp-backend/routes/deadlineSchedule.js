@@ -15,6 +15,6 @@ router.get("/get", getPresentation);
 router.post("/publish/:id", publishSchedule);
 router.get("/getfaculty", getFaculty);
 router.get("/getSlots/:email", checkSlot);
-router.post("/book/:slotId/:groupId", bookSlot);
+router.post("/book", bookSlot);
 
 module.exports = router;

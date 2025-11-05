@@ -168,11 +168,11 @@ exports.getFaculty = async (req, res) => {
 // ---------------- BOOK SLOT ---------------- //
 exports.bookSlot = async (req, res) => {
   try {
-    const { slotId, groupId } = req.params;
-    const schedule = await PresentationSchedule.findOne({ "slots._id": slotId });
+    const { slotId, groupId , selectedSlot } = req.body;
+    const schedule = await PresentationSchedule.findOne({ "slots._id": selectedSlot });
     if (!schedule) return res.status(404).json({ success: false, message: "Schedule not found" });
 
-    const slot = schedule.slots.id(slotId);
+    const slot = schedule.slots.id(selectedSlot);
     if (!slot) return res.status(404).json({ success: false, message: "Slot not found" });
 
     if (slot.bookedBy) return res.status(400).json({ success: false, message: "Slot already booked" });

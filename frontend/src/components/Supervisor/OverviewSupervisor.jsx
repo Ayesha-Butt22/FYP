@@ -26,7 +26,7 @@ export default function OverviewSupervisor({ onTabChange }) {
       const email = localStorage.getItem('email');
       if (!email) return false;
       try {
-        const response = await fetch(`http://localhost:5000/api/deadlineSchedule/book/${slotId}/${groupId}`, {
+        const response = await fetch(`http://localhost:5000/api/evaluation/checkFaculty`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

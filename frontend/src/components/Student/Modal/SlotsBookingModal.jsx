@@ -21,15 +21,15 @@ export default function SlotBookingModal({ open, onClose, slots = [], groupId, s
     const handleBook = async () => {
         if (!selectedSlot) return ToastService.error("Please select a slot");
 
+        console.log(selectedSlot);
         setLoading(true);
         try {
             const res = await fetch(`http://localhost:5000/api/deadlineSchedule/book`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ slotId: selectedSlot, groupId, scheduleId }),
+                body: JSON.stringify({  selectedSlot, groupId, scheduleId }),
             });
             const data = await res.json();
-
             if (data.success) {
                 ToastService.success(" 🎉 Slot booked successfully!");
                 onClose();
