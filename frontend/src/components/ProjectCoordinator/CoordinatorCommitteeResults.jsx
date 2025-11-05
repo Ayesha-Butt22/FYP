@@ -1,250 +1,225 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
-  Typography,
   Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Collapse,
+  IconButton,
+  Typography,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
   Stack,
-  Button,
-  InputAdornment,
+  Divider,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import FileDownload from "@mui/icons-material/FileDownload";
-import DashboardSectionHeader from "./DashboardSectionHeader";
-import AppTable from "../Admin/AppTable.jsx";
-import { toastService } from "../ToastService/ToastService.jsx";
+import {
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  AccessTime,
+  Place,
+} from "@mui/icons-material";
 import axios from "axios";
-import "../CommitteeResults.css";
+import { toastService } from "../ToastService/ToastService.jsx";
+import DashboardSectionHeader from "./DashboardSectionHeader";
+import "./CommitteeResults.css";
 
 export default function CoordinatorCommitteeResults() {
-  const [summaries, setSummaries] = useState([]);
-  const [filterYear, setFilterYear] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [rows, setRows] = useState([]);
+  const [expanded, setExpanded] = useState({});
 
-  // ✅ Fetch from API
+  // ✅ Fetch and transform API data
   useEffect(() => {
     const fetchEvaluations = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/committee-evaluation"); // or your route
+        const res = await axios.get("http://localhost:5000/api/committee-evaluation");
         if (res.data.success && Array.isArray(res.data.data)) {
           const formatted = res.data.data.map((item) => {
             const group = item.groupId || {};
-            const evaluations = item.evaluations || [];
+            const schedule = item.scheduleId || {};
+            const slot = (schedule.slots || []).find(
+              (s) => s._id === item.slotId
+            ) || {};
 
-            // flatten student totals if structure allows
-            const individualTotals = evaluations.map((ev) => ({
-              student: ev.studentName || ev.studentId?.name || "N/A",
-              total: ev.totalMarks || 0,
-              max: ev.maxMarks || 50,
+            const evaluations = (item.evaluations || []).map((ev) => ({
+              evaluatedBy: ev.evaluatedBy?.name || "N/A",
+              email: ev.evaluatedBy?.email,
+              role: ev.evaluatedBy?.role,
+              comments: ev.comments || "—",
+              submittedAt: new Date(ev.submittedAt).toLocaleString(),
+              students: (ev.students || []).map((s) => ({
+                name: s.name,
+                sapId: s.studentId,
+                presentation: s.presentationMarks,
+                performance: s.performanceMarks,
+              })),
             }));
-
-            const groupTotal = individualTotals.reduce((a, b) => a + (b.total || 0), 0);
-            const maxTotal = individualTotals.reduce((a, b) => a + (b.max || 50), 0);
-            const avg = maxTotal ? ((groupTotal / maxTotal) * 100).toFixed(1) : 0;
 
             return {
               id: item._id,
-              groupId: group.groupName || group.title || "Unknown Group",
-              year: group.fypPart || "FYP-1",
-              committeeMembers:
-                (item.evaluations || [])
-                  .map((e) => e.evaluatedBy?.name)
-                  .filter(Boolean) || [],
-              individualTotals,
-              groupTotal,
-              maxTotal,
-              average: avg,
-              status: item.status || "Pending",
-              timestamp: new Date(item.createdAt).toLocaleString(),
+              groupId: group.groupId || "Unknown",
+              venue: schedule.venue || "Not Assigned",
+              slotTime: `${new Date(slot.startTime).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })} - ${new Date(slot.endTime).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}`,
+              evaluations,
+              createdAt: new Date(item.createdAt).toLocaleString(),
             };
           });
-          setSummaries(formatted);
+          setRows(formatted);
         } else {
-          toastService.error("No data found.");
+          toastService.error("No evaluation data found.");
         }
       } catch (err) {
         console.error(err);
-        toastService.error("Failed to load committee results.");
+        toastService.error("Failed to fetch evaluations.");
       }
     };
-
     fetchEvaluations();
   }, []);
 
-  const finalize = async (id) => {
-    try {
-      // Optional: API call (if endpoint exists)
-      // await axios.post(`/api/coordinator/committee-results/${id}/finalize`);
-      setSummaries((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, status: "Finalized" } : s))
-      );
-      toastService.success("Finalized.");
-    } catch {
-      toastService.error("Error finalizing.");
-    }
+  const toggleExpand = (id) => {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
   };
-
-  const reopen = async (id) => {
-    try {
-      // Optional: API call (if endpoint exists)
-      // await axios.post(`/api/coordinator/committee-results/${id}/reopen`);
-      setSummaries((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, status: "Pending" } : s))
-      );
-      toastService.info("Reopened.");
-    } catch {
-      toastService.error("Error reopening.");
-    }
-  };
-
-  const rows = useMemo(() => {
-    const term = (searchTerm || "").trim().toLowerCase();
-    return summaries
-      .filter((s) => (filterYear === "All" ? true : s.year === filterYear))
-      .filter((s) => {
-        if (!term) return true;
-        return (
-          s.groupId.toLowerCase().includes(term) ||
-          (s.committeeMembers || []).join(" ").toLowerCase().includes(term) ||
-          (s.status || "").toLowerCase().includes(term)
-        );
-      })
-      .map((s) => ({
-        "Group#": s.groupId,
-        Year: s.year,
-        "Committee Members": s.committeeMembers.join(", "),
-        "Individual Marks": s.individualTotals
-          .map((it) => `${it.student}: ${it.total}/${it.max}`)
-          .join(" | "),
-        "Group Total": s.groupTotal,
-        Average: s.average + "%",
-        Status: s.status,
-        Time: s.timestamp,
-        Actions:
-          s.status === "Pending" ? (
-            <Button size="small" variant="contained" onClick={() => finalize(s.id)}>
-              Finalize
-            </Button>
-          ) : (
-            <Button size="small" variant="outlined" onClick={() => reopen(s.id)}>
-              Reopen
-            </Button>
-          ),
-      }));
-  }, [summaries, filterYear, searchTerm]);
-
-  function exportCSV() {
-    const headers = [
-      "Group#",
-      "Year",
-      "Committee Members",
-      "Individual Marks",
-      "Group Total",
-      "Average",
-      "Status",
-      "Time",
-    ];
-    const csvRows = [headers.join(",")].concat(
-      summaries.map((s) =>
-        headers
-          .map((h) => {
-            switch (h) {
-              case "Group#":
-                return `"${s.groupId}"`;
-              case "Year":
-                return `"${s.year}"`;
-              case "Committee Members":
-                return `"${s.committeeMembers.join("; ")}"`;
-              case "Individual Marks":
-                return `"${s.individualTotals
-                  .map((it) => `${it.student}:${it.total}/${it.max}`)
-                  .join("; ")}"`;
-              case "Group Total":
-                return `"${s.groupTotal}"`;
-              case "Average":
-                return `"${s.average}%"`;
-              case "Status":
-                return `"${s.status}"`;
-              case "Time":
-                return `"${s.timestamp}"`;
-              default:
-                return '""';
-            }
-          })
-          .join(",")
-      )
-    );
-    const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `coordinator_results_${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
 
   return (
-    <Box>
-      <DashboardSectionHeader description="Coordinator: review, finalize or reopen committee evaluations across all groups">
-        Committee Results — Coordinator
+    <Box className="cor-committee-container">
+      <DashboardSectionHeader description="Coordinator view of all committee evaluations. Expand a group to view detailed remarks and marks.">
+        Committee Evaluation Results
       </DashboardSectionHeader>
 
-      <Paper className="evaluation-form-paper elevated-card" sx={{ mb: 3 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth size="small" variant="filled">
-              <InputLabel>Year</InputLabel>
-              <Select value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
-                <MenuItem value="All">All Years</MenuItem>
-                <MenuItem value="FYP-1">FYP-1</MenuItem>
-                <MenuItem value="FYP-2">FYP-2</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
+      <Paper className="cor-committee-paper">
+        <TableContainer>
+          <Table>
+            <TableHead className="cor-committee-thead">
+              <TableRow>
+                <TableCell />
+                <TableCell><strong>Group#</strong></TableCell>
+                <TableCell><strong>Student Names</strong></TableCell>
+                <TableCell><strong>Venue</strong></TableCell>
+                <TableCell><strong>Slot Timing</strong></TableCell>
+              </TableRow>
+            </TableHead>
 
-          <Grid item xs={12} sm={6} sx={{ textAlign: { xs: "left", sm: "right" } }}>
-            <Stack direction="row" spacing={1} justifyContent="flex-end">
-              <TextField
-                size="small"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <Button variant="outlined" startIcon={<FileDownload />} onClick={exportCSV}>
-                Export CSV
-              </Button>
-            </Stack>
-          </Grid>
-        </Grid>
-      </Paper>
+            <TableBody>
+              {rows.map((row) => {
+                const allStudents = [
+                  row.evaluations?.[0]?.students.map((s) => s.name).join(", "),
+                ];
 
-      <Paper className="evaluation-table-paper">
-        <AppTable
-          headers={[
-            "Group#",
-            "Year",
-            "Committee Members",
-            "Individual Marks",
-            "Group Total",
-            "Average",
-            "Status",
-            "Time",
-            "Actions",
-          ]}
-          rows={rows}
-        />
+                return (
+                  <React.Fragment key={row.id}>
+                    <TableRow
+                      hover
+                      className="cor-committee-row"
+                      onClick={() => toggleExpand(row.id)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <TableCell>
+                        <IconButton size="small">
+                          {expanded[row.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>{row.groupId}</TableCell>
+                      <TableCell>{allStudents}</TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Place fontSize="small" color="primary" />
+                          <Typography variant="body2">{row.venue}</Typography>
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <AccessTime fontSize="small" color="secondary" />
+                          <Typography variant="body2">{row.slotTime}</Typography>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell
+                        style={{ paddingBottom: 0, paddingTop: 0 }}
+                        colSpan={6}
+                      >
+                        <Collapse in={expanded[row.id]} timeout="auto" unmountOnExit>
+                          <Box className="cor-committee-expand">
+                            {row.evaluations.map((evalItem, i) => (
+                              <Paper
+                                key={i}
+                                className="cor-committee-panel-card"
+                                elevation={2}
+                              >
+                                <Typography
+                                  variant="subtitle1"
+                                  className="cor-committee-panel-header"
+                                >
+                                  Panel Member: {evalItem.evaluatedBy}{" "}
+                                  <Typography
+                                    component="span"
+                                    variant="caption"
+                                    color="text.secondary"
+                                  >
+                                    ({evalItem.role})
+                                  </Typography>
+                                </Typography>
+                                <Divider sx={{ mb: 1 }} />
+
+                                <Grid container spacing={1}>
+                                  {evalItem.students.map((stu, j) => (
+                                    <Grid
+                                      item
+                                      xs={12}
+                                      sm={6}
+                                      key={j}
+                                      className="cor-committee-student-box"
+                                    >
+                                      <Typography variant="body2">
+                                        <strong>{stu.name}</strong> ({stu.sapId})
+                                      </Typography>
+                                      <Typography variant="body2">
+                                        Presentation: {stu.presentation}/10
+                                      </Typography>
+                                      <Typography variant="body2">
+                                        Performance: {stu.performance}/10
+                                      </Typography>
+                                    </Grid>
+                                  ))}
+                                </Grid>
+
+                                <Divider sx={{ my: 1 }} />
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ mt: 0.5 }}
+                                >
+                                  <strong>Comments:</strong> {evalItem.comments}
+                                </Typography>
+
+                                <Typography
+                                  variant="caption"
+                                  color="text.disabled"
+                                  sx={{ display: "block", mt: 0.5 }}
+                                >
+                                  Submitted at: {evalItem.submittedAt}
+                                </Typography>
+                              </Paper>
+                            ))}
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Paper>
     </Box>
   );

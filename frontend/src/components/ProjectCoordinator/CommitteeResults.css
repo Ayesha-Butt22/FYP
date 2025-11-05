@@ -1,0 +1,46 @@
+.cor-committee-container {
+  padding: 1rem;
+}
+
+.cor-committee-paper {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cor-committee-thead {
+  background-color: #f5f6fa;
+}
+
+.cor-committee-row:hover {
+  background-color: #fafafa;
+}
+
+.cor-committee-expand {
+  margin: 1rem 2rem;
+  border-left: 3px solid #1976d2;
+  padding-left: 1rem;
+}
+
+.cor-committee-panel-card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background: #fff;
+  transition: 0.2s;
+}
+
+.cor-committee-panel-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cor-committee-panel-header {
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.cor-committee-student-box {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
