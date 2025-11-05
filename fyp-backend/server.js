@@ -17,6 +17,8 @@ const NoticeboardRoutes = require("./routes/NoticeboardRoutes")
 const SupervisorWhiteboardRoutes = require("./routes/SupervisorWhiteboardRoutes");
 const evaluationRoutes = require("./routes/evaluationRoutes");
 
+
+
 app.use('/Filesk', express.static(path.join(__dirname, 'Filesk')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
@@ -29,9 +31,12 @@ app.use('/api/files', require('./routes/FileRouter'));
 app.use("/api/profile-pic", require("./routes/profile"));
 app.use("/api/deadline", require("./routes/deadline"));
 app.use("/api/noticeboard", NoticeboardRoutes);
-app.use("/api/deadlineSchedule" , require("./routes/deadlineSchedule"))
+app.use("/api/deadlineSchedule", require("./routes/deadlineSchedule"));
+
 app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);
 app.use("/api/evaluation", evaluationRoutes);
+
+
 
 // Test route
 app.get('/', (req, res) => res.send('API Running'));
