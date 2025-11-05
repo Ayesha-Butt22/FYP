@@ -100,7 +100,7 @@ export default function CoordinatorCommitteeResults() {
             <TableHead className="cor-committee-thead">
               <TableRow>
                 <TableCell />
-                <TableCell><strong>Group#</strong></TableCell>
+                <TableCell><labe>Group#</labe></TableCell>
                 <TableCell><strong>Student Names</strong></TableCell>
                 <TableCell><strong>Venue</strong></TableCell>
                 <TableCell><strong>Slot Timing</strong></TableCell>
@@ -130,13 +130,13 @@ export default function CoordinatorCommitteeResults() {
                       <TableCell>{allStudents}</TableCell>
                       <TableCell>
                         <Stack direction="row" spacing={1} alignItems="center">
-                          <Place fontSize="small" color="primary" />
+                          
                           <Typography variant="body2">{row.venue}</Typography>
                         </Stack>
                       </TableCell>
                       <TableCell>
                         <Stack direction="row" spacing={1} alignItems="center">
-                          <AccessTime fontSize="small" color="secondary" />
+                        
                           <Typography variant="body2">{row.slotTime}</Typography>
                         </Stack>
                       </TableCell>
