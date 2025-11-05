@@ -230,10 +230,6 @@
   width: 100%;
   margin-bottom: 18px;
   overflow: hidden;
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
 }
 .progress-fill {
   background: #2563eb;

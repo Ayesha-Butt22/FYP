@@ -79,8 +79,7 @@ exports.getEvaluations = async (req, res) => {
 //coordintors 
 exports.approveEvaluation = async (req, res) => {
     try {
-        const { id } = req.params;
-
+        const { id } = req.body;
         const evaluation = await CommiteeEvaluation.findByIdAndUpdate(
             id,
             { isApprovedByCoordinator: true, approvedAt: new Date() },

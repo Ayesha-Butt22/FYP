@@ -4,7 +4,7 @@ const controller = require("../controllers/comitteeEvaluationController");
 
 router.post("/submit", controller.submitEvaluation);
 router.get("/", controller.getEvaluations);
-router.put("/approve/:id", controller.approveEvaluation);
+router.post("/approve", controller.approveEvaluation);
 router.get("/group/:groupId", controller.getEvaluationByGroup);
 
 module.exports = router;
