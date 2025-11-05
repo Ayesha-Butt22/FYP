@@ -73,7 +73,7 @@ export default function CoordinatorCommitteeResults() {
   const handlePublish = async (row) => {
     const isApproved = row.isApproved ;
     if (isApproved) {
-      ToastService.info('Evaluation already approved');
+      ToastService.info('Evaluation already published');
       return;
     }
     const response = await fetch(`http://localhost:5000/api/committee-evaluation/approve`, {
@@ -146,7 +146,7 @@ export default function CoordinatorCommitteeResults() {
                             onClick={() => {
                               handlePublish(row)}}
                         >
-                          Approve
+                         Publish
                         </button>
                       </td>
                     </tr>
