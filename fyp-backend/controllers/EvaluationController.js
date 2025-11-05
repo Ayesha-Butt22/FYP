@@ -31,6 +31,7 @@ exports.checkFacultyInPublishedPanel = async (req, res) => {
         week: alreadyAssigned.week,
         venue: alreadyAssigned.venue,
         fypPart: alreadyAssigned.fypPart,
+        data: alreadyAssigned,
       });
     }
 

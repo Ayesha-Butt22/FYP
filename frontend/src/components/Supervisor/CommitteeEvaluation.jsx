@@ -157,7 +157,7 @@ export default function CommitteeEvaluation() {
       const email = localStorage.getItem('email');
       if (!email) return;
       try {
-        const response = await fetch("/api/evaluation/checkFaculty", {
+        const response = await fetch("http://localhost:5000/api/evaluation/checkFaculty", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -176,17 +176,13 @@ export default function CommitteeEvaluation() {
   // Helper to normalize schedules array from various API shapes
   const facultySchedules = useMemo(() => {
     if (!facultyStatus) return [];
-    // If API returned { success, data: [...] }
+
     if (facultyStatus.data && Array.isArray(facultyStatus.data)) return facultyStatus.data;
-    // If API returned array directly
     if (Array.isArray(facultyStatus)) return facultyStatus;
-    // If API returned single schedule object with scheduleId
     if (facultyStatus.scheduleId || facultyStatus._id) return [facultyStatus];
-    // fallback empty
     return [];
   }, [facultyStatus]);
 
-  // small helper to format slot datetime
   const fmtDateTime = (iso) => {
     try {
       return new Date(iso).toLocaleString();
@@ -617,11 +613,11 @@ export default function CommitteeEvaluation() {
                     <Box sx={{ mt: 0.5 }}>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>Slots:</Typography>
                       <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>
-                        {(sched.slots || []).map((s) => (
+                        {(sched.data.slots || []).map((s) => (
                           <li key={s._id || `${s.startTime}-${s.endTime}`} style={{ marginBottom: 4 }}>
                             <small style={{ color: "#1f2937" }}>
                               {fmtDateTime(s.startTime)} — {fmtDateTime(s.endTime)}
-                              {s.bookedBy ? ` (Booked: ${s.bookedBy.groupId || s.bookedBy})` : " (Available)"}
+                              {s.bookedBy ? ` (Booked: ${s.bookedBy.groupId || s.bookedBy})` : " (Not Booked)"}
                             </small>
                           </li>
                         ))}
