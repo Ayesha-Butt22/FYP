@@ -10,6 +10,8 @@ export default function CommitteeEvaluation() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({});
   const [activeSlot, setActiveSlot] = useState(null);
+  const [week , setWeek] = useState(4);
+  const [schedule , setSchedule] = useState(null);
 
   useEffect(() => {
     const fetchFacultyPanel = async () => {
@@ -39,13 +41,14 @@ export default function CommitteeEvaluation() {
   }, []);
 
 
-  const handleCheckGroup = async (slot) => {
+  const handleCheckGroup = async (slot , panel) => {
     try {
       setLoading(true);
-      setActiveSlot(slot);
-
+      setActiveSlot({ ...slot, panel });
+      setWeek(panel.week === 'Week 4' ? 4 : 13);
+      setSchedule(panel._id);
       const bookedRes = await EvaluationService.getBookedGroups({
-        scheduleId: facultyData._id,
+        scheduleId: panel._id,
         slotId: slot._id,
       });
 
@@ -102,7 +105,7 @@ export default function CommitteeEvaluation() {
       }));
 
       const payload = {
-        scheduleId: facultyData._id,
+        scheduleId: schedule,
         slotId: activeSlot._id,
         groupId: selectedGroup.groupMongoId,
         evaluatedBy,
@@ -154,59 +157,62 @@ export default function CommitteeEvaluation() {
         </DashboardSectionHeader>
 
         <div className="eval-sup-container">
-          <div className="eval-sup-header">
-            <p>
-              <strong>Week:</strong> {facultyData.week} &nbsp; | &nbsp;
-              <strong>FYP Part:</strong> {facultyData.fypPart.toUpperCase()} &nbsp; | &nbsp;
-              <strong>Venue:</strong> {facultyData.venue}
-            </p>
-          </div>
+          {facultyData.map((panel, i) => (
+              <div key={i} className="eval-sup-panel">
+                <div className="eval-sup-header">
+                  <p>
+                    <strong>Week:</strong> {panel.week} &nbsp; | &nbsp;
+                    <strong>FYP Part:</strong> {panel.fypPart?.toUpperCase()} &nbsp; | &nbsp;
+                    <strong>Venue:</strong> {panel.venue}
+                  </p>
+                </div>
 
-          <div className="eval-sup-slots-grid">
-            {facultyData.slots?.map((slot, idx) => {
-              const slotDate = new Date(slot.startTime);
-              const dateStr = slotDate.toLocaleDateString([], {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-              });
-              const startTime = slotDate.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-              const endTime = new Date(slot.endTime).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-              const bookedBy = slot.bookedBy
-                  ? `Group-${slot.bookedBy.slice(-5)}`
-                  : false;
+                <div className="eval-sup-slots-grid">
+                  {panel.slots?.map((slot, idx) => {
+                    const slotDate = new Date(slot.startTime);
+                    const dateStr = slotDate.toLocaleDateString([], {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    });
+                    const startTime = slotDate.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+                    const endTime = new Date(slot.endTime).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+                    const bookedBy = slot.bookedBy
+                        ? `Group-${slot.bookedBy.slice(-5)}`
+                        : false;
 
-              return (
-                  <div key={idx} className="eval-sup-slot-card eval-sup-free">
-                    <div className="eval-sup-slot-time">
-                      <span className="eval-sup-slot-date">{dateStr}</span>
-                      <br />
-                      {startTime} - {endTime}
-                    </div>
-                    <div>
-                      {bookedBy}
-                    </div>
+                    return (
+                        <div key={idx} className="eval-sup-slot-card eval-sup-free">
+                          <div className="eval-sup-slot-time">
+                            <span className="eval-sup-slot-date">{dateStr}</span>
+                            <br />
+                            {startTime} - {endTime}
+                          </div>
+                          <div>{bookedBy}</div>
 
-                    {bookedBy ? (
-                        <button
-                            className="eval-sup-open-btn"
-                            onClick={() => handleCheckGroup(slot)}
-                        >
-                          Evaluate
-                        </button>
-                    ) : (
-                        <div className="eval-sup-unbooked">Not Booked</div>
-                    )}
-                  </div>
-              );
-            })}
-          </div>
+                          {bookedBy ? (
+                              <button
+                                  className="eval-sup-open-btn"
+                                  onClick={() => handleCheckGroup(slot, panel)}
+                              >
+                                Evaluate
+                              </button>
+                          ) : (
+                              <div className="eval-sup-unbooked">Not Booked</div>
+                          )}
+                        </div>
+                    );
+                  })}
+                </div>
+              </div>
+          ))}
+
 
           {selectedGroup && (
               <div className="eval-sup-form-container">
@@ -251,14 +257,20 @@ export default function CommitteeEvaluation() {
                   <thead>
                   <tr>
                     <th>Name</th>
-                    <th>Presentation Marks</th>
-                    <th>Performance Marks</th>
+                    {week && week !== 4 && (
+                        <>
+                          <th>Presentation Marks</th>
+                          <th>Performance Marks</th>
+                        </>
+                    )}
                   </tr>
                   </thead>
                   <tbody>
                   {selectedGroup.members?.map((m) => (
                       <tr key={m.studentId}>
                         <td>{m.name}</td>
+                        {week && week !== 4 && (
+                            <>
                         <td>
                           <input
                               type="text"
@@ -289,6 +301,8 @@ export default function CommitteeEvaluation() {
                               }
                           />
                         </td>
+                            </>
+                        )}
                       </tr>
                   ))}
                   </tbody>

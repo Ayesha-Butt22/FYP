@@ -17,10 +17,7 @@ const progress = [
 ];
 
 export default function OverviewSupervisor({ onTabChange }) {
-  const [facultyStatus, setFacultyStatus] = useState(null);
 
-
-  // ✅ API integration (runs once when page loads)
   useEffect(() => {
     const fetchFacultyStatus = async () => {
       const email = localStorage.getItem('email');
@@ -34,9 +31,9 @@ export default function OverviewSupervisor({ onTabChange }) {
           }),
         });
         const data = await response.json();
-        setFacultyStatus(data);
-        if (data && data.scheduleId){
-          const msg = `Your are listed as panel member for ${data.week || "this week"} at venue ${data.venue || "TBD"} — be ready!`;
+        const lastSchedule = data.data?.[data.data.length - 1];
+        if (lastSchedule._id){
+          const msg = `Your are listed as panel member for ${lastSchedule.week || "this week"} at venue ${lastSchedule.venue || "TBD"} — be ready!`;
           ToastService.info(msg);
         }
       } catch (error) {

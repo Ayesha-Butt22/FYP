@@ -28,7 +28,7 @@ exports.checkFacultyInPublishedPanel = async (req, res) => {
     }
 
     // Find any published schedule where this user is in facultyPanels
-    const alreadyAssigned = await PresentationSchedule.findOne({
+    const alreadyAssigned = await PresentationSchedule.find({
       isPublish: true,
       facultyPanels: user._id,
     });
