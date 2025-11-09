@@ -4,12 +4,7 @@ const Group = require("../models/StudentGroup");
 const PresentationSchedule = require("../models/DeadlineSchedule");
 const Proposal = require("../models/StudentProposal");
 
-/**
- * POST /api/evaluation/checkFaculty
- * Body: { email }
- * - Checks user exists and role is supervisor/coordinator
- * - Returns first published schedule that includes this faculty (if any)
- */
+
 exports.checkFacultyInPublishedPanel = async (req, res) => {
   try {
     const { email } = req.body;
@@ -27,7 +22,6 @@ exports.checkFacultyInPublishedPanel = async (req, res) => {
       });
     }
 
-    // Find any published schedule where this user is in facultyPanels
     const alreadyAssigned = await PresentationSchedule.find({
       isPublish: true,
       facultyPanels: user._id,
@@ -61,12 +55,7 @@ exports.checkFacultyInPublishedPanel = async (req, res) => {
   }
 };
 
-/**
- * POST /api/evaluation/getBookedGroups
- * Body: { scheduleId } OR { week, fypPart, venue? }
- *
- * Returns: { success: true, data: [ { groupId, groupMongoId, proposalTitle, members: [{role,name,email,studentId,userId}], raw } ] }
- */
+
 exports.getBookedGroupsForSchedule = async (req, res) => {
   try {
     const { scheduleId, week, fypPart, venue } = req.body || {};
@@ -110,11 +99,11 @@ exports.getBookedGroupsForSchedule = async (req, res) => {
     const bookedGroupIds = Array.from(bookedSet);
     if (!bookedGroupIds.length) return res.json({ success: true, data: [] });
 
-    // Fetch groups by _id
+  
     const groups = await Group.find({ _id: { $in: bookedGroupIds } }).lean();
     if (!groups.length) return res.json({ success: true, data: [] });
 
-    // Collect email and sapId values to resolve in User collection
+
     const emailSet = new Set();
     const sapSet = new Set();
     groups.forEach(g => {
@@ -132,7 +121,7 @@ exports.getBookedGroupsForSchedule = async (req, res) => {
 
     const users = or.length ? await User.find({ $or: or }).lean() : [];
 
-    // Index users
+
     const userByEmail = {};
     const userByStudentId = {};
     users.forEach(u => {
@@ -141,7 +130,6 @@ exports.getBookedGroupsForSchedule = async (req, res) => {
     });
 
 
-    // Build result array
     const result = await Promise.all(
         groups.map(async (g) => {
           const members = [];
@@ -165,7 +153,6 @@ exports.getBookedGroupsForSchedule = async (req, res) => {
             });
           });
 
-          // ✅ await the DB call
           const project = await Proposal.findOne({ groupId: g._id }).lean();
 
           return {
@@ -187,11 +174,7 @@ exports.getBookedGroupsForSchedule = async (req, res) => {
   }
 };
 
-/**
- * POST /api/evaluation/resolveGroup
- * Body: { groupId }
- * Returns group members resolved to User records when possible.
- */
+
 exports.resolveGroupById = async (req, res) => {
   try {
     const { groupId } = req.body;
@@ -251,11 +234,7 @@ exports.resolveGroupById = async (req, res) => {
   }
 };
 
-/**
- * POST /api/evaluation/bulkResolveGroups
- * Body: { groupIds: ["G-101","G-102"] }
- * Returns resolved members for each group.
- */
+
 exports.bulkResolveGroups = async (req, res) => {
   try {
     const { groupIds } = req.body;

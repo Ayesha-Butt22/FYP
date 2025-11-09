@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import styled, { createGlobalStyle, keyframes } from "styled-components";
 import { motion } from "framer-motion";
-import logoImg from "../assets/logo.jpeg";
+import logoImg from "../assets/rc.png";
 import backgroundImg from "../assets/EDU3.png";
 import capImg from "../assets/cap.png";
 import getUserInfoFromStorage from "./Auth/UserInfo.jsx";
@@ -435,7 +435,7 @@ function useTypewriterLoop(phrases, speed = 55, pause = 1400) {
 
 // --- Assistant Chat Bubbles Logic ---
 const tips = [
-  "👋 Hi! Welcome to Auto-FYP. Need help getting started?",
+  "👋 Hi! Welcome to RiphahCapstone. Need help getting started?",
   "You can manage your Final Year Project from proposal to evaluation here.",
   "Use the Get Started button to pick your role and begin your journey!",
 ];
@@ -669,7 +669,7 @@ const LandingPage = () => {
         <GlassNav>
           <Logo>
             <img src={logoImg} alt="Auto-FYP logo" />
-            Auto-FYP
+            Riphah Capstone
           </Logo>
           <NavLinks>
             {!logedUser ? (

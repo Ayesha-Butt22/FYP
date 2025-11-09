@@ -62,7 +62,7 @@ exports.submitEvaluation = async (req, res) => {
 };
 
 
-//cordintors 
+
 exports.getEvaluations = async (req, res) => {
     try {
         const evaluations = await CommiteeEvaluation.find()
@@ -76,7 +76,7 @@ exports.getEvaluations = async (req, res) => {
     }
 };
 
-//coordintors 
+
 exports.approveEvaluation = async (req, res) => {
     try {
         const { id } = req.body;

@@ -34,7 +34,7 @@ exports.createUser = async (req, res) => {
       password: hashed,
       role,
       department,
-      designation, // ADDED: designation
+      designation, 
       specialization,
       availableSlots,
       bookedSlots,
@@ -85,7 +85,7 @@ exports.getAdmins = async (req, res) => {
   }
 };
 
-// GET SUPERVISORS - DESIGNATION INCLUDED
+// GET SUPERVISORS (DESIGNATION INCLUDED)
 exports.getSupervisors = async (req, res) => {
   try {
     const list = await User.find({ role: 'supervisor' })
@@ -167,9 +167,8 @@ exports.updateUser = async (req, res) => {
     if (typeof bookedSlots !== "undefined") user.bookedSlots = bookedSlots;
     if (typeof availableSlots !== "undefined") user.availableSlots = availableSlots;
 
-    // isProjectHead handle karen
     if (typeof isProjectHead !== "undefined") {
-      // Agar isProjectHead true set ho raha hai, toh pehle same department ke existing head ko reset karen
+      
       if (isProjectHead === true) {
         await User.updateMany(
           { 
@@ -214,7 +213,7 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// REMOVE COORDINATOR (convert to supervisor)
+// REMOVE COORDINATOR 
 exports.removeCoordinator = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -240,7 +239,7 @@ exports.removeCoordinator = async (req, res) => {
   }
 };
 
-// GET SYSTEM STATS
+
 exports.getSystemStats = async (req, res) => {
   try {
     const totalStudents = await User.countDocuments({ role: "student" });
@@ -348,7 +347,7 @@ exports.uploadExcelAndCreateUsers = async (req, res) => {
         role: 'supervisor',
         department,
         specialization,
-        designation: designation, // ADDED: designation
+        designation: designation, 
         availableSlots: availableSlots,
         bookedSlots: bookedSlots || 0,
         mustChangePassword: true,
@@ -426,17 +425,17 @@ exports.makeFYPIncharge = async (req, res) => {
       return res.status(400).json({ error: "Only coordinators can be made FYP Incharge" });
     }
 
-    // Pehle existing FYP Incharge ko reset karen same department mein
+    
     await User.updateMany(
       { 
         department: user.department, 
         isProjectHead: true,
-        _id: { $ne: id } // Current user ko exclude karen
+        _id: { $ne: id } 
       },
       { isProjectHead: false }
     );
 
-    // Naya FYP Incharge set karen
+  
     user.isProjectHead = true;
     await user.save();
 

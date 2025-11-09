@@ -3,7 +3,6 @@ const User = require("../models/User");
 const Group = require("../models/StudentGroup");
 const Proposal = require("../models/StudentProposal");
 
-// API 1: All Students + Group + Proposal
 exports.getAllStudentsWithGroupAndProposal = async (req, res) => {
   try {
     const students = await User.find({ role: "student" })
@@ -25,19 +24,16 @@ exports.getAllStudentsWithGroupAndProposal = async (req, res) => {
       .select("projectTitle projectStatus projectSupervisor projectSupervisorComments")
       .lean();
 
-    // Map: email → student
     const studentMap = {};
     students.forEach(s => { studentMap[s.email] = s; });
 
-    // Map: groupId → group
     const groupMap = {};
     groups.forEach(g => { groupMap[g._id.toString()] = g; });
 
-    // Map: groupId → proposal
     const proposalMap = {};
     proposals.forEach(p => { proposalMap[p.groupId.toString()] = p; });
 
-    // Build final result
+  
     const result = groups.map(group => {
       const groupIdStr = group._id.toString();
 
@@ -56,8 +52,7 @@ exports.getAllStudentsWithGroupAndProposal = async (req, res) => {
       };
     });
 
-    // Add students without groups
-    const groupedEmails = new Set(
+      const groupedEmails = new Set(
       groups.flatMap(g => [g.leader?.email, g.member2?.email, g.member3?.email].filter(Boolean))
     );
 
@@ -69,11 +64,11 @@ exports.getAllStudentsWithGroupAndProposal = async (req, res) => {
         student: s
       }));
 
-    // Combine: grouped + ungrouped
+    
     const finalResult = [
       ...result.map(r => ({
         ...r,
-        student: r.group.leader // leader as representative
+        student: r.group.leader 
       })),
       ...studentsWithoutGroup
     ];
@@ -90,7 +85,7 @@ exports.getAllStudentsWithGroupAndProposal = async (req, res) => {
   }
 };
 
-// API 2: Search by Emails
+
 exports.getStudentsByEmails = async (req, res) => {
   try {
     const { emails } = req.query;
@@ -155,7 +150,7 @@ exports.getStudentsByEmails = async (req, res) => {
       };
     });
 
-    // Add students without group
+  
     const groupedEmails = new Set(
       groups.flatMap(g => [g.leader?.email, g.member2?.email, g.member3?.email].filter(Boolean))
     );

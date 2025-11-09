@@ -11,7 +11,7 @@ import {
   Campaign as CampaignIcon,
   AccountCircle as AccountCircleIcon,
 } from "@mui/icons-material";
-import capImg from "../../assets/cap.png";
+import capImg from "../../assets/rc.png";
 
 import AdminOverview from "./AdminOverview";
 import ManageSupervisors from "./ManageSupervisors";
@@ -39,7 +39,7 @@ const menu = [
 
 const adminInfo = {
   logo: capImg,
-  title: "Auto-FYP",
+  title: "RiphahCapstone",
   name: localStorage.getItem("name") || "Admin",
   subtitle: "FYP Admin",
   email: localStorage.getItem("email") || "admin@riphah.edu.pk",

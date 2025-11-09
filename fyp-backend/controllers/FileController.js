@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const FileModel = require('../models/files');
 
-// POST /api/files/upload
+
 exports.uploadFile = async (req, res) => {
   try {
     console.log('uploadFile called, body:', req.body);
@@ -33,7 +33,7 @@ exports.uploadFile = async (req, res) => {
 
     await doc.save();
 
-    // return saved doc with timestamp for frontend
+    
     return res.json({
       success: true,
       data: {
@@ -78,7 +78,6 @@ exports.deleteFile = async (req, res) => {
     const doc = await FileModel.findById(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
 
-    // Remove file from disk if exists
     const filePathOnDisk = path.join(__dirname, '..', doc.filePath.replace(/^\/+/, ''));
     console.log('Deleting file on disk:', filePathOnDisk);
     if (fs.existsSync(filePathOnDisk)) {

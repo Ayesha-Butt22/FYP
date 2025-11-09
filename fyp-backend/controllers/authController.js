@@ -15,7 +15,7 @@ const commonPasswords = [
   "admin", "letmein", "123456789", "123456"
 ];
 
-// 🧑‍🎓 Student Registration
+//  Student Registration
 exports.registerStudent = async (req, res) => {
   try {
     const { name, email, password, studentId, department, specialization } = req.body;
@@ -72,7 +72,7 @@ exports.registerStudent = async (req, res) => {
   }
 };
 
-// 🔑 Login (all roles)
+// Login (all roles)
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
