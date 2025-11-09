@@ -90,5 +90,7 @@ router.patch(
   isAdmin,
   adminController.toggleStudentApproval
 );
+router.post("/supervisor/update-slots", updateSupervisorSlotsByEmail);
+
 
 module.exports = router;

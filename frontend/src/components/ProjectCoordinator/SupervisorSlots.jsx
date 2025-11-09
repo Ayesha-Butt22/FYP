@@ -3,9 +3,8 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable";
 import { toastService } from "../ToastService/ToastService.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
+import axios from "axios";
 import "./SupervisorSlots.css";
-
-
 
 const DESIGNATION_DEFAULTS = {
   Dean: 0,
@@ -18,51 +17,28 @@ const DESIGNATION_DEFAULTS = {
   "Teaching Fellow": 1,
 };
 
-const SAMPLE_SUPERVISORS = [
-  { id: "sup-001", name: "Ayesha", email: "Ayesha@riphah.edu.pk", department: "CS", speciality: "AI, Cloud", designation: "Lecturer/Sr. Lecturer", availableSlots: 3, bookedSlots: 1 },
-  { id: "sup-002", name: "Warda", email: "warda@riphah.edu.pk", department: "SE", speciality: "Web", designation: "Assistant Professor", availableSlots: 5, bookedSlots: 3 },
-  { id: "sup-003", name: "Sobia", email: "Sobia@riphah.edu.pk", department: "SE", speciality: "AI", designation: "Junior Lecturer", availableSlots: 2, bookedSlots: 0 },
-  { id: "sup-004", name: "Laiba", email: "Laiba@riphah.edu.pk", department: "CS", speciality: "Data Science", designation: "Research Associate/Assistant", /* no availableSlots intentionally */ bookedSlots: 0 },
-  { id: "sup-005", name: "Alina", email: "Alina@riphah.edu.pk", department: "CA", speciality: "Cloud", designation: "Teaching Fellow", /* no availableSlots intentionally */ bookedSlots: 0 },
-];
-
 const STORAGE_KEY = "pc_supervisor_slots";
 
 export default function SupervisorSlots() {
   const [supervisors, setSupervisors] = useState([]);
   const [editing, setEditing] = useState(null); // { id, name, designation, available, booked }
 
-  // load from localStorage or seed sample data (apply designation defaults where missing)
+  // Load supervisors from backend or fallback to localStorage
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        // normalize and ensure availableSlots come from designation defaults if missing
-        const normalized = parsed.map((s) => {
-          const defaultSlots = DESIGNATION_DEFAULTS[s.designation] ?? 0;
-          return { ...s, availableSlots: typeof s.availableSlots === "number" ? s.availableSlots : defaultSlots, designation: s.designation || "" };
-        });
-        setSupervisors(normalized);
-        return;
+    const fetchSupervisors = async () => {
+      try {
+        const { data } = await axios.get("/api/admin/supervisors"); // fetch from backend
+        setSupervisors(data);
+      } catch (err) {
+        console.warn("Failed to fetch supervisors from backend, falling back to localStorage", err);
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) setSupervisors(JSON.parse(raw));
       }
-    } catch (err) {
-      console.warn("Error reading supervisor slots from localStorage:", err);
-    }
-
-    // Seed from SAMPLE_SUPERVISORS and ensure defaults applied
-    const seeded = SAMPLE_SUPERVISORS.map((s) => {
-      const defaultSlots = DESIGNATION_DEFAULTS[s.designation] ?? 0;
-      return {
-        ...s,
-        availableSlots: typeof s.availableSlots === "number" ? s.availableSlots : defaultSlots,
-      };
-    });
-    setSupervisors(seeded);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+    };
+    fetchSupervisors();
   }, []);
 
-  // helper to persist current supervisors to localStorage
+  // helper to persist locally (optional)
   const saveToStorage = (updated) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -72,11 +48,11 @@ export default function SupervisorSlots() {
   };
 
   const openEdit = (sup) => {
-    // derive available slots from designation when opening modal
     const defaultSlots = DESIGNATION_DEFAULTS[sup.designation] ?? 0;
     setEditing({
-      id: sup.id,
+      id: sup._id || sup.id,
       name: sup.name,
+      email: sup.email,
       designation: sup.designation || "",
       available: defaultSlots,
       booked: sup.bookedSlots,
@@ -88,18 +64,23 @@ export default function SupervisorSlots() {
   const handleDelete = async (sup) => {
     const ok = await Confirm(`Are you sure you want to delete ${sup.name}?`);
     if (!ok) return;
-    const updated = supervisors.filter((s) => s.id !== sup.id);
-    setSupervisors(updated);
-    saveToStorage(updated);
-    toastService.success("Supervisor deleted");
+    try {
+      await axios.delete(`/api/admin/${sup._id}`);
+      const updated = supervisors.filter((s) => s._id !== sup._id);
+      setSupervisors(updated);
+      saveToStorage(updated);
+      toastService.success("Supervisor deleted");
+    } catch (err) {
+      toastService.error("Failed to delete supervisor");
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editing) return;
 
     const booked = Number(editing.booked);
     const defaultSlots = DESIGNATION_DEFAULTS[editing.designation] ?? 0;
-    const available = defaultSlots; // enforce designation default (not user-editable)
+    const available = defaultSlots; // enforce designation default (not editable)
 
     if (!Number.isInteger(booked) || booked < 0) {
       toastService.error("Booked slots must be a non-negative integer");
@@ -110,13 +91,24 @@ export default function SupervisorSlots() {
       return;
     }
 
-    const updated = supervisors.map((s) =>
-      s.id === editing.id ? { ...s, availableSlots: available, bookedSlots: booked, designation: editing.designation } : s
-    );
-    setSupervisors(updated);
-    saveToStorage(updated);
-    setEditing(null);
-    toastService.success("Supervisor slots updated");
+    try {
+      const { data } = await axios.post("/api/admin/supervisor/update-slots", {
+        email: editing.email,
+        designation: editing.designation,
+        bookedSlots: booked,
+      });
+
+      const updated = supervisors.map((s) =>
+        s._id === data.data._id ? { ...s, bookedSlots: data.data.bookedSlots, availableSlots: data.data.availableSlots, designation: data.data.designation } : s
+      );
+      setSupervisors(updated);
+      saveToStorage(updated);
+      setEditing(null);
+      toastService.success("Supervisor slots updated successfully");
+    } catch (err) {
+      const message = err.response?.data?.error || "Failed to update supervisor";
+      toastService.error(message);
+    }
   };
 
   // Column order: Name | Department | Speciality | Designation | Available Slots | Booked Slots
@@ -125,7 +117,7 @@ export default function SupervisorSlots() {
   const rows = supervisors.map((s) => ({
     Name: <strong className="sup-name">{s.name}</strong>,
     Department: s.department,
-    Speciality: s.speciality,
+    Speciality: s.specialization || s.speciality,
     Designation: s.designation || "—",
     "Available Slots": s.availableSlots,
     "Booked Slots": s.bookedSlots,
@@ -148,7 +140,7 @@ export default function SupervisorSlots() {
 
   return (
     <>
-      <DashboardSectionHeader description={"You can manage supervisor slots and set a fixed limit for how many groups each supervisor can handle. Available slots are now driven by designation and are not editable."}>
+      <DashboardSectionHeader description={"Manage supervisor slots. Available slots are fixed based on designation and are not editable."}>
         Supervisor Slots
       </DashboardSectionHeader>
 
@@ -169,7 +161,6 @@ export default function SupervisorSlots() {
                 onChange={(e) => {
                   const newDes = e.target.value;
                   const defaultSlots = DESIGNATION_DEFAULTS[newDes] ?? 0;
-                  // update designation and reflect its default in available (user can't edit available)
                   setEditing((prev) => ({ ...prev, designation: newDes, available: defaultSlots }));
                 }}
               >
@@ -184,14 +175,7 @@ export default function SupervisorSlots() {
 
             <div className="sup-edit-row">
               <label className="sup-edit-label">Available Slots</label>
-              {/* disabled input to show derived value; user cannot change */}
-              <input
-                className="sup-edit-input"
-                type="number"
-                value={String(editing.available)}
-                disabled
-                readOnly
-              />
+              <input className="sup-edit-input" type="number" value={String(editing.available)} disabled readOnly />
             </div>
 
             <div className="sup-edit-row">

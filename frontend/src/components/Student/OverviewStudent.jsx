@@ -106,7 +106,7 @@ export default function OverviewStudent({ onTabChange }) {
           </button>
         </Tooltip>
 
-        <div className="banner-title">Welcome, Student!</div>
+        <div className="banner-title">Student Workspace!</div>
         <div className="banner-desc">
           All your FYP progress, group, supervisor, and tasks — in one place.<br />
           Stay organized, keep your group on track, and never miss a deadline.
@@ -131,7 +131,7 @@ export default function OverviewStudent({ onTabChange }) {
           </button>
           <button
             className="quick-link-btn"
-            onClick={() => onTabChange("Supervisor Selection")}
+            onClick={() => onTabChange("Selected supervisor")}
           >
             <FaStar /> Supervisor <FaArrowRight />
           </button>

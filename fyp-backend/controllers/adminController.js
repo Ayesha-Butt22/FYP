@@ -371,6 +371,75 @@ exports.uploadExcelAndCreateUsers = async (req, res) => {
   }
 };
 
+// UPDATE SUPERVISOR SLOTS USING EMAIL + DESIGNATION + BOOKED SLOTS
+exports.updateSupervisorSlotsByEmail = async (req, res) => {
+  try {
+    const { email, designation, bookedSlots } = req.body;
+
+    if (!email || !designation || bookedSlots === undefined) {
+      return res.status(400).json({ error: "Email, designation and bookedSlots are required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "Supervisor with this email not found" });
+    }
+
+    if (user.role !== "supervisor") {
+      return res.status(400).json({ error: "This email does not belong to a supervisor" });
+    }
+
+    // Normalize designation keys
+    const designationSlotsMap = {
+      'dean': 0,
+      'professor': 1,
+      'associateprofessor': 2,
+      'assistantprofessor': 3,
+      'lecturer': 3,
+      'sr.lecturer': 3,
+      'srlecturer': 3,
+      'juniorlecturer': 2,
+      'researchassociate': 1,
+      'researchassistant': 1,
+      'teachingfellow': 1
+    };
+
+    const normalized = designation.toLowerCase().replace(/\s+/g, "");
+    const availableSlots = designationSlotsMap[normalized];
+
+    if (availableSlots === undefined) {
+      return res.status(400).json({ error: "Invalid designation" });
+    }
+
+    if (bookedSlots > availableSlots) {
+      return res.status(400).json({ 
+        error: `Booked slots (${bookedSlots}) cannot exceed available slots (${availableSlots})`
+      });
+    }
+
+    // Update supervisor
+    user.designation = designation;
+    user.availableSlots = availableSlots;
+    user.bookedSlots = bookedSlots;
+
+    await user.save();
+
+    const u = user.toObject();
+    delete u.password;
+
+    return res.json({
+      success: true,
+      message: "Supervisor slots updated successfully",
+      data: u
+    });
+
+  } catch (err) {
+    console.error("Update Supervisor Slots Error:", err);
+    return res.status(500).json({ error: "Server Error" });
+  }
+};
+
 // TOGGLE STUDENT APPROVAL (Approve / Unapprove)
 exports.toggleStudentApproval = async (req, res) => {
   try {

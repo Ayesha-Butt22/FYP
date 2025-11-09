@@ -47,7 +47,7 @@ export default function OverviewSupervisor({ onTabChange }) {
   return (
     <div className="overview-container">
       <div className="welcome-banner">
-        <div className="banner-title">Welcome, Supervisor!</div>
+        <div className="banner-title">Supervisor Workspace!</div>
         <div className="banner-desc">
           Stay on top of your assigned FYP groups, review proposals, track progress, schedule meetings, and manage evaluations — all in one place.
         </div>
