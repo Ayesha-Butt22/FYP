@@ -27,10 +27,13 @@ export default function SupervisorSlots() {
   useEffect(() => {
     const fetchSupervisors = async () => {
       try {
-        const { data } = await axios.get("/api/admin/supervisors"); // fetch from backend
-        setSupervisors(data);
+        const { data } = await axios.get("/api/admin/supervisors");
+
+        // Ensure data is array
+        const supArray = Array.isArray(data) ? data : data?.data ?? [];
+        setSupervisors(supArray);
       } catch (err) {
-        console.warn("Failed to fetch supervisors from backend, falling back to localStorage", err);
+        console.warn("Failed to fetch supervisors from backend", err);
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) setSupervisors(JSON.parse(raw));
       }
@@ -80,14 +83,16 @@ export default function SupervisorSlots() {
 
     const booked = Number(editing.booked);
     const defaultSlots = DESIGNATION_DEFAULTS[editing.designation] ?? 0;
-    const available = defaultSlots; // enforce designation default (not editable)
+    const available = defaultSlots;
 
     if (!Number.isInteger(booked) || booked < 0) {
       toastService.error("Booked slots must be a non-negative integer");
       return;
     }
     if (booked > available) {
-      toastService.error(`Booked slots (${booked}) cannot exceed available slots (${available}).`);
+      toastService.error(
+        `Booked slots (${booked}) cannot exceed available slots (${available}).`
+      );
       return;
     }
 
@@ -99,7 +104,14 @@ export default function SupervisorSlots() {
       });
 
       const updated = supervisors.map((s) =>
-        s._id === data.data._id ? { ...s, bookedSlots: data.data.bookedSlots, availableSlots: data.data.availableSlots, designation: data.data.designation } : s
+        s._id === data.data._id
+          ? {
+              ...s,
+              bookedSlots: data.data.bookedSlots,
+              availableSlots: data.data.availableSlots,
+              designation: data.data.designation,
+            }
+          : s
       );
       setSupervisors(updated);
       saveToStorage(updated);
@@ -112,17 +124,26 @@ export default function SupervisorSlots() {
   };
 
   // Column order: Name | Department | Speciality | Designation | Available Slots | Booked Slots
-  const headers = ["Name", "Department", "Speciality", "Designation", "Available Slots", "Booked Slots"];
+  const headers = [
+    "Name",
+    "Department",
+    "Speciality",
+    "Designation",
+    "Available Slots",
+    "Booked Slots",
+  ];
 
-  const rows = supervisors.map((s) => ({
-    Name: <strong className="sup-name">{s.name}</strong>,
-    Department: s.department,
-    Speciality: s.specialization || s.speciality,
-    Designation: s.designation || "—",
-    "Available Slots": s.availableSlots,
-    "Booked Slots": s.bookedSlots,
-    __raw: s,
-  }));
+  const rows = Array.isArray(supervisors)
+    ? supervisors.map((s) => ({
+        Name: <strong className="sup-name">{s.name}</strong>,
+        Department: s.department,
+        Speciality: s.specialization || s.speciality,
+        Designation: s.designation || "—",
+        "Available Slots": s.availableSlots,
+        "Booked Slots": s.bookedSlots,
+        __raw: s,
+      }))
+    : [];
 
   const renderActions = (rowObj, index) => {
     const sup = rowObj.__raw || supervisors[index];
