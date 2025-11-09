@@ -10,7 +10,7 @@ import {
   Person as PersonIcon,
   BarChart as BarChartIcon,
 } from "@mui/icons-material";
-import capImg from "../../assets/cap.png";
+import capImg from "../../assets/rc.png";
 import OverviewCoordinator from "./OverviewCoordinator";
 import ManageDeadlines from "./ManageDeadlines";
 import GroupsTab from "./GroupsGrid";
@@ -37,7 +37,7 @@ const menu = [
 
 const coordinatorInfo = {
   logo: capImg,
-  title: "Auto-FYP",
+  title: "RiphahCapstone",
   name: localStorage.getItem("name") || "Coordinator",
   subtitle: localStorage.getItem("department") || "Project Coordination",
   email: localStorage.getItem("email") || "coordinator@example.com",

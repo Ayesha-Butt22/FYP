@@ -13,7 +13,7 @@ import {
   BarChart as BarChartIcon,
   Person as PersonIcon,
 } from "@mui/icons-material";
-import capImg from "../../assets/cap.png";
+import capImg from "../../assets/rc.png";
 import OverviewSupervisor from "./OverviewSupervisor";
 import SupervisorGroups from "./SupervisorGroups";
 import SupervisorIdeaReview from "./SupervisorIdeaReview";
@@ -48,7 +48,7 @@ const menu = [
 
 const supervisorInfo = {
   logo: capImg,
-  title: "Auto-FYP",
+  title: "RiphahCapstone",
   name: localStorage.getItem("name") || "Supervisor",
   subtitle: localStorage.getItem("specialization") || "AI, ML, Software Engineering",
   email: localStorage.getItem("email") || "supervisor@example.com",

@@ -31,7 +31,7 @@ import {
   LibraryBooks as LibraryBooksIcon,
   AccountCircle as AccountCircleIcon,
 } from "@mui/icons-material";
-import capImg from "../../assets/cap.png";
+import capImg from "../../assets/rc.png";
 
 const menu = [
   // { label: "Overview", icon: <DashboardIcon /> },
@@ -53,7 +53,7 @@ const menu = [
 
 const studentInfo = {
   logo: capImg,
-  title: "Auto-FYP",
+  title: "RiphahCapstone",
   name: localStorage.getItem("name") || "Student",
 };
 
