@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../Api/authService";
 import { toastService } from "../ToastService/ToastService.jsx";
@@ -20,11 +20,18 @@ export default function Auth() {
   const query = useQuery();
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState("register");
+  const [mode, setMode] = useState("register"); // initial UI state uses classes to show login/register panes
   const [registerData, setRegisterData] = useState({});
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
+  // NEW: forgot-password UI state (stays on same page, doesn't call APIs)
+  // forgotState: null | "askEmail" | "showResetFields"
+  const [forgotState, setForgotState] = useState(null);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
   // Only student registration allowed
   const selectedRole = "student";
@@ -84,6 +91,8 @@ export default function Auth() {
   // Login
   const handleLogin = async (e) => {
     e.preventDefault();
+    // If forgot flow active, do not submit login
+    if (forgotState) return;
     const validation = validateLogin(loginData);
     setErrors(validation);
     if (Object.keys(validation).length > 0) {
@@ -202,46 +211,165 @@ export default function Auth() {
     </>
   );
 
+  // ---- Forgot password flow (local UI only) ----
+  const openForgot = () => {
+    // show the "Enter your email address" step
+    setForgotState("askEmail");
+    // ensure login pane visible
+    setMode("login");
+    // clear previous values
+    setForgotEmail("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setErrors({});
+  };
+
+  const cancelForgot = () => {
+    setForgotState(null);
+    setForgotEmail("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setErrors({});
+  };
+
+  const handleForgotEmailSubmit = (e) => {
+    e.preventDefault();
+    // simple email validation (don't call API)
+    if (!forgotEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
+      setErrors({ forgotEmail: "Enter a valid email address." });
+      toastService.error("Enter a valid email address.");
+      return;
+    }
+    // Show the password reset fields (no API calls, as requested)
+    setForgotState("showResetFields");
+    // clear errors
+    setErrors({});
+    toastService.info("Enter a new password below (this is a local UI demo; no API is called).");
+  };
+
+  const handleResetPasswordSubmit = (e) => {
+    e.preventDefault();
+    // validate new password entries locally
+    const errs = {};
+    if (!newPassword || newPassword.length < 8) errs.newPassword = "Password must be at least 8 characters.";
+    if (newPassword !== confirmNewPassword) errs.confirmNewPassword = "Passwords do not match.";
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      toastService.error("Please fix the errors before submitting.");
+      return;
+    }
+    // Do NOT call any API (user request). Just show confirmation and reset UI.
+    toastService.success("Password fields accepted. (No API call made — demo only.)");
+    // Reset forgot flow and keep user on login pane
+    setForgotState(null);
+    setForgotEmail("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+  };
+
   return (
     <>
       <div className={`auth-container${mode === "register" ? " active" : ""}`}>
         <div className="form-box login">
-          <form onSubmit={handleLogin} noValidate>
-            <h1>Sign in to Portal</h1>
-            <div className="input-box">
-              <input
-                type="email"
-                placeholder="Email"
-                required
-                value={loginData.email}
-                onChange={e => handleLoginChange("email", e.target.value)}
-                disabled={isLoading}
-              />
-              <span className="input-icon" role="img" aria-label="mail">📧</span>
-            </div>
-            {errors.email && <div className="error-msg">{errors.email}</div>}
+          {/* If forgotState active, we still show login pane but render forgot UI above the login form */}
+          {forgotState === "askEmail" ? (
+            <form onSubmit={handleForgotEmailSubmit} noValidate>
+              <h1>Forgot Password</h1>
+              <div className="input-box">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  required
+                  value={forgotEmail}
+                  onChange={(e) => { setForgotEmail(e.target.value); clearFieldError("forgotEmail"); }}
+                  disabled={isLoading}
+                />
+              </div>
+              {errors.forgotEmail && <div className="error-msg">{errors.forgotEmail}</div>}
+              <div style={{ display: "flex", gap: 8 }}>
+                <button type="submit" className="btn main-btn" disabled={isLoading}>Continue</button>
+                <button type="button" className="btn alt-btn" onClick={cancelForgot} disabled={isLoading}>Cancel</button>
+              </div>
+            </form>
+          ) : forgotState === "showResetFields" ? (
+            <form onSubmit={handleResetPasswordSubmit} noValidate>
+              <h1>Reset Password</h1>
+              <div className="input-box">
+                <input
+                  type="password"
+                  placeholder="New password"
+                  value={newPassword}
+                  onChange={(e) => { setNewPassword(e.target.value); clearFieldError("newPassword"); }}
+                  disabled={isLoading}
+                />
+                {errors.newPassword && <div className="error-msg">{errors.newPassword}</div>}
+              </div>
+              <div className="input-box">
+                <input
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmNewPassword}
+                  onChange={(e) => { setConfirmNewPassword(e.target.value); clearFieldError("confirmNewPassword"); }}
+                  disabled={isLoading}
+                />
+                {errors.confirmNewPassword && <div className="error-msg">{errors.confirmNewPassword}</div>}
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button type="submit" className="btn main-btn" disabled={isLoading}>Reset Password</button>
+                <button type="button" className="btn alt-btn" onClick={cancelForgot} disabled={isLoading}>Cancel</button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleLogin} noValidate>
+              <h1>Sign in to Portal</h1>
+              <div className="input-box">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  required
+                  value={loginData.email}
+                  onChange={e => handleLoginChange("email", e.target.value)}
+                  disabled={isLoading}
+                />
+                <span className="input-icon" role="img" aria-label="mail">📧</span>
+              </div>
+              {errors.email && <div className="error-msg">{errors.email}</div>}
 
-            <div className="input-box">
-              <input
-                type="password"
-                placeholder="Password"
-                required
-                value={loginData.password}
-                onChange={e => handleLoginChange("password", e.target.value)}
-                disabled={isLoading}
-              />
-              <span className="input-icon" role="img" aria-label="lock">🔒</span>
-            </div>
-            {errors.password && <div className="error-msg">{errors.password}</div>}
+              <div className="input-box">
+                <input
+                  type="password"
+                  placeholder="Password"
+                  required
+                  value={loginData.password}
+                  onChange={e => handleLoginChange("password", e.target.value)}
+                  disabled={isLoading}
+                />
+                <span className="input-icon" role="img" aria-label="lock">🔒</span>
+              </div>
+              {errors.password && <div className="error-msg">{errors.password}</div>}
 
-            <button
-              type="submit"
-              className="btn main-btn"
-              disabled={isLoading}
-            >
-              {isLoading ? "SIGNING IN..." : "SIGN IN"}
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="btn main-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? "SIGNING IN..." : "SIGN IN"}
+              </button>
+
+              {/* NEW: Forgot password link - opens local forgot flow on same page */}
+              <div style={{ marginTop: 12, textAlign: "center" }}>
+                <button
+                  type="button"
+                  className="btn link-btn"
+                  onClick={openForgot}
+                  disabled={isLoading}
+                  style={{ background: "transparent", border: "none", color: "#2563eb", cursor: "pointer", padding: 0 }}
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            </form>
+          )}
         </div>
 
         <div className="form-box register">
@@ -291,7 +419,7 @@ export default function Auth() {
             <p>Already have an account?</p>
             <button
               className="btn alt-btn"
-              onClick={() => setMode("login")}
+              onClick={() => { setMode("login"); setForgotState(null); }}
               disabled={isLoading}
             >
               Login

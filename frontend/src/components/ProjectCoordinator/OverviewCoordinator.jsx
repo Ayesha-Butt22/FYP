@@ -46,7 +46,7 @@ export default function OverviewCoordinator({ onTabChange }) {
   return (
     <div className="overview-container">
       <div className="welcome-banner">
-        <div className="banner-title">Welcome, Coordinator!</div>
+        <div className="banner-title">Coordinator Workspace!</div>
 
         <div className="banner-desc">
           Oversee your department's FYP activity — review proposals, set deadlines, assign supervisors and monitor progress.
