@@ -89,6 +89,54 @@
 .btn-update:hover { transform: translateY(-2px); }
 .btn-cancel { background:transparent; color:var(--main-blue); border:2px solid rgba(1,51,122,0.06); padding:10px 16px; border-radius:10px; font-weight:700; cursor:pointer; }
 
+/* Override for archive button color — drop into your existing SupervisorMilestones.css
+   This changes the "Add to Archive" button to a blue primary color to match the theme.
+*/
+
+.archive-button-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 14px 0 22px 0;
+}
+
+/* New primary-blue style for Archive button */
+.archive-btn {
+  background: #2563eb;             /* primary blue */
+  color: #ffffff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(37,99,235,0.18);
+  transition: background 160ms ease, transform 120ms ease;
+  font-size: 0.95rem;
+}
+.archive-btn:hover {
+  background: #1e40af;             /* darker blue on hover */
+  transform: translateY(-2px);
+}
+.archive-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(30,64,175,0.14);
+}
+
+/* Keep archived badge distinct but harmonized with new color */
+.archived-badge {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #eef2ff;
+  color: #1e40af;
+  border-radius: 8px;
+  font-weight: 700;
+  border: 1px solid #c7d2fe;
+}
+
+/* Slight visual lift when not archived to accent button area */
+.milestone-group-card:not(.archived) .archive-button-wrap {
+  transform: translateY(0);
+  transition: transform 180ms ease;
+}
 /* small devices */
 @media (max-width: 640px) {
   .mmodal { max-width: 96vw; }

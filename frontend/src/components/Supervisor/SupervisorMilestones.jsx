@@ -7,14 +7,20 @@ import "./SupervisorMilestones.css";
 
 Chart.register(ArcElement, Tooltip, Legend);
 
+// Extended weeks (kept same order as earlier)
 const WEEKS = [
   "Week 1",
   "Week 2",
   "Week 4",
   "Week 6",
+  "Week 11",
+  "Week 13",
+  "Week 15",
   "13th Week before Final Exams",
+  "Week After Finals",
 ];
 
+// status palette
 const STATUS = {
   completed: { color: "#16a34a", bg: "#d1fadf", text: "Completed", icon: "✅" },
   pending: { color: "#01337a", bg: "#fef7aa", text: "Pending", icon: "⏳" },
@@ -22,6 +28,7 @@ const STATUS = {
   rejected: { color: "#ef4444", bg: "#fff0f0", text: "Rejected", icon: "✖️" },
 };
 
+// Template labels for weeks (aligned to WEEKS length)
 const TEMPLATE_LABELS = [
   "Template-01: Project Team (MS Word)",
   "Template-02: Initial Proposal (MS Word)",
@@ -30,20 +37,39 @@ const TEMPLATE_LABELS = [
   "Template-05: Project Report (MS Word)",
   "Template-06: Final Presentation (MS PowerPoint)",
   "Template-07: Progress Presentation (MS PowerPoint)",
+  "Template-08: Posters/Final Deliverables",
+  "Template-09: Hardcopy Documentation & CD",
 ];
 
-// Restored three groups (as requested)
+// Human readable template details
+const TEMPLATE_DETAILS = [
+  "Project team and responsibilities (Template-01).",
+  "Initial proposal document (Template-02).",
+  "Proposal presentation slides (Template-03).",
+  "Detailed proposal & plan (Template-04).",
+  "Complete Project Report (SOFT COPY – Use Template-05).",
+  "Final Presentation (Use Template-06) and Full Working Demo.",
+  "Progress Presentation (Use Template-07).",
+  "Banners, Posters, Brochure, Final Presentation & Demo deliverables.",
+  "Documentation (Hard Binding – 3 Copies), CD with source and appendices.",
+];
+
+// Static demo groups with due dates filled for every week (frontend-only sample data)
 const INITIAL_GROUPS = [
   {
     group: "Group 1",
     title: "Smart Attendance System",
     department: "Software Engineering",
     milestones: [
-      { name: "Proposal", status: "completed", due: "2025-09-10", uploadedFile: null, note: "" },
-      { name: "SRS", status: "pending", due: "2025-09-20", uploadedFile: null, note: "" },
-      { name: "Design", status: "pending", due: "2025-09-28", uploadedFile: { name: "design.pptx", url: "#", uploadedAt: "2025-09-29T14:30:00Z" }, note: "" },
-      { name: "Report", status: "pending", due: "2025-10-10", uploadedFile: null, note: "" },
-      { name: "Defense", status: "pending", due: "2025-10-25", uploadedFile: null, note: "" },
+      { name: "Project Team", status: "completed", due: "2025-09-01", uploadedFile: { name: "team.docx", url: "#" }, note: "" },
+      { name: "Initial Proposal", status: "completed", due: "2025-09-08", uploadedFile: { name: "proposal.docx", url: "#" }, note: "" },
+      { name: "Proposal Presentation", status: "completed", due: "2025-09-15", uploadedFile: { name: "proposal_slides.pptx", url: "#" }, note: "" },
+      { name: "Proposal & Plan", status: "pending", due: "2025-09-22", uploadedFile: null, note: "" },
+      { name: "Project Report (Draft)", status: "pending", due: "2025-09-29", uploadedFile: null, note: "" },
+      { name: "Progress Presentation", status: "pending", due: "2025-10-06", uploadedFile: null, note: "" },
+      { name: "Final Presentation Prep", status: "pending", due: "2025-10-13", uploadedFile: null, note: "" },
+      { name: "Pre-Final Deliverables (Posters/Brochure)", status: "pending", due: "2025-10-20", uploadedFile: null, note: "" },
+      { name: "Hardcopy & CD Submission", status: "pending", due: "2025-10-27", uploadedFile: null, note: "" },
     ],
     members: ["Ali Raza", "Sana Tariq", "Bilal Khan"],
   },
@@ -52,11 +78,15 @@ const INITIAL_GROUPS = [
     title: "AI-Based Disease Prediction",
     department: "Computer Science",
     milestones: [
-      { name: "Proposal", status: "completed", due: "2025-09-11", uploadedFile: null, note: "" },
-      { name: "SRS", status: "completed", due: "2025-09-19", uploadedFile: null, note: "" },
-      { name: "Design", status: "overdue", due: "2025-09-29", uploadedFile: null, note: "" },
-      { name: "Report", status: "pending", due: "2025-10-11", uploadedFile: null, note: "" },
-      { name: "Defense", status: "pending", due: "2025-10-28", uploadedFile: null, note: "" },
+      { name: "Project Team", status: "completed", due: "2025-09-01", uploadedFile: { name: "team2.docx", url: "#" }, note: "" },
+      { name: "Initial Proposal", status: "completed", due: "2025-09-08", uploadedFile: { name: "proposal2.docx", url: "#" }, note: "" },
+      { name: "Proposal Presentation", status: "completed", due: "2025-09-15", uploadedFile: null, note: "" },
+      { name: "Proposal & Plan", status: "overdue", due: "2025-09-22", uploadedFile: null, note: "Plan needs more details" },
+      { name: "Project Report (Draft)", status: "pending", due: "2025-09-29", uploadedFile: null, note: "" },
+      { name: "Progress Presentation", status: "pending", due: "2025-10-06", uploadedFile: null, note: "" },
+      { name: "Final Presentation Prep", status: "pending", due: "2025-10-13", uploadedFile: null, note: "" },
+      { name: "Pre-Final Deliverables (Posters/Brochure)", status: "pending", due: "2025-10-20", uploadedFile: null, note: "" },
+      { name: "Hardcopy & CD Submission", status: "pending", due: "2025-10-27", uploadedFile: null, note: "" },
     ],
     members: ["Ayesha Butt", "Madiha Sumbal", "Saad Farooq"],
   },
@@ -66,11 +96,15 @@ const INITIAL_GROUPS = [
     department: "Computer Arts",
     templateLink: "https://drive.google.com/drive/folders/CA-TEMPLATES-URL",
     milestones: [
-      { name: "Proposal", status: "completed", due: "2025-09-12", uploadedFile: null, note: "" },
-      { name: "SRS", status: "completed", due: "2025-09-21", uploadedFile: null, note: "" },
-      { name: "Design", status: "completed", due: "2025-09-30", uploadedFile: null, note: "" },
-      { name: "Report", status: "pending", due: "2025-10-13", uploadedFile: null, note: "" },
-      { name: "Defense", status: "pending", due: "2025-10-27", uploadedFile: null, note: "" },
+      { name: "Project Team", status: "completed", due: "2025-09-01", uploadedFile: { name: "team3.docx", url: "#" }, note: "" },
+      { name: "Initial Proposal", status: "completed", due: "2025-09-08", uploadedFile: { name: "proposal3.docx", url: "#" }, note: "" },
+      { name: "Proposal Presentation", status: "completed", due: "2025-09-15", uploadedFile: { name: "proposal3.pptx", url: "#" }, note: "" },
+      { name: "Proposal & Plan", status: "completed", due: "2025-09-22", uploadedFile: { name: "plan3.docx", url: "#" }, note: "" },
+      { name: "Project Report (Draft)", status: "pending", due: "2025-09-29", uploadedFile: null, note: "" },
+      { name: "Progress Presentation", status: "pending", due: "2025-10-06", uploadedFile: null, note: "" },
+      { name: "Final Presentation Prep", status: "pending", due: "2025-10-13", uploadedFile: null, note: "" },
+      { name: "Pre-Final Deliverables (Posters/Brochure)", status: "pending", due: "2025-10-20", uploadedFile: null, note: "" },
+      { name: "Hardcopy & CD Submission", status: "pending", due: "2025-10-27", uploadedFile: null, note: "" },
     ],
     members: ["Fatima Noor", "Usman Ghani", "Hira Qureshi"],
   },
@@ -162,6 +196,13 @@ export default function SupervisorMilestones() {
     }
   };
 
+  // NEW: archive a group (frontend-only). Adds _archived flag and shows toast.
+  const archiveGroup = (gIndex) => {
+    if (!window.confirm("Add this group to archive?")) return;
+    setGroups((prev) => prev.map((g, i) => (i === gIndex ? { ...g, _archived: true, _show: false } : g)));
+    toastService.success("Group added to archive (frontend only)");
+  };
+
   return (
     <div>
       <DashboardSectionHeader description="Here you can view all the FYP groups milestones. Click 'Show Timeline' to see groups progress, milestones, and deadlines.">
@@ -174,7 +215,7 @@ export default function SupervisorMilestones() {
             const original = (group.milestones && group.milestones[idx]) || null;
             return {
               week: wk,
-              name: original ? original.name : "",
+              name: original ? original.name : (TEMPLATE_LABELS[idx] || ""),
               due: original ? original.due : "—",
               status: original ? original.status : "pending",
               uploadedFile: original ? original.uploadedFile : null,
@@ -199,7 +240,7 @@ export default function SupervisorMilestones() {
           };
 
           return (
-            <div className="milestone-group-card" key={group.group}>
+            <div className={`milestone-group-card ${group._archived ? "archived" : ""}`} key={group.group}>
               <div className="milestone-card-header">
                 <div>
                   <div className="milestone-card-group">{group.group}</div>
@@ -223,11 +264,12 @@ export default function SupervisorMilestones() {
               <button
                 className="milestone-toggle-btn"
                 onClick={() => setGroups((s) => s.map((x) => (x === group ? { ...x, _show: !x._show } : x)))}
+                disabled={!!group._archived}
               >
                 {group._show ? "Hide Timeline" : "Show Timeline"}
               </button>
 
-              {group._show && (
+              {group._show && !group._archived && (
                 <div className="milestone-timeline-table-wrap">
                   <table className="milestone-timeline-table">
                     <thead>
@@ -244,7 +286,7 @@ export default function SupervisorMilestones() {
                           <td className="milestone-td">{m.due}</td>
                           <td className="milestone-td">
                             <div className="milestone-action-row">
-                              <button className="view-details-btn" onClick={() => openDetails(gIdx, mIdx)}>
+                              <button className="view-details-btn" onClick={() => openDetails(gIdx, mIdx)} disabled={!!group._archived}>
                                 View Details
                               </button>
                             </div>
@@ -253,7 +295,20 @@ export default function SupervisorMilestones() {
                       ))}
                     </tbody>
                   </table>
+
+                  {/* Archive button placed AFTER the full template/timeline table, centered in the card */}
+                  <div className="archive-button-wrap">
+                    {!group._archived ? (
+                      <button className="archive-btn" onClick={() => archiveGroup(gIdx)}>Add to Archive</button>
+                    ) : (
+                      <div className="archived-badge">Archived</div>
+                    )}
+                  </div>
                 </div>
+              )}
+
+              {group._archived && (
+                <div className="milestone-archived-note">This group is archived. Timeline is hidden.</div>
               )}
             </div>
           );
@@ -276,12 +331,12 @@ export default function SupervisorMilestones() {
                 const g = groups[modal.gIndex];
                 const m = g && g.milestones && g.milestones[modal.mIndex];
                 const templateLabel = TEMPLATE_LABELS[modal.mIndex] || `Template-${String(modal.mIndex + 1).padStart(2, "0")}`;
+                const templateDetail = TEMPLATE_DETAILS[modal.mIndex] || "";
                 const uploadedFile = m && m.uploadedFile ? m.uploadedFile : null;
                 const currentNote = m && m.note ? m.note : "";
 
                 // Prepare due date/time display and uploadedAt
                 const dueRaw = m && m.due ? m.due : null;
-                // treat dueRaw as date-only (YYYY-MM-DD) -> set to 23:59 local end of day for lateness check
                 let dueDateObj = null;
                 if (dueRaw) {
                   const maybeIso = new Date(dueRaw);
@@ -318,7 +373,10 @@ export default function SupervisorMilestones() {
 
                     <div className="stack-item">
                       <div className="stack-label">Template</div>
-                      <div className="stack-value">{templateLabel}</div>
+                      <div className="stack-value">
+                        <div>{templateLabel}</div>
+                        {templateDetail && <div className="muted" style={{ marginTop: 6 }}>{templateDetail}</div>}
+                      </div>
                     </div>
 
                     <div className="stack-item">
