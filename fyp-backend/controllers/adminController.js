@@ -440,6 +440,41 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
   }
 };
 
+// GET /api/admin/supervisors-for-coordinator
+// Returns all supervisors with necessary details for coordinator slot integration
+exports.getSupervisorsForCoordinator = async (req, res) => {
+  try {
+    const supervisors = await User.find({ role: "supervisor" })
+      .select("name email department specialization designation availableSlots bookedSlots")
+      .sort({ createdAt: -1 });
+
+    // Ensure availableSlots/bookedSlots are present
+    const DESIGNATION_DEFAULTS = {
+      Dean: 0,
+      Professor: 1,
+      "Associate Professor": 2,
+      "Assistant Professor": 3,
+      "Lecturer/Sr. Lecturer": 3,
+      "Junior Lecturer": 2,
+      "Research Associate/Assistant": 1,
+      "Teaching Fellow": 1,
+    };
+
+    const normalized = supervisors.map((sup) => {
+      const available =
+        sup.availableSlots ?? DESIGNATION_DEFAULTS[sup.designation] ?? 0;
+      const booked = sup.bookedSlots ?? 0;
+      return { ...sup.toObject(), availableSlots: available, bookedSlots: booked };
+    });
+
+    return res.json({ success: true, data: normalized });
+  } catch (err) {
+    console.error("Get Supervisors For Coordinator Error:", err);
+    return res.status(500).json({ success: false, error: "Server Error" });
+  }
+};
+
+
 // TOGGLE STUDENT APPROVAL (Approve / Unapprove)
 exports.toggleStudentApproval = async (req, res) => {
   try {

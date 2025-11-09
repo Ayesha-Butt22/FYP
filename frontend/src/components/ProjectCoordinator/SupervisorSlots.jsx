@@ -21,27 +21,35 @@ const STORAGE_KEY = "pc_supervisor_slots";
 
 export default function SupervisorSlots() {
   const [supervisors, setSupervisors] = useState([]);
-  const [editing, setEditing] = useState(null); // { id, name, designation, available, booked }
+  const [editing, setEditing] = useState(null);
+  const [viewForCoordinator, setViewForCoordinator] = useState(false); // toggle new API
 
-  // Load supervisors from backend or fallback to localStorage
+  // Fetch supervisors (existing or new API)
   useEffect(() => {
     const fetchSupervisors = async () => {
       try {
-        const { data } = await axios.get("/api/admin/supervisors");
+        const url = viewForCoordinator
+          ? "/api/admin/supervisors-for-coordinator"
+          : "/api/admin/supervisors";
 
-        // Ensure data is array
-        const supArray = Array.isArray(data) ? data : data?.data ?? [];
+        const { data } = await axios.get(url);
+        const supArray = viewForCoordinator
+          ? data.data || []
+          : Array.isArray(data)
+          ? data
+          : data?.data ?? [];
+
         setSupervisors(supArray);
       } catch (err) {
-        console.warn("Failed to fetch supervisors from backend", err);
+        console.warn("Failed to fetch supervisors", err);
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) setSupervisors(JSON.parse(raw));
       }
     };
     fetchSupervisors();
-  }, []);
+  }, [viewForCoordinator]);
 
-  // helper to persist locally (optional)
+  // Persist locally
   const saveToStorage = (updated) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -57,8 +65,8 @@ export default function SupervisorSlots() {
       name: sup.name,
       email: sup.email,
       designation: sup.designation || "",
-      available: defaultSlots,
-      booked: sup.bookedSlots,
+      available: sup.availableSlots ?? defaultSlots,
+      booked: sup.bookedSlots ?? 0,
     });
   };
 
@@ -123,7 +131,6 @@ export default function SupervisorSlots() {
     }
   };
 
-  // Column order: Name | Department | Speciality | Designation | Available Slots | Booked Slots
   const headers = [
     "Name",
     "Department",
@@ -152,18 +159,36 @@ export default function SupervisorSlots() {
         <button className="table-action-btn" onClick={() => openEdit(sup)}>
           Edit
         </button>
-        <button className="table-action-btn delete" onClick={() => handleDelete(sup)}>
-          Delete
-        </button>
+        {!viewForCoordinator && (
+          <button className="table-action-btn delete" onClick={() => handleDelete(sup)}>
+            Delete
+          </button>
+        )}
       </>
     );
   };
 
   return (
     <>
-      <DashboardSectionHeader description={"Manage supervisor slots. Available slots are fixed based on designation and are not editable."}>
+      <DashboardSectionHeader
+        description={
+          "Manage supervisor slots. Available slots are fixed based on designation and are not editable."
+        }
+      >
         Supervisor Slots
       </DashboardSectionHeader>
+
+      <div style={{ marginBottom: "10px" }}>
+        <label>
+          <input
+            type="checkbox"
+            checked={viewForCoordinator}
+            onChange={(e) => setViewForCoordinator(e.target.checked)}
+            style={{ marginRight: "5px" }}
+          />
+          Show for Coordinator Integration
+        </label>
+      </div>
 
       <div className="sup-table-card">
         <AppTable headers={headers} rows={rows} renderActions={renderActions} />
@@ -182,7 +207,11 @@ export default function SupervisorSlots() {
                 onChange={(e) => {
                   const newDes = e.target.value;
                   const defaultSlots = DESIGNATION_DEFAULTS[newDes] ?? 0;
-                  setEditing((prev) => ({ ...prev, designation: newDes, available: defaultSlots }));
+                  setEditing((prev) => ({
+                    ...prev,
+                    designation: newDes,
+                    available: defaultSlots,
+                  }));
                 }}
               >
                 <option value="">-- Select designation --</option>
@@ -196,7 +225,13 @@ export default function SupervisorSlots() {
 
             <div className="sup-edit-row">
               <label className="sup-edit-label">Available Slots</label>
-              <input className="sup-edit-input" type="number" value={String(editing.available)} disabled readOnly />
+              <input
+                className="sup-edit-input"
+                type="number"
+                value={String(editing.available)}
+                disabled
+                readOnly
+              />
             </div>
 
             <div className="sup-edit-row">
@@ -206,7 +241,9 @@ export default function SupervisorSlots() {
                 type="number"
                 min="0"
                 value={String(editing.booked)}
-                onChange={(e) => setEditing((prev) => ({ ...prev, booked: e.target.value }))}
+                onChange={(e) =>
+                  setEditing((prev) => ({ ...prev, booked: e.target.value }))
+                }
               />
             </div>
 

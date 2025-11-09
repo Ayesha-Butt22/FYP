@@ -93,5 +93,6 @@ router.patch(
 
 router.post("/supervisor/update-slots", protect, isAdmin, adminController.updateSupervisorSlotsByEmail);
 
+router.get("/supervisors-for-coordinator", protect, isAdmin, adminController.getSupervisorsForCoordinator);
 
 module.exports = router;
