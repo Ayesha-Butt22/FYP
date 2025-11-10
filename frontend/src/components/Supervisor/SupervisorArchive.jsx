@@ -6,7 +6,7 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable";
 import "./SupervisorArchive.css";
 
-// Dummy data (with supervisor)
+// Dummy data 
 const dummyProjects = [
     {
         projectId: "proj123",
@@ -40,6 +40,7 @@ export default function SupervisorArchive() {
     const [projects, setProjects] = useState([]);
 
     useEffect(() => {
+        
         // load demo data (replace with API when available)
         setProjects(dummyProjects);
     }, []);

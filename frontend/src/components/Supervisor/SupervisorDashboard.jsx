@@ -21,8 +21,8 @@ import SupervisorMilestones from "./SupervisorMilestones";
 import SupervisorWhiteboard from "./SupervisorWhiteboard";
 import SupervisorMeetings from "./SupervisorMeetings";
 import SupervisorEvaluations from "./SupervisorEvaluations";
-import CommitteeEvaluation from "./CommitteeEvaluation.jsx"; // existing committee-eval UI
-import SupervisorCommitteeResults from "./SupervisorCommitteeResults.jsx"; // new read-only results view
+import CommitteeEvaluation from "./CommitteeEvaluation.jsx"; 
+import SupervisorCommitteeResults from "./SupervisorCommitteeResults.jsx"; 
 import SupervisorReports from "./SupervisorReports";
 import SupervisorArchive from "./SupervisorArchive";
 import SupervisorAnalytics from "./SupervisorAnalytics";
@@ -38,8 +38,8 @@ const menu = [
   { label: "Whiteboard", icon: <CampaignIcon /> },
   { label: "Meetings", icon: <CalendarMonthIcon /> },
   { label: "Evaluations", icon: <EmojiObjectsIcon /> },
-  { label: "Commitee Eval", icon: <EmojiObjectsIcon /> }, // existing committee evaluation form
-  { label: "Committee Results", icon: <GroupsIcon /> }, // <-- added for SupervisorCommitteeResults
+  { label: "Commitee Eval", icon: <EmojiObjectsIcon /> }, 
+  { label: "Committee Results", icon: <GroupsIcon /> }, 
   { label: "Reports", icon: <DescriptionIcon /> },
   { label: "Analytics", icon: <BarChartIcon /> },
   { label: "FYP Archive", icon: <LibraryBooksIcon /> },
@@ -71,8 +71,8 @@ export default function SupervisorDashboard() {
     Whiteboard: <SupervisorWhiteboard />,
     Meetings: <SupervisorMeetings />,
     Evaluations: <SupervisorEvaluations />,
-    "Commitee Eval": <CommitteeEvaluation />, // committee evaluation form (for submitting)
-    "Committee Results": <SupervisorCommitteeResults />, // read-only results tab for supervisors
+    "Commitee Eval": <CommitteeEvaluation />, 
+    "Committee Results": <SupervisorCommitteeResults />, 
     Reports: <SupervisorReports />,
     Analytics: <SupervisorAnalytics />,
     "FYP Archive": <SupervisorArchive />,

@@ -71,7 +71,6 @@ const assignedGroups = [
 export default function SupervisorGroups() {
   const [selectedGroup, setSelectedGroup] = useState(null);
 
-  // close modal on ESC for better UX
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") setSelectedGroup(null);

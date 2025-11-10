@@ -19,7 +19,6 @@
   min-height: 100vh;
 }
 
-/* spacer to offset the fixed sidebar in main flow */
 .spacer {
   width: 250px;
   flex-shrink: 0;
@@ -48,7 +47,7 @@
   -webkit-filter: brightness(0) invert(1);
 }
 
-/* Sidebar menu: make it take remaining vertical space and scroll independently */
+
 .sidebar-menu {
   list-style: none;
   padding: 0 0 0 8px;
@@ -57,21 +56,21 @@
   flex-direction: column;
   gap: 8px;
 
-  /* IMPORTANT: allow scrolling when menu is long */
+
   flex: 1 1 auto;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
-  padding-bottom: 96px; /* room for logout button so last items aren't hidden */
+  -webkit-overflow-scrolling: touch; 
+  padding-bottom: 96px; 
 
-  /* Hide native scrollbar but keep scrolling functional */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  
+  scrollbar-width: none;
+  -ms-overflow-style: none; 
 }
 .sidebar-menu::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none; 
 }
 
-/* items */
+
 .sidebar-item {
   padding: 12px 32px 12px 20px;
   cursor: pointer;
@@ -89,6 +88,10 @@
   -moz-transition:;
   -ms-transition:;
   -o-transition:;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 
 .sidebar-item.active {
@@ -103,7 +106,6 @@
   color: var(--main-blue);
 }
 
-/* Logout area: pinned to the bottom of the fixed sidebar */
 .logout-area {
   position: absolute;
   left: 0;
@@ -115,7 +117,7 @@
   pointer-events: auto;
 }
 
-/* logout button styling */
+
 .logout-area .MuiIconButton-root {
   background: #fff !important;
   color: var(--main-blue) !important;
@@ -131,7 +133,7 @@
   color: var(--main-blue)  !important;
 }
 
-/* Header */
+
 .dashboard-header {
   margin-top: -28px;
   position: sticky;
@@ -182,12 +184,11 @@
   opacity: 0.8;
 }
 
-/* Make sure main content does not go under the fixed sidebar on wide screens */
 .main-panel {
-  margin-left: 250px; /* should match .sidebar width */
+  margin-left: 250px; 
 }
 
-/* Small screens: allow sidebar to collapse (you already handle spacer) */
+
 @media (max-width: 900px) {
   .sidebar {
     width: 220px;

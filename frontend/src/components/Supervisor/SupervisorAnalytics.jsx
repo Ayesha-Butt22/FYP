@@ -78,6 +78,7 @@ export default function SupervisorAnalytics() {
   };
 
   // Line charts for milestones of each group
+  
   const groupLineCharts = Object.entries(
     analyticsData.groupMilestones
   ).map(([groupName, milestones]) => {

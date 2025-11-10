@@ -148,33 +148,21 @@ const mapProposalToIdea = (proposal) => {
   };
 };
 
-/**
- * Mask group label to show prefix (if any) and last 5 characters as "prefix-last5".
- * If a non-empty textual prefix exists before trailing digits or hyphen, keep that prefix.
- * Examples:
- *  - "group-1761918961210" -> "group-61210"
- *  - "team42" -> "team-00042"? (we will keep prefix + last5 of full string)
- * Implementation:
- *  - Try to split into leading non-digit chunk and trailing digits.
- *  - If found, return `${prefix}${last5}` (prefix usually includes hyphen if present).
- *  - Otherwise, if no clear prefix, use "group-" + last5.
- */
+
 const maskGroupLabel = (groupName) => {
   if (!groupName) return "";
   const s = String(groupName);
 
-  // match leading non-digit characters (prefix) and trailing digits
   const m = s.match(/^([^\d]*?)(\d{1,})$/);
   if (m) {
     const prefix = m[1] || "group-";
     const digits = m[2] || "";
     const last5 = digits.slice(-5);
-    // ensure prefix ends with '-' if it originally had one or if we want to separate
-    // Keep prefix as-is to respect original formatting (e.g., "group-")
+   
     return `${prefix}${last5}`;
   }
 
-  // fallback: no trailing digits, just return "group-" + last 5 chars of string
+
   const last5 = s.slice(-5);
   return `group-${last5}`;
 };

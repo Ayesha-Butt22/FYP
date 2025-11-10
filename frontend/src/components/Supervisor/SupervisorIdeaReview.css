@@ -17,6 +17,10 @@
   font-family: inherit;
   text-align: left;
   transition: background 0.1s;
+  -webkit-transition: background 0.1s;
+  -moz-transition: background 0.1s;
+  -ms-transition: background 0.1s;
+  -o-transition: background 0.1s;
 }
 .review-table-row:hover {
   background: #f3f7fb !important;
@@ -30,7 +34,6 @@
   text-align: left;
 }
 
-/* Increased base font-size inside details for readability */
 .idea-details-box {
   background: #f9fafb;
   border-radius: 0;
@@ -141,7 +144,6 @@
   justify-content: center;
 }
 
-/* Modal responsive tweaks (Modal uses MUI sx, these are fallback) */
 @media (max-width: 600px) {
   .review-table-box { padding: 14px 8px; }
   .idea-detail-label { font-size: 18px; }

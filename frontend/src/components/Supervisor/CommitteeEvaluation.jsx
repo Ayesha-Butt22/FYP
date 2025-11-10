@@ -13,7 +13,6 @@ export default function CommitteeEvaluation() {
   const [week , setWeek] = useState(4);
   const [schedule , setSchedule] = useState(null);
 
-  // --- helper to mask groupId ---
   const maskGroupId = (groupId) => {
     if (!groupId) return "";
     const lastFive = groupId.slice(-5);
@@ -80,7 +79,9 @@ export default function CommitteeEvaluation() {
   };
 
   const handleInputChange = (studentId, field, value) => {
+    
     // Allow only numbers and empty string
+
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setFormData((prev) => ({
         ...prev,

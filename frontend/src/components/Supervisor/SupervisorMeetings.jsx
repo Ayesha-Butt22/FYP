@@ -46,7 +46,7 @@ function getDummySlots() {
     { slotId: "slot4", supervisorId: SUPERVISOR_ID, date: "2025-09-16", time: "11:00", duration: 30, bookedBy: "Group 2" },
   ];
 }
-// -----------------------
+
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
@@ -60,14 +60,14 @@ function formatTime(timeStr) {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-// Dialog Transition
+
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 export default function SupervisorMeetings() {
   const [slots, setSlots] = useState([]);
-  // Meeting history to collect done/cancelled meetings
+  
   const [meetingHistory, setMeetingHistory] = useState([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -78,7 +78,6 @@ export default function SupervisorMeetings() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Load dummy slots
   useEffect(() => {
     setSlots(getDummySlots());
   }, []);
@@ -158,7 +157,7 @@ export default function SupervisorMeetings() {
             Add Available Slot
           </Button>
 
-          {/* Add Slot Dialog */}
+          
           <Dialog
               open={openDialog}
               TransitionComponent={Transition}
@@ -349,7 +348,7 @@ export default function SupervisorMeetings() {
             )}
           </Paper>
 
-          {/* Meeting History - shows slots that were marked done (kept simple table, design consistent) */}
+         
           <Typography variant="h6" sx={{ mt: 4, mb: 1, fontWeight: 800, color: "#01337a" }}>
             Meeting History
           </Typography>

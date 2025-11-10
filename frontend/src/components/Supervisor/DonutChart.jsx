@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 
-// --- Styled Components for Donut Pie Chart ---
 const DonutWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -111,7 +110,7 @@ export default function DonutChart({
           r={donutInnerR}
           fill="#fff"
         />
-        {/* Center Title/Value */}
+     
         <text
           x={cx}
           y={cy - 12}

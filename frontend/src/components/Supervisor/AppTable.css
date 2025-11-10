@@ -23,13 +23,13 @@
 
 .app-table th,
 .app-table td {
-  padding: 16px 24px; /* Slightly increased padding for bigger feel */
+  padding: 16px 24px; 
   text-align: left;
 }
 
 .app-table th {
   color: #fff;
-  font-size: 1.3rem; /* ✅ Bigger Header Font */
+  font-size: 1.3rem; 
   font-weight: 700;
   letter-spacing: .2px;
   border-right: 1px solid #01337a11;
@@ -37,7 +37,7 @@
 
 .app-table td {
   color: #01337a;
-  font-size: 1.15rem; /* ✅ Bigger Row Font */
+  font-size: 1.15rem; 
   font-weight: 500;
 }
 
@@ -51,6 +51,10 @@
   background: #f7f8ff;
   border-bottom: 1px solid #f0f1fa;
   transition: background 0.18s;
+  -webkit-transition: background 0.18s;
+  -moz-transition: background 0.18s;
+  -ms-transition: background 0.18s;
+  -o-transition: background 0.18s;
 }
 
 .app-table tbody tr:nth-child(even) {
@@ -73,6 +77,10 @@
   font-size: 0.98rem;
   transition: background 0.18s, color 0.19s;
   margin-right: 8px;
+  -webkit-transition: background 0.18s, color 0.19s;
+  -moz-transition: background 0.18s, color 0.19s;
+  -ms-transition: background 0.18s, color 0.19s;
+  -o-transition: background 0.18s, color 0.19s;
 }
 .app-table td .table-action-btn:last-child {
   margin-right: 0;

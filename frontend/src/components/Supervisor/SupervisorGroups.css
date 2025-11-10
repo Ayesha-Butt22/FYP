@@ -8,6 +8,7 @@
   box-sizing: border-box;
   animation: fadeInGroups 0.7s;
   padding: 0 0 40px 0;
+  -webkit-animation: fadeInGroups 0.7s;
 }
 
 .supervisor-dashboard-title {
@@ -114,7 +115,7 @@
   background: #01337a;
   color: #fff;
   font-weight: 800;
-      font-size: 1.3rem;
+  font-size: 1.3rem;
   cursor: pointer;
   box-shadow: 0 2px 12px #01337a23;
   display: flex;
@@ -125,6 +126,10 @@
   letter-spacing: 0.7px;
   transition: background 0.18s, color 0.19s, transform 0.17s;
   text-align: center;
+  -webkit-transition: background 0.18s, color 0.19s, transform 0.17s;
+  -moz-transition: background 0.18s, color 0.19s, transform 0.17s;
+  -ms-transition: background 0.18s, color 0.19s, transform 0.17s;
+  -o-transition: background 0.18s, color 0.19s, transform 0.17s;
 }
 
 .supervisor-view-btn:hover {

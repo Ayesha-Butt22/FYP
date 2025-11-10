@@ -2,11 +2,7 @@
   --main-blue: #01337a;
 }
 
-/* ===== GLOBAL BUTTON STYLING (apply system dark-blue consistently) =====
-   We target MUI button variants used in this component. These rules use
-   !important to override MUI inline/priority styles where needed and
-   add a stable transparent border to avoid layout jumps when hovering.
-*/
+
 .MuiButton-root {
   border-radius: 10px !important;
   text-transform: none !important;
@@ -17,7 +13,7 @@
 .MuiButton-contained:not(.Mui-disabled) {
   background: var(--main-blue) !important;
   color: #fff !important;
-  border: 2px solid transparent !important; /* stable base border to avoid jump */
+  border: 2px solid transparent !important; 
   box-shadow: 0 8px 20px rgba(1,51,122,0.08) !important;
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease !important;
 }
@@ -27,6 +23,10 @@
   border-color: var(--main-blue) !important;
   transform: translateY(-2px) !important;
   box-shadow: 0 12px 30px rgba(1,51,122,0.12) !important;
+  -webkit-transform: translateY(-2px) !important;
+  -moz-transform: translateY(-2px) !important;
+  -ms-transform: translateY(-2px) !important;
+  -o-transform: translateY(-2px) !important;
 }
 .MuiButton-contained.Mui-disabled {
   background: #cbd5e1 !important;
@@ -41,12 +41,20 @@
   border: 2px solid var(--main-blue) !important;
   box-shadow: 0 6px 18px rgba(1,51,122,0.04) !important;
   transition: transform 120ms ease, box-shadow 120ms ease !important;
+  -webkit-transition: transform 120ms ease, box-shadow 120ms ease !important;
+  -moz-transition: transform 120ms ease, box-shadow 120ms ease !important;
+  -ms-transition: transform 120ms ease, box-shadow 120ms ease !important;
+  -o-transition: transform 120ms ease, box-shadow 120ms ease !important;
 }
 .MuiButton-outlined:not(.Mui-disabled):hover {
   background: #fff !important;
   color: var(--main-blue) !important;
   transform: translateY(-2px) !important;
   box-shadow: 0 12px 30px rgba(1,51,122,0.12) !important;
+  -webkit-transform:;
+  -moz-transform:;
+  -ms-transform:;
+  -o-transform:;
 }
 
 /* Text buttons */
@@ -58,16 +66,17 @@
   color: var(--main-blue) !important;
   transform: translateY(-1px) !important;
   box-shadow: 0 6px 18px rgba(1,51,122,0.04) !important;
+  -webkit-transform:;
+  -moz-transform:;
+  -ms-transform:;
+  -o-transform:;
 }
 
-/* Specific classes (keep if code references them) */
 .submit-evaluation-btn {
-  /* will inherit contained button rules above; keep small overrides if needed */
+
 }
 
-/* ======================================================================== */
-/* Existing SupervisorEvaluations styles (preserved and kept below)         */
-/* ======================================================================== */
+
 
 .evaluation-form-paper,
 .evaluation-table-paper {
@@ -78,12 +87,16 @@
   background: linear-gradient(180deg, #ffffff, #f9fbff);
   box-shadow: 0 10px 36px rgba(1, 51, 122, 0.08);
   border: 1px solid #e5efff;
-  font-size: 1.1rem !important; /* base font bump */
+  font-size: 1.1rem !important; 
 }
 
 
 .elevated-card {
   transition: transform 160ms ease, box-shadow 160ms ease;
+  -webkit-transition: transform 160ms ease, box-shadow 160ms ease;
+  -moz-transition: transform 160ms ease, box-shadow 160ms ease;
+  -ms-transition: transform 160ms ease, box-shadow 160ms ease;
+  -o-transition: transform 160ms ease, box-shadow 160ms ease;
 }
 .elevated-card:hover {
   transform: translateY(-6px);
@@ -189,6 +202,10 @@
   font-size: 1.05rem !important;
   padding: 10px 20px !important;
   border-radius: 10px !important;
+  -webkit-border-radius: 10px !important;
+  -moz-border-radius: 10px !important;
+  -ms-border-radius: 10px !important;
+  -o-border-radius: 10px !important;
 }
 
 @media (max-width: 900px) {

@@ -7,7 +7,6 @@ import "./SupervisorMilestones.css";
 
 Chart.register(ArcElement, Tooltip, Legend);
 
-// Extended weeks (kept same order as earlier)
 const WEEKS = [
   "Week 1",
   "Week 2",
@@ -20,7 +19,7 @@ const WEEKS = [
   "Week After Finals",
 ];
 
-// status palette
+
 const STATUS = {
   completed: { color: "#16a34a", bg: "#d1fadf", text: "Completed", icon: "✅" },
   pending: { color: "#01337a", bg: "#fef7aa", text: "Pending", icon: "⏳" },
@@ -28,7 +27,6 @@ const STATUS = {
   rejected: { color: "#ef4444", bg: "#fff0f0", text: "Rejected", icon: "✖️" },
 };
 
-// Template labels for weeks (aligned to WEEKS length)
 const TEMPLATE_LABELS = [
   "Template-01: Project Team (MS Word)",
   "Template-02: Initial Proposal (MS Word)",
@@ -41,7 +39,6 @@ const TEMPLATE_LABELS = [
   "Template-09: Hardcopy Documentation & CD",
 ];
 
-// Human readable template details
 const TEMPLATE_DETAILS = [
   "Project team and responsibilities (Template-01).",
   "Initial proposal document (Template-02).",
@@ -54,7 +51,7 @@ const TEMPLATE_DETAILS = [
   "Documentation (Hard Binding – 3 Copies), CD with source and appendices.",
 ];
 
-// Static demo groups with due dates filled for every week (frontend-only sample data)
+
 const INITIAL_GROUPS = [
   {
     group: "Group 1",
@@ -169,10 +166,10 @@ export default function SupervisorMilestones() {
         : "Mark this milestone as Pending?";
     if (!window.confirm(confirmMsg)) return;
 
-    // Map select value to saved status
+
     const mapped = selectedAction === "approve" ? "completed" : selectedAction === "unapprove" ? "rejected" : "pending";
 
-    // optimistic update
+    
     setGroups((prev) => {
       const next = JSON.parse(JSON.stringify(prev));
       if (next[gIndex] && next[gIndex].milestones && next[gIndex].milestones[mIndex]) {
@@ -183,20 +180,20 @@ export default function SupervisorMilestones() {
 
     setModal((s) => ({ ...s, saving: true }));
     try {
-      // simulate network latency / placeholder for real API call
+  
       await new Promise((r) => setTimeout(r, 600));
       toastService.success("Milestone updated (frontend only)");
       closeDetails();
-      // TODO: call backend API to persist change
+      
     } catch (err) {
       toastService.error("Failed to update milestone");
-      // revert: for demo we'll reload initial snapshot (simple approach)
+     
       setGroups(INITIAL_GROUPS);
       setModal((s) => ({ ...s, saving: false }));
     }
   };
 
-  // NEW: archive a group (frontend-only). Adds _archived flag and shows toast.
+  
   const archiveGroup = (gIndex) => {
     if (!window.confirm("Add this group to archive?")) return;
     setGroups((prev) => prev.map((g, i) => (i === gIndex ? { ...g, _archived: true, _show: false } : g)));
@@ -296,7 +293,7 @@ export default function SupervisorMilestones() {
                     </tbody>
                   </table>
 
-                  {/* Archive button placed AFTER the full template/timeline table, centered in the card */}
+                  
                   <div className="archive-button-wrap">
                     {!group._archived ? (
                       <button className="archive-btn" onClick={() => archiveGroup(gIdx)}>Add to Archive</button>
@@ -315,7 +312,7 @@ export default function SupervisorMilestones() {
         })}
       </div>
 
-      {/* Modal: simplified vertical layout (Week, Template, Uploaded File, Due Date/Time, Submission Date/Time, Status dropdown, Comment, Update) */}
+      
       {modal.open && modal.gIndex != null && modal.mIndex != null && (
         <div className="mmodal-backdrop" role="dialog" aria-modal="true">
           <div className="mmodal modal-centered" role="document" aria-labelledby="milestone-details-title">
@@ -335,7 +332,7 @@ export default function SupervisorMilestones() {
                 const uploadedFile = m && m.uploadedFile ? m.uploadedFile : null;
                 const currentNote = m && m.note ? m.note : "";
 
-                // Prepare due date/time display and uploadedAt
+               
                 const dueRaw = m && m.due ? m.due : null;
                 let dueDateObj = null;
                 if (dueRaw) {
@@ -350,13 +347,13 @@ export default function SupervisorMilestones() {
                   }
                 }
 
-                // uploadedAt may be in uploadedFile.uploadedAt or uploadedFile.timestamp (support both)
+                
                 const uploadedAtRaw = uploadedFile && (uploadedFile.uploadedAt || uploadedFile.timestamp || uploadedFile.time);
                 const uploadedDateObj = uploadedAtRaw ? new Date(uploadedAtRaw) : null;
 
                 const isLate = uploadedDateObj && dueDateObj ? uploadedDateObj.getTime() > dueDateObj.getTime() : false;
 
-                // human readable strings
+             
                 const dueDisplay =
                   dueDateObj && !isNaN(dueDateObj.getTime()) ? formatDateTime(dueDateObj.toISOString()) : (dueRaw || "—");
                 const uploadedDisplay = uploadedDateObj && !isNaN(uploadedDateObj.getTime()) ? formatDateTime(uploadedDateObj.toISOString()) : (uploadedAtRaw ? String(uploadedAtRaw) : "No upload");
@@ -395,7 +392,7 @@ export default function SupervisorMilestones() {
                       </div>
                     </div>
 
-                    {/* Due Date/Time */}
+                   
                     <div className="stack-item">
                       <div className="stack-label">Due Date & Time</div>
                       <div className="stack-value">
@@ -403,7 +400,7 @@ export default function SupervisorMilestones() {
                       </div>
                     </div>
 
-                    {/* Submission Date & Time (new field) */}
+                  
                     <div className="stack-item">
                       <div className="stack-label">Submission Date & Time</div>
                       <div className="stack-value">
@@ -415,7 +412,6 @@ export default function SupervisorMilestones() {
                       </div>
                     </div>
 
-                    {/* Submission Status (Late / On time / No submission) */}
                     <div className="stack-item">
                       <div className="stack-label">Submission Status</div>
                       <div className="stack-value">

@@ -2,7 +2,6 @@
   --main-blue: #01337a;
 }
 
-/* Shared styling for results screens (Supervisor / Coordinator / Student) */
 
 /* Button styling */
 .MuiButton-root {
@@ -46,7 +45,6 @@
   color: #01337a;
 }
 
-/* small responsive tweaks */
 @media (max-width: 900px) {
   .evaluation-form-paper { padding: 16px !important; }
 }

@@ -132,12 +132,12 @@
   border: 1px solid #c7d2fe;
 }
 
-/* Slight visual lift when not archived to accent button area */
+
 .milestone-group-card:not(.archived) .archive-button-wrap {
   transform: translateY(0);
   transition: transform 180ms ease;
 }
-/* small devices */
+
 @media (max-width: 640px) {
   .mmodal { max-width: 96vw; }
   .stack-item { gap:8px; }
