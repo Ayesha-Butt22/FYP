@@ -5,6 +5,7 @@ const {
   resolveGroupById,
   bulkResolveGroups,
   getBookedGroupsForSchedule,
+  getSingleGroups,
 } = require("../controllers/EvaluationController");
 
 // Faculty check route (used by Overview/Committee)
@@ -16,5 +17,6 @@ router.post("/bulkResolveGroups", bulkResolveGroups);
 
 // New: get groups that booked slots for schedule(s)
 router.post("/getBookedGroups", getBookedGroupsForSchedule);
+router.post("/getSingleGroups", getSingleGroups);
 
 module.exports = router;
