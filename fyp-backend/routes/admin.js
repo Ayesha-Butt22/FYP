@@ -42,7 +42,7 @@ router.get('/coordinators', protect, isAdmin, adminController.getCoordinators);
 router.get('/alladmins', protect, isAdmin, adminController.getAdmins);
 
 // GET SUPERVISORS
-router.get('/supervisors', protect, isAdmin, adminController.getSupervisors);
+router.get('/supervisors',adminController.getSupervisors);
 
 // GET ALL STUDENTS for admin
 router.get('/students', protect, isAdmin, adminController.getAllStudents);
@@ -69,7 +69,7 @@ router.put(
 );
 
 // DELETE USER
-router.delete('/:id', protect, isAdmin, adminController.deleteUser);
+router.delete('/:id',  adminController.deleteUser);
 
 // REMOVE COORDINATOR (convert to supervisor)
 router.patch('/remove-coordinator/:id', protect, isAdmin, adminController.removeCoordinator);
@@ -91,7 +91,7 @@ router.patch(
   adminController.toggleStudentApproval
 );
 
-router.post("/supervisor/update-slots", protect, isAdmin, adminController.updateSupervisorSlotsByEmail);
+router.post("/supervisor/update-slots", adminController.updateSupervisorSlotsByEmail);
 
 router.get("/supervisors-for-coordinator", protect, isAdmin, adminController.getSupervisorsForCoordinator);
 

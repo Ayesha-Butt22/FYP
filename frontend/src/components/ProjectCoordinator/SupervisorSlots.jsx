@@ -28,16 +28,13 @@ export default function SupervisorSlots() {
   useEffect(() => {
     const fetchSupervisors = async () => {
       try {
-        const url = viewForCoordinator
-          ? "/api/admin/supervisors-for-coordinator"
-          : "/api/admin/supervisors";
+        const url = "http://localhost:5000/api/admin/supervisors";
 
         const { data } = await axios.get(url);
-        const supArray = viewForCoordinator
-          ? data.data || []
-          : Array.isArray(data)
-          ? data
-          : data?.data ?? [];
+
+        const supArray = Array.isArray(data)
+            ? data
+            : data?.data ?? [];
 
         setSupervisors(supArray);
       } catch (err) {
@@ -76,7 +73,7 @@ export default function SupervisorSlots() {
     const ok = await Confirm(`Are you sure you want to delete ${sup.name}?`);
     if (!ok) return;
     try {
-      await axios.delete(`/api/admin/${sup._id}`);
+      await axios.delete(`http://localhost:5000/api/admin/${sup._id}`);
       const updated = supervisors.filter((s) => s._id !== sup._id);
       setSupervisors(updated);
       saveToStorage(updated);
@@ -105,7 +102,7 @@ export default function SupervisorSlots() {
     }
 
     try {
-      const { data } = await axios.post("/api/admin/supervisor/update-slots", {
+      const { data } = await axios.post("http://localhost:5000/api/admin/supervisor/update-slots", {
         email: editing.email,
         designation: editing.designation,
         bookedSlots: booked,

@@ -375,6 +375,7 @@ exports.uploadExcelAndCreateUsers = async (req, res) => {
 exports.updateSupervisorSlotsByEmail = async (req, res) => {
   try {
     const { email, designation, bookedSlots } = req.body;
+    console.log("here");
 
     if (!email || !designation || bookedSlots === undefined) {
       return res.status(400).json({ error: "Email, designation and bookedSlots are required" });
@@ -397,10 +398,12 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
       'associateprofessor': 2,
       'assistantprofessor': 3,
       'lecturer': 3,
+      'lecturerSr.lecturer':3,
       'sr.lecturer': 3,
       'srlecturer': 3,
       'juniorlecturer': 2,
       'researchassociate': 1,
+      'researchassociateassistant': 1,
       'researchassistant': 1,
       'teachingfellow': 1
     };

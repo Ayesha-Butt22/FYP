@@ -27,6 +27,35 @@ exports.checkFacultyInPublishedPanel = async (req, res) => {
       facultyPanels: user._id,
     });
 
+
+
+    const groups = await Proposal.find({ projectSupervisor: email });
+
+    const groupsWithSlots = [];
+    for (const group of groups) {
+      const schedule = await PresentationSchedule.findOne({
+        "slots.bookedBy": group.groupId,
+      });
+
+      const grp = await Group.findOne({
+        "_id": group.groupId,
+      });
+      groupsWithSlots.push({
+        displayId : grp.groupId,
+        groupId: group.groupId,
+        bookedSlot: schedule
+            ? schedule.slots.find((s) => s.bookedBy?.toString() === group.groupId.toString())
+            : null,
+        scheduleInfo: schedule
+            ? {
+              week: schedule.week,
+              fypPart: schedule.fypPart,
+              venue: schedule.venue,
+            }
+            : null,
+      });
+    }
+
     if (alreadyAssigned) {
       return res.status(200).json({
         success: true,
@@ -37,6 +66,7 @@ exports.checkFacultyInPublishedPanel = async (req, res) => {
         venue: alreadyAssigned.venue,
         fypPart: alreadyAssigned.fypPart,
         data: alreadyAssigned,
+        groupsSupervised: groupsWithSlots,
       });
     }
 

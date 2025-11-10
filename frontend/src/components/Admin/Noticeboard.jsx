@@ -26,12 +26,15 @@ export default function Noticeboard() {
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState(null); // null | 'add' | 'edit'
   const [editId, setEditId] = useState(null);
+  const role = localStorage.getItem('role');
   const [form, setForm] = useState({
     title: "",
     description: "",
     audience: "All",
     department: "All",
+    role: role,
   });
+
 
   // ✅ Fetch all notices when component loads
   useEffect(() => {

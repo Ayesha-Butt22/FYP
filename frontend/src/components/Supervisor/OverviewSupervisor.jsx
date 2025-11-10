@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { FaUsers, FaClipboardCheck, FaCalendarCheck, FaStar, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./OverviewSupervisor.css";
@@ -17,8 +17,10 @@ const progress = [
 ];
 
 export default function OverviewSupervisor({ onTabChange }) {
-
+  const ranOnce = useRef(false);
   useEffect(() => {
+    if (ranOnce.current) return;
+    ranOnce.current = true;
     const fetchFacultyStatus = async () => {
       const email = localStorage.getItem('email');
       if (!email) return false;
@@ -32,10 +34,37 @@ export default function OverviewSupervisor({ onTabChange }) {
         });
         const data = await response.json();
         const lastSchedule = data.data?.[data.data.length - 1];
+        const groups = data.groupsSupervised;
         if (lastSchedule._id){
           const msg = `Your are listed as panel member for ${lastSchedule.week || "this week"} at venue ${lastSchedule.venue || "TBD"} — be ready!`;
           ToastService.info(msg);
         }
+        if (groups && Array.isArray(groups)) {
+          groups.forEach((group) => {
+            if (group.bookedSlot){
+              const formattedGroupId = `grp-${group.displayId.slice(-5)}`;
+              const startDate = new Date(group.bookedSlot.startTime);
+              const endDate = new Date(group.bookedSlot.endTime);
+              const timeFormatter = new Intl.DateTimeFormat('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: 'UTC'
+              });
+              const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                timeZone: 'UTC'
+              });
+              const formattedStartTime = timeFormatter.format(startDate);
+              const formattedEndTime = timeFormatter.format(endDate);
+              const formattedDate = dateFormatter.format(startDate).toLowerCase();
+              const msg = `Your Group ${formattedGroupId} has booked a slot from ${formattedStartTime} to ${formattedEndTime} on ${formattedDate}!`;
+              ToastService.success(msg);
+            }
+          });
+        }
+
       } catch (error) {
         console.error("Error fetching faculty status:", error);
       }

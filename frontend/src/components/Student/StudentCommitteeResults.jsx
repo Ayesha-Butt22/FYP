@@ -10,19 +10,23 @@ import {
   Place,
 } from "@mui/icons-material";
 
-export default function SupervisorCommitteeResults() {
+export default function StudentCommitteeResults() {
   const [rows, setRows] = useState([]);
   const [expanded, setExpanded] = useState({});
   const name = localStorage.getItem('name');
 
 
   useEffect(() => {
+    const email = localStorage.getItem('email');
+    if(!email) return;
     const fetchEvaluations = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/committee-evaluation/onlyApproved");
+        const res = await axios.get(`http://localhost:5000/api/committee-evaluation/student/${email}`);
         if (res.data.success && Array.isArray(res.data.data)) {
           const formatted = res.data.data.map((item) => {
-            const group = item.groupId || {};
+            console.log(item)
+            const group = item.scheduleId.fypPart || {};
+            const week = item.scheduleId.week || {};
             const schedule = item.scheduleId || {};
             const slot = (schedule.slots || []).find((s) => s._id === item.slotId) || {};
             const isApprovedByCoordinator = item.isApprovedByCoordinator;
@@ -31,6 +35,7 @@ export default function SupervisorCommitteeResults() {
               email: ev.evaluatedBy?.email,
               role: ev.evaluatedBy?.role,
               comments: ev.comments || "—",
+              week: item.scheduleId.week || {},
               submittedAt: new Date(ev.submittedAt).toLocaleString(),
               students: (ev.students || []).map((s) => ({
                 name: s.name,
@@ -42,7 +47,8 @@ export default function SupervisorCommitteeResults() {
 
             return {
               id: item._id,
-              groupId: group.groupId || "Unknown",
+              groupId: group || "Unknown",
+              week: week || "Unknown",
               venue: schedule.venue || "Not Assigned",
               slotTime: `${new Date(slot.startTime).toLocaleTimeString([], {
                 hour: "2-digit",
@@ -74,8 +80,8 @@ export default function SupervisorCommitteeResults() {
 
   if (rows.length === 0) return (
   <>
-    <DashboardSectionHeader description="View committee evaluation results for groups you supervise (read-only)">
-      Committee Results — Supervisor View
+    <DashboardSectionHeader description="View committee evaluation results">
+      Committee Results — Student Result
     </DashboardSectionHeader>
   <label>
     No Committee Results to display right now
@@ -86,49 +92,48 @@ export default function SupervisorCommitteeResults() {
 
   return (
       <div className="cor-committee-container">
-        <DashboardSectionHeader description="View committee evaluation results for groups you supervise (read-only)">
-          Committee Results — Supervisor View
+
+        <DashboardSectionHeader description="View committee evaluation results">
+          Committee Results — Student Result
         </DashboardSectionHeader>
+
 
         <div className="cor-committee-paper">
           <table className="cor-committee-table">
             <thead className="cor-committee-thead">
             <tr>
               <th></th>
-              <th><strong>Group#</strong></th>
-              <th><strong>Student Names</strong></th>
+              <th><strong>Week</strong></th>
+              <th><strong>Year</strong></th>
               <th><strong>Venue</strong></th>
+              <th><strong>Slots</strong></th>
             </tr>
             </thead>
 
             <tbody>
             {rows.map((row) => {
-              const allStudents = [
-                row.evaluations?.[0]?.students.map((s) => s.name).join(", "),
-              ];
-
               return (
                   <React.Fragment key={row.id}>
                     <tr
                         className="cor-committee-row"
                         onClick={() => toggleExpand(row.id)}
-                        style={{ cursor: "pointer" }}
+                        style={{cursor: "pointer"}}
                     >
                       <td>
                         {expanded[row.id] ? (
-                            <KeyboardArrowUp fontSize="small" />
+                            <KeyboardArrowUp fontSize="small"/>
                         ) : (
-                            <KeyboardArrowDown fontSize="small" />
+                            <KeyboardArrowDown fontSize="small"/>
                         )}
                       </td>
-                      <td style={{ textTransform: 'capitalize'}}>{row.groupId}</td>
-                      <td>{allStudents}</td>
+                      <td>{row.week}</td>
+                      <td style={{textTransform: 'capitalize'}}>{row.groupId}</td>
                       <td className="cor-venue-cell">
-                        <Place fontSize="small" color="primary" />
+                        <Place fontSize="small" color="primary"/>
                         <span>{row.venue}</span>
                       </td>
-                      <td className="cor-time-cell">
-                        <AccessTime fontSize="small" color="secondary" />
+                      <td>
+                        <AccessTime fontSize="small" color="secondary"/>
                         <span>{row.slotTime}</span>
                       </td>
                     </tr>
@@ -155,8 +160,12 @@ export default function SupervisorCommitteeResults() {
                                             <div>
                                               <strong>{stu.name}</strong> ({stu.sapId})
                                             </div>
-                                            <div>Presentation: {stu.presentation}/10</div>
-                                            <div>Performance: {stu.performance}/10</div>
+                                            {evalItem.week !== "Week 4" ? (
+                                                <>
+                                                  <div>Presentation: {stu.presentation}/10</div>
+                                                  <div>Performance: {stu.performance}/10</div>
+                                                </>
+                                            ) : null}
                                           </div>
                                       ))}
                                     </div>

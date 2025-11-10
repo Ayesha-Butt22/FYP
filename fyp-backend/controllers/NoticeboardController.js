@@ -15,18 +15,21 @@ exports.getAllNotices = async (req, res) => {
 // Create a new notice
 exports.createNotice = async (req, res) => {
   try {
-    const { title, description, audience, department } = req.body;
+    const { title, description, audience, department , role } = req.body;
 
     if (!title || !description) {
       return res.status(400).json({ success: false, error: "Title and description required" });
     }
+
+
+
 
     const newNotice = await Noticeboard.create({
       title,
       description,
       audience: audience || "All",
       department: department || "All",
-      postedBy: req.user ? req.user.name : "Admin",
+      postedBy: role ? role : "Admin",
     });
 
     return res.status(201).json({ success: true, notice: newNotice });

@@ -15,6 +15,7 @@ import StudentReports from "./StudentReports";
 import SupervisorArchive from "../Supervisor/SupervisorArchive";
 import StudentProfile from "./StudentProfile";
 import StudentEvaluationResults from "./StudentEvaluationResults";
+import StudentCommitteeResults from "./StudentCommitteeResults.jsx";
 
 import {
   Dashboard as DashboardIcon,
@@ -44,6 +45,7 @@ const menu = [
   { label: "Meetings", icon: <CalendarMonthIcon /> },
   { label: "Checklist", icon: <ChecklistIcon /> },
   { label: "Evaluations", icon: <FeedbackIcon /> },
+  { label: "Committee Result", icon: <FeedbackIcon /> },
   { label: "Final Results", icon: <BookIcon /> }, // <-- new tab for final results (read-only)
   { label: "Journal", icon: <BookIcon /> },
   { label: "Reports", icon: <DescriptionIcon /> },
@@ -76,6 +78,7 @@ export default function StudentDashboard() {
     "Meetings": <StudentMeetings />,
     "Checklist": <StudentChecklist />,
     "Evaluations": <StudentEvaluations />,
+    "Committee Result": <StudentCommitteeResults />,
     "Final Results": <StudentEvaluationResults />, // <-- mapped read-only final results
     "Journal": <StudentJournal />,
     "Reports": <StudentReports />,
