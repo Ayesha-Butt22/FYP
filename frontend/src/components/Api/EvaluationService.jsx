@@ -43,9 +43,25 @@ const EvaluationService = {
       try { parsed = JSON.parse(text); } catch { parsed = { message: text }; }
       throw new Error(`Request failed (${res.status}): ${JSON.stringify(parsed)}`);
     }
-
     return res.json();
   },
+
+  async getSingleGroups(payload) {
+    const res = await fetch(`${API_BASE}/getSingleGroups`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      let parsed;
+      try { parsed = JSON.parse(text); } catch { parsed = { message: text }; }
+      throw new Error(`Request failed (${res.status}): ${JSON.stringify(parsed)}`);
+    }
+    return res.json();
+  },
+
 
   // other helpers can be added here (resolveGroup, bulkResolveGroups) if needed
 };

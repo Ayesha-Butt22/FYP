@@ -205,6 +205,145 @@ exports.getBookedGroupsForSchedule = async (req, res) => {
 };
 
 
+
+exports.getSingleGroups = async (req, res) => {
+  try {
+    const { scheduleId, slotId,week, fypPart, venue } = req.body || {};
+
+    let schedules = [];
+
+    if (scheduleId) {
+      if (!mongoose.Types.ObjectId.isValid(scheduleId)) {
+        return res.status(400).json({ success: false, message: "Invalid scheduleId" });
+      }
+      const query = { _id: scheduleId };
+
+      if (slotId) {
+        if (!mongoose.Types.ObjectId.isValid(slotId)) {
+          return res.status(400).json({ success: false, message: "Invalid slotId" });
+        }
+        query["slots._id"] = slotId;
+      }
+      const sched = await PresentationSchedule.findOne(query).lean();
+      if (!sched) {
+        return res.status(404).json({ success: false, message: "Schedule not found" });
+      }
+      if (slotId) {
+        sched.slots = sched.slots.filter(
+            (slot) => String(slot._id) === String(slotId)
+        );
+      }
+      schedules = [sched];
+    }
+    else {
+      if (!week || !fypPart) {
+        return res.status(400).json({
+          success: false,
+          message: "Either scheduleId or (week and fypPart) required",
+        });
+      }
+      const q = { week, fypPart };
+      if (venue) q.venue = venue;
+      schedules = await PresentationSchedule.find(q).lean();
+      if (!schedules || !schedules.length) return res.json({ success: true, data: [] });
+    }
+
+    const bookedSet = new Set();
+    schedules.forEach(s => {
+      (s.slots || []).forEach(slot => {
+        if (!slot) return;
+        const b = slot.bookedBy;
+        if (!b) return;
+        try {
+          const idStr = String(b._id ?? b);
+          if (idStr && idStr !== "null" && idStr !== "undefined") bookedSet.add(idStr);
+        } catch {
+          const idStr = String(b);
+          if (idStr && idStr !== "null" && idStr !== "undefined") bookedSet.add(idStr);
+        }
+      });
+    });
+
+    const bookedGroupIds = Array.from(bookedSet);
+    if (!bookedGroupIds.length) return res.json({ success: true, data: [] });
+
+
+    const groups = await Group.find({ _id: { $in: bookedGroupIds } }).lean();
+    if (!groups.length) return res.json({ success: true, data: [] });
+
+
+    const emailSet = new Set();
+    const sapSet = new Set();
+    groups.forEach(g => {
+      ["leader", "member2", "member3"].forEach(k => {
+        const m = g[k];
+        if (!m) return;
+        if (m.email) emailSet.add(String(m.email).toLowerCase());
+        if (m.sapId) sapSet.add(String(m.sapId));
+      });
+    });
+
+    const or = [];
+    if (emailSet.size) or.push({ email: { $in: Array.from(emailSet) } });
+    if (sapSet.size) or.push({ studentId: { $in: Array.from(sapSet) } });
+
+    const users = or.length ? await User.find({ $or: or }).lean() : [];
+
+
+    const userByEmail = {};
+    const userByStudentId = {};
+    users.forEach(u => {
+      if (u.email) userByEmail[String(u.email).toLowerCase()] = u;
+      if (u.studentId) userByStudentId[String(u.studentId)] = u;
+    });
+
+
+    const result = await Promise.all(
+        groups.map(async (g) => {
+          const members = [];
+
+          ["leader", "member2", "member3"].forEach((k) => {
+            const m = g[k];
+            if (!m) return;
+            const email = m.email ? String(m.email).toLowerCase() : null;
+            const sap = m.sapId ? String(m.sapId) : null;
+            const matchedUser =
+                (email && userByEmail[email]) ||
+                (sap && userByStudentId[sap]) ||
+                null;
+
+            members.push({
+              role: k === "leader" ? "leader" : "member",
+              name: matchedUser?.name || m.name || null,
+              email: matchedUser?.email || m.email || null,
+              studentId: matchedUser?.studentId || m.sapId || null,
+              userId: matchedUser?._id || null,
+            });
+          });
+
+          const project = await Proposal.findOne({ groupId: g._id }).lean();
+
+          return {
+            groupId: g.groupId || null,
+            groupMongoId: g._id,
+            proposalTitle: g.proposalTitle || g.projectTitle || null,
+            members,
+            raw: g,
+            project: project || null,
+          };
+        })
+    );
+
+
+    return res.json({ success: true, data: result });
+  } catch (err) {
+    console.error("getBookedGroupsForSchedule error:", err);
+    return res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+};
+
+
+
 exports.resolveGroupById = async (req, res) => {
   try {
     const { groupId } = req.body;

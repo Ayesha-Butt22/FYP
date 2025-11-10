@@ -53,7 +53,7 @@ export default function CommitteeEvaluation() {
       setActiveSlot({ ...slot, panel });
       setWeek(panel.week === 'Week 4' ? 4 : 13);
       setSchedule(panel._id);
-      const bookedRes = await EvaluationService.getBookedGroups({
+      const bookedRes = await EvaluationService.getSingleGroups({
         scheduleId: panel._id,
         slotId: slot._id,
       });
