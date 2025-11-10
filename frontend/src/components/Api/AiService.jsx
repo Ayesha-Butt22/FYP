@@ -27,7 +27,8 @@ export async function GetTitle(inputTitle) {
 
         const data = await response.json();
         const text = data.choices?.[0]?.message?.content || "";
-
+        
+//clean the title 
         const titles = text
             .split("\n")
             .map((line) =>

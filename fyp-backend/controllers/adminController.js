@@ -443,15 +443,13 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
   }
 };
 
-// GET /api/admin/supervisors-for-coordinator
-// Returns all supervisors with necessary details for coordinator slot integration
 exports.getSupervisorsForCoordinator = async (req, res) => {
   try {
     const supervisors = await User.find({ role: "supervisor" })
       .select("name email department specialization designation availableSlots bookedSlots")
       .sort({ createdAt: -1 });
 
-    // Ensure availableSlots/bookedSlots are present
+    
     const DESIGNATION_DEFAULTS = {
       Dean: 0,
       Professor: 1,

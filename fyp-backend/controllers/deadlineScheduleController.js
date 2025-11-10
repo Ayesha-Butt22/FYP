@@ -3,7 +3,6 @@ const User = require("../models/User");
 const Group = require("../models/StudentGroup");
 const mongoose = require("mongoose");
 
-// ---------------- Helper functions ---------------- //
 function intervalsOverlap(aStart, aEnd, bStart, bEnd) {
   return aStart < bEnd && bStart < aEnd;
 }
@@ -26,7 +25,7 @@ async function validateFacultyIds(ids = []) {
   return count === ids.length;
 }
 
-// ---------------- CREATE OR UPDATE PRESENTATION BATCH ---------------- //
+
 exports.createOrUpdatePresentationBatch = async (req, res) => {
   try {
     const { week, fypPart, panels = [], durationMinutes = 45 } = req.body;
@@ -57,7 +56,7 @@ exports.createOrUpdatePresentationBatch = async (req, res) => {
       let schedule = await PresentationSchedule.findOne({ week, fypPart, venue });
 
       if (schedule) {
-        // Update existing
+        
         const existingFacultyIds = schedule.facultyPanels.map(f => f.toString());
         const newFaculty = facultyPanels.filter(id => !existingFacultyIds.includes(id.toString()));
         schedule.facultyPanels.push(...newFaculty);
@@ -133,7 +132,7 @@ exports.publishSchedule = async (req, res) => {
   }
 };
 
-// ---------------- GET PRESENTATIONS (only published) ---------------- //
+
 exports.getPresentation = async (req, res) => {
   try {
     const { week, fypPart } = req.query;

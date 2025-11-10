@@ -23,7 +23,7 @@ exports.uploadFile = async (req, res) => {
     }
 
     const fileName = path.basename(req.file.path);
-    const fileUrl = `/Filesk/${fileName}`; // served statically from /Filesk
+    const fileUrl = `/Filesk/${fileName}`; 
 
     const doc = new FileModel({
       template,

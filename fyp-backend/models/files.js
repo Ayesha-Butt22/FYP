@@ -6,7 +6,7 @@ const FileSchema = new mongoose.Schema({
   filePath: { type: String, required: true },   
 }, {
   timestamps: true,
-  collection: 'files' // ensure collection name is 'files'
+  collection: 'files',
 });
 
 module.exports = mongoose.model('files', FileSchema);

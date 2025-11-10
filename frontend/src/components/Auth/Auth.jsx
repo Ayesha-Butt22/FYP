@@ -26,7 +26,8 @@ export default function Auth() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  
+  // NEW: forgot-password UI state (stays on same page, doesn't call APIs)
+  // forgotState: null | "askEmail" | "showResetFields"
   const [forgotState, setForgotState] = useState(null);
   const [forgotEmail, setForgotEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -57,7 +58,7 @@ export default function Auth() {
     clearFieldError(fieldName);
   }, [clearFieldError]);
 
-
+  // Dashboard route
   const getDashboardRoute = (role) => {
     const routes = {
       admin: "/dashboard/admin",
@@ -90,7 +91,7 @@ export default function Auth() {
   // Login
   const handleLogin = async (e) => {
     e.preventDefault();
-    
+    // If forgot flow active, do not submit login
     if (forgotState) return;
     const validation = validateLogin(loginData);
     setErrors(validation);
@@ -156,6 +157,8 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
+
+  // Student registration fields (department rendered as a dropdown)
   const renderStudentFields = () => (
     <>
       {STUDENT_FIELDS.map(field => (
@@ -207,13 +210,14 @@ export default function Auth() {
       ))}
     </>
   );
--
+
+  // ---- Forgot password flow (local UI only) ----
   const openForgot = () => {
- 
+    // show the "Enter your email address" step
     setForgotState("askEmail");
-  
+    // ensure login pane visible
     setMode("login");
-    
+    // clear previous values
     setForgotEmail("");
     setNewPassword("");
     setConfirmNewPassword("");
@@ -236,16 +240,16 @@ export default function Auth() {
       toastService.error("Enter a valid email address.");
       return;
     }
-    
+    // Show the password reset fields (no API calls, as requested)
     setForgotState("showResetFields");
-   
+    // clear errors
     setErrors({});
     toastService.info("Enter a new password below (this is a local UI demo; no API is called).");
   };
 
   const handleResetPasswordSubmit = (e) => {
     e.preventDefault();
-   
+    // validate new password entries locally
     const errs = {};
     if (!newPassword || newPassword.length < 8) errs.newPassword = "Password must be at least 8 characters.";
     if (newPassword !== confirmNewPassword) errs.confirmNewPassword = "Passwords do not match.";
@@ -254,8 +258,9 @@ export default function Auth() {
       toastService.error("Please fix the errors before submitting.");
       return;
     }
+    // Do NOT call any API (user request). Just show confirmation and reset UI.
     toastService.success("Password fields accepted. (No API call made — demo only.)");
-
+    // Reset forgot flow and keep user on login pane
     setForgotState(null);
     setForgotEmail("");
     setNewPassword("");
@@ -266,6 +271,7 @@ export default function Auth() {
     <>
       <div className={`auth-container${mode === "register" ? " active" : ""}`}>
         <div className="form-box login">
+          {/* If forgotState active, we still show login pane but render forgot UI above the login form */}
           {forgotState === "askEmail" ? (
             <form onSubmit={handleForgotEmailSubmit} noValidate>
               <h1>Forgot Password</h1>
@@ -350,6 +356,7 @@ export default function Auth() {
                 {isLoading ? "SIGNING IN..." : "SIGN IN"}
               </button>
 
+              {/* NEW: Forgot password link - opens local forgot flow on same page */}
               <div style={{ marginTop: 12, textAlign: "center" }}>
                 <button
                   type="button"
