@@ -148,7 +148,6 @@ const mapProposalToIdea = (proposal) => {
   };
 };
 
-
 const maskGroupLabel = (groupName) => {
   if (!groupName) return "";
   const s = String(groupName);
@@ -158,11 +157,8 @@ const maskGroupLabel = (groupName) => {
     const prefix = m[1] || "group-";
     const digits = m[2] || "";
     const last5 = digits.slice(-5);
-   
     return `${prefix}${last5}`;
   }
-
-
   const last5 = s.slice(-5);
   return `group-${last5}`;
 };

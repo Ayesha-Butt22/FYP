@@ -93,7 +93,7 @@ exports.getMyProposals = async (req, res) => {
           path: 'groupId',
           select: 'groupId leader member2 member3'
         })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 }) .lean();
 
 
     for (const proposal of proposals) {

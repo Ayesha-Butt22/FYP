@@ -35,36 +35,53 @@ export default function OverviewSupervisor({ onTabChange }) {
         const data = await response.json();
         const lastSchedule = data.data?.[data.data.length - 1];
         const groups = data.groupsSupervised;
-        if (lastSchedule._id){
-          const msg = `Your are listed as panel member for ${lastSchedule.week || "this week"} at venue ${lastSchedule.venue || "TBD"} — be ready!`;
-          ToastService.info(msg);
+        if (lastSchedule._id) {
+          const slot = lastSchedule.slots[0];
+          const slotTime = new Date(slot.startTime);
+          const now = new Date();
+          if (slotTime > now) {
+            const msg = `You are listed as a panel member for ${
+                lastSchedule.week || "this week"
+            } at venue ${lastSchedule.venue || "TBD"} — be ready!`;
+            ToastService.info(msg);
+          }
         }
         if (groups && Array.isArray(groups)) {
           groups.forEach((group) => {
-            if (group.bookedSlot){
-              const formattedGroupId = `grp-${group.displayId.slice(-5)}`;
+            if (group.bookedSlot) {
               const startDate = new Date(group.bookedSlot.startTime);
-              const endDate = new Date(group.bookedSlot.endTime);
-              const timeFormatter = new Intl.DateTimeFormat('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true,
-                timeZone: 'UTC'
-              });
-              const dateFormatter = new Intl.DateTimeFormat('en-GB', {
-                day: 'numeric',
-                month: 'short',
-                timeZone: 'UTC'
-              });
-              const formattedStartTime = timeFormatter.format(startDate);
-              const formattedEndTime = timeFormatter.format(endDate);
-              const formattedDate = dateFormatter.format(startDate).toLowerCase();
-              const msg = `Your Group ${formattedGroupId} has booked a slot from ${formattedStartTime} to ${formattedEndTime} on ${formattedDate}!`;
-              ToastService.success(msg);
+              const now = new Date();
+
+              if (startDate > now) {
+                const formattedGroupId = `grp-${group.displayId.slice(-5)}`;
+                const endDate = new Date(group.bookedSlot.endTime);
+
+                const timeFormatter = new Intl.DateTimeFormat('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                  timeZone: 'UTC'
+                });
+                const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+                  day: 'numeric',
+                  month: 'short',
+                  timeZone: 'UTC'
+                });
+
+                const formattedStartTime = timeFormatter.format(startDate);
+                const formattedEndTime = timeFormatter.format(endDate);
+                const formattedDate = dateFormatter.format(startDate).toLowerCase();
+
+                const msg = `Your Group ${formattedGroupId} has booked a slot from ${formattedStartTime} to ${formattedEndTime} on ${formattedDate}!`;
+                ToastService.success(msg);
+              } else {
+                console.log(
+                    `Skipping toast for ${group.displayId}: slot has already passed.`
+                );
+              }
             }
           });
         }
-
       } catch (error) {
         console.error("Error fetching faculty status:", error);
       }
