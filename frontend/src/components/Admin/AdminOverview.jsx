@@ -60,7 +60,7 @@ export default function AdminOverview({ onTabChange }) {
     return (
         <div className="overview-container">
             <div className="welcome-banner">
-                <div className="banner-title">Welcome, Admin!</div>
+                <div className="banner-title">Admin Workspace!</div>
                 <div className="banner-desc">
                     Manage supervisors, coordinators, student registrations, group assignments, and overall FYP workflow from a single dashboard.
                 </div>
