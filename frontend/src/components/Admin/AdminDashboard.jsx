@@ -22,10 +22,10 @@ import GroupsGrid from "../ProjectCoordinator/GroupsGrid";
 import SupervisorArchive from "../Supervisor/SupervisorArchive";
 import StudentTemplates from "./StudentTemplates";
 import Noticeboard from "./Noticeboard";
-import AdminProfile from "./AdminProfile"; // <-- new profile tab
+import AdminProfile from "./AdminProfile";
 
 const menu = [
-  // { label: "Dashboard", icon: <DashboardIcon /> },
+  
   { label: "Manage Admin", icon: <PersonIcon /> },
   { label: "Manage Supervisors", icon: <GroupsIcon /> },
   { label: "Manage Project Coordinators", icon: <SupervisorAccountIcon /> },
@@ -34,7 +34,7 @@ const menu = [
   { label: "Noticeboard", icon: <CampaignIcon /> },
   { label: "View Groups", icon: <GroupsIcon /> },
   { label: "FYP Archive", icon: <ArchiveIcon /> },
-  { label: "Profile", icon: <AccountCircleIcon /> }, // profile at the end
+  { label: "Profile", icon: <AccountCircleIcon /> }, 
 ];
 
 const adminInfo = {
@@ -63,7 +63,7 @@ export default function AdminDashboard() {
     Noticeboard: <Noticeboard />,
     "View Groups": <GroupsGrid />,
     "FYP Archive": <SupervisorArchive />,
-    Profile: <AdminProfile />, // wired profile component
+    Profile: <AdminProfile />, 
   };
 
   return (

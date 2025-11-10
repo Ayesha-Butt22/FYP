@@ -1,9 +1,9 @@
 :root {
-  /* Replace these variables with your project colors */
+  
   --main-blue: #01337a;
-  --primary: #01337a;           /* deep primary blue */
-  --primary-variant: #2563eb;   /* accent blue */
-  --accent: #06b6d4;            /* cyan accent */
+  --primary: #01337a;          
+  --primary-variant: #2563eb;   
+  --accent: #06b6d4;            
   --accent-700: #0891b2;
   --bg-start: #f0f9ff;
   --bg-end: #e0f2fe;

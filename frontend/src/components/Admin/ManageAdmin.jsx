@@ -6,7 +6,7 @@ import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 
-// --- Reusable input for form fields ---
+
 function FormInput({ label, error, ...props }) {
   return (
     <div className="form-group">
@@ -72,7 +72,7 @@ export default function ManageAdmin() {
   const [formErrors, setFormErrors] = useState({});
   const [processing, setProcessing] = useState(false);
 
-  // Fetch admins from backend
+  
   useEffect(() => {
     const fetchAdmins = async () => {
       setLoading(true);
@@ -85,11 +85,11 @@ export default function ManageAdmin() {
             ID: adm.studentId || adm._id,
             Name: adm.name,
             Email: adm.email,
-            Gender: getDisplayGender(adm.gender), // Convert to display format
+            Gender: getDisplayGender(adm.gender), 
             ContactNumber: adm.contactNumber,
             Password: "******",
             _id: adm._id,
-            originalGender: adm.gender // Store original for editing
+            originalGender: adm.gender 
           }));
           setRows(admins);
         } else {
@@ -138,8 +138,8 @@ export default function ManageAdmin() {
       ID: row.ID || "",
       Name: row.Name || "",
       Email: row.Email || "",
-      Password: "", // Reset password field when editing
-      Gender: row.Gender || "", // Display format already
+      Password: "", 
+      Gender: row.Gender || "", 
       ContactNumber: row.ContactNumber || ""
     });
     setFormErrors({});
@@ -171,9 +171,9 @@ export default function ManageAdmin() {
       const payload = {
         name: formData.Name,
         email: formData.Email,
-        gender: getBackendGender(formData.Gender), // Convert to backend format
+        gender: getBackendGender(formData.Gender), 
         contactNumber: formData.ContactNumber
-        // Password field removed from update payload
+        
       };
 
       console.log("Update Payload:", payload);
@@ -183,14 +183,14 @@ export default function ManageAdmin() {
       if (res.success) {
         toastService.success('Admin updated successfully!');
         
-        // Refresh the admin list
+        
         const adminsRes = await adminSupervisorApi.getAdmins();
         if (adminsRes.success) {
           const admins = adminsRes.data.map(adm => ({
             ID: adm.studentId || adm._id,
             Name: adm.name,
             Email: adm.email,
-            Gender: getDisplayGender(adm.gender), // Convert to display format
+            Gender: getDisplayGender(adm.gender),
             ContactNumber: adm.contactNumber,
             Password: "******",
             _id: adm._id
@@ -217,7 +217,7 @@ export default function ManageAdmin() {
       const payload = {
         name: formData.Name,
         email: formData.Email,
-        gender: getBackendGender(formData.Gender), // Convert to backend format
+        gender: getBackendGender(formData.Gender), 
         contactNumber: formData.ContactNumber,
         password: formData.Password
       };
@@ -229,14 +229,14 @@ export default function ManageAdmin() {
       if (res.success) {
         toastService.success('Admin added successfully!');
         
-        // Refresh the admin list from backend
+     
         const adminsRes = await adminSupervisorApi.getAdmins();
         if (adminsRes.success) {
           const admins = adminsRes.data.map(adm => ({
             ID: adm.studentId || adm._id,
             Name: adm.name,
             Email: adm.email,
-            Gender: getDisplayGender(adm.gender), // Convert to display format
+            Gender: getDisplayGender(adm.gender), 
             ContactNumber: adm.contactNumber,
             Password: "******",
             _id: adm._id
@@ -271,14 +271,13 @@ export default function ManageAdmin() {
       if (res.success) {
         toastService.success('Admin deleted successfully!');
         
-        // Refresh the admin list
         const adminsRes = await adminSupervisorApi.getAdmins();
         if (adminsRes.success) {
           const admins = adminsRes.data.map(adm => ({
             ID: adm.studentId || adm._id,
             Name: adm.name,
             Email: adm.email,
-            Gender: getDisplayGender(adm.gender), // Convert to display format
+            Gender: getDisplayGender(adm.gender),
             ContactNumber: adm.contactNumber,
             Password: "******",
             _id: adm._id
@@ -469,7 +468,7 @@ export default function ManageAdmin() {
               disabled={processing}
             />
 
-            {/* Password field only shown for Add mode */}
+            
             {sideFormMode === "add" && (
               <FormInput
                 label="Password"

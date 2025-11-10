@@ -1,7 +1,6 @@
 import React from "react";
 import "./AppTable.css";
 
-// headers: array of strings, rows: array of arrays/objects, actions: optional render function
 export default function AppTable({ headers = [], rows = [], renderActions }) {
   return (
     <div className="app-table-outer">

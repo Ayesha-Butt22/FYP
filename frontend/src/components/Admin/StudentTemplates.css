@@ -1,4 +1,4 @@
-/* Styles for the student templates view - Department-only dropdown */
+
 
 .st-controls {
   display: flex;
@@ -9,7 +9,7 @@
   flex-wrap: wrap;
 }
 
-/* Filter */
+
 .st-filter { display:flex; flex-direction:column; gap:6px; }
 .st-filter label { font-weight:700; color:#102a43; font-size:0.85rem; }
 .st-dept-select {
@@ -40,11 +40,11 @@
 }
 
 
-/* loading / empty */
+
 .st-loading { color:#666; margin-top: 12px; }
 .st-empty { color:#6b7280; margin-top: 12px; font-style: italic; }
 
-/* Small screens */
+
 @media (max-width: 720px) {
   .st-controls { flex-direction: column; align-items: stretch; }
   .st-dept-select { min-width: 100%; }

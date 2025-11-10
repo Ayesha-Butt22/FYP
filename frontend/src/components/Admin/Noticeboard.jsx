@@ -3,7 +3,7 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable.jsx";
 import { toastService } from "../ToastService/ToastService.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
-import noticeboardApi from "../Api/NoticeboardApi.jsx";  // ✅ correct path
+import noticeboardApi from "../Api/NoticeboardApi.jsx";  
 import "./Noticeboard.css";
 
 const AUDIENCE = [
@@ -24,7 +24,7 @@ const DEPARTMENTS = [
 export default function Noticeboard() {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState(null); // null | 'add' | 'edit'
+  const [mode, setMode] = useState(null); 
   const [editId, setEditId] = useState(null);
   const role = localStorage.getItem('role');
   const [form, setForm] = useState({
@@ -36,7 +36,7 @@ export default function Noticeboard() {
   });
 
 
-  // ✅ Fetch all notices when component loads
+  
   useEffect(() => {
     fetchNotices();
   }, []);
@@ -67,7 +67,7 @@ export default function Noticeboard() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Create or update notice
+  
   const handlePost = async (e) => {
     e.preventDefault();
     if (!form.title.trim()) return toastService.error("Title is required");
@@ -93,7 +93,7 @@ export default function Noticeboard() {
     }
   };
 
-  // ✅ Edit notice
+ 
   const handleEdit = (row) => {
     setMode("edit");
     setEditId(row.__meta._id);
@@ -106,7 +106,7 @@ export default function Noticeboard() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ✅ Delete notice
+
   const handleDelete = async (row) => {
     const ok = await Confirm(`Delete notice "${row.Title}"?`);
     if (!ok) return;
@@ -120,7 +120,7 @@ export default function Noticeboard() {
     }
   };
 
-  // ✅ Table setup
+  
   const headers = ["Title", "Target Role", "Date"];
   const rows = notices.map((n) => ({
     Title: n.title,

@@ -1,8 +1,7 @@
 :root{
-  --main-blue: #01337a; /* fallback for main blue used in hover */
+  --main-blue: #01337a; 
 }
 
-/* Noticeboard improved clean layout */
 
 .nb-root {
   padding: 20px 0;
@@ -40,7 +39,7 @@
   gap: 14px;
 }
 
-/* Each input row */
+
 .nb-row {
   display: flex;
   flex-direction: column;
@@ -71,7 +70,7 @@
   box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.15);
 }
 
-/* Actions */
+
 .nb-actions {
   display: flex;
   gap: 10px;
@@ -94,12 +93,11 @@
   background: #01337a;
   color: #fff;
   font-size: 1.3rem;
-  /* stable border to prevent layout shift when hovering */
+ 
   border: 2px solid transparent;
   transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.12s;
 }
 
-/* Requested hover style for Post Notice button */
 .mt-btn.primary:hover:not(:disabled) {
   background: #fff;
   color: var(--main-blue);
@@ -107,13 +105,13 @@
   transform: translateY(-2px);
 }
 
-/* keep an accessible focus style */
+
 .mt-btn.primary:focus {
   outline: none;
   box-shadow: 0 0 0 4px rgba(1,51,122,0.12);
 }
 
-/* Cancel button */
+
 .mt-btn.cancel {
   background: #6c757d;
   color: #fff;
@@ -124,7 +122,7 @@
   font-size: 1.3rem;
 }
 
-/* Responsive */
+
 @media (max-width: 900px) {
   .nb-form {
     grid-template-columns: 1fr;

@@ -101,8 +101,8 @@ function checkOnTimeByGroup(template, deadlines) {
 
 export default function TemplateView() {
   const [templates, setTemplates] = useState([]);
-  const [groupView, setGroupView] = useState(null); // { groupId, items: [...] }
-  // filters
+  const [groupView, setGroupView] = useState(null); 
+
   const [filterStatus, setFilterStatus] = useState("");
   const [filterGroup, setFilterGroup] = useState("");
   const [search, setSearch] = useState("");
@@ -125,7 +125,7 @@ export default function TemplateView() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(DUMMY_TEMPLATES));
     }
 
-    // auto-assign supervisors per group if missing
+
     const groups = Array.from(new Set(loaded.map((t) => t.groupId))).sort();
     const map = {};
     let idx = 0;
@@ -184,7 +184,7 @@ export default function TemplateView() {
     return true;
   });
 
-  // Build rows by unique groups (use first template for representative values)
+  
   const groups = Array.from(new Set(filtered.map((t) => t.groupId))).sort();
   const tableRows = groups.map((g) => {
     const rep = filtered.find((t) => t.groupId === g) || templates.find((t) => t.groupId === g) || {};

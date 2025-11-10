@@ -1,6 +1,4 @@
-/* TemplateView.css — kept original styles and added StudentTemplates control styles
-   so the dropdowns look the same as StudentTemplates (st-controls classes).
-*/
+
 
 .stv-card {
   padding: 18px;
@@ -27,7 +25,7 @@
   font-size: 0.98rem;
 }
 
-/* status badges (text-based) */
+
 .stv-status {
   font-weight: 700;
   padding: 6px 10px;
@@ -55,20 +53,27 @@
   padding: 18px;
   border-radius: 12px;
   box-shadow: 0 26px 80px rgba(1, 51, 122, 0.18);
+  -webkit-transform: translateX(-50%);
+  -moz-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  -o-transform: translateX(-50%);
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 
-/* on-time / late badges in table */
 .stv-on-time { color: #0b5a3a; font-weight: 800; }
 .stv-late { color: #b91c1c; font-weight: 800; }
 
-/* small tweaks for View button */
+
 .stv-table .MuiButton-root {
   min-width: 72px;
   text-transform: none;
   font-weight: 700;
 }
 
-/* Responsive */
+
 @media (max-width: 720px) {
   .stv-student-modal {
     width: 96vw;
@@ -76,8 +81,7 @@
   }
 }
 
-/* ---------- Copied StudentTemplates control styles ---------- */
-/* Controls wrapper (dropdown + clear) */
+
 .st-controls {
   display: flex;
   gap: 12px;
@@ -87,11 +91,11 @@
   flex-wrap: wrap;
 }
 
-/* Filter (label + select) */
+
 .st-filter { display:flex; flex-direction:column; gap:6px; }
 .st-filter label { font-weight:700; color:#102a43; font-size:0.85rem; }
 
-/* Use same look for selects and simple text inputs */
+
 .st-dept-select {
   padding: 8px 10px;
   border-radius: 8px;
@@ -107,7 +111,6 @@
   color: #0b3b69;
 }
 
-/* Clear button matching student styles */
 .st-clear-btn {
   background: #01337a;
   color: #fff;

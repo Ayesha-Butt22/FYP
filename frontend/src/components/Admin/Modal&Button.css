@@ -1,9 +1,9 @@
 :root{
-  /* fallback main-blue variable - used by hover styles */
+  
   --main-blue: #01337a;
 }
 
-/* Modal overlay & modal box */
+
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;

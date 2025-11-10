@@ -47,7 +47,7 @@ export default function StudentTemplates() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Show only this department dropdown (All, SE, CS, CA)
+  
   const DEPARTMENTS = ["All", "SE", "CS", "CA"];
   const [selectedDept, setSelectedDept] = useState("All");
 
@@ -55,12 +55,12 @@ export default function StudentTemplates() {
 
   useEffect(() => {
     loadTemplates();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, []);
 
   useEffect(() => {
     applyFilters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [allFiles, selectedDept]);
 
   const loadTemplates = async () => {

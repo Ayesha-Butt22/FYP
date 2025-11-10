@@ -24,7 +24,7 @@ export default function SupervisorSlots() {
   const [editing, setEditing] = useState(null);
   const [viewForCoordinator, setViewForCoordinator] = useState(false); // toggle new API
 
-  // Fetch supervisors (existing or new API)
+ 
   useEffect(() => {
     const fetchSupervisors = async () => {
       try {
@@ -46,7 +46,6 @@ export default function SupervisorSlots() {
     fetchSupervisors();
   }, [viewForCoordinator]);
 
-  // Persist locally
   const saveToStorage = (updated) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));

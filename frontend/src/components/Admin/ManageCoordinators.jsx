@@ -6,7 +6,7 @@ import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 
-// --- Reusable input for form fields ---
+
 function FormInput({ label, error, ...props }) {
   return (
     <div className="form-group">
@@ -53,7 +53,7 @@ export default function ManageCoordinators() {
   });
   const [formErrors, setFormErrors] = useState({});
 
-  // Fetch coordinators from backend
+  
   useEffect(() => {
     const fetchCoordinators = async () => {
       setLoading(true);
@@ -89,7 +89,7 @@ export default function ManageCoordinators() {
     setEditIndex(null);
   };
 
-  // Add/Edit handler
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validateForm(formData, sideFormMode === 'add');
@@ -228,7 +228,7 @@ export default function ManageCoordinators() {
     }
   };
 
-  // Remove Coordinator handler (converts to supervisor)
+ 
   const handleRemove = async (idx) => {
     const confirmed = await Confirm("Are you sure you want to remove this coordinator? This will convert them to a supervisor role.");
     if (!confirmed) {
@@ -243,7 +243,7 @@ export default function ManageCoordinators() {
       if (res.success) {
         toastService.success('Coordinator removed successfully! Converted to supervisor.');
         resetForm();
-        // Remove from current coordinators list
+        
         setRows(prev => prev.filter((_, index) => index !== idx));
       } else {
         toastService.error("Remove failed: " + (res.error || res.data?.message || 'Unknown error'));
@@ -255,7 +255,7 @@ export default function ManageCoordinators() {
     }
   };
 
-  // Make FYP Incharge handler
+
   const handleMakeIncharge = async (idx) => {
     const coordinator = rows[idx];
     const confirmed = await Confirm(
@@ -271,7 +271,7 @@ export default function ManageCoordinators() {
       if (res.success) {
         toastService.success(res.data.message || "Coordinator is now FYP Incharge!");
         
-        // Refresh coordinators list
+        
         const refreshed = await adminSupervisorApi.getCoordinators();
         const updatedCoordinators = refreshed.data.map(coord => ({
           ID: coord._id,
@@ -322,7 +322,7 @@ export default function ManageCoordinators() {
               rows={rows.map(({ Name, Email, Department, isProjectHead }) => ({ 
                 Name, 
                 Email, 
-                // Department mein "Head Coordinator" add karen agar isProjectHead true ho
+                
                 Department: isProjectHead ? `${Department.replace(" (Head Coordinator)", "")} (Head Coordinator)` : Department
               }))}
               renderActions={(row, i) => (
@@ -344,7 +344,7 @@ export default function ManageCoordinators() {
                     Delete
                   </button>
 
-                  {/* Remove Coordinator button */}
+                
                   <button
                     className="table-action-btn"
                     style={{ background: "rgb(1 51 122)", color: "#fff", marginLeft: 8 }}
@@ -355,7 +355,7 @@ export default function ManageCoordinators() {
                     Remove Coordinator
                   </button>
 
-                  {/* Make FYP Incharge button */}
+             
                   <button
                     className="table-action-btn"
                     style={{ 

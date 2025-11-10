@@ -19,7 +19,7 @@ function formatBatchAsRange(rawBatch) {
   return `${startYear}-${endYear}`;
 }
 
-// Status Badge Component
+
 function StatusBadge({ approved }) {
   return (
     <span
@@ -89,7 +89,6 @@ export default function ApprovedStudents() {
     new Set(rows.map((r) => (r.Batch ? String(r.Batch) : "")).filter(Boolean))
   );
 
-  // Filter students based on batch and status
   const displayedRows = rows.filter((r) => {
     const batchMatch = batchFilter === "All" || String(r.Batch) === String(batchFilter);
     const statusMatch = statusFilter === "All" || 
@@ -113,7 +112,7 @@ export default function ApprovedStudents() {
       if (res.success) {
         toastService.success(res.data.message);
         
-        // Update the local state
+        
         setRows((prev) =>
           prev.map((r) => 
             r.ID === studentId ? { ...r, Approved: !currentStatus } : r
