@@ -399,6 +399,7 @@ const ChatBubble = styled.div`
 `;
 
 // --- Typewriter/Word Morph Logic ---
+
 const headlinePhrases = [
   "Manage Your FYP Journey Seamlessly",
   "Submit Proposals With One Click",
@@ -461,7 +462,8 @@ function useAssistantTips(tips, initialShow = true) {
   return { show, tip: tips[tipIndex], setShow };
 }
 
-// --- How It Works Section (Framer Motion) ---
+
+
 const steps = [
   {
     title: "Register & Login",
@@ -562,7 +564,7 @@ const StepDesc = styled.div`
 `;
 
 function HowItWorksSection() {
-  // Ref to the section for inView trigger
+  
   const ref = useRef(null);
 
   return (
