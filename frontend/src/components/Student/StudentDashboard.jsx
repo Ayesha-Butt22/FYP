@@ -46,11 +46,11 @@ const menu = [
   { label: "Checklist", icon: <ChecklistIcon /> },
   { label: "Evaluations", icon: <FeedbackIcon /> },
   { label: "Committee Result", icon: <FeedbackIcon /> },
-  { label: "Final Results", icon: <BookIcon /> }, // <-- new tab for final results (read-only)
+  { label: "Final Results", icon: <BookIcon /> }, 
   { label: "Journal", icon: <BookIcon /> },
   { label: "Reports", icon: <DescriptionIcon /> },
   { label: "FYP Archive", icon: <LibraryBooksIcon /> },
-  { label: "Profile", icon: <AccountCircleIcon /> } // added Profile at the end
+  { label: "Profile", icon: <AccountCircleIcon /> } 
 ];
 
 const studentInfo = {
@@ -79,11 +79,11 @@ export default function StudentDashboard() {
     "Checklist": <StudentChecklist />,
     "Evaluations": <StudentEvaluations />,
     "Committee Result": <StudentCommitteeResults />,
-    "Final Results": <StudentEvaluationResults />, // <-- mapped read-only final results
+    "Final Results": <StudentEvaluationResults />, 
     "Journal": <StudentJournal />,
     "Reports": <StudentReports />,
     "FYP Archive": <SupervisorArchive />,
-    "Profile": <StudentProfile /> // Profile tab wired
+    "Profile": <StudentProfile /> 
   };
 
   return (

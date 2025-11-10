@@ -11,8 +11,6 @@ try {
 } catch (e) {
   TemplateService = null;
 }
-
-// Pre-defined templates and default due dates (you can adjust dates as needed)
 const TEMPLATE_DEFINITIONS = [
   { code: "t01", label: "Template-01: Project Team (MS Word)", due: "2025-09-10" },
   { code: "t02", label: "Template-02: Initial Proposal (MS Word)", due: "2025-09-25" },
@@ -61,14 +59,14 @@ export default function StudentTemplates() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Show only this department dropdown (All, SE, CS, CA)
+  // Show only this department dropdown 
   const DEPARTMENTS = ["All", "SE", "CS", "CA"];
 
-  // determine user role and student department from localStorage
+  
   const userRoleRaw = (localStorage.getItem("role") || "").toString();
   const isStudent = /student/i.test(userRoleRaw);
 
-  // try several common localStorage keys for department
+
   const storedDept =
     localStorage.getItem("department") ||
     localStorage.getItem("dept") ||
@@ -77,15 +75,15 @@ export default function StudentTemplates() {
     localStorage.getItem("department_code") ||
     "";
 
-  // selectedDept state: for students we will force their department (if available)
+
   const [selectedDept, setSelectedDept] = useState(isStudent ? (storedDept || "All") : "All");
 
   const headers = ["Template", "Due Date", "Status", "Action"];
 
-  // refs to hidden file inputs per template code
+  
   const fileInputRefs = useRef({});
 
-  // normalize status strings for consistent UI and default to "Pending"
+
   const normalizeStatus = (raw) => {
     if (raw == null || raw === "") return "Pending";
     const s = String(raw).trim().toLowerCase();
@@ -108,16 +106,16 @@ export default function StudentTemplates() {
 
   useEffect(() => {
     loadTemplates();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, []);
 
   useEffect(() => {
-    // if the user is a student and we don't already have a selectedDept, set it
+   
     if (isStudent && storedDept && selectedDept !== storedDept) {
       setSelectedDept(storedDept);
     }
     applyFilters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, [allFiles, selectedDept, isStudent, storedDept]);
 
   const loadTemplates = async () => {
@@ -187,12 +185,12 @@ export default function StudentTemplates() {
   };
 
   function applyFilters() {
-    // For each template definition, determine if a file exists for selectedDept (or All)
+    
     const tableRows = TEMPLATE_DEFINITIONS.map((tpl) => {
-      // find file matching this template and selected dept (or student's dept)
+     
       const matchingFile = allFiles.find((f) => {
         if ((f.template || "") !== tpl.code) return false;
-        // if student: match student's storedDept OR if file.department is empty, treat as match
+        
         if (isStudent) {
           const deptToMatch = storedDept || selectedDept;
           if (!deptToMatch || deptToMatch === "All") return true;
@@ -202,9 +200,7 @@ export default function StudentTemplates() {
         return true;
       });
 
-      // decide status logic:
-      // - if matchingFile exists: use its normalized status (Approved, Under Review, Rejected, Pending)
-      // - otherwise: "Pending" (meaning not uploaded yet)
+      
       const status = matchingFile ? normalizeStatus(matchingFile.status || "Under Review") : "Pending";
       const uploadedAt = matchingFile ? (matchingFile.uploadedAt || matchingFile.__raw?.createdAt || "") : "";
 
@@ -225,10 +221,10 @@ export default function StudentTemplates() {
     setRows(tableRows);
   }
 
-  // When upload button clicked, trigger hidden file input for that template
+ 
   const handleTriggerUpload = (tplCode) => {
     if (!fileInputRefs.current[tplCode]) {
-      // create an input dynamically and attach handler
+
       const input = document.createElement("input");
       input.type = "file";
       input.accept = ".doc,.docx,.pdf,.ppt,.pptx,.zip";
@@ -245,7 +241,6 @@ export default function StudentTemplates() {
     if (!files || files.length === 0) return;
     const file = files[0];
 
-    // build a simple entry to show in UI immediately
     const dept = isStudent ? (storedDept || selectedDept) : selectedDept;
     const newEntry = {
       id: `local-${Date.now()}`,
@@ -253,18 +248,18 @@ export default function StudentTemplates() {
       templateLabel: TEMPLATE_DEFINITIONS.find((t) => t.code === tplCode)?.label || tplCode,
       department: dept,
       filename: file.name,
-      filePath: URL.createObjectURL(file), // local preview url; in real app upload and store real path
+      filePath: URL.createObjectURL(file),
       uploadedAt: new Date().toISOString(),
-      status: "Under Review", // uploaded -> Under Review
+      status: "Under Review", 
       __raw: { local: true },
     };
 
-    // If TemplateService.upload exists, try to upload and get real status/URL back
+   
     if (TemplateService && typeof TemplateService.uploadFile === "function") {
       try {
         setLoading(true);
         const res = await TemplateService.uploadFile(tplCode, dept, file);
-        // expected contract: { success: true, data: { filePath, status, id, originalName, uploadedAt } }
+     
         if (res && res.success && res.data) {
           const d = res.data;
           const entry = {
@@ -278,15 +273,15 @@ export default function StudentTemplates() {
             status: normalizeStatus(d.status || "Under Review"),
             __raw: d,
           };
-          // replace or append
+          
           setAllFiles((prev) => {
-            // remove existing same-template same-dept
+
             const filtered = prev.filter((p) => !(p.template === tplCode && p.department === dept));
             return [...filtered, entry];
           });
           toastService.success("File uploaded successfully.");
         } else {
-          // fallback to local entry (status will be Under Review)
+          
           setAllFiles((prev) => {
             const filtered = prev.filter((p) => !(p.template === tplCode && p.department === dept));
             return [...filtered, newEntry];
@@ -301,7 +296,7 @@ export default function StudentTemplates() {
         applyFilters();
       }
     } else {
-      // No backend uploader available — simulate upload by updating state
+     
       setAllFiles((prev) => {
         const filtered = prev.filter((p) => !(p.template === tplCode && p.department === dept));
         return [...filtered, newEntry];
@@ -310,13 +305,11 @@ export default function StudentTemplates() {
       applyFilters();
     }
 
-    // clear the input to allow uploading same file again if needed
     if (fileInputRefs.current[tplCode]) {
       fileInputRefs.current[tplCode].value = "";
     }
   };
 
-  // Row action renderer: we will show Upload button (and View/Download if file exists)
   const renderActions = (row) => {
     const meta = row.__meta || {};
     const tplCode = meta.template;
@@ -356,7 +349,7 @@ export default function StudentTemplates() {
   };
 
   const clearFilters = () => {
-    // For students do not allow clearing to show other departments.
+ 
     if (isStudent) {
       setSelectedDept(storedDept || "All");
       return;

@@ -2,21 +2,23 @@
   --main-blue: #01337a;
 }
 
-/* Only modal/slot-row related styles are included here — the rest of your project CSS remains unchanged */
 
-/* Schedule button style: larger, bolder text, custom color with !important */
 .schedule-btn {
   background: #01337a !important;
   color: #fff !important;
-  font-size: 1.05rem !important;       /* larger text */
-  padding: 12px 22px !important;       /* bigger clickable area */
-  min-width: 220px !important;         /* ensure width */
-  border-radius: 10px !important;
+  font-size: 1.05rem !important;
+  /*largertext*/padding: 12px 22px !important;
+  /*biggerclickablearea*/min-width: 220px !important;
+  /*ensurewidth*/border-radius: 10px !important;
   font-weight: 700 !important;
   box-shadow: 0 8px 28px rgba(1, 51, 122, 0.12);
-  border: 2px solid transparent !important; /* stable border to avoid layout shift */
-  box-sizing: border-box !important;
+  border: 2px solid transparent !important;
+  /*stablebordertoavoidlayoutshift*/box-sizing: border-box !important;
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease !important;
+  -webkit-border-radius: 10px !important;
+  -moz-border-radius: 10px !important;
+  -ms-border-radius: 10px !important;
+  -o-border-radius: 10px !important;
 }
 .schedule-btn:hover:not(:disabled) {
   background: #fff !important;
@@ -36,7 +38,7 @@
   box-shadow: none !important;
 }
 
-/* Confirm Booking button style: exact color and important override requested */
+
 .confirm-btn-meetingmodal {
   background: #01337a !important;
   color: #fff !important;
@@ -63,7 +65,7 @@
 .confirm-btn-meetingmodal:hover:not(:disabled) {
   background: #fff !important;
   color: var(--main-blue) !important;
-  border-color: var(--main-blue) !important; /* visible border */
+  border-color: var(--main-blue) !important; 
   transform: translateY(-2px) !important;
   box-shadow: 0 12px 36px rgba(1, 51, 122, 0.14) !important;
 }
@@ -71,7 +73,7 @@
   color: white!important;
 }
 
-/* Disabled confirm style */
+
 .confirm-btn-meetingmodal[disabled],
 .confirm-btn-meetingmodal:disabled,
 button.confirm-btn-meetingmodal[disabled] {
@@ -79,10 +81,10 @@ button.confirm-btn-meetingmodal[disabled] {
   color: #94a3b8 !important;
   box-shadow: none !important;
   cursor: not-allowed !important;
-  opacity: 1 !important; /* keep full opacity but different colors */
+  opacity: 1 !important; 
 }
 
-/* Row-based slot styling (used by the reworked modal) */
+
 .slot-row {
   transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
   -webkit-transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
@@ -94,7 +96,7 @@ button.confirm-btn-meetingmodal[disabled] {
   box-shadow: 0 8px 24px rgba(2,6,23,0.06);
 }
 
-/* Keep previous card/slot styles for any other places (no other changes) */
+
 .supervisor-card {
   border-radius: 12px;
   overflow: visible;
@@ -146,7 +148,7 @@ button.confirm-btn-meetingmodal[disabled] {
   background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
 }
 
-/* slots count pill (kept for compatibility if used elsewhere) */
+
 .slots-count {
   display: inline-block;
   padding: 6px 10px;
@@ -168,7 +170,7 @@ button.confirm-btn-meetingmodal[disabled] {
   justify-content: right;
 }
 
-/* small screens adjustments */
+
 @media (max-width: 720px) {
   .slot-row { flex-direction: column; align-items: flex-start; gap: 6px; }
   .slot-card { padding: 8px; }

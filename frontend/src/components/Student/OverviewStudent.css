@@ -10,7 +10,7 @@
   --shadow-weak: rgba(1, 51, 122, 0.04);
 }
 
-/* Base */
+
 .overview-container {
   margin-top: 56px;
   width: 100%;
@@ -31,7 +31,7 @@
   .overview-container { padding: 0 12px 28px 12px; }
 }
 
-/* Welcome banner */
+
 .welcome-banner {
   background: linear-gradient(90deg, var(--main-blue) 0%, var(--accent-blue) 100%);
   color: #fff;
@@ -81,7 +81,7 @@
   flex-wrap:wrap;
 }
 
-/* Floating whiteboard (FAB) inside banner */
+
 .whiteboard-fab {
   position: absolute;
   top: 18px;
@@ -108,7 +108,7 @@
 }
 .whiteboard-fab:active { transform: translateY(-1px); }
 
-/* Quick links */
+
 .quick-links {
   display: flex;
   gap: 16px;
@@ -145,7 +145,6 @@
   transform: translateY(-2px);
 }
 
-/* Section chip */
 .section-chip {
   display: inline-block;
   background: #e6eeff;
@@ -161,7 +160,7 @@
   box-sizing: border-box;
 }
 
-/* Cards grid */
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -206,7 +205,7 @@
   color: var(--accent-blue);
 }
 
-/* Progress section */
+
 .progress-section-gap { height: 20px; }
 .progress-box {
   margin-bottom: 36px;
@@ -238,8 +237,6 @@
   justify-content: space-between;
   align-items: center;
 }
-
-/* Timeline / Activity */
 .activity-list {
   width: 100%;
   max-width: 1120px;
@@ -278,7 +275,7 @@
   margin-left: auto;
 }
 
-/* Tip box */
+
 .fyp-tip {
   background: #fff8e6;
   color: #7a5800;
@@ -297,7 +294,7 @@
   border: 1px solid rgba(250, 205, 105, 0.22);
 }
 
-/* Focus & accessibility helpers */
+
 .quick-link-btn:focus,
 .quick-link-btn:active,
 .whiteboard-fab:focus {
@@ -305,7 +302,6 @@
   outline-offset: 3px;
 }
 
-/* Responsive tweaks */
 @media (max-width: 700px) {
   .stat-value-studentonly { font-size: 1.35rem; }
   .banner-desc { font-size: 0.98rem; }
@@ -314,7 +310,7 @@
   .section-chip { padding: 6px 14px; }
 }
 
-/* Respect reduced motion */
+
 @media (prefers-reduced-motion: reduce) {
   .overview-container, .progress-fill {
     animation: none !important;

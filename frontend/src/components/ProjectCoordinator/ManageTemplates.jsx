@@ -24,7 +24,7 @@ const DEPARTMENTS = [
 ];
 
 const ALLOWED_EXTS = [".doc", ".docx", ".ppt", ".pptx"];
-const MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+const MAX_SIZE_BYTES = 20 * 1024 * 1024; 
 
 function hasAllowedExtension(filename = "") {
   const n = filename.toLowerCase();
@@ -38,11 +38,10 @@ export default function ManageTemplates() {
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
 
-  // uploadedList: array of { id, template, department, filePath, originalName, uploadedAt }
+  
   const [uploadedList, setUploadedList] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // New: filter for department in the uploaded templates list
   const [deptFilter, setDeptFilter] = useState("All");
 
   useEffect(() => {
@@ -161,7 +160,6 @@ export default function ManageTemplates() {
         return;
       }
 
-      // refresh from server to ensure consistent state
       await fetchUploadedFiles();
 
       toastService.success("Template uploaded successfully.");
@@ -265,7 +263,7 @@ export default function ManageTemplates() {
 
       {loading && <div style={{ color: "#666", marginBottom: 8 }}>Loading…</div>}
 
-      {/* --- DEPARTMENT FILTER + CLEAR BUTTON (copied style from StudentTemplates) --- */}
+      
       <div className="st-controls" style={{ marginTop: 8, marginBottom: 12 }}>
         <div className="st-filter">
           <label>Department</label>

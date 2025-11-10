@@ -2,8 +2,7 @@
   --main-blue: #01337a;
 }
 
-/* ManageTemplates styles (place at src/components/ProjectCoordinator/ManageTemplates.css) */
-/* -- existing styles preserved -- */
+
 
 .mt-root { padding-bottom: 18px; }
 
@@ -27,19 +26,20 @@
   flex-wrap: wrap;
 }
 
-/* Updated mt-primary: stable border to avoid layout shift; hover per request:
-   background: #fff; color: var(--main-blue); border: 2px solid #fff;
-*/
 .mt-primary {
   background: linear-gradient(#01337a);
   color: #fff;
-  border: 2px solid transparent; /* stable border so hover doesn't shift layout */
+  border: 2px solid transparent;
   padding: 10px 14px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 700;
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease;
   box-sizing: border-box;
+  -webkit-transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+  -moz-transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+  -ms-transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+  -o-transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease, box-shadow 160ms ease;
 }
 
 /* requested hover style */
@@ -92,7 +92,6 @@
 }
 .mt-btn.danger { background: #f43f5e; }
 
-/* Add spacing between action buttons and right-align the action cell. */
 .mt-row > div:last-child {
   display: flex;
   gap: 10px;
@@ -104,27 +103,26 @@
   white-space: nowrap;
 }
 
-/* List / table */
+
 .mt-list { margin-top: 12px; }
 
-/* header area for list + filter (stacked: heading then filter dropdown) */
+
 .mt-list-header {
   display: flex;
-  flex-direction: column; /* stack vertically */
+  flex-direction: column; 
   align-items: flex-start;
   gap: 10px;
   margin-bottom: 12px;
 }
 
-/* ✅ Updated "Uploaded templates" styling */
+
 .mt-list h4 {
-  font-weight: 700;       /* Bold */
-  color: #01337a;         /* Dark blue */
-  margin-bottom: 0;       /* keep tight with filter */
-  font-size: 1.1rem;      /* Slightly prominent */
+  color: #01337a;         
+  margin-bottom: 0;       
+  font-size: 1.1rem;      
 }
 
-/* filter row below heading */
+
 .mt-filter-row {
   display: flex;
   align-items: center;
@@ -148,14 +146,14 @@
   font-weight: 700;
 }
 
-/* Table styles */
+
 .mt-table { border-radius: 10px; overflow: hidden; border: 1px solid #eef3fb; }
 .mt-table-head {
   display: grid;
   grid-template-columns: 2fr 1fr 2fr 1.2fr 1fr;
   gap: 12px;
   padding: 12px;
-  background: #0b3b69; /* darker header for contrast */
+  background: #0b3b69; 
   color: #fff;
   font-weight: 700;
 }
@@ -171,7 +169,7 @@
 }
 .mt-row .muted { color: #9ca3af; }
 
-/* Modal */
+
 .mt-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -207,7 +205,7 @@
   flex-direction: row;
 }
 
-/* --- copied styles from StudentTemplates for the department dropdown & clear button --- */
+
 .st-controls {
   display: flex;
   gap: 12px;
@@ -217,7 +215,6 @@
   flex-wrap: wrap;
 }
 
-/* Filter */
 .st-filter { display:flex; flex-direction:column; gap:6px; }
 .st-filter label { font-weight:700; color:#102a43; font-size:0.85rem; }
 .st-dept-select {
@@ -247,7 +244,7 @@
     transition: background 0.18s;
 }
 
-/* Responsive */
+
 @media (max-width: 720px) {
   .st-controls { flex-direction: column; align-items: stretch; }
   .st-dept-select { min-width: 100%; }

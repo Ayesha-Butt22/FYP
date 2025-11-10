@@ -148,7 +148,7 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Divider */}
+   
         <div className="divider" aria-hidden="true"></div>
 
         {/* Password Update */}

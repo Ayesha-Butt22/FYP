@@ -15,12 +15,7 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "../Admin/AppTable.jsx";
 import "../CommitteeResults.css";
 
-/**
- * StudentEvaluationResults.jsx
- * Read-only view for students to see finalized results for their group (frontend-only).
- *
- * Replace demo with GET /api/student/final-results/:groupId
- */
+
 
 const DEMO_FINAL_RESULTS = [
   {
@@ -49,7 +44,7 @@ export default function StudentEvaluationResults() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    // In real app: fetch student group final result by groupId
+   
     setResults(DEMO_FINAL_RESULTS);
   }, []);
 

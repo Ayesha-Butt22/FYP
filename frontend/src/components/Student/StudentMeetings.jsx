@@ -19,10 +19,10 @@ import { toastService } from "../ToastService/ToastService";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 import "./StudentMeetings.css";
 
-/* constants */
+
 const STORAGE_KEY = "student_meetings_v1";
 
-/* demo supervisors + slots: replace with API result when available */
+
 const DEMO_SUPERVISORS = [
   {
     id: "sup-1",
@@ -47,7 +47,7 @@ const DEMO_SUPERVISORS = [
     name: "Dr Ayesha",
     color: "#3b82f6",
     slots: [
-      // sample slots including October dates so filter shows results
+   
       { date: "2025-10-13", time: "09:00 AM" },
       { date: "2025-10-13", time: "11:30 AM" },
       { date: "2025-10-14", time: "02:00 PM" },
@@ -57,7 +57,7 @@ const DEMO_SUPERVISORS = [
   },
 ];
 
-/* storage helpers */
+
 function readMeetingsFromStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -72,7 +72,6 @@ function writeMeetingsToStorage(data) {
   } catch {}
 }
 
-/* helper: call toastService in a robust way with fallbacks */
 function callToast(message, type = "success") {
   try {
     if (toastService) {
@@ -94,16 +93,14 @@ function callToast(message, type = "success") {
       }
     }
   } catch (e) {
-    // ignore and fallback
-    // eslint-disable-next-line no-console
+    
     console.warn("toastService call failed", e);
   }
-  // fallback
-  // eslint-disable-next-line no-alert
+  
   alert(message);
 }
 
-/* helper: call Confirm service, fallback to window.confirm */
+
 async function confirmPrompt(message) {
   try {
     if (typeof Confirm === "function") {
@@ -114,7 +111,7 @@ async function confirmPrompt(message) {
       return !!result;
     }
   } catch (e) {
-    // eslint-disable-next-line no-console
+
     console.warn("Confirm service error, falling back to window.confirm", e);
   }
   return window.confirm(message);
@@ -131,21 +128,20 @@ export default function StudentMeetings() {
     setMeetings(readMeetingsFromStorage());
   }, []);
 
-  /* open modal */
+
   const handleOpen = () => {
     setSelectedSlot(null);
     setFilterDate("");
     setOpen(true);
   };
 
-  /* close modal */
+ 
   const handleClose = () => {
     setOpen(false);
     setSelectedSlot(null);
     setFilterDate("");
   };
 
-  /* schedule confirm */
   const scheduleMeetingConfirm = () => {
     if (!selectedSlot) return;
     const id = `M-${Date.now().toString().slice(-6)}`;
@@ -164,7 +160,7 @@ export default function StudentMeetings() {
     handleClose();
   };
 
-  /* cancel meeting (uses Confirm service) */
+ 
   const cancelMeeting = async (id) => {
     const ok = await confirmPrompt("Are you sure you want to cancel this meeting?");
     if (!ok) return;
@@ -174,13 +170,12 @@ export default function StudentMeetings() {
     callToast("Meeting cancelled", "success");
   };
 
-  /* computed visible supervisors based on date filter only (supervisor column removed) */
+
   const visibleSupervisors = supervisors.map((s) => ({
     ...s,
     slots: s.slots.filter((sl) => (filterDate ? sl.date === filterDate : true)),
   }));
 
-  /* build a flat list of slots (for row layout). Keep supervisorName in data but not shown in UI */
   const slotsList = visibleSupervisors.flatMap((s) =>
     s.slots.map((sl, idx) => ({
       slotId: `${s.id}-slot-${idx + 1}`,
@@ -191,7 +186,7 @@ export default function StudentMeetings() {
     }))
   );
 
-  /* toggle select slot */
+  
   const toggleSelectSlot = (slot) => {
     if (selectedSlot && selectedSlot.slotId === slot.slotId && selectedSlot.supervisorId === slot.supervisorId) {
       setSelectedSlot(null);
@@ -200,7 +195,6 @@ export default function StudentMeetings() {
     }
   };
 
-  /* prepare rows for AppTable */
   const headers = ["Meeting ID", "Meeting Date", "Meeting Time", "Booked On"];
   const rowsForTable = meetings.map((m) => ({
     "Meeting ID": m.id,
@@ -210,10 +204,9 @@ export default function StudentMeetings() {
     __raw: m,
   }));
 
-  /* Render actions: use a styled HTML button showing "Cancel" */
   const renderActions = (rowObj) => {
     const id = rowObj["Meeting ID"];
-    const sideFormMode = false; // replace with prop if available
+    const sideFormMode = false; 
     return (
       <button
         className="std-meeting-cancel-btn"
@@ -253,10 +246,10 @@ export default function StudentMeetings() {
         </Typography>
       </Box>
 
-      {/* AppTable */}
+    
       <AppTable headers={headers} rows={rowsForTable} renderActions={renderActions} />
 
-      {/* Modal (no Supervisor column, no supervisor dropdown) */}
+      
       <Modal
         open={open}
         onClose={handleClose}
@@ -284,7 +277,7 @@ export default function StudentMeetings() {
             overflow: "hidden",
           }}
         >
-          {/* Header */}
+          
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", p: 2, borderBottom: "1px solid #eef2f6" }}>
             <Typography id="student-meetings-modal-title" variant="h6">Available Slots</Typography>
             <IconButton onClick={handleClose} size="small" aria-label="close modal">
@@ -292,9 +285,9 @@ export default function StudentMeetings() {
             </IconButton>
           </Box>
 
-          {/* Body: scrollable area with rows */}
+         
           <Box sx={{ p: 2, overflowY: "auto" }}>
-            {/* Filters row - only date filter kept */}
+          
             <Box display="flex" gap={2} alignItems="center" mb={2} flexWrap="wrap">
               <TextField
                 size="small"
@@ -311,7 +304,7 @@ export default function StudentMeetings() {
               </Button>
             </Box>
 
-            {/* Table-like header for rows (supervisor column removed) */}
+           
             <Box sx={{ display: "flex", gap: 2, pb: 1, borderBottom: "1px dashed #e6eef6", mb: 1, fontWeight: 700 }}>
               <Box sx={{ width: "40%", color: "#374151" }}>Slot ID</Box>
               <Box sx={{ width: "30%", color: "#374151" }}>Date</Box>
@@ -362,7 +355,7 @@ export default function StudentMeetings() {
             })}
           </Box>
 
-          {/* Sticky footer with actions */}
+       
           
           <div className="cnf-booking-btn-div">
             <Button className="std-meeting-cancel-btn" onClick={handleClose}>Cancel</Button>

@@ -4,7 +4,7 @@ export default function DashboardSectionHeader({ children, description, ...props
     return (
         <>
             <Box sx={{ mb: description ? 6 : 4 }}>
-                {/* Heading Wrapper with Left Accent & Underline */}
+              
                 <Box
                     sx={{
                         display: "flex",
@@ -24,7 +24,7 @@ export default function DashboardSectionHeader({ children, description, ...props
                         }
                     }}
                 >
-                    {/* Left Accent Bar */}
+                   
                     <Box
                         sx={{
                             width: "4px",
@@ -47,7 +47,6 @@ export default function DashboardSectionHeader({ children, description, ...props
                         }}
                     />
 
-                    {/* Heading Text */}
                     <Typography
                         variant="h3"
                         fontWeight={900}
@@ -71,7 +70,7 @@ export default function DashboardSectionHeader({ children, description, ...props
                     </Typography>
                 </Box>
 
-                {/* Description (Optional) */}
+               
                 {description && (
                     <Typography className="section-desc">
                         {description}
@@ -79,7 +78,6 @@ export default function DashboardSectionHeader({ children, description, ...props
                 )}
             </Box>
 
-            {/* ✅ Inline style block (wrapped properly) */}
             <style>{`
                 .section-desc {
                     color: #01337a;

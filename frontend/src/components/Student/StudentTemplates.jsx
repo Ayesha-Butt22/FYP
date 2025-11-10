@@ -54,7 +54,7 @@ export default function StudentTemplates() {
   const userRoleRaw = (localStorage.getItem("role") || "").toString();
   const isStudent = /student/i.test(userRoleRaw);
 
-  // try several common localStorage keys for department
+
   const storedDept =
     localStorage.getItem("department") ||
     localStorage.getItem("dept") ||
@@ -63,23 +63,23 @@ export default function StudentTemplates() {
     localStorage.getItem("department_code") ||
     "";
 
-  // selectedDept state: for students we will force their department (if available)
+  
   const [selectedDept, setSelectedDept] = useState(isStudent ? (storedDept || "All") : "All");
 
   const headers = ["Template", "Department", "Filename", "Uploaded At"];
 
   useEffect(() => {
     loadTemplates();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   useEffect(() => {
-    // if the user is a student and we don't already have a selectedDept, set it
+   
     if (isStudent && storedDept && selectedDept !== storedDept) {
       setSelectedDept(storedDept);
     }
     applyFilters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [allFiles, selectedDept, isStudent, storedDept]);
 
   const loadTemplates = async () => {
@@ -148,14 +148,14 @@ export default function StudentTemplates() {
 
   function applyFilters() {
     const filtered = allFiles.filter((f) => {
-      // If user is a student: always filter by their department (if storedDept provided)
+     
       if (isStudent) {
         const deptToMatch = storedDept || selectedDept;
         if (deptToMatch && deptToMatch !== "All" && f.department !== deptToMatch) return false;
         return true;
       }
 
-      // non-students: use selectedDept dropdown as normal
+     
       if (selectedDept && selectedDept !== "All" && f.department !== selectedDept) return false;
       return true;
     });
@@ -170,7 +170,7 @@ export default function StudentTemplates() {
     setRows(tableRows);
   }
 
-  // AppTable action renderer
+
   const renderActions = (row) => {
     const meta = row.__meta || row;
     return (
@@ -186,7 +186,7 @@ export default function StudentTemplates() {
   };
 
   const clearFilters = () => {
-    // For students do not allow clearing to show other departments.
+    
     if (isStudent) {
       setSelectedDept(storedDept || "All");
       return;
@@ -200,8 +200,7 @@ export default function StudentTemplates() {
         View Templates
       </DashboardSectionHeader>
 
-      {/* If the current user is a student, do not show any department label or "Not specified".
-          Students will only see templates for their department; no readonly label is rendered. */}
+      
       <Box className="st-controls" sx={{ mb: 1 }}>
         {!isStudent ? (
           <>

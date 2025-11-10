@@ -3,12 +3,7 @@ import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import { toastService } from "../ToastService/ToastService";
 import "./Tasks.css";
 
-/**
- * Tasks Component
- * - Top form (Title, Assign To, Status "Pending", Comments)
- * - Cards below form, left-aligned
- * - Update modal for progress & new comment
- */
+
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [formData, setFormData] = useState({

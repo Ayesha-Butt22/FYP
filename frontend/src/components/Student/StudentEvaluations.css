@@ -5,7 +5,7 @@
   font-family: Inter, Roboto, Arial, sans-serif;
 }
 
-/* Reuse the same Clear Filters button styling used in StudentTemplates */
+
 .st-clear-btn {
   background: #01337a;
   color: #fff;
@@ -29,7 +29,6 @@
   transform: translateY(-1px) scale(1.02);
 }
 
-/* Expanded AppTable container */
 .eval-expanded-wrap {
   background: #fff;
   border: 1px solid #eef3fb;
@@ -38,10 +37,7 @@
   box-shadow: 0 6px 20px rgba(1,51,122,0.04);
 }
 
-/* Title above the AppTable */
 .eval-expanded-title {
   font-weight: 800;
   color: #01337a;
 }
-
-/* Keep existing minimal styles for consistency */

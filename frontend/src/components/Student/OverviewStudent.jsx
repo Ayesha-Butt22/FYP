@@ -208,7 +208,7 @@ export default function OverviewStudent({ onTabChange }) {
         <span>Tip: Complete your checklist and upload all templates before final submission!</span>
       </div>
 
-      {/* Dialog / Modal that shows StudentWhiteboard content with a close (X) in the title */}
+     
       <Dialog
         open={whiteboardOpen}
         onClose={() => setWhiteboardOpen(false)}

@@ -1,4 +1,4 @@
-/* polished checklist styles (works with Supervisor milestone visual language) */
+
 
 .checklist-grid {
   display: grid;
@@ -7,7 +7,7 @@
   margin-top: 18px;
 }
 
-/* Card */
+
 .checklist-card {
   background: #fff;
   border-radius: 14px;
@@ -19,7 +19,7 @@
   min-height: 200px;
 }
 
-/* header */
+
 .checklist-header {
   display: flex;
   justify-content: space-between;
@@ -40,7 +40,7 @@
   font-size: 14px;
 }
 
-/* body table */
+
 .small-table {
   width: 100%;
   border-collapse: collapse;
@@ -61,14 +61,14 @@ padding: 3px 8px;
   color: #0f172a;
 }
 
-/* small empty state */
+
 .small-table .empty {
   padding: 18px;
   color: #64748b;
   text-align: center;
 }
 
-/* footer */
+
 .checklist-footer {
   margin-top: auto;
   display: flex;
@@ -79,14 +79,14 @@ padding: 3px 8px;
 
 .
 
-/* chip styles */
+
 .chip { font-weight: 700; }
 .chip-success { background: #d1fadf !important; color: #065f46 !important; }
 .chip-danger { background: #fee2e2 !important; color: #991b1b !important; }
 .chip-info { background: #e0f2fe !important; color: #0369a1 !important; }
 .chip-warning { background: #fff7ed !important; color: #92400e !important; }
 
-/* Modal full list */
+
 .full-list-modal {
   width: min(920px, 96vw);
   max-height: 84vh;
@@ -120,7 +120,7 @@ padding: 3px 8px;
   gap: 12px;
 }
 
-/* responsive tweaks */
+
 @media (max-width: 720px) {
   .checklist-grid { gap: 16px; }
   .checklist-title { font-size: 18px; }

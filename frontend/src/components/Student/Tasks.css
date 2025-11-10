@@ -88,9 +88,7 @@
   margin-top: 6px;
 }
 
-/* Updated .create-btn: added stable transparent border to prevent layout shift;
-   hover turns background white and text to main blue with a visible border.
-*/
+
 .create-btn {
     max-width: 150px;
     height: 36px;
@@ -116,10 +114,6 @@
     box-shadow: 0 8px 20px rgba(1,51,122,0.12);
 }
 
-/* If you prefer the hover border to be visible on white background, replace the
-   border-color: #fff above with: border-color: var(--main-blue);
-   (This keeps a visible colored border against the white bg.)
-*/
 
 .create-btn:disabled {
     opacity: 0.6;
@@ -247,22 +241,28 @@
   cursor: pointer;
   font-weight: 700;
   transition: transform .08s, box-shadow .12s;
+  -webkit-transition: transform .08s, box-shadow .12s;
+  -moz-transition: transform .08s, box-shadow .12s;
+  -ms-transition: transform .08s, box-shadow .12s;
+  -o-transition: transform .08s, box-shadow .12s;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
 }
 
-/* Updated .btn.primary to include stable border and requested hover style.
-   This affects the "Update Status" button which uses className="btn primary".
-*/
+
 .btn.primary {
   background:  #01337a;
   color: #fff;
-  border: 2px solid transparent; /* stable base border to avoid layout shift */
+  border: 2px solid transparent; 
   transition: background .16s ease, color .16s ease, border-color .16s ease, transform .12s ease, box-shadow .12s ease;
 }
 
 .btn.primary:hover:not(:disabled) {
-  background: #fff;                 /* white background on hover */
-  color: var(--main-blue);          /* dark blue text on hover */
-  border-color: #fff;               /* per your requested hover (white border) */
+  background: #fff;                 
+  color: var(--main-blue);          
+  border-color: #fff;               
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(1,51,122,0.10);
 }
@@ -288,8 +288,8 @@
   inset: 0;
   background: rgba(0,0,0,0.35);
   display: flex;
-  justify-content: center; /* horizontal centering */
-  align-items: center;     /* vertical centering */
+  justify-content: center;
+  align-items: center;     
   z-index: 2000;
 }
 

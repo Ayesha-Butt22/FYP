@@ -17,7 +17,6 @@
   min-height: 420px;
 }
 
-/* keep original form styles intact so screen doesn't change */
 .proposal-form .form-group {
   margin-bottom: 1.5rem;
   display: flex;
@@ -58,7 +57,7 @@
   margin-top: 2rem;
 }
 
-/* Submit button (system colors) */
+
 .submit-btn {
   background: var(--main-blue);
   color: #fff;
@@ -116,7 +115,6 @@
 }
 .ai-suggestion-item:hover { transform: translateY(-4px); }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -189,7 +187,7 @@
 
 .slots { color: var(--success); font-weight: 500; }
 
-/* Result card (shown after submit) */
+
 .result-card {
   margin: 18px auto;
   padding: 26px;
@@ -207,7 +205,7 @@
 .result-card h2 { margin: 0; color: var(--main-blue); font-size: 1.4rem; }
 .result-card p { margin: 0; color: #234; font-size: 1rem; }
 
-/* success and failure variations */
+
 .result-card.success {
   border-color: rgba(16,185,129,0.12);
   box-shadow: 0 12px 40px rgba(16,185,129,0.06);
@@ -217,7 +215,6 @@
   box-shadow: 0 12px 40px rgba(239,68,68,0.06);
 }
 
-/* result actions */
 .result-actions {
   margin-top: 12px;
   display: flex;
@@ -225,7 +222,6 @@
   align-items: center;
 }
 
-/* small responsive tweaks */
 @media (max-width: 720px) {
   .form-buttons { justify-content: stretch; }
   .submit-btn { width: 100%; justify-content: center; }

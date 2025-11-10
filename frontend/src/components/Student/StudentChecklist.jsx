@@ -217,7 +217,6 @@ export default function StudentChecklist({
           </Box>
         </Box>
 
-        {/* Notices (whiteboard) — status column removed */}
         <Box className="checklist-card">
           <Box className="checklist-header">
             <Typography className="checklist-title">Whiteboard </Typography>
@@ -230,7 +229,7 @@ export default function StudentChecklist({
                 <tr>
                   <th>Post</th>
                   <th>Posted</th>
-                  {/* Status column intentionally removed */}
+             
                 </tr>
               </thead>
               <tbody>
@@ -238,7 +237,7 @@ export default function StudentChecklist({
                   <tr key={n.description + i}>
                     <td>{n.description}</td>
                     <td>{n.posted}</td>
-                    {/* Status cell removed from preview */}
+                 
                   </tr>
                 ))}
                 {notices.length === 0 && <tr><td colSpan={2} className="empty">No notices.</td></tr>}
@@ -252,7 +251,7 @@ export default function StudentChecklist({
         </Box>
       </Box>
 
-      {/* Modal: shows the full table for the selected type */}
+      
       <Modal open={modal.open} onClose={closeModal} aria-labelledby="full-list-modal" >
         <Box className="full-list-modal">
           <Box className="modal-header">

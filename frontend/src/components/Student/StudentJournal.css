@@ -2,7 +2,7 @@
   --main-blue: #01337a;
 }
 
-/* wrapper */
+
 .student-journal-wrap {
   max-width: 1200px;
   margin: 0 auto 48px;
@@ -10,25 +10,28 @@
   font-family: Inter, Roboto, Arial, sans-serif;
 }
 
-/* journal controls */
 .journal-controls {
   margin-bottom: 10px;
 }
 
-/* New: export button styling to match system dark-blue */
+
 .export-btn {
   background: var(--main-blue) !important;
   color: #fff !important;
-  border: 2px solid transparent !important; /* stable border */
+  border: 2px solid transparent !important;
   padding: 8px 14px !important;
   font-weight: 700 !important;
   text-transform: none !important;
   box-shadow: 0 8px 20px rgba(1,51,122,0.08) !important;
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease !important;
   border-radius: 8px !important;
+  -webkit-transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease !important;
+  -moz-transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease !important;
+  -ms-transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease !important;
+  -o-transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease !important;
 }
 
-/* Hover: subtle lift and inverted look (keeps style consistent with app) */
+
 .export-btn:hover:not(:disabled) {
   background: #fff !important;
   color: var(--main-blue) !important;
@@ -43,14 +46,14 @@
   box-shadow: none !important;
 }
 
-/* rest of journal styles (unchanged) */
+
 .journal-body {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-/* grid of month cards, show three equal cards per row */
+
 .journal-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

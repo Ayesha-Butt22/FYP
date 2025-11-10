@@ -2,7 +2,7 @@
   --main-blue: #01337a;
 }
 
-/* wrapper */
+
 .student-reports-wrap {
   max-width: 1100px;
   margin: 0 auto 48px;
@@ -21,7 +21,7 @@
   gap: 18px;
 }
 
-/* summary card */
+
 .report-summary {
   padding: 16px;
   border-radius: 12px;
@@ -46,7 +46,7 @@
   color: #01337a;
 }
 
-/* tables */
+
 .report-table-wrap {
   padding: 12px;
   background: #fff;
@@ -55,17 +55,12 @@
   box-shadow: 0 2px 6px rgba(1,51,122,0.03);
 }
 
-/* small tweaks for PDF-friendly layout */
+
 .report-table-wrap table {
   font-size: 13px;
 }
 
-/* Export buttons: apply system dark-blue styling
-   - export-pdf-btn (contained): dark-blue bg, white text
-   - export-excel-btn (outlined): white bg, dark-blue text and border
-   Both have hover states that invert to white bg + dark-blue text + visible main-blue border.
-   Use !important to override MUI styles.
-*/
+
 .export-btn {
   border-radius: 8px !important;
   text-transform: none !important;
@@ -75,7 +70,7 @@
   border: 2px solid transparent !important; /* stable base border to avoid layout jumps */
 }
 
-/* PDF button (contained) */
+
 .export-pdf-btn {
   background: var(--main-blue) !important;
   color: #fff !important;
@@ -90,7 +85,7 @@
   box-shadow: 0 12px 30px rgba(1,51,122,0.12) !important;
 }
 
-/* Excel button (outlined) */
+
 .export-excel-btn {
   background: #fff !important;
   color: var(--main-blue) !important;
@@ -98,7 +93,7 @@
   padding: 8px 14px !important;
 }
 .export-excel-btn:hover:not(:disabled) {
-  /* keep same hover as PDF for consistency */
+  
   background: #fff !important;
   color: var(--main-blue) !important;
   border-color: var(--main-blue) !important;
@@ -112,12 +107,12 @@
   box-shadow: none !important;
 }
 
-/* report-controls button min-width */
+
 .report-controls button {
   min-width: 160px;
 }
 
-/* Responsive */
+
 @media (max-width: 900px) {
   .report-card {
     min-width: 140px;

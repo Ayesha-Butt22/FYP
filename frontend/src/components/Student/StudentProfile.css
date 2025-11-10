@@ -15,7 +15,7 @@
   --card-shadow: 0 15px 40px rgba(17, 7, 7, 0.08);
 }
 
-/* root spacing */
+
 .student-profile-root {
   
   padding: 3rem 1rem;
@@ -171,7 +171,7 @@
 }
 .info-icon {
   display: flex;
-    justify-content: center; /* Horizontal center */
+    justify-content: center; 
     align-items: center;
 
 }

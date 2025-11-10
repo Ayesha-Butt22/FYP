@@ -14,13 +14,7 @@ import { toastService } from "../ToastService/ToastService";
 import AppTable from "../Admin/AppTable.jsx";
 import "./StudentReports.css";
 
-/**
- * StudentReports (updated)
- * - Replaced MUI Table blocks with AppTable usage.
- * - Kept exportPDF / exportExcel and data-loading logic intact.
- * - Modified the "Tasks" table to be shown as "Milestone" with columns:
- *   Templates, Status, DueDate (data sourced from tasks array).
- */
+
 
 const STORAGE_KEYS = {
   tasks: "student_tasks_v1",

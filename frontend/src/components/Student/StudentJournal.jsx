@@ -15,12 +15,12 @@ import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import { toastService } from "../ToastService/ToastService";
 import "./StudentJournal.css";
 
-// LocalStorage keys used by other features (adjust if your app uses different keys)
+
 const KEYS = {
   meetings: "student_meetings_v1",
   tasks: "student_tasks_v1",
   milestones: "student_milestones_v1",
-  evaluations: "student_evaluations_v1", // rubric/feedback
+  evaluations: "student_evaluations_v1", 
 };
 
 const DEMO_MEETINGS = [
@@ -208,9 +208,8 @@ export default function StudentJournal() {
         const sorted = acts.sort((a, b) => new Date(b.dateISO) - new Date(a.dateISO));
         return { monthKey, monthLabel: label, activities: sorted };
       })
-      .sort((a, b) => (a.monthKey < b.monthKey ? 1 : -1)); // latest month first
+      .sort((a, b) => (a.monthKey < b.monthKey ? 1 : -1)); 
 
-    // Ensure exactly 3 month cards are shown (latest 3 months). If less data exist, pad with previous empty months.
     const WANT = 3;
     if (arr.length >= WANT) {
       arr = arr.slice(0, WANT);

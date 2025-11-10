@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import IdeaProposalForm from "./IdeaProposalForm";
-import StudentDashboard from "./StudentDashboard"; // Your sidebar/dashboard
+import StudentDashboard from "./StudentDashboard"; 
 
 export default function StudentIdeaGate() {
-  const [ideaSubmitted, setIdeaSubmitted] = useState(null); // null=loading, false=not, true=yes
+  const [ideaSubmitted, setIdeaSubmitted] = useState(null); 
 
   useEffect(() => {
-    // TODO: Replace with your real backend API
+    
     fetch("/api/student/idea-status", { credentials: "include" })
       .then(res => res.json())
       .then(data => setIdeaSubmitted(data.submitted));

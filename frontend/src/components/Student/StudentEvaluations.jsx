@@ -43,7 +43,7 @@ const DEMO_EVALS = [
       },
     ],
   },
-  // you can add more demo evaluation objects here
+ 
 ];
 
 const STORAGE_KEY = "student_evaluations_v1";
@@ -144,7 +144,7 @@ export default function StudentEvaluations() {
 
           const scorePercent = totals.max > 0 ? Math.round((totals.scored / totals.max) * 100) : 0;
 
-          // Build one row per member (each member gets own row)
+       
           const memberRows = (Array.isArray(rec.members) && rec.members.length > 0)
             ? rec.members.map((member) => ({
                 "FYP Year": "FYP1",

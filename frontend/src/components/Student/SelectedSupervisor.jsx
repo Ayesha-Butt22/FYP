@@ -193,8 +193,7 @@ const styles = {
     color: "#1e293b",
     lineHeight: "1.5",
   },
-  // note: input, modal and add-button related styles are kept in the stylesheet
-  // but the UI elements have been removed from the JSX per user's request.
+  
 };
 
 export default function SupervisorProfile({ supervisorInfo }) {
@@ -294,7 +293,7 @@ export default function SupervisorProfile({ supervisorInfo }) {
                   }}
                 />
               </div>
-              {/* Add button removed as requested */}
+             
             </div>
 
             <div style={styles.skillsList}>
@@ -314,12 +313,12 @@ export default function SupervisorProfile({ supervisorInfo }) {
                       </div>
                     </div>
                   </div>
-                  {/* skill remove button removed as requested */}
+                
                 </div>
               ))}
             </div>
 
-            {/* help text removed as requested */}
+           
           </div>
 
           <div
@@ -345,12 +344,12 @@ export default function SupervisorProfile({ supervisorInfo }) {
                 >
                   <FaLightbulb color="#f59e0b" size={18} style={{ marginTop: "2px" }} />
                   <div style={styles.ideaText}>{idea}</div>
-                  {/* idea remove button removed as requested */}
+                  
                 </div>
               ))}
             </div>
 
-            {/* input group and Add button removed as requested */}
+           
           </div>
         </div>
       </div>
