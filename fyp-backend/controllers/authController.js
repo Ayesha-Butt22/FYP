@@ -103,6 +103,8 @@ exports.login = async (req, res) => {
         first_login: user.first_login,
         studentId: user.studentId ? user.studentId : 0,
         isGroupMade: user.isGroupMade ? user.isGroupMade : false,
+        IsApproved: user.IsApproved,
+        user: user,
       }
     });
   } catch (err) {

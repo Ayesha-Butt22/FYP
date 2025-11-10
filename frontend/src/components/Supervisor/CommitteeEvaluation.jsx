@@ -148,9 +148,30 @@ export default function CommitteeEvaluation() {
     setActiveSlot(null);
   };
 
+  if (facultyData.length === 0) return (
+      <>
+        <DashboardSectionHeader description="View committee evaluation results for groups you supervise (read-only)">
+          Committee Results — Supervisor View
+        </DashboardSectionHeader>
+        <label>
+          No Committee Results to display right now
+        </label>
+      </>
+  );
+
   if (loading) return <div className="eval-sup-loading">Loading...</div>;
   if (!facultyData)
-    return <div className="eval-sup-empty">Nothing to show right now.</div>;
+    return (
+        <>
+          <DashboardSectionHeader description="View committee evaluation results for groups you supervise (read-only)">
+            Committee Results — Supervisor View
+          </DashboardSectionHeader>
+          <label>
+            No Committee Results to display right now
+          </label>
+        </>
+    );
+
 
   return (
       <>

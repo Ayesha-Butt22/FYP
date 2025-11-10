@@ -60,6 +60,13 @@ export default function OverviewStudent({ onTabChange }) {
   const [hasNewNotification ,setHasNewNotification] = useState(true);
 
   useEffect(() => {
+    const IsApproved = localStorage.getItem('IsApproved');
+    if (IsApproved !== "true") {
+      ToastService.error('Your account is not approved yet contact admin...Logging out');
+      setTimeout(() => {  localStorage.clear(); window.location.href = "/auth"; }, 3000);
+      return
+    }
+
     const checkSlotBooking = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/deadlineSchedule/getSlots/${studentEmail}`);

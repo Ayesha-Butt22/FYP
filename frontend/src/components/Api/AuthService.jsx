@@ -59,6 +59,7 @@ class AuthService {
             mustChangePassword: data.user?.mustChangePassword ? 'true' : 'false',
             isGroupMade: data.user?.isGroupMade ? 'true' : 'false',
             id: data.user?.id ,
+            IsApproved: data.user?.IsApproved ? 'true' : 'false',
         };
 
         Object.entries(userInfo).forEach(([key, value]) => {
@@ -69,7 +70,7 @@ class AuthService {
     }
 
     clearUserData() {
-        const keys = ['token', 'role', 'name', 'specialization', 'email', 'department', 'studentId'];
+        const keys = ['token', 'role', 'name', 'specialization', 'email', 'department', 'studentId' , 'IsApproved'];
         keys.forEach(key => localStorage.removeItem(key));
     }
 
@@ -81,7 +82,8 @@ class AuthService {
             specialization: localStorage.getItem('specialization'),
             email: localStorage.getItem('email'),
             department: localStorage.getItem('department'),
-            studentId: localStorage.getItem('studentId')
+            studentId: localStorage.getItem('studentId'),
+            isApproved: localStorage.getItem('IsApproved'),
         };
     }
 
