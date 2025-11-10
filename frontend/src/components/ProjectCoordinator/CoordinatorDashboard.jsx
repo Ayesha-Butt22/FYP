@@ -8,7 +8,6 @@ import {
   Announcement as AnnouncementIcon,
   Description as DescriptionIcon,
   Person as PersonIcon,
-  BarChart as BarChartIcon,
 } from "@mui/icons-material";
 import capImg from "../../assets/rc.png";
 import OverviewCoordinator from "./OverviewCoordinator";
@@ -20,7 +19,7 @@ import SupervisorArchive from "../Supervisor/SupervisorArchive";
 import Noticeboard from "../Admin/Noticeboard";
 import TemplateView from "./TemplateView";
 import Profile from "./Profile";
-import CoordinatorCommitteeResults from "./CoordinatorCommitteeResults.jsx"; // added import
+import CoordinatorCommitteeResults from "./CoordinatorCommitteeResults.jsx";
 
 const menu = [
   { label: "Manage Deadlines", icon: <CalendarMonthIcon /> },
@@ -29,9 +28,8 @@ const menu = [
   { label: "Manage Templates", icon: <SettingsIcon /> },
   { label: "Noticeboard", icon: <AnnouncementIcon /> },
   { label: "View Reports", icon: <DescriptionIcon /> },
-  { label: "Committee Results", icon: <GroupsIcon /> }, // <-- added menu entry
+  { label: "Committee Results", icon: <GroupsIcon /> },
   { label: "FYP Archive", icon: <ArchiveIcon /> },
-  { label: "Analytics", icon: <BarChartIcon /> },
   { label: "Profile", icon: <PersonIcon /> }
 ];
 
@@ -59,9 +57,8 @@ export default function CoordinatorDashboard() {
     "Manage Templates": <ManageTemplates />,
     "Noticeboard": <Noticeboard />,
     "View Reports": <TemplateView />,
-    "Committee Results": <CoordinatorCommitteeResults />, // mapped tab
+    "Committee Results": <CoordinatorCommitteeResults />,
     "FYP Archive": <SupervisorArchive />,
-    "Analytics": <div style={{ padding: 24 }}>Analytics (placeholder)</div>,
     "Profile": <Profile />
   };
 

@@ -238,7 +238,7 @@ export default function ManageCoordinators() {
     try {
       const id = rows[idx].ID;
       // Using updateCoordinator to change role to supervisor
-      const res = await adminSupervisorApi.updateCoordinator(id, { role: "supervisor" });
+      const res = await adminSupervisorApi.removeCoordinator(id);
       
       if (res.success) {
         toastService.success('Coordinator removed successfully! Converted to supervisor.');

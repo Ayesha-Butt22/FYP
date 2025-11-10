@@ -21,7 +21,15 @@ import { studentGroupApi } from "../Api/StudentApi/StudentGroupApi";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 import AppTable from "../Admin/AppTable.jsx";
 
-const sapidToEmail = (sapid) => sapid ? `${sapid}@students.riphah.edu.pk` : "";
+const sapidToEmail = (sapid) => (sapid ? `${sapid}@students.riphah.edu.pk` : "");
+
+// ✅ MASKING FUNCTION ADDED HERE
+const maskGroupId = (id) => {
+  if (!id) return "group-unknown";
+  const str = String(id);
+  const last5 = str.slice(-5);
+  return "group-" + last5;
+};
 
 export default function StudentGroup() {
   const [CURRENT_USER_SAPID, setCURRENT_USER_SAPID] = useState(localStorage.getItem("studentId") || "");
@@ -56,8 +64,7 @@ export default function StudentGroup() {
       setLoading(true);
       try {
         const res = await studentGroupApi.getGroupByEmail(CURRENT_USER_EMAIL);
-        if (res && res.groupId) 
-          {
+        if (res && res.groupId) {
           localStorage.setItem("groupId", res._id);
           setGroup({
             groupId: res.groupId,
@@ -134,18 +141,16 @@ export default function StudentGroup() {
           groupId: res.group.groupId || groupObj.groupId,
         };
 
-        // save group id to localStorage
         try {
           if (res.group._id) localStorage.setItem("groupId", res.group._id);
-          if (res.group.groupId || groupObj.groupId) localStorage.setItem("groupCode", res.group.groupId || groupObj.groupId);
-        } catch (e) {
-          // ignore localStorage errors
-        }
+          if (res.group.groupId || groupObj.groupId)
+            localStorage.setItem("groupCode", res.group.groupId || groupObj.groupId);
+        } catch (e) {}
 
         setGroup(newGroup);
         setOpen(false);
         setStep(1);
-        setGroupChanged(c => c + 1);
+        setGroupChanged((c) => c + 1);
         toastService.success("Group created successfully!");
       } else {
         setError(res?.error || "Failed to create group.");
@@ -164,7 +169,6 @@ export default function StudentGroup() {
       const res = await studentGroupApi.deleteGroup(group._id);
       if (res && res.message) {
         setGroup(null);
-        // reset local storage keys
         try {
           localStorage.removeItem("groupId");
           localStorage.removeItem("groupCode");
@@ -212,8 +216,13 @@ export default function StudentGroup() {
       {!loading && group && (
         <Box className="studentgroup-table-outer-wrap">
           <Box className="studentgroup-group-card">
-            <label className="studentgroup-group-title" > Group Members</label>
-            <label className="studentgroup-group-title-sub">{group.groupId}</label>
+            <label className="studentgroup-group-title"> Group Members</label>
+
+            {/* ✅ MASKED GROUP ID DISPLAY APPLIED HERE */}
+            <label className="studentgroup-group-title-sub">
+              {maskGroupId(group.groupId)}
+            </label>
+
             <AppTable
               headers={["Role", "Name", "SAP ID", "Email"]}
               rows={group.members.map((m, idx) => ({
@@ -240,7 +249,6 @@ export default function StudentGroup() {
         </Box>
       )}
 
-      {/* Plain HTML modal (replaces MUI Dialog) */}
       {open && (
         <div
           className="studentgroup-dialog-overlay"
@@ -248,7 +256,6 @@ export default function StudentGroup() {
           aria-modal="true"
           aria-labelledby="studentgroup-dialog-title"
           onClick={(e) => {
-            // click outside closes modal
             if (e.target.classList.contains("studentgroup-dialog-overlay")) {
               setOpen(false);
               setStep(1);
@@ -281,7 +288,10 @@ export default function StudentGroup() {
               </h3>
               <button
                 aria-label="close"
-                onClick={() => { setOpen(false); setStep(1); }}
+                onClick={() => {
+                  setOpen(false);
+                  setStep(1);
+                }}
                 style={{
                   background: "transparent",
                   border: "none",
@@ -296,7 +306,9 @@ export default function StudentGroup() {
             <div style={{ marginTop: 8 }}>
               {step === 1 && (
                 <form onSubmit={handleNumMembersSubmit}>
-                  <label style={{ display: "block", marginBottom: 8, fontWeight: 700 }}>Number of Members (1-3)</label>
+                  <label style={{ display: "block", marginBottom: 8, fontWeight: 700 }}>
+                    Number of Members (1-3)
+                  </label>
                   <input
                     type="number"
                     min="1"
@@ -341,7 +353,6 @@ export default function StudentGroup() {
                           placeholder="SAP ID"
                           value={members[i]?.sapid || ""}
                           onChange={(e) => handleMemberChange(i, e.target.value)}
-                          disabled={i === 0 ? false : false} /* leader editable here; you can adjust */
                           style={{
                             flex: 1,
                             padding: "10px 12px",
@@ -382,9 +393,18 @@ export default function StudentGroup() {
                 </button>
               )}
               <button
-                onClick={() => { setOpen(false); setStep(1); }}
+                onClick={() => {
+                  setOpen(false);
+                  setStep(1);
+                }}
                 className="studentgroup-cancel-btn"
-                style={{ cursor: "pointer", background: "transparent", border: "none", fontWeight: 700, fontSize: "1rem" }}
+                style={{
+                  cursor: "pointer",
+                  background: "transparent",
+                  border: "none",
+                  fontWeight: 700,
+                  fontSize: "1rem",
+                }}
               >
                 CANCEL
               </button>

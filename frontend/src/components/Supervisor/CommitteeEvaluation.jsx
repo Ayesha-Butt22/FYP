@@ -13,6 +13,13 @@ export default function CommitteeEvaluation() {
   const [week , setWeek] = useState(4);
   const [schedule , setSchedule] = useState(null);
 
+  // --- helper to mask groupId ---
+  const maskGroupId = (groupId) => {
+    if (!groupId) return "";
+    const lastFive = groupId.slice(-5);
+    return `Group-${lastFive}`;
+  };
+
   useEffect(() => {
     const fetchFacultyPanel = async () => {
       try {
@@ -39,7 +46,6 @@ export default function CommitteeEvaluation() {
 
     fetchFacultyPanel();
   }, []);
-
 
   const handleCheckGroup = async (slot , panel) => {
     try {
@@ -96,7 +102,6 @@ export default function CommitteeEvaluation() {
         return;
       }
 
-
       const students = selectedGroup.members.map((m) => ({
         studentId: m.studentId,
         name: m.name,
@@ -137,7 +142,6 @@ export default function CommitteeEvaluation() {
       setLoading(false);
     }
   };
-
 
   const handleCancel = () => {
     setSelectedGroup(null);
@@ -184,7 +188,7 @@ export default function CommitteeEvaluation() {
                       minute: "2-digit",
                     });
                     const bookedBy = slot.bookedBy
-                        ? `Group-${slot.bookedBy.slice(-5)}`
+                        ? maskGroupId(slot.bookedBy)
                         : false;
 
                     return (
@@ -217,7 +221,7 @@ export default function CommitteeEvaluation() {
           {selectedGroup && (
               <div className="eval-sup-form-container">
                 <div className="eval-sup-form-header">
-                  <h3>Evaluate Group: {selectedGroup.groupId}</h3>
+                  <h3>Evaluate Group: {maskGroupId(selectedGroup.groupId)}</h3>
                   <button
                       className="eval-sup-close-btn"
                       onClick={handleCancel}
