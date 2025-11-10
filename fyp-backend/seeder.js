@@ -22,6 +22,7 @@ const adminPassword = process.env.SEED_ADMIN_PASS || 'Admin@123';
     const hashed = await bcrypt.hash(adminPassword, 10);
 
   const admin = new User({
+    
     name: "System Admin",
   email: adminEmail,
   password: hashed,
