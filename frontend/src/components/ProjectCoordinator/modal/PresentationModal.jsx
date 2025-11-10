@@ -5,7 +5,7 @@ import { DropdownMultiSelect } from "../../Admin/DropDowns.jsx";
 import "./Modal.css";
 import ToastService from "../../ToastService/ToastService.jsx";
 
-/** helper: generate contiguous slots for a day */
+
 function generateSlotsForDay(startDateStr, startTimeStr, endTimeStr, durationMinutes = 45, dayOffset = 0) {
   const baseDate = new Date(startDateStr);
   baseDate.setDate(baseDate.getDate() + dayOffset);
@@ -30,7 +30,6 @@ export default function PresentationModal({ week, onClose, year }) {
   const [existingSchedules, setExistingSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // config
   const [panelCount, setPanelCount] = useState(1);
   const [daysCount, setDaysCount] = useState(1);
   const [slotDuration, setSlotDuration] = useState(45);
@@ -72,9 +71,8 @@ export default function PresentationModal({ week, onClose, year }) {
 
   const allFacultyLabels = faculty.map(f => ({ label: `${f.name} (${f.email})`, value: f._id }));
 
-  // compute used faculty ids to exclude from other dropdowns
   const usedFacultyIds = panelsData.flatMap(p => p.facultyIds);
-  // available options (per current overall selection)
+  
   const availableFacultyLabels = allFacultyLabels.filter(f => !usedFacultyIds.includes(f.value));
 
   const updatePanelField = (index, field, value) => {
@@ -86,7 +84,7 @@ export default function PresentationModal({ week, onClose, year }) {
   };
 
   const handleSaveBatch = async () => {
-    // validation
+
     for (let i = 0; i < panelsData.length; i++) {
       const p = panelsData[i];
       if (!p.facultyIds || p.facultyIds.length === 0) {
@@ -99,7 +97,7 @@ export default function PresentationModal({ week, onClose, year }) {
       }
     }
 
-    // build panels payload with generated slots
+  
     const panelsPayload = panelsData.map(p => {
       let allSlots = [];
       for (let d = 0; d < daysCount; d++) {
