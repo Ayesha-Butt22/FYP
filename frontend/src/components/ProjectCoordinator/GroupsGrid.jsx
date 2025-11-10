@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import GroupInfoCard from "./GroupInfoCard";
 import DashboardSectionHeader from "./DashboardSectionHeader";
-import groupsInfoApi from "../Api/ProjectCoordinator/GroupsInfoApi"; // correct relative path from ProjectCoordinator
+import groupsInfoApi from "../Api/ProjectCoordinator/GroupsInfoApi";
 
-// ✅ Fallback sample data if API fails
+// ✅ Fallback sample data (untouched)
 const sampleGroups = [
   {
     id: "G-101",
@@ -26,6 +26,7 @@ export default function GroupsGrid() {
   useEffect(() => {
     let mounted = true;
 
+    // ✅ Email → Name converter
     const emailToName = (email) => {
       if (!email) return "";
       const local = email.split("@")[0] || "";
@@ -36,8 +37,19 @@ export default function GroupsGrid() {
         .join(" ");
     };
 
+    // ✅ NEW: Masking function → group-12345
+    const maskGroupId = (id) => {
+      if (!id) return "group-unknown";
+      const str = String(id);
+      const last5 = str.slice(-5); 
+      return "group-" + last5;
+    };
+
+    // ✅ Mapping API response to UI-safe object
     const mapApiGroupToUi = (g) => {
-      const id = g.groupId || (g._id ? String(g._id) : "unknown");
+      const rawId = g.groupId || (g._id ? String(g._id) : "unknown");
+      const id = maskGroupId(rawId); // ✅ Masked ID used here
+
       const firstProposal =
         Array.isArray(g.proposals) && g.proposals.length > 0
           ? g.proposals[0]
@@ -77,9 +89,11 @@ export default function GroupsGrid() {
       return { id, title, description, tools, members };
     };
 
+    // ✅ Fetch groups from API
     const fetchGroups = async () => {
       setLoading(true);
       const res = await groupsInfoApi.fetchGroupsInfo();
+
       if (!mounted) return;
 
       if (!res.success || !Array.isArray(res.data)) {
@@ -88,6 +102,7 @@ export default function GroupsGrid() {
       } else {
         setGroups(res.data.map(mapApiGroupToUi));
       }
+
       setLoading(false);
     };
 
