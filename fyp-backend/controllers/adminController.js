@@ -47,7 +47,7 @@ exports.createUser = async (req, res) => {
     // Auto Admin ID
     if (role === 'admin') {
       const count = await User.countDocuments({ role: 'admin' });
-      newUser.studentId = `adm-${String(count + 1).padStart(3, '0')}`;
+      newUser.studentId = `adm-${String(count + 2).padStart(3, '0')}`;
     }
 
     await newUser.save();
