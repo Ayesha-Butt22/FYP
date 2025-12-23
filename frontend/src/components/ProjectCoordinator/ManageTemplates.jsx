@@ -51,33 +51,43 @@ export default function ManageTemplates() {
   const fetchUploadedFiles = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/files`);
+      // CHANGE 1: Updated API endpoint
+      const url = deptFilter === "All" 
+        ? `${API_BASE}/api/templates`
+        : `${API_BASE}/api/templates?department=${deptFilter}`;
+      
+      const res = await fetch(url);
+      
       if (!res.ok) {
         const txt = await res.text().catch(() => "");
-        console.error("GET /api/files failed:", res.status, txt);
-        toastService.error(`Could not load uploaded templates (${res.status})`);
+        console.error("GET /api/templates failed:", res.status, txt);
+        toastService.error(`Could not load templates (${res.status})`);
         setUploadedList([]);
         return;
       }
+      
       const data = await res.json();
+      
       if (!data || !data.success) {
-        console.error("GET /api/files returned error:", data);
-        toastService.error("Could not load uploaded templates");
+        console.error("GET /api/templates returned error:", data);
+        toastService.error(data?.message || "Could not load templates");
         setUploadedList([]);
         return;
       }
+      
       const list = data.data.map((d) => ({
         id: d._id || d.id,
         template: d.template,
         department: d.department,
         filePath: d.filePath,
         originalName: d.originalName || d.fileName || (d.filePath ? d.filePath.split("/").pop() : "file"),
-        uploadedAt: d.uploadedAt || d.createdAt || d.created_at,
+        uploadedAt: d.createdAt || d.uploadedAt || d.created_at,
       }));
+      
       setUploadedList(list);
     } catch (err) {
       console.error("fetchUploadedFiles error", err);
-      toastService.error("Could not load uploaded templates (network error)");
+      toastService.error("Could not load templates (network error)");
       setUploadedList([]);
     } finally {
       setLoading(false);
@@ -138,24 +148,33 @@ export default function ManageTemplates() {
     formData.append("file", selectedFile);
     formData.append("template", selectedTemplate);
     formData.append("department", selectedDept);
+    formData.append("uploadedBy", "Coordinator");
 
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/api/files/upload`, {
+      // CHANGE 2: Updated upload endpoint
+      const res = await fetch(`${API_BASE}/api/templates/upload`, {
         method: "POST",
         body: formData,
       });
 
       if (!res.ok) {
         const txt = await res.text().catch(() => "");
-        console.error("POST /api/files/upload failed:", res.status, txt);
-        toastService.error(`Upload failed (${res.status})`);
+        console.error("POST /api/templates/upload failed:", res.status, txt);
+        
+        let errorMsg = `Upload failed (${res.status})`;
+        try {
+          const errorJson = JSON.parse(txt);
+          errorMsg = errorJson.message || errorMsg;
+        } catch {}
+        
+        toastService.error(errorMsg);
         return;
       }
 
       const json = await res.json();
       if (!json || !json.success) {
-        console.error("upload returned error:", json);
+        console.error("Upload returned error:", json);
         toastService.error(json?.message || "Upload failed");
         return;
       }
@@ -167,7 +186,7 @@ export default function ManageTemplates() {
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
-      console.error("upload API error", err);
+      console.error("Upload API error", err);
       toastService.error("Upload failed. Try again.");
     } finally {
       setLoading(false);
@@ -179,7 +198,17 @@ export default function ManageTemplates() {
       toastService.error("File not available");
       return;
     }
-    const url = meta.filePath.startsWith("http") ? meta.filePath : (API_BASE ? API_BASE + meta.filePath : window.location.origin + meta.filePath);
+    
+    // CHANGE 3: Updated URL construction
+    let url;
+    if (meta.filePath.startsWith("http")) {
+      url = meta.filePath;
+    } else if (meta.filePath.startsWith("/")) {
+      url = `${API_BASE}${meta.filePath}`;
+    } else {
+      url = `${API_BASE}/uploads/templates/${meta.filePath}`;
+    }
+    
     window.open(url, "_blank");
   };
 
@@ -194,23 +223,35 @@ export default function ManageTemplates() {
 
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/api/files/${meta.id}`, { method: "DELETE" });
+      // CHANGE 4: Updated delete endpoint
+      const res = await fetch(`${API_BASE}/api/templates/${meta.id}`, { 
+        method: "DELETE" 
+      });
+      
       if (!res.ok) {
         const txt = await res.text().catch(() => "");
-        console.error("DELETE /api/files/:id failed", res.status, txt);
-        toastService.error(`Delete failed (${res.status})`);
+        console.error("DELETE /api/templates/:id failed", res.status, txt);
+        
+        let errorMsg = `Delete failed (${res.status})`;
+        try {
+          const errorJson = JSON.parse(txt);
+          errorMsg = errorJson.message || errorMsg;
+        } catch {}
+        
+        toastService.error(errorMsg);
         return;
       }
+      
       const json = await res.json();
       if (!json || !json.success) {
         toastService.error(json?.message || "Delete failed");
         return;
       }
-      // refresh
+      
       await fetchUploadedFiles();
       toastService.success("Uploaded template removed.");
     } catch (err) {
-      console.error("delete API error", err);
+      console.error("Delete API error", err);
       toastService.error("Delete failed. Try again.");
     } finally {
       setLoading(false);
@@ -223,7 +264,6 @@ export default function ManageTemplates() {
   // Filter uploadedList by deptFilter
   const filteredUploadedList = uploadedList.filter((r) => {
     if (!deptFilter || deptFilter === "All") return true;
-    // departments are stored as "CS", "SE", "CA"
     return String(r.department || "").toUpperCase() === String(deptFilter).toUpperCase();
   });
 
@@ -247,7 +287,10 @@ export default function ManageTemplates() {
     );
   };
 
-  const clearFilters = () => setDeptFilter("All");
+  const clearFilters = () => {
+    setDeptFilter("All");
+    fetchUploadedFiles();
+  };
 
   return (
     <div className="mt-root">

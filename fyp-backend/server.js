@@ -9,6 +9,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// =============== CRITICAL: Add static file serving ===============
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/Filesk', express.static(path.join(__dirname, 'Filesk')));
+// ================================================================
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
@@ -18,9 +23,9 @@ const SupervisorWhiteboardRoutes = require("./routes/SupervisorWhiteboardRoutes"
 const evaluationRoutes = require("./routes/evaluationRoutes");
 const committeeevaluationRoutes = require("./routes/committeEvalution");
 
+// =============== NEW: Import Template Routes ===============
+const templateRoutes = require("./routes/templateRoutes");
 
-
-app.use('/Filesk', express.static(path.join(__dirname, 'Filesk')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/groups', require('./routes/studentgroup'));
@@ -30,7 +35,7 @@ app.use("/api/student", require("./routes/student"));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/files', require('./routes/FileRouter'));
 app.use("/api/profile-pic", require("./routes/profile"));
-app.use("/api/deadline", require("./routes/deadline"));
+app.use("/api/deadline", require('./routes/deadline'));
 app.use("/api/noticeboard", NoticeboardRoutes);
 app.use("/api/deadlineSchedule", require("./routes/deadlineSchedule"));
 
@@ -38,7 +43,8 @@ app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);
 app.use("/api/evaluation", evaluationRoutes);
 app.use("/api/committee-evaluation", committeeevaluationRoutes);
 
-
+// =============== NEW: Add Template Routes Here ===============
+app.use("/api/templates", templateRoutes);
 
 // Test route
 app.get('/', (req, res) => res.send('API Running'));
