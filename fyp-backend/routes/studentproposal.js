@@ -9,13 +9,7 @@ router.post("/submit", protect, isStudent, proposalController.createProposal);
 router.delete("/:id", protect, isStudent, proposalController.deleteProposal);
 
 router.get("/supervisor", protect, isSupervisor, proposalController.getMyProposals);
-router.get(
-  "/proposals/pending",
-  protect,
-  isSupervisor,
-  proposalController.getPendingProposals
-);
-
+router.get("/pending", protect, isSupervisor, proposalController.getPendingProposals); 
 
 
 

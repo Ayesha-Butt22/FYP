@@ -127,18 +127,13 @@ exports.getPendingProposals = async (req, res) => {
   try {
     const supervisorEmail = req.user.email;
     const now = new Date();
-
-    // ⏱ Time window: 10 to 16 hours ago
-    const sixteenHoursAgo = new Date(now.getTime() - 16 * 60 * 60 * 1000);
     const tenHoursAgo = new Date(now.getTime() - 10 * 60 * 60 * 1000);
+    const sixteenHoursAgo = new Date(now.getTime() - 16 * 60 * 60 * 1000);
 
     const proposals = await Proposal.find({
       projectSupervisor: supervisorEmail,
-      projectStatus: 0, // ✅ pending only
-      createdAt: {
-        $gte: sixteenHoursAgo,
-        $lte: tenHoursAgo,
-      },
+      projectStatus: 0, // pending
+      createdAt: { $gte: sixteenHoursAgo, $lte: tenHoursAgo },
     })
       .populate({
         path: "groupId",
@@ -147,39 +142,25 @@ exports.getPendingProposals = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    // 🔁 attach member names (same logic as before)
     for (const proposal of proposals) {
       const group = proposal.groupId;
       if (group) {
-        const emails = [
-          group.leader?.email,
-          group.member2?.email,
-          group.member3?.email,
-        ].filter(Boolean);
-
-        const users = await User.find(
-          { email: { $in: emails } },
-          "name email sapId"
-        );
-
-        users.forEach((u) => {
+        const emails = [group.leader?.email, group.member2?.email, group.member3?.email].filter(Boolean);
+        const users = await User.find({ email: { $in: emails } }, "name email sapId");
+        for (const u of users) {
           if (group.leader?.email === u.email) group.leader.name = u.name;
           if (group.member2?.email === u.email) group.member2.name = u.name;
           if (group.member3?.email === u.email) group.member3.name = u.name;
-        });
+        }
       }
     }
 
-    return res.json({
-      success: true,
-      count: proposals.length,
-      data: proposals,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json({ success: true, count: proposals.length, data: proposals });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
 };
-
 
 exports.getProposalsByGroup = async (req, res) => {
   const param = req.params.groupId;
