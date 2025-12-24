@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://localhost:5000/api";
+// src/Api/Proposals/supervisorReviewApi.jsx
+const API_BASE_URL = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
 
 const getHeaders = () => {
   const token = localStorage.getItem("token");
@@ -54,7 +55,7 @@ export const updateProposalStatus = async (proposalId, status, comments) => {
   return await response.json();
 };
 
-// Fetch pending proposals with time window logic
+// Fetch pending proposals with server-side time-window logic
 export const fetchPendingProposals = async () => {
   try {
     const res = await fetch(`${API_BASE_URL}/proposals/pending`, {

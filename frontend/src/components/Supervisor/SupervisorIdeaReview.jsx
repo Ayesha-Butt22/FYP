@@ -1,3 +1,4 @@
+// src/components/SupervisorIdeaReview.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -116,6 +117,9 @@ const mapProposalToIdea = (proposal) => {
     extractMemberInfo(group.member3, "Member 3"),
   ].filter(Boolean);
 
+  // createdAt might be string or Date in server response
+  const createdAt = proposal.createdAt ? new Date(proposal.createdAt) : null;
+
   return {
     ideaId: proposal._id,
     groupName: group.groupId || "Group",
@@ -126,7 +130,7 @@ const mapProposalToIdea = (proposal) => {
     domain: proposal.projectSpecialization || "",
     status: statusKey,
     members,
-    createdAt: proposal.createdAt,
+    createdAt: createdAt ? createdAt.toISOString() : null,
     feedback: proposal.projectSupervisorComments
       ? { severity: getFeedbackSeverity(projectStatus), comment: proposal.projectSupervisorComments }
       : null,
@@ -164,7 +168,6 @@ export default function SupervisorIdeaReview() {
         const supervisorProposals = await fetchSupervisorProposals();
         const mappedSupervisor = supervisorProposals.map(mapProposalToIdea);
         if (!mounted) return;
-
         setIdeas(mappedSupervisor);
       } catch (err) {
         console.error("[SupervisorIdeaReview] Load proposals error:", err);
@@ -176,18 +179,23 @@ export default function SupervisorIdeaReview() {
 
     const loadPending = async () => {
       try {
-        const pending = await fetchPendingProposals();
+        const pending = await fetchPendingProposals(); // raw proposals from server
         if (!mounted) return;
 
+        // map for UI display
         setPendingIdeas(pending.map(mapProposalToIdea));
 
-        // Countdown setup
+        // prepare countdowns keyed by proposal._id
         const now = new Date();
         const countdowns = {};
         pending.forEach((p) => {
-          const createdAt = new Date(p.createdAt);
-          const deadline = new Date(createdAt.getTime() + 16 * 60 * 60 * 1000);
-          countdowns[p._id] = Math.max(deadline - now, 0);
+          const created = p.createdAt ? new Date(p.createdAt) : null;
+          if (created) {
+            const deadline = new Date(created.getTime() + 16 * 60 * 60 * 1000); // 16 hours after creation
+            countdowns[p._id] = Math.max(deadline - now, 0);
+          } else {
+            countdowns[p._id] = 0;
+          }
         });
         setTimerCountdowns(countdowns);
       } catch (err) {
@@ -198,6 +206,7 @@ export default function SupervisorIdeaReview() {
     loadAllProposals();
     loadPending();
 
+    // ticker to decrement countdowns every second
     const interval = setInterval(() => {
       setTimerCountdowns((prev) => {
         const updated = {};
@@ -240,9 +249,9 @@ export default function SupervisorIdeaReview() {
 
       const newFeedback = { severity: modalStatus === "approved" ? "✅" : "❌", comment: modalComment.trim() };
 
-      setIdeas((prev) =>
-        prev.map((idea) => (idea.ideaId === modalIdeaId ? { ...idea, status: modalStatus, feedback: newFeedback } : idea))
-      );
+      // update in both ideas and pendingIdeas arrays
+      setIdeas((prev) => prev.map((idea) => (idea.ideaId === modalIdeaId ? { ...idea, status: modalStatus, feedback: newFeedback } : idea)));
+      setPendingIdeas((prev) => prev.map((idea) => (idea.ideaId === modalIdeaId ? { ...idea, status: modalStatus, feedback: newFeedback } : idea)));
 
       toastService.success("Proposal reviewed successfully!");
       closeStatusModal();
@@ -265,20 +274,23 @@ export default function SupervisorIdeaReview() {
     );
   }
 
+  // combined list — pending first (to show timers), then other proposals
+  const combinedIdeas = [...pendingIdeas, ...ideas.filter(a => !pendingIdeas.some(p => p.ideaId === a.ideaId))];
+
   return (
     <>
-      <DashboardSectionHeader description="Here you can review FYP group ideas and proposals. Pending proposals show countdown timer.">
+      <DashboardSectionHeader description="Here you can review FYP group ideas and proposals. Pending proposals show a countdown timer.">
         FYP Idea & Proposal Review
       </DashboardSectionHeader>
 
       <Box maxWidth={1500} mx="auto" my={4}>
         {loadError ? (
           <ErrorMessage message={loadError} />
-        ) : ideas.length === 0 && pendingIdeas.length === 0 ? (
+        ) : combinedIdeas.length === 0 ? (
           <EmptyState />
         ) : (
           <ProposalTable
-            ideas={[...pendingIdeas, ...ideas]}
+            ideas={combinedIdeas}
             expanded={expanded}
             onToggleExpanded={toggleExpanded}
             onOpenStatusModal={openStatusModal}
@@ -341,11 +353,13 @@ const ProposalRow = ({ idea, isExpanded, onToggleExpanded, onOpenStatusModal, ti
   const remaining = timerCountdowns[idea.ideaId];
 
   const formatCountdown = (ms) => {
-    if (!ms) return "-";
+    if (ms === undefined) return "-";
+    if (ms <= 0) return "Expired";
     const h = Math.floor(ms / 3600000);
     const m = Math.floor((ms % 3600000) / 60000);
     const s = Math.floor((ms % 60000) / 1000);
-    return `${h}h ${m}m ${s}s`;
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
   };
 
   return (
@@ -367,8 +381,10 @@ const ProposalRow = ({ idea, isExpanded, onToggleExpanded, onOpenStatusModal, ti
 
         <TableCell sx={TABLE_STYLES.cell}>
           <Chip icon={status.icon} label={status.label} sx={{ px: 1.5, ...status.chipStyle, borderRadius: 25, fontWeight: 700, fontSize: 17, height: 36, minWidth: 130, justifyContent: "left" }} />
-          {idea.status === "pending" && remaining !== undefined && (
-            <Typography sx={{ mt: 0.5, fontSize: 16, color: "#f2994a" }}>Time left: {formatCountdown(remaining)}</Typography>
+          {idea.status === "pending" && (
+            <Typography sx={{ mt: 0.5, fontSize: 16, color: "#f2994a" }}>
+              Time left: {formatCountdown(remaining)}
+            </Typography>
           )}
         </TableCell>
 
@@ -406,6 +422,11 @@ const ProposalDetails = ({ idea }) => (
       <DetailRow label="Tools" value={idea.tools} />
       <DetailRow label="Domain" value={idea.domain} />
       {idea.status !== "pending" && <FeedbackSection feedback={idea.feedback} />}
+      {idea.status === "pending" && idea.createdAt && (
+        <Box sx={{ mt: 2 }}>
+          <strong>Created:</strong> {new Date(idea.createdAt).toLocaleString()}
+        </Box>
+      )}
     </Box>
     <MembersSection members={idea.members} />
   </Box>
