@@ -1,4 +1,3 @@
-// src/components/SupervisorIdeaReview.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -198,6 +197,13 @@ export default function SupervisorIdeaReview() {
           }
         });
         setTimerCountdowns(countdowns);
+
+        // --- ADDED TOAST NOTICE (after pending load and countdown logic) ---
+        // Show info toast to supervisor to review FYP ideas if there are pending proposals.
+        if (Array.isArray(pending) && pending.length > 0) {
+          toastService.info("Kindly review the FYP idea");
+        }
+        // -------------------------------------------------------------------
       } catch (err) {
         console.error("[SupervisorIdeaReview] Fetch pending error:", err);
       }

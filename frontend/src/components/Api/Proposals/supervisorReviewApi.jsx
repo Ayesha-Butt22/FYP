@@ -1,5 +1,5 @@
 // src/Api/Proposals/supervisorReviewApi.jsx
-const API_BASE_URL = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
+const API_BASE_URL = "http://localhost:5000/api";
 
 const getHeaders = () => {
   const token = localStorage.getItem("token");

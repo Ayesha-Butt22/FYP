@@ -177,7 +177,7 @@ exports.getPendingProposals = async (req, res) => {
       }
     }
 
-    // Optionally include server-side time-left for convenience (milliseconds)
+    // Include server-side time-left for convenience (milliseconds until 16h mark)
     const nowMs = Date.now();
     const withTimeLeft = proposals.map((p) => {
       const created = p.createdAt ? new Date(p.createdAt).getTime() : null;
@@ -197,11 +197,18 @@ exports.getPendingProposals = async (req, res) => {
 
 /**
  * Get proposals by groupId (id or display string)
+ *
+ * Added: auto-delete any proposal that:
+ *   - has projectStatus === 0 (pending)
+ *   - and is older than 24 hours from createdAt
+ *
+ * After cleanup, return remaining proposals for the group (or 404 if none).
  */
 exports.getProposalsByGroup = async (req, res) => {
   const param = req.params.groupId;
 
   try {
+    // initial find (attempt by ObjectId first)
     let proposals = [];
 
     if (typeof param === "string" && mongoose.isValidObjectId(param)) {
@@ -209,17 +216,55 @@ exports.getProposalsByGroup = async (req, res) => {
         const oid = new mongoose.Types.ObjectId(param);
         proposals = await Proposal.find({ groupId: oid }).populate("groupId");
       } catch (err) {
-        // ignore and fallback
+        // ignore and fallback to string match
       }
     }
+
     if (!proposals || proposals.length === 0) {
       proposals = await Proposal.find({ groupId: param }).populate("groupId");
     }
+
     if (!proposals || proposals.length === 0) {
       return res.status(404).json({ error: "No proposal found for this group." });
     }
 
-    return res.json(proposals);
+    // CLEANUP: delete any pending proposals older than 24 hours
+    const nowMs = Date.now();
+    const twentyFourHoursMs = 24 * 60 * 60 * 1000;
+    const toDeleteIds = [];
+    for (const p of proposals) {
+      const createdMs = p.createdAt ? new Date(p.createdAt).getTime() : null;
+      if (createdMs && (p.projectStatus === 0 || p.projectStatus === "0" || p.projectStatus === null || p.projectStatus === undefined)) {
+        if (nowMs - createdMs > twentyFourHoursMs) {
+          toDeleteIds.push(p._id);
+        }
+      }
+    }
+
+    if (toDeleteIds.length > 0) {
+      // delete all expired pending proposals
+      await Proposal.deleteMany({ _id: { $in: toDeleteIds } });
+    }
+
+    // fetch remaining proposals after cleanup
+    let remaining = [];
+    if (typeof param === "string" && mongoose.isValidObjectId(param)) {
+      try {
+        const oid = new mongoose.Types.ObjectId(param);
+        remaining = await Proposal.find({ groupId: oid }).populate("groupId").lean();
+      } catch (err) {
+        // fallback
+      }
+    }
+    if (!remaining || remaining.length === 0) {
+      remaining = await Proposal.find({ groupId: param }).populate("groupId").lean();
+    }
+
+    if (!remaining || remaining.length === 0) {
+      return res.status(404).json({ error: "No proposal found for this group." });
+    }
+
+    return res.json(remaining);
   } catch (err) {
     return res.status(500).json({ error: err.message || "Server error" });
   }
