@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { FaUserTie, FaEnvelope, FaLightbulb } from "react-icons/fa";
-import { Chip } from "@mui/material";
 import ProfileService from "../Api/ProfileService.jsx";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
 
@@ -23,10 +22,6 @@ const styles = {
     transition: "all 0.3s ease",
     position: "relative",
     overflow: "hidden",
-  },
-  cardHover: {
-    transform: "translateY(-4px)",
-    boxShadow: "0 12px 40px rgba(37, 99, 235, 0.15)",
   },
   profileCard: {
     display: "flex",
@@ -119,52 +114,6 @@ const styles = {
     alignItems: "center",
     gap: "12px",
   },
-  skillsList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-    marginBottom: "20px",
-    maxHeight: "280px",
-    overflowY: "auto",
-    paddingRight: "8px",
-  },
-  skillItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-  },
-  skillContent: {
-    flex: "1",
-  },
-  skillName: {
-    fontSize: "16px",
-    fontWeight: "700",
-    color: "#01337a",
-    marginBottom: "8px",
-  },
-  skillBarContainer: {
-    width: "100%",
-    height: "12px",
-    background: "#e2e8f0",
-    borderRadius: "6px",
-    overflow: "hidden",
-    position: "relative",
-  },
-  skillBar: {
-    height: "100%",
-    borderRadius: "6px",
-    transition: "width 0.6s ease",
-    position: "relative",
-  },
-  skillPercent: {
-    position: "absolute",
-    right: "8px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    fontSize: "11px",
-    fontWeight: "700",
-    color: "#fff",
-  },
   ideasList: {
     display: "flex",
     flexDirection: "column",
@@ -182,10 +131,6 @@ const styles = {
     border: "1px solid #e2e8f0",
     transition: "all 0.2s ease",
   },
-  ideaItemHover: {
-    background: "#f1f5f9",
-    borderColor: "#2563eb",
-  },
   ideaText: {
     flex: "1",
     fontSize: "15px",
@@ -193,16 +138,9 @@ const styles = {
     color: "#1e293b",
     lineHeight: "1.5",
   },
-  
 };
 
 export default function SupervisorProfile({ supervisorInfo }) {
-  const [skills, setSkills] = useState([
-    { label: "Python", color: "#2563eb", percent: 90 },
-    { label: "React", color: "#f59e0b", percent: 85 },
-    { label: "AI/ML", color: "#10b981", percent: 95 },
-    { label: "Node.js", color: "#ef4444", percent: 70 },
-  ]);
   const [profilePic, setProfilePic] = useState(null);
   const email = localStorage.getItem("email");
 
@@ -225,18 +163,14 @@ export default function SupervisorProfile({ supervisorInfo }) {
   return (
     <div>
       <DashboardSectionHeader
-        description={`Here you can see your selected  supervisor  profile.`}
+        description={`Here you can see your selected supervisor profile.`}
       >
         Selected Supervisor
       </DashboardSectionHeader>
       <div style={styles.container}>
         <div style={styles.cardsWrapper}>
-          <div
-            style={{
-              ...styles.card,
-              ...styles.profileCard,
-            }}
-          >
+          {/* Profile Card */}
+          <div style={{ ...styles.card, ...styles.profileCard }}>
             <div style={styles.avatarContainer}>
               <div style={styles.avatarRing}></div>
               {profilePic ? (
@@ -277,50 +211,7 @@ export default function SupervisorProfile({ supervisorInfo }) {
             </div>
           </div>
 
-          <div style={{ ...styles.card }}>
-            <div style={styles.cardHeader}>
-              <div style={styles.cardTitle}>
-                Supervisor Skills
-                <Chip
-                  size="small"
-                  label="Top Skills"
-                  sx={{
-                    background: "#dbeafe",
-                    color: "#2563eb",
-                    fontWeight: "700",
-                    fontSize: "12px",
-                    ml: 1,
-                  }}
-                />
-              </div>
-             
-            </div>
-
-            <div style={styles.skillsList}>
-              {skills.map((skill) => (
-                <div key={skill.label} style={styles.skillItem}>
-                  <div style={styles.skillContent}>
-                    <div style={styles.skillName}>{skill.label}</div>
-                    <div style={styles.skillBarContainer}>
-                      <div
-                        style={{
-                          ...styles.skillBar,
-                          width: `${skill.percent}%`,
-                          background: skill.color,
-                        }}
-                      >
-                        <span style={styles.skillPercent}>{skill.percent}%</span>
-                      </div>
-                    </div>
-                  </div>
-                
-                </div>
-              ))}
-            </div>
-
-           
-          </div>
-
+          {/* Project Ideas Card */}
           <div
             style={{
               ...styles.card,
@@ -336,20 +227,16 @@ export default function SupervisorProfile({ supervisorInfo }) {
 
             <div style={styles.ideasList}>
               {ideas.map((idea, i) => (
-                <div
-                  key={i}
-                  style={{
-                    ...styles.ideaItem,
-                  }}
-                >
-                  <FaLightbulb color="#f59e0b" size={18} style={{ marginTop: "2px" }} />
+                <div key={i} style={{ ...styles.ideaItem }}>
+                  <FaLightbulb
+                    color="#f59e0b"
+                    size={18}
+                    style={{ marginTop: "2px" }}
+                  />
                   <div style={styles.ideaText}>{idea}</div>
-                  
                 </div>
               ))}
             </div>
-
-           
           </div>
         </div>
       </div>
