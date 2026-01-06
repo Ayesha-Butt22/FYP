@@ -1,13 +1,15 @@
+// AdminProfile Component
 import React, { useState, useRef, useEffect } from 'react';
 import { User, Mail, Phone, Eye, EyeOff, Camera } from 'lucide-react';
 import DashboardSectionHeader from './DashboardSectionHeader'; // added import
+import { authService } from '../Api/AuthService'; // make sure the path is correct
 import './AdminProfile.css';
 
 export default function AdminProfile() {
   const [adminData] = useState({
-    name: 'Muhammad Ahmed Khan',
+    name: 'Admin',
     role: 'Admin',
-    email: 'ahmed.admin@company.com',
+    email: 'admin@riphah.edu.pk',
     gender: 'Male',
     contact: '+92 300 1234567',
     avatar:
@@ -45,7 +47,7 @@ export default function AdminProfile() {
     }
   };
 
-  const handleUpdatePassword = () => {
+  const handleUpdatePassword = async () => {
     const { newPassword, confirmPassword } = passwords;
 
     if (!newPassword || !confirmPassword) {
@@ -63,16 +65,26 @@ export default function AdminProfile() {
       return;
     }
 
-    setMessage({ type: 'success', text: '✓ Password updated successfully!' });
-    setPasswords({ newPassword: '', confirmPassword: '' });
+    try {
+      // API call using authService
+      const result = await authService.makeAPICall('change-password-email', {
+        email: adminData.email,
+        newPassword,
+        confirmPassword
+      });
 
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+      if (result.success) {
+        setMessage({ type: 'success', text: '✓ Password updated successfully!' });
+        setPasswords({ newPassword: '', confirmPassword: '' });
+      } else {
+        setMessage({ type: 'error', text: result.data?.error || result.error || 'Failed to update password' });
+      }
+
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => setMessage({ type: '', text: '' }), 4000);
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
     }
-    timeoutRef.current = setTimeout(() => {
-      setMessage({ type: '', text: '' });
-      timeoutRef.current = null;
-    }, 4000);
   };
 
   return (
