@@ -1,7 +1,9 @@
+// SelectedSupervisor.jsx
 import React, { useEffect, useState } from "react";
 import { FaUserTie, FaEnvelope, FaLightbulb } from "react-icons/fa";
-import ProfileService from "../Api/ProfileService.jsx";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
+import axios from "axios";
+import ProfileService from "../Api/ProfileService.jsx";
 
 const styles = {
   container: {
@@ -140,11 +142,13 @@ const styles = {
   },
 };
 
-export default function SupervisorProfile({ supervisorInfo }) {
+export default function SelectedSupervisor({ supervisorInfo }) {
   const [profilePic, setProfilePic] = useState(null);
+  const [ideas, setIdeas] = useState([]);
   const email = localStorage.getItem("email");
 
   useEffect(() => {
+    // Load profile picture
     const loadProfilePic = async () => {
       if (!email) return;
       const imageUrl = await ProfileService.getProfilePic(email);
@@ -153,20 +157,30 @@ export default function SupervisorProfile({ supervisorInfo }) {
     loadProfilePic();
   }, [email]);
 
-  const expertiseTags = ["AI", "ML", "Web"];
-  const [ideas] = useState([
-    "AI-Based Disease Prediction",
-    "Smart Attendance System",
-    "Online Exam Proctoring",
-  ]);
+  useEffect(() => {
+    // Load project ideas
+    const loadIdeas = async () => {
+      if (!supervisorInfo?._id) return;
+      try {
+        const res = await axios.get(`/api/project-ideas/read/${supervisorInfo._id}`);
+        if (res.data.success) setIdeas(res.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadIdeas();
+  }, [supervisorInfo]);
+
+  const expertiseTags = supervisorInfo?.expertise || ["AI", "ML", "Web"];
 
   return (
     <div>
       <DashboardSectionHeader
-        description={`Here you can see your selected supervisor profile.`}
+        description="Here you can see your selected supervisor profile."
       >
         Selected Supervisor
       </DashboardSectionHeader>
+
       <div style={styles.container}>
         <div style={styles.cardsWrapper}>
           {/* Profile Card */}
@@ -177,15 +191,8 @@ export default function SupervisorProfile({ supervisorInfo }) {
                 <img
                   src={profilePic}
                   alt="Profile"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                  }}
+                  style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+                  onError={(e) => { e.target.style.display = "none"; }}
                 />
               ) : (
                 <FaUserTie size={60} color="#fff" />
@@ -212,30 +219,23 @@ export default function SupervisorProfile({ supervisorInfo }) {
           </div>
 
           {/* Project Ideas Card */}
-          <div
-            style={{
-              ...styles.card,
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
+          <div style={{ ...styles.card, display: "flex", flexDirection: "column" }}>
             <div style={styles.cardHeader}>
               <div style={styles.cardTitle}>
                 Project Ideas <FaLightbulb color="#f59e0b" />
               </div>
             </div>
-
             <div style={styles.ideasList}>
-              {ideas.map((idea, i) => (
-                <div key={i} style={{ ...styles.ideaItem }}>
-                  <FaLightbulb
-                    color="#f59e0b"
-                    size={18}
-                    style={{ marginTop: "2px" }}
-                  />
-                  <div style={styles.ideaText}>{idea}</div>
-                </div>
-              ))}
+              {ideas.length > 0 ? (
+                ideas.map((idea) => (
+                  <div key={idea._id} style={styles.ideaItem}>
+                    <FaLightbulb color="#f59e0b" size={18} style={{ marginTop: "2px" }} />
+                    <div style={styles.ideaText}>{idea.title}</div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ color: "#64748b", textAlign: "center" }}>No project ideas yet.</div>
+              )}
             </div>
           </div>
         </div>
