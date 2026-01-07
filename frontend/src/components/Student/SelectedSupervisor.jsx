@@ -2,13 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { FaUserTie, FaEnvelope, FaLightbulb } from "react-icons/fa";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
-import axios from "axios";
+import { projectIdeasService } from "../Api/ProjectIdeasService.jsx";
 import ProfileService from "../Api/ProfileService.jsx";
+import axios from "axios";
 
 const styles = {
-  container: {
-    width: "100%",
-  },
+  container: { width: "100%" },
   cardsWrapper: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
@@ -25,12 +24,7 @@ const styles = {
     position: "relative",
     overflow: "hidden",
   },
-  profileCard: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    textAlign: "center",
-  },
+  profileCard: { display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" },
   avatarContainer: {
     width: "120px",
     height: "120px",
@@ -43,171 +37,103 @@ const styles = {
     boxShadow: "0 8px 24px rgba(37, 99, 235, 0.3)",
     position: "relative",
   },
-  avatarRing: {
-    position: "absolute",
-    width: "140px",
-    height: "140px",
-    border: "3px solid rgba(37, 99, 235, 0.2)",
-    borderRadius: "50%",
-  },
-  name: {
-    fontSize: "28px",
-    fontWeight: "900",
-    color: "#01337a",
-    marginBottom: "8px",
-  },
-  subtitle: {
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "#2563eb",
-    marginBottom: "16px",
-  },
-  email: {
-    fontSize: "15px",
-    color: "#64748b",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    justifyContent: "center",
-    marginBottom: "24px",
-  },
-  expertiseSection: {
-    background: "#f1f5f9",
-    borderRadius: "16px",
-    padding: "20px",
-    width: "100%",
-    marginTop: "auto",
-  },
-  expertiseTitle: {
-    fontSize: "14px",
-    fontWeight: "700",
-    color: "#475569",
-    marginBottom: "12px",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-  },
-  expertiseTags: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: "8px",
-  },
-  expertiseTag: {
-    background: "#2563eb",
-    color: "#fff",
-    fontWeight: "700",
-    borderRadius: "8px",
-    padding: "6px 16px",
-    fontSize: "13px",
-  },
-  cardHeader: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: "28px",
-    paddingBottom: "16px",
-    borderBottom: "2px solid #e2e8f0",
-  },
-  cardTitle: {
-    fontSize: "24px",
-    fontWeight: "800",
-    color: "#01337a",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-  ideasList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-    marginBottom: "24px",
-    minHeight: "200px",
-  },
-  ideaItem: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "12px",
-    padding: "16px",
-    background: "#f8fafc",
-    borderRadius: "12px",
-    border: "1px solid #e2e8f0",
-    transition: "all 0.2s ease",
-  },
-  ideaText: {
-    flex: "1",
-    fontSize: "15px",
-    fontWeight: "600",
-    color: "#1e293b",
-    lineHeight: "1.5",
-  },
+  avatarRing: { position: "absolute", width: "140px", height: "140px", border: "3px solid rgba(37, 99, 235, 0.2)", borderRadius: "50%" },
+  name: { fontSize: "28px", fontWeight: "900", color: "#01337a", marginBottom: "8px" },
+  subtitle: { fontSize: "18px", fontWeight: "600", color: "#2563eb", marginBottom: "16px" },
+  email: { fontSize: "15px", color: "#64748b", display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", marginBottom: "24px" },
+  expertiseSection: { background: "#f1f5f9", borderRadius: "16px", padding: "20px", width: "100%", marginTop: "auto" },
+  expertiseTitle: { fontSize: "14px", fontWeight: "700", color: "#475569", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" },
+  expertiseTags: { display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px" },
+  expertiseTag: { background: "#2563eb", color: "#fff", fontWeight: "700", borderRadius: "8px", padding: "6px 16px", fontSize: "13px" },
+  cardHeader: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px", paddingBottom: "16px", borderBottom: "2px solid #e2e8f0" },
+  cardTitle: { fontSize: "24px", fontWeight: "800", color: "#01337a", display: "flex", alignItems: "center", gap: "12px" },
+  ideasList: { display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px", minHeight: "200px" },
+  ideaItem: { display: "flex", alignItems: "flex-start", gap: "12px", padding: "16px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0", transition: "all 0.2s ease" },
+  ideaText: { flex: "1", fontSize: "15px", fontWeight: "600", color: "#1e293b", lineHeight: "1.5" },
 };
 
-export default function SelectedSupervisor({ supervisorInfo }) {
+export default function SelectedSupervisor() {
   const [profilePic, setProfilePic] = useState(null);
   const [ideas, setIdeas] = useState([]);
-  const email = localStorage.getItem("email");
+  const [supervisor, setSupervisor] = useState(null);
 
+  const email = localStorage.getItem("studentId"); // student SAP
+
+  /* ================= LOAD IDEAS + SUPERVISOR ================= */
   useEffect(() => {
-    // Load profile picture
-    const loadProfilePic = async () => {
+    const loadData = async () => {
       if (!email) return;
-      const imageUrl = await ProfileService.getProfilePic(email);
-      if (imageUrl) setProfilePic(imageUrl);
-    };
-    loadProfilePic();
-  }, [email]);
 
-  useEffect(() => {
-    // Load project ideas
-    const loadIdeas = async () => {
-      if (!supervisorInfo?._id) return;
       try {
-        const res = await axios.get(`/api/project-ideas/read/${supervisorInfo._id}`);
-        if (res.data.success) setIdeas(res.data.data);
-      } catch (err) {
-        console.error(err);
+        const res = await projectIdeasService.getIdeasForStudent(email);
+
+        if (res?.data) {
+          setIdeas(res.data.ideas || []);
+          setSupervisor(res.data.user || null); // 🔥 MAIN LINE
+        }
+      } catch (error) {
+        console.error("Error loading supervisor data:", error);
+        setIdeas([]);
+        setSupervisor(null);
       }
     };
-    loadIdeas();
-  }, [supervisorInfo]);
 
-  const expertiseTags = supervisorInfo?.expertise || ["AI", "ML", "Web"];
+    loadData();
+  }, [email]);
+
+  /* ================= LOAD PROFILE PIC ================= */
+  useEffect(() => {
+    const loadProfilePic = async () => {
+      if (!supervisor?.email) return;
+
+      const imageUrl = await ProfileService.getProfilePic(supervisor.email);
+      if (imageUrl) setProfilePic(imageUrl);
+    };
+
+    loadProfilePic();
+  }, [supervisor]);
+
+  /* ================= EXPERTISE TAGS ================= */
+  const expertiseTags = supervisor?.specialization
+    ? supervisor.specialization.split(",")
+    : ["Web", "SE"];
 
   return (
     <div>
-      <DashboardSectionHeader
-        description="Here you can see your selected supervisor profile."
-      >
+      <DashboardSectionHeader description="Here you can see your assigned supervisor profile.">
         Selected Supervisor
       </DashboardSectionHeader>
 
       <div style={styles.container}>
         <div style={styles.cardsWrapper}>
-          {/* Profile Card */}
+
+          {/* ================= PROFILE CARD ================= */}
           <div style={{ ...styles.card, ...styles.profileCard }}>
             <div style={styles.avatarContainer}>
-              <div style={styles.avatarRing}></div>
               {profilePic ? (
                 <img
                   src={profilePic}
                   alt="Profile"
-                  style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
-                  onError={(e) => { e.target.style.display = "none"; }}
+                  style={styles.avatarImg}
                 />
               ) : (
                 <FaUserTie size={60} color="#fff" />
               )}
             </div>
-            <div style={styles.name}>{supervisorInfo?.name || "Ayesha"}</div>
+
+            <div style={styles.name}>{supervisor?.name}</div>
+
             <div style={styles.subtitle}>
-              {supervisorInfo?.subtitle || "AI, ML, Software Engineering"}
+              {supervisor?.designation} — {supervisor?.department}
             </div>
+
             <div style={styles.email}>
               <FaEnvelope color="#2563eb" />
-              {supervisorInfo?.email || "ayesha@riphah.edu.pk"}
+              {supervisor?.email}
             </div>
+
             <div style={styles.expertiseSection}>
-              <div style={styles.expertiseTitle}>Expertise Tags</div>
+              <div style={styles.expertiseTitle}>Expertise</div>
               <div style={styles.expertiseTags}>
                 {expertiseTags.map((tag, i) => (
                   <span key={i} style={styles.expertiseTag}>
@@ -216,28 +142,33 @@ export default function SelectedSupervisor({ supervisorInfo }) {
                 ))}
               </div>
             </div>
+
           </div>
 
-          {/* Project Ideas Card */}
-          <div style={{ ...styles.card, display: "flex", flexDirection: "column" }}>
+          {/* ================= IDEAS CARD ================= */}
+          <div style={{ ...styles.card }}>
             <div style={styles.cardHeader}>
               <div style={styles.cardTitle}>
                 Project Ideas <FaLightbulb color="#f59e0b" />
               </div>
             </div>
+
             <div style={styles.ideasList}>
               {ideas.length > 0 ? (
                 ideas.map((idea) => (
                   <div key={idea._id} style={styles.ideaItem}>
-                    <FaLightbulb color="#f59e0b" size={18} style={{ marginTop: "2px" }} />
-                    <div style={styles.ideaText}>{idea.title}</div>
+                    <FaLightbulb color="#f59e0b" />
+                    <div>{idea.title}</div>
                   </div>
                 ))
               ) : (
-                <div style={{ color: "#64748b", textAlign: "center" }}>No project ideas yet.</div>
+                <div style={{ color: "#64748b", textAlign: "center" }}>
+                  No project ideas yet.
+                </div>
               )}
             </div>
           </div>
+
         </div>
       </div>
     </div>

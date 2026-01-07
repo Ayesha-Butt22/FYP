@@ -11,4 +11,10 @@ router.get("/supervisor/:supervisorEmail", projectIdeasController.getIdeasBySupe
 // Delete idea
 router.delete("/:id", projectIdeasController.deleteIdea);
 
+router.get(
+  "/student/:studentEmail",
+  projectIdeasController.getIdeasForStudent
+);
+
+
 module.exports = router;
