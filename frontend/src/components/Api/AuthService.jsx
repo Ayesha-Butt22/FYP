@@ -1,3 +1,4 @@
+// AuthService.jsx
 const API_BASE_URL = "http://localhost:5000/api/auth";
 
 class AuthService {
@@ -74,6 +75,19 @@ class AuthService {
             return { success: false, error: error.message, data: null };
         }
     }
+    async getUserByEmail(email) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/user-by-email/${email}`);
+      const data = await res.json();
+
+      return {
+        success: res.ok,
+        data
+      };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
 
     // Change password by email (no auth required)
     async changePasswordByEmail(payload) {
@@ -152,6 +166,7 @@ class AuthService {
 
         return { ...basePayload, ...(roleSpecificFields[role] || {}) };
     }
+
 }
 
 export const authService = new AuthService();

@@ -177,3 +177,41 @@ exports.changePasswordByEmail = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+// Get user profile by email
+exports.getUserByEmail = async (req, res) => {
+  try {
+    let { email } = req.params;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    // Clean the email
+    email = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Return only required fields
+    return res.json({
+      success: true,
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        studentId: user.studentId,
+        department: user.department,
+        specialization: user.specialization,
+        isGroupMade: user.isGroupMade,
+        IsApproved: user.IsApproved,
+        createdAt: user.createdAt,
+      }
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
