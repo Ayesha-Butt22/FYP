@@ -28,7 +28,7 @@ import SupervisorArchive from "./SupervisorArchive";
 import SupervisorAnalytics from "./SupervisorAnalytics";
 import SupervisorNotices from "./SupervisorNotices";
 import SupervisorProfile from "./SupervisorProfile";
-import StudentTemplates from "../Student/StudentTemplates.jsx";
+import SupervisorTemplates from "./SupervisorTemplate.jsx";
 
 const menu = [
   { label: "Idea & Proposal Review", icon: <AssignmentIcon /> },
@@ -66,7 +66,7 @@ export default function SupervisorDashboard() {
     Overview: <OverviewSupervisor onTabChange={setActiveTab} />,
     "Idea & Proposal Review": <SupervisorIdeaReview />,
     "My Groups": <SupervisorGroups />,
-    Templates: <StudentTemplates />,
+    Templates: <SupervisorTemplates />,
     Milestones: <SupervisorMilestones />,
     Whiteboard: <SupervisorWhiteboard />,
     Meetings: <SupervisorMeetings />,

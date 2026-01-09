@@ -20,7 +20,7 @@ import ManageCoordinators from "./ManageCoordinators";
 import ApprovedStudents from "./ApprovedStudents";
 import GroupsGrid from "../ProjectCoordinator/GroupsGrid";
 import SupervisorArchive from "../Supervisor/SupervisorArchive";
-import StudentTemplates from "./StudentTemplates";
+import AdminTemplates from "./AdminTemplate";
 import Noticeboard from "./Noticeboard";
 import AdminProfile from "./AdminProfile";
 
@@ -59,7 +59,7 @@ export default function AdminDashboard() {
     "Manage Supervisors": <ManageSupervisors />,
     "Manage Project Coordinators": <ManageCoordinators />,
     "Approved Students": <ApprovedStudents />,
-    Templates: <StudentTemplates />,
+    Templates: <AdminTemplates />,
     Noticeboard: <Noticeboard />,
     "View Groups": <GroupsGrid />,
     "FYP Archive": <SupervisorArchive />,

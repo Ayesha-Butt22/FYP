@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
-import DashboardSectionHeader from "./DashboardSectionHeader";
-import AppTable from "../Admin/AppTable.jsx";
-import { toastService } from "../ToastService/ToastService";
-import "./StudentTemplates.css";
+import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
+import AppTable from "./AppTable.jsx";
+import { toastService } from "../ToastService/ToastService.jsx";
+import "./AdminTemplates.css";
 
 // API BASE URL
 const API_BASE = "http://localhost:5000";
