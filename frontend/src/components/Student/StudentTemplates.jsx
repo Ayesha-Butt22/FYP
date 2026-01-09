@@ -5,227 +5,181 @@ import AppTable from "../Admin/AppTable.jsx";
 import { toastService } from "../ToastService/ToastService";
 import "./StudentTemplates.css";
 
-let TemplateService = null;
-try {
-  TemplateService = require("../ProjectCoordinatorApi/TemplateService.jsx").default;
-} catch (e) {
-  TemplateService = null;
-}
+// API BASE URL
+const API_BASE = "http://localhost:5000";
 
-const MOCK_FILES = [
-  {
-    _id: "m1",
-    template: "t03",
-    templateLabel: "Template-03: Proposal Presentation (PowerPoint)",
-    department: "SE",
-    filePath: "/Filesk/mock-proposal-1.docx",
-    originalName: "mock-proposal-1.docx",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: "m2",
-    template: "t03",
-    templateLabel: "Template-03: Proposal Presentation (PowerPoint)",
-    department: "SE",
-    filePath: "/Filesk/mock-proposal-2.docx",
-    originalName: "mock-proposal-2.docx",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: "m3",
-    template: "t01",
-    templateLabel: "Template-01: Project Team (MS Word)",
-    department: "SE",
-    filePath: "/Filesk/mock-team.docx",
-    originalName: "mock-team.docx",
-    createdAt: new Date().toISOString(),
-  },
+// Template types mapping
+const TEMPLATES = [
+  { id: "t01", label: "Template-01: Project Team (MS Word)" },
+  { id: "t02", label: "Template-02: Initial Proposal (MS Word)" },
+  { id: "t03", label: "Template-03: Proposal Presentation (PowerPoint)" },
+  { id: "t04", label: "Template-04: Proposal & Plan (MS Word)" },
+  { id: "t05", label: "Template-05: Project Report (MS Word)" },
+  { id: "t06", label: "Template-06: Final Presentation (PowerPoint)" },
+  { id: "t07", label: "Template-07: Progress Presentation (PowerPoint)" },
 ];
 
 export default function StudentTemplates() {
-  const [allFiles, setAllFiles] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Show only this department dropdown (All, SE, CS, CA)
-  const DEPARTMENTS = ["All", "SE", "CS", "CA"];
+  // Student ka department nikalo
+  const getStudentDepartment = () => {
+    const storedDept = localStorage.getItem("department") || 
+                      localStorage.getItem("dept") || 
+                      localStorage.getItem("departmentCode") || 
+                      localStorage.getItem("userDepartment") ||
+                      localStorage.getItem("department_code") || 
+                      "SE"; // Default agar na mile
+    return storedDept.toUpperCase(); // Ensure uppercase
+  };
 
-  // determine user role and student department from localStorage
-  const userRoleRaw = (localStorage.getItem("role") || "").toString();
-  const isStudent = /student/i.test(userRoleRaw);
-
-
-  const storedDept =
-    localStorage.getItem("department") ||
-    localStorage.getItem("dept") ||
-    localStorage.getItem("departmentCode") ||
-    localStorage.getItem("userDepartment") ||
-    localStorage.getItem("department_code") ||
-    "";
-
-  
-  const [selectedDept, setSelectedDept] = useState(isStudent ? (storedDept || "All") : "All");
+  const studentDept = getStudentDepartment();
 
   const headers = ["Template", "Department", "Filename", "Uploaded At"];
 
   useEffect(() => {
     loadTemplates();
-
   }, []);
-
-  useEffect(() => {
-   
-    if (isStudent && storedDept && selectedDept !== storedDept) {
-      setSelectedDept(storedDept);
-    }
-    applyFilters();
-    
-  }, [allFiles, selectedDept, isStudent, storedDept]);
 
   const loadTemplates = async () => {
     setLoading(true);
     try {
-      let files = [];
-      if (TemplateService && typeof TemplateService.getFiles === "function") {
-        files = await TemplateService.getFiles();
-      } else {
-        files = MOCK_FILES;
+      // Sirf student ke department ke templates fetch karo
+      const url = `${API_BASE}/api/templates?department=${studentDept}`;
+      
+      const res = await fetch(url);
+      
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        console.error("GET /api/templates failed:", res.status, txt);
+        toastService.error(`Could not load templates (${res.status})`);
+        setTemplates([]);
+        return;
       }
-
-      const normalized = files.map((f) => ({
-        id: f._id || f.id,
-        templateLabel: f.templateLabel || f.template || "Template",
-        department: (f.department || "").toString(),
-        filename: f.originalName || f.fileName || (f.filePath ? f.filePath.split("/").pop() : ""),
-        filePath: f.filePath,
-        uploadedAt: f.uploadedAt || f.createdAt || f.created_at || "",
-        __raw: f,
-      }));
-      setAllFiles(normalized);
+      
+      const data = await res.json();
+      
+      if (!data || !data.success) {
+        console.error("GET /api/templates returned error:", data);
+        toastService.error(data?.message || "Could not load templates");
+        setTemplates([]);
+        return;
+      }
+      
+      setTemplates(data.data);
+      prepareTableRows(data.data);
+      
     } catch (err) {
-      console.error("Could not load templates", err);
-      toastService.error("Could not load templates: " + (err.message || ""));
-      setAllFiles([]);
+      console.error("loadTemplates error", err);
+      toastService.error("Could not load templates (network error)");
+      setTemplates([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const buildFileUrl = (filePath) => {
-    if (TemplateService && typeof TemplateService.buildFileUrl === "function") {
-      return TemplateService.buildFileUrl(filePath);
-    }
-    if (!filePath) return "";
-    if (filePath.startsWith("http")) return filePath;
-    return window.location.origin + filePath;
+  const prepareTableRows = (templatesList) => {
+    const tableRows = templatesList.map((template) => ({
+      Template: TEMPLATES.find(t => t.id === template.template)?.label || template.template,
+      Department: template.department,
+      Filename: template.originalName,
+      "Uploaded At": template.createdAt ? new Date(template.createdAt).toLocaleString() : "—",
+      __meta: template,
+    }));
+    
+    setRows(tableRows);
   };
 
-  const handleView = (row) => {
-    const meta = row.__meta || row;
-    if (!meta || !meta.filePath) {
-      toastService.error("File not available");
-      return;
+  const buildFileUrl = (filePath) => {
+    if (!filePath) return "";
+    if (filePath.startsWith("http")) return filePath;
+    
+    // Backend ka correct URL build karo
+    if (filePath.startsWith("/")) {
+      return `${API_BASE}${filePath}`;
+    } else {
+      return `${API_BASE}/uploads/templates/${filePath}`;
     }
-    const url = buildFileUrl(meta.filePath);
-    window.open(url, "_blank");
   };
 
   const handleDownload = (row) => {
-    const meta = row.__meta || row;
+    const meta = row.__meta;
     if (!meta || !meta.filePath) {
       toastService.error("File not available");
       return;
     }
+    
+    // DOWNLOAD: Force download
     const url = buildFileUrl(meta.filePath);
-    const a = document.createElement("a");
-    a.href = url;
-    const filename = row.Filename || meta.filename || url.split("/").pop();
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    const filename = row.Filename || meta.originalName || url.split("/").pop();
+    
+    // Create invisible anchor tag for download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    
+    // Set download attribute for force download
+    link.setAttribute('download', filename);
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Success message
+    toastService.success(`Downloading "${filename}"...`);
   };
 
-  function applyFilters() {
-    const filtered = allFiles.filter((f) => {
-     
-      if (isStudent) {
-        const deptToMatch = storedDept || selectedDept;
-        if (deptToMatch && deptToMatch !== "All" && f.department !== deptToMatch) return false;
-        return true;
-      }
-
-     
-      if (selectedDept && selectedDept !== "All" && f.department !== selectedDept) return false;
-      return true;
-    });
-
-    const tableRows = filtered.map((f) => ({
-      Template: f.templateLabel,
-      Department: f.department,
-      Filename: f.filename,
-      "Uploaded At": f.uploadedAt ? new Date(f.uploadedAt).toLocaleString() : "—",
-      __meta: f,
-    }));
-    setRows(tableRows);
-  }
-
-
   const renderActions = (row) => {
-    const meta = row.__meta || row;
+    const meta = row.__meta;
     return (
       <Box sx={{ display: "flex", gap: 1, justifyContent: "left" }}>
-        <button className="mt-btn" onClick={() => handleView(row)} title="View" style={{ background: "#0b5ed7" }}>
-          View
-        </button>
-        <button className="mt-btn" onClick={() => handleDownload(row)} title="Download" style={{ background: "#2563eb" }}>
+        <button 
+          className="mt-btn" 
+          onClick={() => handleDownload(row)} 
+          title="Download file"
+          style={{ background: "#2563eb" }}
+        >
           Download
         </button>
       </Box>
     );
   };
 
-  const clearFilters = () => {
-    
-    if (isStudent) {
-      setSelectedDept(storedDept || "All");
-      return;
-    }
-    setSelectedDept("All");
-  };
-
   return (
     <Box sx={{ pb: 3 }}>
-      <DashboardSectionHeader description={"Here you can view the templates provided by the department and download them."}>
+      <DashboardSectionHeader 
+        description={`Here you can view and download the templates provided by your department.`}
+      >
         View Templates
       </DashboardSectionHeader>
 
-      
-      <Box className="st-controls" sx={{ mb: 1 }}>
-        {!isStudent ? (
-          <>
-            <div className="st-filter">
-              <label>Department</label>
-              <select className="st-dept-select" value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)}>
-                {DEPARTMENTS.map((d) => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-              <button className="st-clear-btn" onClick={clearFilters}>Clear filters</button>
-            </div>
-          </>
-        ) : null}
-      </Box>
+      {/* Empty State Message (only when no templates) */}
+      {templates.length === 0 && !loading && (
+        <div style={{ 
+          marginBottom: "16px",
+          padding: "8px 16px",
+          background: "#f9fafb",
+          borderRadius: "8px",
+          border: "1px dashed #d1d5db",
+          color: "#6b7280",
+          fontSize: "14px"
+        }}>
+          No templates available for {studentDept} department.
+        </div>
+      )}
 
       {loading ? (
         <div className="st-loading">Loading templates…</div>
       ) : (
         <div style={{ marginTop: 12 }}>
-          <AppTable headers={headers} rows={rows} renderActions={renderActions} />
-          {rows.length === 0 && <div className="st-empty">No templates found for the selected department.</div>}
+          {templates.length === 0 ? (
+            <div style={{ height: "200px" }}></div> // Spacer for empty state
+          ) : (
+            <AppTable headers={headers} rows={rows} renderActions={renderActions} />
+          )}
         </div>
       )}
     </Box>
