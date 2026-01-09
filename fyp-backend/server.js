@@ -17,6 +17,8 @@ const NoticeboardRoutes = require("./routes/NoticeboardRoutes")
 const SupervisorWhiteboardRoutes = require("./routes/SupervisorWhiteboardRoutes");
 const evaluationRoutes = require("./routes/evaluationRoutes");
 const committeeevaluationRoutes = require("./routes/committeEvalution");
+const projectIdeasRoutes = require("./routes/projectIdeasRoutes");
+
 
 
 
@@ -37,8 +39,7 @@ app.use("/api/deadlineSchedule", require("./routes/deadlineSchedule"));
 app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);
 app.use("/api/evaluation", evaluationRoutes);
 app.use("/api/committee-evaluation", committeeevaluationRoutes);
-
-
+app.use("/api/project-ideas", projectIdeasRoutes);
 
 // Test route
 app.get('/', (req, res) => res.send('API Running'));

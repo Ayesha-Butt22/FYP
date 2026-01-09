@@ -1,3 +1,4 @@
+// AuthService.jsx
 const API_BASE_URL = "http://localhost:5000/api/auth";
 
 class AuthService {
@@ -31,7 +32,7 @@ class AuthService {
         }
     }
 
-
+    // Login
     async login(credentials) {
         const result = await this.makeAPICall("login", credentials);
 
@@ -42,11 +43,62 @@ class AuthService {
         return result;
     }
 
-
+    // Register
     async register(userData) {
         return await this.makeAPICall("register", userData);
     }
 
+    // Change password (old + new)
+    async changePassword(payload) {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/change-password`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    oldPassword: payload.oldPassword,
+                    newPassword: payload.newPassword,
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                return { success: true, data };
+            } else {
+                return { success: false, error: data.error || "Something went wrong", data };
+            }
+        } catch (error) {
+            return { success: false, error: error.message, data: null };
+        }
+    }
+    async getUserByEmail(email) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/user-by-email/${email}`);
+      const data = await res.json();
+
+      return {
+        success: res.ok,
+        data
+      };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+    // Change password by email (no auth required)
+    async changePasswordByEmail(payload) {
+        return await this.makeAPICall('change-password-email', {
+            email: payload.email,
+            newPassword: payload.newPassword,
+            confirmPassword: payload.confirmPassword
+        });
+    }
+
+    // Store user data in localStorage
     storeUserData(data) {
         const userInfo = {
             token: data.token || "demoToken",
@@ -63,17 +115,17 @@ class AuthService {
         };
 
         Object.entries(userInfo).forEach(([key, value]) => {
-            if (value) {
-                localStorage.setItem(key, value);
-            }
+            if (value) localStorage.setItem(key, value);
         });
     }
 
+    // Clear localStorage
     clearUserData() {
-        const keys = ['token', 'role', 'name', 'specialization', 'email', 'department', 'studentId' , 'IsApproved'];
+        const keys = ['token', 'role', 'name', 'specialization', 'email', 'department', 'studentId', 'IsApproved'];
         keys.forEach(key => localStorage.removeItem(key));
     }
 
+    // Get user data
     getUserData() {
         return {
             token: localStorage.getItem('token'),
@@ -87,54 +139,17 @@ class AuthService {
         };
     }
 
+    // Check if logged in
     isAuthenticated() {
         return !!localStorage.getItem('token');
     }
 
-    async changePassword(payload) {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch("http://localhost:5000/api/auth/change-password", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    oldPassword: payload.oldPassword,
-                    newPassword: payload.newPassword,
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                return {
-                    success: true,
-                    data
-                };
-            } else {
-                return {
-                    success: false,
-                    error: data.error || "Something went wrong",
-                    data
-                };
-            }
-        } catch (error) {
-            return {
-                success: false,
-                error: error.message,
-                data: null
-            };
-        }
-    }
-
-
+    // Logout
     logout() {
         this.clearUserData();
     }
 
-
+    // Build register payload
     buildRegisterPayload(data, role) {
         const basePayload = {
             email: data.email,
@@ -143,24 +158,15 @@ class AuthService {
         };
 
         const roleSpecificFields = {
-            student: {
-                studentId: data.studentId,
-                department: data.department
-            },
-            coordinator: {
-                department: data.department
-            },
-            supervisor: {
-                specialization: data.specialization
-            },
+            student: { studentId: data.studentId, department: data.department },
+            coordinator: { department: data.department },
+            supervisor: { specialization: data.specialization },
             admin: {}
         };
 
-        return {
-            ...basePayload,
-            ...(roleSpecificFields[role] || {})
-        };
+        return { ...basePayload, ...(roleSpecificFields[role] || {}) };
     }
+
 }
 
 export const authService = new AuthService();

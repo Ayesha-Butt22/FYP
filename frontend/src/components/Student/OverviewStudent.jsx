@@ -1,3 +1,4 @@
+// OverviewStudent.jsx
 import React, {useEffect, useState} from "react";
 import { FaUsers, FaClipboardCheck, FaCalendarCheck, FaCheckCircle, FaStar, FaArrowRight, FaBookOpen, FaTasks, FaLightbulb } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -73,6 +74,20 @@ export default function OverviewStudent({ onTabChange }) {
         const data = await res.json();
 
         if (!data.success) return;
+
+
+        /*CHECK ADDED */
+if (!data.alreadyBooked && data.availableSlots?.length > 0) {
+  const lastSlot = data.availableSlots[data.availableSlots.length - 1];
+  const lastSlotStartTime = new Date(lastSlot.startTime);
+  const now = new Date();
+
+  if (lastSlotStartTime < now) {
+    return; 
+  }
+}
+
+
 
         if (!data.alreadyBooked && data.availableSlots.length > 0) {
           ToastService.info("Please Book a slot");

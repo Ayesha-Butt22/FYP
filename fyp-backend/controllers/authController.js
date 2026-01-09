@@ -1,3 +1,4 @@
+//authController.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
@@ -134,6 +135,82 @@ exports.changePassword = async (req, res) => {
 
     await user.save();
     return res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// Change password by email (no middleware)
+exports.changePasswordByEmail = async (req, res) => {
+  try {
+    const { email, newPassword, confirmPassword } = req.body;
+
+    if (!email || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: "Email, newPassword and confirmPassword are required" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: "New password and confirm password do not match" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "User not found with this email" });
+
+    // Optional: Check strong password
+    const isStrongPassword = password =>
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/.test(password) && !/\s/.test(password);
+
+    if (!isStrongPassword(newPassword)) {
+      return res.status(400).json({ error: "Password must be min 8 chars, include upper/lower/number/special and no spaces." });
+    }
+
+    // Hash and save
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    user.mustChangePassword = false;
+    user.first_login = false;
+
+    await user.save();
+
+    return res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// Get user profile by email
+exports.getUserByEmail = async (req, res) => {
+  try {
+    let { email } = req.params;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    // Clean the email
+    email = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Return only required fields
+    return res.json({
+      success: true,
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        studentId: user.studentId,
+        department: user.department,
+        specialization: user.specialization,
+        isGroupMade: user.isGroupMade,
+        IsApproved: user.IsApproved,
+        createdAt: user.createdAt,
+      }
+    });
+
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

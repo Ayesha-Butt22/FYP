@@ -60,13 +60,14 @@
 }
 
 /* Avatar */
-.profile-avatar-section {
-  padding: 0 2rem;
-  margin-top: -6rem;
-  margin-bottom: 2rem;
-  display: flex;
-  justify-content: center;
+.profile-avatar-section-sup {
+    padding: 115px 2rem;
+    margin-top: -6rem;
+    margin-bottom: -6rem;
+    display: flex;
+    justify-content: center;
 }
+
 
 .avatar-wrapper {
   position: relative;
