@@ -90,6 +90,8 @@ router.patch(
   isAdmin,
   adminController.toggleStudentApproval
 );
+// GET RECENT ACTIVITIES
+router.get('/recent-activities', protect, isAdmin, adminController.getRecentActivities);
 
 router.post("/supervisor/update-slots", adminController.updateSupervisorSlotsByEmail);
 

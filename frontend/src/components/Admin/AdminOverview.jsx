@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {FaUserTie,  FaUserPlus, FaArrowRight, FaUserGraduate} from "react-icons/fa";
+import {FaUserTie, FaUserPlus, FaArrowRight, FaUserGraduate} from "react-icons/fa";
 import "./AdminOverview.css";
 import toastService from "../ToastService/ToastService.jsx";
 import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
@@ -17,12 +17,19 @@ async function getSystemStats() {
     return data;
 }
 
-const activities = [
-    { type: "supervisor", text: "Added Supervisor Dr. Ali Raza", time: "1 hour ago" },
-    { type: "group", text: "Assigned Group G-106 to Supervisor", time: "Yesterday" },
-    { type: "coordinator", text: "Promoted Ms. Sana as Coordinator", time: "2 days ago" }
-];
-
+// NEW: Function to fetch recent activities
+async function getRecentActivities() {
+    const response = await adminSupervisorApi.getRecentActivities();
+    console.log("Recent Activities API Response:", response); // DEBUG
+    if (!response.status === 200) {
+        throw new Error('Failed to fetch recent activities from the server.');
+    }
+    const data = await response.data;
+    if (!data.success) {
+        throw new Error(data.message || 'API returned an error.');
+    }
+    return data;
+}
 
 export default function AdminOverview({ onTabChange }) {
     const [stats, setStats] = useState({
@@ -32,6 +39,9 @@ export default function AdminOverview({ onTabChange }) {
         totalGroups: 0,
     });
     const [loading, setLoading] = useState(true);
+    const [recentActivities, setRecentActivities] = useState([]);
+    const [apiError, setApiError] = useState(false); // NEW: Error state
+
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -45,9 +55,28 @@ export default function AdminOverview({ onTabChange }) {
             }
         };
 
-        fetchStats();
-    }, []);
+        // NEW: Fetch recent activities from API
+        const fetchRecentActivities = async () => {
+            try {
+                setApiError(false);
+                const response = await getRecentActivities();
+                console.log("Activities data:", response.activities); // DEBUG
+                setRecentActivities(response.activities);
+            } catch (error) {
+                console.error("Error fetching recent activities:", error);
+                setApiError(true);
+                // API fail hone par fallback activities
+                setRecentActivities([
+                    { type: "supervisor", text: "Added Supervisor Dr. Ali Raza", time: "1 hour ago" },
+                    { type: "group", text: "Assigned Group G-106 to Supervisor", time: "Yesterday" },
+                    { type: "coordinator", text: "Promoted Ms. Sana as Coordinator", time: "2 days ago" }
+                ]);
+            }
+        };
 
+        fetchStats();
+        fetchRecentActivities(); // NEW: Call the API
+    }, []);
 
     const statsCards = [
         { label: "Total Students", value: stats.totalStudents, icon: <FaUserGraduate />, color: "#2563eb" },
@@ -55,7 +84,6 @@ export default function AdminOverview({ onTabChange }) {
         { label: "Total Supervisors", value: stats.totalSupervisors, icon: <FaUserPen />, color: "#16a34a" },
         { label: "Total Coordinators", value: stats.totalCoordinators, icon: <FaUserTie />, color: "#fbc73d" }
     ];
-
 
     return (
         <div className="overview-container">
@@ -97,17 +125,16 @@ export default function AdminOverview({ onTabChange }) {
                     <div className="stat-card" key={i}>
                         <div className="stat-icon-circle" style={{background: s.color}}>{s.icon}</div>
                         <div className="stat-title">{s.label}</div>
-                        {/* Display a loading indicator or the final value */}
                         <div className="stat-value">{loading ? "..." : s.value}</div>
                     </div>
                 ))}
             </div>
 
             <div className="progress-section-gap"></div>
-            <div className="section-chip">Recent Activity</div>
+            <div className="section-chip">Recent Activity {apiError && "(Using Fallback Data)"}</div>
             <div className="activity-list">
                 <div className="timeline">
-                    {activities.map((act, i) => (
+                    {recentActivities.map((act, i) => (
                         <div className="activity-item" key={i}>
                             {act.text}
                             <span className="time">{act.time}</span>
