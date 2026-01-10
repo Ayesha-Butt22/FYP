@@ -1,20 +1,19 @@
-
-// AdminProfile Component
-import React, { useState, useRef, useEffect } from 'react';
+// AdminProfile.jsx
+import React, { useState, useEffect, useRef } from 'react';
 import { User, Mail, Phone, Eye, EyeOff, Camera } from 'lucide-react';
-import DashboardSectionHeader from './DashboardSectionHeader'; // added import
-import { authService } from '../Api/AuthService'; // make sure the path is correct
+import DashboardSectionHeader from './DashboardSectionHeader';
+import { authService } from '../Api/AuthService';
 import './AdminProfile.css';
 
 export default function AdminProfile() {
-  const [adminData] = useState({
-    name: 'Admin',
-    role: 'Admin',
-    email: 'admin@riphah.edu.pk',
-    gender: 'Male',
-    contact: '+92 300 1234567',
-    avatar:
-      'https://ui-avatars.com/api/?name=Muhammad+Ahmed&size=200&background=0891b2&color=fff&bold=true&font-size=0.4'
+  const timeoutRef = useRef(null);
+
+  const [adminData, setAdminData] = useState({
+    name: '',
+    role: '',
+    email: '',
+    contact: '',
+    avatar: 'https://ui-avatars.com/api/?name=Admin&size=200&background=0891b2&color=fff&bold=true&font-size=0.4'
   });
 
   const [passwords, setPasswords] = useState({
@@ -26,19 +25,44 @@ export default function AdminProfile() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  const timeoutRef = useRef(null);
-
+  // Clear timeout on unmount
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  // Fetch admin profile from API
+  useEffect(() => {
+    const fetchAdminProfile = async () => {
+      try {
+        const email = localStorage.getItem('email') || 'admin@riphah.edu.pk'; // fallback email
+        const res = await authService.getUserByEmail(email);
+
+        if (res.success && res.data?.user) {
+          const u = res.data.user;
+          setAdminData({
+            name: u.name || 'Admin',
+            role: u.role || 'Admin',
+            email: u.email || 'admin@riphah.edu.pk',
+            contact: u.contactNumber || '+92 300 1234567',
+            avatar: u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'Admin')}&size=200&background=0891b2&color=fff&bold=true&font-size=0.4`
+          });
+        } else {
+          console.error('Failed to fetch admin:', res.data?.error || res.error);
+        }
+      } catch (err) {
+        console.error('Error fetching admin:', err.message);
       }
     };
-  }, []);zz
 
+    fetchAdminProfile();
+  }, []);
+
+  // Handle password input changes
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setPasswords((prev) => ({ ...prev, [name]: value }));
+    setPasswords(prev => ({ ...prev, [name]: value }));
     if (message.text) {
       setMessage({ type: '', text: '' });
       if (timeoutRef.current) {
@@ -48,6 +72,7 @@ export default function AdminProfile() {
     }
   };
 
+  // Update password API call
   const handleUpdatePassword = async () => {
     const { newPassword, confirmPassword } = passwords;
 
@@ -67,7 +92,6 @@ export default function AdminProfile() {
     }
 
     try {
-      // API call using authService
       const result = await authService.makeAPICall('change-password-email', {
         email: adminData.email,
         newPassword,
@@ -90,15 +114,13 @@ export default function AdminProfile() {
 
   return (
     <>
-      {/* Dashboard Section Header */}
-      <DashboardSectionHeader description={"Admins can view their own Profile."}>
+      <DashboardSectionHeader description="Admins can view their own profile.">
         Profile
       </DashboardSectionHeader>
 
-      {/* Main Profile Container */}
       <div className="admin-profile-container">
         <div className="admin-profile-card" role="region" aria-label="Admin profile">
-          {/* Top Decorative Section */}
+          {/* Decorative background */}
           <div className="profile-decorative-bg">
             <div className="overlay" aria-hidden="true"></div>
             <svg viewBox="0 0 1440 120" className="wave" aria-hidden="true">
@@ -109,28 +131,18 @@ export default function AdminProfile() {
             </svg>
           </div>
 
-          {/* Profile Picture */}
+          {/* Avatar */}
           <div className="profile-avatar-section">
             <div className="avatar-wrapper">
               <img src={adminData.avatar} alt={adminData.name} className="avatar" />
-              <button
-                type="button"
-                className="avatar-camera-btn"
-                aria-label="Change avatar"
-                title="Change avatar"
-              >
-                <Camera className="icon" aria-hidden="true" />
-              </button>
+             
             </div>
           </div>
 
           {/* Name & Role */}
           <div className="profile-name-role">
             <h1>{adminData.name}</h1>
-            <div className="role-badge">
-              <User className="icon" aria-hidden="true" />
-              <span>{adminData.role}</span>
-            </div>
+           
           </div>
 
           {/* Personal Info */}
@@ -144,9 +156,9 @@ export default function AdminProfile() {
                 <Mail className="icon" aria-hidden="true" />
                 <span>{adminData.email}</span>
               </div>
-              <div className="info-card gender-card">
+              <div className="info-card role-card">
                 <User className="icon" aria-hidden="true" />
-                <span>{adminData.gender}</span>
+                <span>{adminData.role}</span>
               </div>
               <div className="info-card contact-card">
                 <Phone className="icon" aria-hidden="true" />
@@ -178,15 +190,9 @@ export default function AdminProfile() {
                     onChange={handlePasswordChange}
                     placeholder="At least 8 characters"
                     autoComplete="new-password"
-                    aria-label="New password"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword((s) => !s)}
-                    aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
-                    title={showNewPassword ? 'Hide' : 'Show'}
-                  >
-                    {showNewPassword ? <EyeOff className="icon" aria-hidden="true" /> : <Eye className="icon" aria-hidden="true" />}
+                  <button type="button" onClick={() => setShowNewPassword(s => !s)}>
+                    {showNewPassword ? <EyeOff className="icon" /> : <Eye className="icon" />}
                   </button>
                 </div>
               </div>
@@ -202,15 +208,9 @@ export default function AdminProfile() {
                     onChange={handlePasswordChange}
                     placeholder="Enter password again"
                     autoComplete="new-password"
-                    aria-label="Confirm password"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((s) => !s)}
-                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-                    title={showConfirmPassword ? 'Hide' : 'Show'}
-                  >
-                    {showConfirmPassword ? <EyeOff className="icon" aria-hidden="true" /> : <Eye className="icon" aria-hidden="true" />}
+                  <button type="button" onClick={() => setShowConfirmPassword(s => !s)}>
+                    {showConfirmPassword ? <EyeOff className="icon" /> : <Eye className="icon" />}
                   </button>
                 </div>
               </div>
