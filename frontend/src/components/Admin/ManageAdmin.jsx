@@ -1,3 +1,4 @@
+//ManageAdmin.jsx
 import React, { useEffect, useState } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
 import AppTable from "./AppTable.jsx";
