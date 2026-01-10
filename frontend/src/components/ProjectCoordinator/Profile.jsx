@@ -1,25 +1,25 @@
+// ProjectCoordinator/Profile.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, EyeOff, Camera, User, Mail, Phone } from 'lucide-react';
-import { authService } from '../Api/AuthService'; // Ensure the path is correct
+import { User, Mail, Eye, EyeOff, Camera } from 'lucide-react';
+import DashboardSectionHeader from './DashboardSectionHeader';
+import { authService } from '../Api/AuthService';
 import './Profile.css';
-import DashboardSectionHeader from "./DashboardSectionHeader";
 
 export default function Profile() {
-  const [adminData] = useState({
-    name: 'Sobia',
-    role: 'Project Coordinator',
-    department: 'Computer Science (CS)',
-    email: 'Sobia@riphah.edu.pk',
-    gender: 'Female',
-    contact: '+92 300 1234567',
-    avatar: 'https://ui-avatars.com/api/?name=Muhammad+Ahmed&size=200&background=0891b2&color=fff&bold=true&font-size=0.4'
+  const timeoutRef = useRef(null);
+
+  const [profile, setProfile] = useState({
+    name: "",
+    role: "Project Coordinator",
+    department: "",
+    email: "",
+    avatar: "https://ui-avatars.com/api/?name=Project+Coordinator&size=200&background=0891b2&color=fff&bold=true&font-size=0.4"
   });
 
   const [passwords, setPasswords] = useState({ newPassword: '', confirmPassword: '' });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const timeoutRef = useRef(null);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -28,7 +28,34 @@ export default function Profile() {
     };
   }, []);
 
-  // Handle input changes
+  // Fetch profile via API
+  useEffect(() => {
+    const email = localStorage.getItem("email");
+    if (!email) return;
+
+    const fetchProfile = async () => {
+      try {
+        const res = await authService.getUserByEmail(email);
+        if (res.success && res.data?.user) {
+          const u = res.data.user;
+          setProfile({
+            name: u.name,
+            role: u.role || "Project Coordinator",
+            department: u.department || "N/A",
+            email: u.email,
+            avatar: u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=200&background=0891b2&color=fff&bold=true&font-size=0.4`
+          });
+        } else {
+          console.error("Profile fetch failed:", res.data?.error || res.error);
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err.message);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswords(prev => ({ ...prev, [name]: value }));
@@ -38,11 +65,9 @@ export default function Profile() {
     }
   };
 
-  // Handle password update
   const handleUpdatePassword = async () => {
     const { newPassword, confirmPassword } = passwords;
 
-    // Basic validations
     if (!newPassword || !confirmPassword) {
       setMessage({ type: 'error', text: 'All fields are required!' });
       return;
@@ -58,7 +83,7 @@ export default function Profile() {
 
     try {
       const result = await authService.makeAPICall('change-password-email', {
-        email: adminData.email,
+        email: profile.email,
         newPassword,
         confirmPassword
       });
@@ -72,7 +97,6 @@ export default function Profile() {
 
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => setMessage({ type: '', text: '' }), 4000);
-
     } catch (err) {
       setMessage({ type: 'error', text: err.message });
     }
@@ -85,34 +109,28 @@ export default function Profile() {
       </DashboardSectionHeader>
 
       <div className="admin-profile-container">
-        <div className="admin-profile-card" role="region" aria-label="Profile">
-          
+        <div className="admin-profile-card" role="region" aria-label="Project Coordinator profile">
           {/* Profile Avatar */}
           <div className="profile-avatar-section-sup">
             <div className="avatar-wrapper">
-              <img src={adminData.avatar} alt={adminData.name} className="avatar" />
-              <button type="button" className="avatar-camera-btn" aria-label="Change avatar">
-                <Camera className="icon" />
-              </button>
+              <img src={profile.avatar} alt={profile.name} className="avatar" />
+              
             </div>
           </div>
 
           {/* Name & Role */}
           <div className="profile-name-role">
-            <h1>{adminData.name}</h1>
-            <div className="role-and-dept">
-              <div className="role-badge"><User className="icon" /> {adminData.role}</div>
-              <div className="department-badge">{adminData.department}</div>
-            </div>
+            <h1>{profile.name}</h1>
+       
           </div>
 
           {/* Personal Info */}
           <div className="personal-info-section">
             <label>Personal Information</label>
             <div className="personal-info-grid">
-              <div className="info-card email-card"><Mail className="icon" /> {adminData.email}</div>
-              <div className="info-card gender-card"><User className="icon" /> {adminData.gender}</div>
-              <div className="info-card contact-card"><Phone className="icon" /> {adminData.contact}</div>
+              <div className="info-card email-card"><Mail className="icon" /> {profile.email}</div>
+              <div className="info-card department-card"><User className="icon" /> {profile.department}</div>
+              <div className="info-card role-card"><User className="icon" /> {profile.role}</div>
             </div>
           </div>
 
@@ -132,6 +150,7 @@ export default function Profile() {
                     name="newPassword"
                     value={passwords.newPassword}
                     onChange={handlePasswordChange}
+                    placeholder="At least 8 characters"
                   />
                   <button onClick={() => setShowNewPassword(s => !s)}>
                     {showNewPassword ? <EyeOff /> : <Eye />}
@@ -147,6 +166,7 @@ export default function Profile() {
                     name="confirmPassword"
                     value={passwords.confirmPassword}
                     onChange={handlePasswordChange}
+                    placeholder="Enter password again"
                   />
                   <button onClick={() => setShowConfirmPassword(s => !s)}>
                     {showConfirmPassword ? <EyeOff /> : <Eye />}

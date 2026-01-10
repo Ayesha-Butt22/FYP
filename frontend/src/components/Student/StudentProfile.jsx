@@ -1,3 +1,4 @@
+//StudentProfile.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Camera, Mail, BookOpen, Calendar, Eye, EyeOff, User as UserIcon } from "lucide-react";
 import DashboardSectionHeader from "./DashboardSectionHeader";

@@ -1,3 +1,4 @@
+
 // AdminProfile Component
 import React, { useState, useRef, useEffect } from 'react';
 import { User, Mail, Phone, Eye, EyeOff, Camera } from 'lucide-react';
@@ -33,7 +34,7 @@ export default function AdminProfile() {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, []);
+  }, []);zz
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
