@@ -23,7 +23,7 @@ import "./SupervisorMeetings.css";
 
 /* ================= CONFIG ================= */
 const API = "http://localhost:5000/api/meetings";
-const SUPERVISOR_EMAIL = "sup@riphah.edu.pk";
+const SUPERVISOR_EMAIL = localStorage.getItem("email");
 
 /* ================= HELPERS ================= */
 function formatDate(dateStr) {

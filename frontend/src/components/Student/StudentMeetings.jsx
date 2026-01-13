@@ -16,8 +16,7 @@ import "./StudentMeetings.css";
 
 /* ================= CONFIG ================= */
 const API_BASE = "http://localhost:5000/api/meetings";
-const STUDENT_EMAIL = "student@riphah.edu.pk";
-const SUPERVISOR_EMAIL = "sup@riphah.edu.pk";
+
 
 /* ================= HELPERS ================= */
 const formatDate = (d) =>
@@ -40,11 +39,12 @@ export default function StudentMeetings() {
   const [myMeetings, setMyMeetings] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [openConfirm, setOpenConfirm] = useState(false);
+  const email = localStorage.getItem("email");
 
   /* ================= LOAD DATA ================= */
   const loadAvailableSlots = async () => {
     try {
-      const res = await fetch(`${API_BASE}/available/${SUPERVISOR_EMAIL}`);
+      const res = await fetch(`${API_BASE}/available/${email}`);
       const data = await res.json();
       if (data.success) setAvailableSlots(data.slots);
     } catch (err) {
@@ -77,7 +77,7 @@ export default function StudentMeetings() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           slotId: selectedSlot._id,
-          studentEmail: STUDENT_EMAIL,
+          studentEmail: email,
         }),
       });
 

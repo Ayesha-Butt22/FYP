@@ -1,4 +1,6 @@
 const MeetingSlot = require("../models/MeetingSlot");
+const getStudentMetaData = require("./getStudentMetaData");
+
 
 /* ================= CREATE SLOT ================= */
 exports.createSlot = async (req, res) => {
@@ -18,7 +20,6 @@ exports.getSupervisorMeetings = async (req, res) => {
 
     const all = await MeetingSlot.find({ supervisorEmail: email });
 
-    // FUTURE SLOTS = status not done AND date today or later
     const futureSlots = all.filter(s => s.status !== 2 && s.date >= today);
 
     // UPCOMING = booked slots today or later
@@ -40,9 +41,13 @@ exports.getSupervisorMeetings = async (req, res) => {
 
 /* ================= GET AVAILABLE SLOTS FOR STUDENT ================= */
 exports.getAvailableSlots = async (req, res) => {
+   const { group, proposal } = await getStudentMetaData({
+      email: req.params.email
+    });
+
   try {
     const slots = await MeetingSlot.find({
-      supervisorEmail: req.params.email,
+      supervisorEmail: proposal.projectSupervisor,
       status: 0
     }).sort({ date: 1, time: 1 });
 
@@ -53,47 +58,154 @@ exports.getAvailableSlots = async (req, res) => {
 };
 
 /* ================= BOOK SLOT (STUDENT) ================= */
+
+/* ================= BOOK SLOT (STUDENT EMAIL BASED → GROUP) ================= */
 exports.bookSlot = async (req, res) => {
   try {
     const { slotId, studentEmail } = req.body;
-    const slot = await MeetingSlot.findOne({ _id: slotId, status: 0 });
 
-    if (!slot) return res.status(400).json({ success: false, message: "Slot not available" });
+    if (!slotId || !studentEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "slotId and studentEmail are required"
+      });
+    }
 
-    slot.status = 1;
-    slot.bookedBy = studentEmail;
+    /* =========================
+       STEP 1: CHECK SLOT
+    ========================= */
+    const slot = await MeetingSlot.findOne({
+      _id: slotId,
+      status: 0
+    });
+
+    if (!slot) {
+      return res.status(400).json({
+        success: false,
+        message: "Slot not available"
+      });
+    }
+
+    /* =========================
+       STEP 2: GET STUDENT META
+    ========================= */
+    const { group, proposal } = await getStudentMetaData({
+      email: studentEmail
+    });
+
+    /* =========================
+       STEP 3: VALIDATIONS
+    ========================= */
+    if (!group) {
+      return res.status(403).json({
+        success: false,
+        message: "Student ka koi group registered nahi hai"
+      });
+    }
+
+    if (!proposal) {
+      return res.status(403).json({
+        success: false,
+        message: "Group ki proposal submit nahi hui"
+      });
+    }
+
+    /* =========================
+       STEP 4: BOOK SLOT (GROUP)
+    ========================= */
+    slot.status = 1;                 // booked
+    slot.bookedBy = group._id;       // ✅ GROUP ID
     await slot.save();
 
-    res.json({ success: true, slot });
+    /* =========================
+       SUCCESS RESPONSE
+    ========================= */
+    res.json({
+      success: true,
+      message: "Meeting booked successfully",
+      data: {
+        slotId: slot._id,
+        groupId: group._id,
+        proposalId: proposal._id
+      }
+    });
+
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error("Book slot error:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
   }
 };
-
 /* ================= GET STUDENT MEETINGS ================= */
+/* ================= GET STUDENT MEETINGS (EMAIL → GROUP) ================= */
 exports.getStudentMeetings = async (req, res) => {
   try {
+    const studentEmail = req.params.email;
+
+    /* =========================
+       STEP 1: GET STUDENT META
+    ========================= */
+    const { group } = await getStudentMetaData({
+      email: studentEmail
+    });
+
+    if (!group) {
+      return res.status(404).json({
+        success: false,
+        message: "Student ka koi group registered nahi hai"
+      });
+    }
+
+    /* =========================
+       STEP 2: FETCH GROUP MEETINGS
+    ========================= */
     const meetings = await MeetingSlot.find({
-      bookedBy: req.params.email,
+      bookedBy: group._id,
       status: { $in: [1, 2] }
     }).sort({ date: -1 });
 
-    res.json({ success: true, meetings });
+    res.json({
+      success: true,
+      meetings
+    });
+
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error("Get student meetings error:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
   }
 };
 
 /* ================= MARK DONE ================= */
 exports.markDone = async (req, res) => {
   try {
-    await MeetingSlot.findByIdAndUpdate(req.body.slotId, {
-      status: 2,
-      doneAt: new Date()
-    });
+    const slot = await MeetingSlot.findById(req.body.slotId);
+    if (!slot) {
+      return res.status(404).json({ success: false, message: "Slot not found" });
+    }
+
+    // Combine date + time
+    const meetingDateTime = new Date(`${slot.date}T${slot.time}`);
+    const now = new Date();
+
+    if (now < meetingDateTime) {
+      return res.status(400).json({
+        success: false,
+        message: "Meeting time has not passed yet"
+      });
+    }
+
+    slot.status = 2; // done
+    slot.doneAt = new Date();
+    await slot.save();
 
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
