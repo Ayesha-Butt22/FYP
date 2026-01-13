@@ -13,10 +13,10 @@ import {
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "../Supervisor/AppTable"; 
 import "./StudentMeetings.css";
+import { toastService } from "../ToastService/ToastService.jsx";
 
 /* ================= CONFIG ================= */
 const API_BASE = "http://localhost:5000/api/meetings";
-
 
 /* ================= HELPERS ================= */
 const formatDate = (d) =>
@@ -49,16 +49,18 @@ export default function StudentMeetings() {
       if (data.success) setAvailableSlots(data.slots);
     } catch (err) {
       console.error("Failed to load available slots", err);
+      toastService.error("Failed to load available slots");
     }
   };
 
   const loadMyMeetings = async () => {
     try {
-      const res = await fetch(`${API_BASE}/student/${STUDENT_EMAIL}`);
+      const res = await fetch(`${API_BASE}/student/${email}`);
       const data = await res.json();
       if (data.success) setMyMeetings(data.meetings);
     } catch (err) {
       console.error("Failed to load my meetings", err);
+      toastService.error("Failed to load your meetings");
     }
   };
 
@@ -72,7 +74,7 @@ export default function StudentMeetings() {
     if (!selectedSlot) return;
 
     try {
-      await fetch(`${API_BASE}/book`, {
+      const res = await fetch(`${API_BASE}/book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -81,14 +83,19 @@ export default function StudentMeetings() {
         }),
       });
 
-      setOpenConfirm(false);
-      setSelectedSlot(null);
-
-      loadAvailableSlots();
-      loadMyMeetings();
+      const data = await res.json();
+      if (data.success) {
+        toastService.success("Meeting booked successfully!");
+        setOpenConfirm(false);
+        setSelectedSlot(null);
+        loadAvailableSlots();
+        loadMyMeetings();
+      } else {
+        toastService.error(data.message || "Failed to book meeting");
+      }
     } catch (err) {
       console.error("Booking failed", err);
-      alert("Failed to book meeting. Try again.");
+      toastService.error("Something went wrong while booking");
     }
   };
 
@@ -102,8 +109,8 @@ export default function StudentMeetings() {
       {/* ================= AVAILABLE SLOTS ================= */}
       <Paper sx={{ p: 2, mb: 4 }}>
         <Typography className="supermeeting-section-title">
-  Available Slots
-</Typography>
+          Available Slots
+        </Typography>
 
         <AppTable
           headers={["Date", "Time", "Duration", "Action"]}
