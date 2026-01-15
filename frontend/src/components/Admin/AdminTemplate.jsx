@@ -196,7 +196,7 @@ export default function AdminTemplates() {
             onClick={refreshTemplates}
             disabled={loading}
             title="Refresh templates"
-            style={{ background: "#10b981" }}
+             style={{ background: "#01337a" }}  
           >
             ↻ Refresh
           </button>
