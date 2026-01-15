@@ -140,7 +140,7 @@ exports.changePassword = async (req, res) => {
   }
 };
 
-// Change password by email (no middleware)
+// Change password by email 
 exports.changePasswordByEmail = async (req, res) => {
   try {
     const { email, newPassword, confirmPassword } = req.body;
@@ -178,40 +178,40 @@ exports.changePasswordByEmail = async (req, res) => {
   }
 };
 
-// Get user profile by email
+
+// Get user by email (no auth required)
 exports.getUserByEmail = async (req, res) => {
   try {
-    let { email } = req.params;
+    const { email } = req.params; // email from URL param
 
     if (!email) {
-      return res.status(400).json({ error: "Email is required" });
+      return res.status(400).json({ success: false, error: "Email is required" });
     }
-
-    // Clean the email
-    email = email.trim().toLowerCase();
 
     const user = await User.findOne({ email });
+
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ success: false, error: "User not found" });
     }
 
-    // Return only required fields
-    return res.json({
-      success: true,
-      user: {
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        studentId: user.studentId,
-        department: user.department,
-        specialization: user.specialization,
-        isGroupMade: user.isGroupMade,
-        IsApproved: user.IsApproved,
-        createdAt: user.createdAt,
-      }
-    });
+    // Map only required fields
+    const userData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      specialization: user.specialization || "",
+      department: user.department || "",
+      studentId: user.studentId || "",
+      mustChangePassword: user.mustChangePassword || false,
+      first_login: user.first_login || false,
+      isGroupMade: user.isGroupMade || false,
+      IsApproved: user.IsApproved || false,
+    };
 
+    return res.status(200).json({ success: true, user: userData });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    console.error(err);
+    return res.status(500).json({ success: false, error: err.message });
   }
 };
