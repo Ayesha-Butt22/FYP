@@ -1,3 +1,4 @@
+//AdminApis.jsx
 const API_BASE_URL = "http://localhost:5000/api";
 
 class AdminApis {
@@ -115,10 +116,7 @@ async removeCoordinator(id) {
     async toggleStudentApproval(id) {
         return await this.makeAPICall(`admin/toggle-approval/${id}`, {}, { method: 'PATCH' });
     }
-   // GET RECENT ACTIVITIES - ADD THIS METHOD
-async getRecentActivities() {
-    return await this.makeAPICall("admin/recent-activities", {}, { method: "GET" });
-}
+    
     // MAKE FYP INCHARGE
 async makeFYPIncharge(id) {
   return await this.makeAPICall(`admin/make-fyp-incharge/${id}`, {}, { method: 'POST' });
@@ -127,17 +125,7 @@ async makeFYPIncharge(id) {
     async getAllUsers() {
         return await this.makeAPICall("admin/all", {}, { method: "GET" });
     }
-    // GET SUPERVISOR STATS
-async getSupervisorStats() {
-    return await this.makeAPICall("supervisor/stats", {}, { method: "GET" });
 }
-
-// GET RECENT ACTIVITIES FOR SUPERVISOR
-async getSupervisorRecentActivities() {
-    return await this.makeAPICall("supervisor/recent-activities", {}, { method: "GET" });
-}
-}
-
 
 export const adminSupervisorApi = new AdminApis();
 export default adminSupervisorApi;

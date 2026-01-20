@@ -43,6 +43,18 @@ class AuthService {
         return result;
     }
 
+
+    // Get user profile by email
+async getUserByEmail(email) {
+    try {
+        const res = await fetch(`${API_BASE_URL}/user-by-email/${encodeURIComponent(email)}`);
+        const data = await res.json();
+        return { success: res.ok, data };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
     // Register
     async register(userData) {
         return await this.makeAPICall("register", userData);
@@ -75,19 +87,8 @@ class AuthService {
             return { success: false, error: error.message, data: null };
         }
     }
-    async getUserByEmail(email) {
-    try {
-      const res = await fetch(`${API_BASE_URL}/user-by-email/${email}`);
-      const data = await res.json();
 
-      return {
-        success: res.ok,
-        data
-      };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+  
 
     // Change password by email (no auth required)
     async changePasswordByEmail(payload) {

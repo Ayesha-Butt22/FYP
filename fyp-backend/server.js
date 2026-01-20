@@ -25,9 +25,11 @@ const committeeevaluationRoutes = require("./routes/committeEvalution");
 const projectIdeasRoutes = require("./routes/projectIdeasRoutes");
 
 
+
+
 // =============== NEW: Import Template Routes ===============
 const templateRoutes = require("./routes/templateRoutes");
-
+const meetingRoutes = require("./routes/meetingRoutes");
 
 app.use('/Filesk', express.static(path.join(__dirname, 'Filesk')));
 app.use('/api/auth', require('./routes/auth'));
@@ -47,6 +49,9 @@ app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);
 app.use("/api/evaluation", evaluationRoutes);
 app.use("/api/committee-evaluation", committeeevaluationRoutes);
 app.use("/api/project-ideas", projectIdeasRoutes);
+app.use("/api/meetings", require("./routes/meetingRoutes"));
+
+
 
 // =============== NEW: Add Template Routes Here ===============
 app.use("/api/templates", templateRoutes);

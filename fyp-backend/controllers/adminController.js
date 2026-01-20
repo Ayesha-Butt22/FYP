@@ -45,11 +45,24 @@ exports.createUser = async (req, res) => {
     });
 
     // Auto Admin ID
-    if (role === 'admin') {
-      const count = await User.countDocuments({ role: 'admin' });
-      newUser.studentId = `adm-${String(count + 2).padStart(3, '0')}`;
-    }
+if (role === 'admin') {
+  // Find last admin
+  const lastAdmin = await User.find({ role: 'admin' })
+    .sort({ createdAt: -1 }) // get the latest
+    .limit(1);
 
+  let nextId = 1; // default for first admin
+
+  if (lastAdmin.length > 0 && lastAdmin[0].studentId) {
+    // Extract the number from last admin ID
+    const lastNum = parseInt(lastAdmin[0].studentId.split('-')[1]);
+    nextId = lastNum + 1;
+  }
+
+  // Pad with zeros: adm-001, adm-002, etc.
+  const padded = String(nextId).padStart(3, '0');
+  newUser.studentId = `adm-${padded}`;
+}
     await newUser.save();
     const u = newUser.toObject();
     delete u.password;
@@ -557,183 +570,3 @@ exports.makeFYPIncharge = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
-
-// GET RECENT ACTIVITIES FOR ADMIN DASHBOARD
-exports.getRecentActivities = async (req, res) => {
-  try {
-    console.log("Recent Activities API called");
-    
-    // Import your existing models
-    const Proposal = require('../models/StudentProposal');
-    const Group = require('../models/StudentGroup');
-    const Noticeboard = require('../models/Noticeboard');
-
-    // Get latest proposal
-    const latestProposal = await Proposal.findOne()
-      .sort({ createdAt: -1 })
-      .populate('groupId');
-
-    // Get latest group
-    const latestGroup = await Group.findOne()
-      .sort({ createdAt: -1 });
-
-    // Get latest notice
-    const latestNotice = await Noticeboard.findOne()
-      .sort({ createdAt: -1 });
-
-    // Format activities
-    const activities = [];
-
-    // Activity 1: Latest Proposal
-    if (latestProposal) {
-      // Smart group name masking
-      let groupDisplay = 'New Group';
-      if (latestProposal.groupId) {
-        const originalGroupId = latestProposal.groupId.groupId || latestProposal.groupId._id.toString();
-        groupDisplay = maskGroupId(originalGroupId);
-      }
-      
-      // Project title trim if too long
-      let projectTitle = latestProposal.projectTitle;
-      if (projectTitle.length > 25) {
-        projectTitle = projectTitle.substring(0, 25) + '...';
-      }
-      
-      const timeAgo = getTimeAgo(latestProposal.createdAt);
-      
-      activities.push({
-        type: "proposal",
-        text: `New proposal "${projectTitle}" submitted by ${groupDisplay}`,
-        time: timeAgo
-      });
-    } else {
-      activities.push({
-        type: "proposal", 
-        text: "No proposals submitted yet",
-        time: "Recently"
-      });
-    }
-
-    // Activity 2: Latest Group
-    if (latestGroup) {
-      // Smart group name masking
-      let groupName = 'New Group';
-      if (latestGroup.groupId) {
-        groupName = maskGroupId(latestGroup.groupId);
-      } else if (latestGroup._id) {
-        groupName = maskGroupId(latestGroup._id.toString());
-      }
-      
-      const timeAgo = getTimeAgo(latestGroup.createdAt);
-      
-      // Count members properly
-      const memberCount = [
-        latestGroup.leader,
-        latestGroup.member2, 
-        latestGroup.member3
-      ].filter(member => member && member.email).length;
-      
-      const memberText = memberCount === 1 ? '1 member' : `${memberCount} members`;
-      
-      activities.push({
-        type: "group", 
-        text: `New ${groupName} created with ${memberText}`,
-        time: timeAgo
-      });
-    } else {
-      activities.push({
-        type: "group",
-        text: "No groups created yet", 
-        time: "Recently"
-      });
-    }
-
-    // Activity 3: Latest Notice
-    if (latestNotice) {
-      const timeAgo = getTimeAgo(latestNotice.createdAt);
-      
-      // Notice title smart trimming
-      let noticeTitle = latestNotice.title;
-      if (noticeTitle.length > 30) {
-        noticeTitle = noticeTitle.substring(0, 30) + '...';
-      }
-      
-      activities.push({
-        type: "notification",
-        text: `New notice: ${noticeTitle}`,
-        time: timeAgo
-      });
-    } else {
-      activities.push({
-        type: "system",
-        text: "FYP Management System is active",
-        time: "Just now"
-      });
-    }
-
-    console.log("Final activities:", activities);
-
-    return res.status(200).json({
-      success: true,
-      activities
-    });
-
-  } catch (err) {
-    console.error("Error fetching recent activities:", err);
-    return res.status(500).json({ 
-      success: false, 
-      error: "Failed to fetch recent activities" 
-    });
-  }
-};
-
-// Smart Group ID Masking Function
-function maskGroupId(originalId) {
-  if (!originalId) return 'Group-001';
-  
-  // Agar number type ka hai to direct use karo
-  if (typeof originalId === 'number') {
-    return `Group-${String(originalId).padStart(3, '0')}`;
-  }
-  
-  // Agar string hai to check karo
-  const strId = originalId.toString();
-  
-  // Agar already "group-" ya "Group-" se start ho raha hai to use karo
-  if (strId.toLowerCase().startsWith('group-')) {
-    return `Group-${strId.substring(6, 9)}`; // Pehle 3 digits lelo
-  }
-  
-  // Agar long number hai (like timestamp) to last 3 digits lelo
-  if (strId.length > 5 && /^\d+$/.test(strId)) {
-    const shortId = parseInt(strId.substring(strId.length - 3));
-    return `Group-${String(shortId).padStart(3, '0')}`;
-  }
-  
-  // Agar ObjectId type ka hai to last 3 characters lelo
-  if (strId.length === 24) { // MongoDB ObjectId length
-    return `Group-${strId.substring(18, 21).toUpperCase()}`;
-  }
-  
-  // Default: first 6 characters with "Group-" prefix
-  return `Group-${strId.substring(0, 3).toUpperCase()}`;
-}
-
-// Helper function to calculate time ago
-function getTimeAgo(date) {
-  const now = new Date();
-  const diffInMs = now - new Date(date);
-  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-  const diffInDays = Math.floor(diffInHours / 24);
-
-  if (diffInDays > 0) {
-    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-  } else if (diffInHours > 0) {
-    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-  } else if (diffInMinutes > 0) {
-    return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
-  } else {
-    return 'Just now';
-  }
-}

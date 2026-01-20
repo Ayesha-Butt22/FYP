@@ -170,6 +170,14 @@ button.confirm-btn-meetingmodal[disabled] {
   justify-content: right;
 }
 
+.supermeeting-section-title {
+  font-weight: 800 !important;
+  font-size: 1.4rem !important;
+  color: #01337a;
+  margin-bottom: 14px !important;
+  display: flex;
+  align-items: center;
+}
 
 @media (max-width: 720px) {
   .slot-row { flex-direction: column; align-items: flex-start; gap: 6px; }
