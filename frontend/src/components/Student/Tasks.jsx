@@ -1,31 +1,104 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import { toastService } from "../ToastService/ToastService";
 import "./Tasks.css";
-
 
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     assignee: "",
-    status: "Pending",
+    progress: "0", // Changed from status to progress, default 0
     comments: "",
   });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [updateData, setUpdateData] = useState({ progress: "", comment: "" });
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const groupMembers = ["Ahmed Ali", "Fatima Khan", "Hassan Raza", "Ayesha Malik", "Bilal Sheikh"];
-  const currentUser = "Ahmed Ali";
+  // Get current user info
+  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+
+  // Fetch group members on component mount
+  useEffect(() => {
+    fetchGroupMembers();
+    fetchTasks();
+  }, []);
+
+  const fetchGroupMembers = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      
+      const response = await fetch("http://localhost:5000/api/tasks/group-members", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Format: "Name (Email)"
+        const memberStrings = data.members.map(member => member.display);
+        setGroupMembers(memberStrings);
+      } else {
+        // Fallback if API fails
+        toastService?.error?.(data.message || "Failed to load group members");
+        setGroupMembers([
+          "Ahmed Ali (ahmed@example.com)",
+          "Fatima Khan (fatima@example.com)",
+          "Hassan Raza (hassan@example.com)",
+          "Ayesha Malik (ayesha@example.com)",
+          "Bilal Sheikh (bilal@example.com)"
+        ]);
+      }
+    } catch (error) {
+      console.error("Error fetching group members:", error);
+      // Fallback data
+      setGroupMembers([
+        "Ahmed Ali (ahmed@example.com)",
+        "Fatima Khan (fatima@example.com)",
+        "Hassan Raza (hassan@example.com)",
+        "Ayesha Malik (ayesha@example.com)",
+        "Bilal Sheikh (bilal@example.com)"
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTasks = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      
+      const response = await fetch("http://localhost:5000/api/tasks", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setTasks(data.tasks);
+      } else {
+        toastService?.error?.(data.message || "Failed to load tasks");
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      toastService?.error?.("Failed to load tasks from server");
+    }
+  };
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData((p) => ({ ...p, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.title.trim() || !formData.assignee) {
@@ -33,65 +106,121 @@ export default function Tasks() {
       return;
     }
 
-    const createdAt = new Date();
-    const initialComments = formData.comments.trim()
-      ? [{ text: formData.comments.trim(), date: createdAt.toLocaleString(), author: currentUser }]
-      : [];
+    try {
+      const token = localStorage.getItem("token");
+      
+      const response = await fetch("http://localhost:5000/api/tasks/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: formData.title.trim(),
+          assignee: formData.assignee,
+          comments: formData.comments.trim()
+        })
+      });
 
-    const newTask = {
-      id: Date.now(),
-      title: formData.title.trim(),
-      createdBy: currentUser,
-      createDate: createdAt.toLocaleString(),
-      assignedTo: formData.assignee,
-      progress: 0,
-      comments: initialComments,
-    };
+      const data = await response.json();
+      
+      if (data.success) {
+        // Add new task to state
+        setTasks(prev => [data.task, ...prev]);
+        
+        // Reset form
+        setFormData({ 
+          title: "", 
+          assignee: "", 
+          progress: "0", // Reset to 0
+          comments: "" 
+        });
+        
+        toastService?.success?.("Task created successfully");
 
-    setTasks((p) => [newTask, ...p]);
-    setFormData({ title: "", assignee: "", status: "Pending", comments: "" });
-    toastService?.success?.("Task created");
-
-    setTimeout(() => {
-      const el = document.querySelector(".task-cards-wrapper");
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 120);
+        setTimeout(() => {
+          const el = document.querySelector(".task-cards-wrapper");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 120);
+      } else {
+        toastService?.error?.(data.message);
+      }
+    } catch (error) {
+      console.error("Error creating task:", error);
+      toastService?.error?.("Failed to create task");
+    }
   };
 
   const handleOpenModal = (taskId) => {
     setSelectedTaskId(taskId);
-    setUpdateData({ progress: "", comment: "" });
+    const task = tasks.find(t => t.id === taskId);
+    setUpdateData({ 
+      progress: task?.progress?.toString() || "0", // Default 0 if empty
+      comment: "" 
+    });
     setModalOpen(true);
   };
 
   const handleUpdateChange = (e) => {
     const { name, value } = e.target;
-    setUpdateData((p) => ({ ...p, [name]: value }));
+    setUpdateData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const saveUpdate = () => {
+  const saveUpdate = async () => {
     if (updateData.progress === "" || isNaN(Number(updateData.progress))) {
       toastService?.error?.("Please provide a progress percentage (0-100)");
       return;
     }
+    
     const pct = Math.max(0, Math.min(100, Number(updateData.progress)));
 
-    setTasks((prev) =>
-      prev.map((t) => {
-        if (t.id !== selectedTaskId) return t;
-        const newComments = [...t.comments];
-        if (updateData.comment.trim()) {
-          newComments.push({ text: updateData.comment.trim(), date: new Date().toLocaleString(), author: currentUser });
-        }
-        return { ...t, progress: pct, comments: newComments };
-      })
-    );
+    try {
+      const token = localStorage.getItem("token");
+      
+      const response = await fetch(`http://localhost:5000/api/tasks/${selectedTaskId}/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          progress: pct,
+          comment: updateData.comment.trim()
+        })
+      });
 
-    setModalOpen(false);
-    setSelectedTaskId(null);
-    setUpdateData({ progress: "", comment: "" });
-    toastService?.success?.("Task updated");
+      const data = await response.json();
+      
+      if (data.success) {
+        // Update task in state
+        setTasks(prev => prev.map(t => 
+          t.id === selectedTaskId ? data.task : t
+        ));
+        
+        setModalOpen(false);
+        setSelectedTaskId(null);
+        setUpdateData({ progress: "", comment: "" });
+        
+        toastService?.success?.("Task updated successfully");
+      } else {
+        toastService?.error?.(data.message);
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
+      toastService?.error?.("Failed to update task");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="tasks-root">
+        <DashboardSectionHeader description="Loading group members...">
+          Manage Tasks
+        </DashboardSectionHeader>
+        <div className="loading">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="tasks-root">
@@ -100,7 +229,7 @@ export default function Tasks() {
       </DashboardSectionHeader>
 
       <div className="tasks-container">
-        {/* Top form */}
+        {/* Top form - Status changed to Progress with default 0 */}
         <form className="task-form two-column" onSubmit={handleSubmit}>
           <div className="left-col">
             <div className="form-row">
@@ -116,17 +245,29 @@ export default function Tasks() {
 
             <div className="form-row">
               <label className="form-label">Assign To *</label>
-              <select name="assignee" value={formData.assignee} onChange={handleFormChange} className="input">
+              <select 
+                name="assignee" 
+                value={formData.assignee} 
+                onChange={handleFormChange} 
+                className="input"
+              >
                 <option value="">Select member</option>
-                {groupMembers.map((m) => (
-                  <option key={m} value={m}>{m}</option>
+                {groupMembers.map((member, index) => (
+                  <option key={index} value={member}>
+                    {member}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div className="form-row">
-              <label className="form-label">Status</label>
-              <input name="status" value={formData.status} disabled className="input disabled" />
+              <label className="form-label">Initial Progress %</label>
+              <input 
+                name="progress" 
+                value="0" 
+                disabled 
+                className="input disabled" 
+              />
             </div>
           </div>
 
@@ -147,7 +288,7 @@ export default function Tasks() {
           </div>
         </form>
 
-        {/* Task cards */}
+        {/* Task cards - EXACTLY SAME AS BEFORE */}
         <div className="task-cards-wrapper">
           {tasks.length === 0 ? (
             <div className="no-tasks-note">No tasks available. Create a new task above.</div>
@@ -175,7 +316,10 @@ export default function Tasks() {
                   )}
                 </div>
 
-                <button className="btn primary" onClick={() => handleOpenModal(task.id)}>
+                <button 
+                  className="btn primary" 
+                  onClick={() => handleOpenModal(task.id)}
+                >
                   Update Status
                 </button>
               </div>
@@ -183,7 +327,7 @@ export default function Tasks() {
           )}
         </div>
 
-        {/* Modal */}
+        {/* Modal - EXACTLY SAME AS BEFORE */}
         {modalOpen && (
           <div className="modal-backdrop" onMouseDown={() => setModalOpen(false)}>
             <div className="modal" onMouseDown={(e) => e.stopPropagation()}>
