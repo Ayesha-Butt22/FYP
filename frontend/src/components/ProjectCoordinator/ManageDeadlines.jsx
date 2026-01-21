@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import DeadLineService from "../Api/DeadlineService.jsx";
-import SemesterStartService from "../Api/SemesterStartService.js";
+import SemesterStartService from "../Api/SemesterStartService.jsx";
 
 import {
   ResponsiveContainer,

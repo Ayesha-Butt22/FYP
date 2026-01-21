@@ -58,6 +58,10 @@ app.use("/api/project-ideas", projectIdeasRoutes);
 app.use("/api/meetings", require("./routes/meetingRoutes"));
 
 app.use("/api/semester-start", require("./routes/semesterStartRoutes"));
+app.use("/uploads", express.static("uploads"));
+app.use("/api/student-templates", require("./routes/studentTemplateRoutes"));
+
+
 
 
 
