@@ -57,6 +57,9 @@ app.use("/api/committee-evaluation", committeeevaluationRoutes);
 app.use("/api/project-ideas", projectIdeasRoutes);
 app.use("/api/meetings", require("./routes/meetingRoutes"));
 
+app.use("/api/semester-start", require("./routes/semesterStartRoutes"));
+
+
 
 
 
