@@ -2,6 +2,7 @@ const StudentUploadedTemplate = require("../models/StudentUploadedTemplate");
 const User = require("../models/User"); // only once
 const fs = require("fs");
 const path = require("path");
+const getStudentMetaData = require("./getStudentMetaData");
 
 // Allowed file extensions per template type
 const ALLOWED_EXT = {
@@ -111,11 +112,15 @@ exports.getStudentInfo = async (req, res) => {
     const student = await User.findOne({ studentId: Number(studentId) }).select("department groupId");
     if (!student) return res.status(404).json({ success: false, message: "Student not found" });
 
+      const { group, proposal } = await getStudentMetaData({
+          sapId: studentId
+      });
+
     res.json({
       success: true,
       data: {
         department: student.department,
-        groupId: student.groupId,
+          groupId: group._id,
       },
     });
   } catch (err) {

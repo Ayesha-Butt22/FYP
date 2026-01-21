@@ -29,7 +29,7 @@ export default class TemplateService {
   // ---------------- GET STUDENT INFO ----------------
   static async getStudentInfo(studentId) {
     if (!studentId) throw new Error("Student ID is required.");
-    const res = await axios.get(`${API_BASE}/student/${studentId}`);
+    const res = await axios.get(`${API_BASE}/students/${studentId}`);
     return res.data.success ? res.data.data : null;
   }
 

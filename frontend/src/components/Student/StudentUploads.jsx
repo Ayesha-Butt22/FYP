@@ -73,7 +73,10 @@ export default function StudentUploads() {
       if (!studentId) return;
       try {
         const data = await TemplateService.getStudentInfo(studentId);
-        setStudentInfo(data);
+       // const data = localStorage.getItem('studentId');
+         setStudentInfo(data);
+
+
       } catch (err) {
         console.error(err);
         toastService.error("Could not load student info");
