@@ -6,8 +6,6 @@ const User = require("../models/User");
 // 1. Get current user's group and its members (for dropdown)
 exports.getMyGroup = async (req, res) => {
   try {
-    console.log("=== getMyGroup DEBUG ===");
-    console.log("User email:", req.user?.email);
     
     if (!req.user || !req.user.email) {
       return res.status(401).json({ error: "Authentication required" });
@@ -15,7 +13,6 @@ exports.getMyGroup = async (req, res) => {
 
     // Try a simpler approach - get all groups and filter
     const allGroups = await Group.find({});
-    console.log("Total groups in DB:", allGroups.length);
     
     // Log all groups for debugging
     allGroups.forEach((g, i) => {
@@ -41,10 +38,7 @@ exports.getMyGroup = async (req, res) => {
       return groupEmails.includes(userEmail);
     });
     
-    console.log("Groups found for user:", userGroups.length);
-    
     if (userGroups.length === 0) {
-      console.log("No group found for user:", req.user.email);
       return res.status(200).json({ 
         success: false,
         groupId: null,
@@ -56,12 +50,7 @@ exports.getMyGroup = async (req, res) => {
     // Take the first group (assuming user is only in one group)
     const group = userGroups[0];
     
-    console.log("Selected group:", {
-      groupId: group.groupId,
-      leader: group.leader?.email,
-      member2: group.member2?.email,
-      member3: group.member3?.email
-    });
+    
     
     // Build members array directly from group data
     const members = [
@@ -89,7 +78,7 @@ exports.getMyGroup = async (req, res) => {
         : null
     ].filter(Boolean);
 
-    console.log("Members array:", members);
+    
 
     res.status(200).json({
       success: true,
@@ -97,7 +86,6 @@ exports.getMyGroup = async (req, res) => {
       members
     });
   } catch (err) {
-    console.error("Get my group error:", err);
     res.status(500).json({ 
       success: false,
       error: "Server error: " + err.message 
