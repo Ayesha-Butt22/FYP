@@ -31,7 +31,15 @@ exports.uploadTemplate = async (req, res) => {
     const student = await User.findOne({ studentId: Number(studentId) }).select("department groupId");
     if (!student) return res.status(404).json({ success: false, message: "Student not found" });
 
-    const { groupId, department } = student;
+      const { group, proposal } = await getStudentMetaData({
+          sapId: studentId
+      });
+
+         const  groupId = group._id;
+
+      // const { groupId, department } = student;
+
+
 
     if (!req.file) return res.status(400).json({ success: false, message: "File is required" });
 
