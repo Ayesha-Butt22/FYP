@@ -1,30 +1,31 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const multer = require("multer");
-const { uploadTemplate, getGroupTemplates } = require("../controllers/studentTemplateController");
-
 const router = express.Router();
+const multer = require("multer");
+const path = require("path");
+const studentTemplateController = require("../controllers/studentTemplateController");
 
-// ---------------- STORAGE ----------------
+// ---------------- SETUP MULTER ----------------
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = "uploads/templates";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
+  destination: function (req, file, cb) {
+    cb(null, "uploads/student-templates/");
   },
-  filename: (req, file, cb) => {
-    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
+  filename: function (req, file, cb) {
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueName);
   },
 });
 
 const upload = multer({ storage });
 
-// POST upload template
-router.post("/upload", upload.single("file"), uploadTemplate);
+// ---------------- ROUTES ----------------
 
-// GET group templates
-router.get("/group/:groupId", getGroupTemplates);
+// Upload a template
+router.post("/upload", upload.single("file"), studentTemplateController.uploadTemplate);
+
+// Get all templates for a group
+router.get("/group/:groupId", studentTemplateController.getGroupTemplates);
+
+// Get student info by studentId
+router.get("/student/:studentId", studentTemplateController.getStudentInfo);
 
 module.exports = router;

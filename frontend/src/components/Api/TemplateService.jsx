@@ -4,19 +4,14 @@ const API_BASE = "http://localhost:5000/api/student-templates";
 
 export default class TemplateService {
   // ---------------- UPLOAD FILE ----------------
-  static async uploadFile(templateCode, dept, file, groupId, studentId, templateLabel, week) {
-    if (!groupId || !studentId) {
-      throw new Error("Group ID and Student ID are required for upload.");
-    }
-
+  static async uploadFile(templateCode, file, studentId, week) {
+    if (!studentId) throw new Error("Student ID is required.");
+    
     const formData = new FormData();
     formData.append("file", file);
     formData.append("templateCode", templateCode);
-    formData.append("templateLabel", templateLabel);
-    formData.append("groupId", groupId);
     formData.append("studentId", studentId);
     formData.append("week", week);
-    formData.append("department", dept);
 
     const res = await axios.post(`${API_BASE}/upload`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -29,6 +24,13 @@ export default class TemplateService {
     if (!groupId) return [];
     const res = await axios.get(`${API_BASE}/group/${groupId}`);
     return res.data.success ? res.data.data : [];
+  }
+
+  // ---------------- GET STUDENT INFO ----------------
+  static async getStudentInfo(studentId) {
+    if (!studentId) throw new Error("Student ID is required.");
+    const res = await axios.get(`${API_BASE}/student/${studentId}`);
+    return res.data.success ? res.data.data : null;
   }
 
   // ---------------- BUILD FILE URL ----------------

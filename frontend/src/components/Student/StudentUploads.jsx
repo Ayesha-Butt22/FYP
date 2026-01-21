@@ -16,13 +16,15 @@ const calculateDueDate = (startDate, week) => {
 
 /* ================= TEMPLATE DEFINITIONS ================= */
 const TEMPLATE_DEFINITIONS = [
-  { code: "t01", label: "Template-01: Project Team (MS Word)", week: 1 },
+  { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1 },
   { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2 },
-  { code: "t03", label: "Template-03: Proposal Presentation (MS PowerPoint)", week: 3 },
-  { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 4 },
-  { code: "t05", label: "Template-05: Project Report (MS Word)", week: 5 },
-  { code: "t06", label: "Template-06: Final Presentation (MS PowerPoint)", week: 6 },
-  { code: "t07", label: "Template-07: Progress Presentation (MS PowerPoint)", week: 7 },
+  { code: "t03", label: "Template-03: Proposal Presentation (MS PowerPoint)", week: 4 },
+  { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6 },
+  { code: "t05", label: "Template-05: Progress Presentation (MS PowerPoint)", week: 13 },
+  { code: "t06", label: "Template-06: Complete Project Report (MS Word)", week: 24 },
+  { code: "t07", label: "Template-07: Final Presentation (MS PowerPoint)", week: 26 },
+  { code: "t08", label: "Template-08: Complete Final Presentation (MS Word)", week: 28 },
+  { code: "t09", label: "Template-09: Complete Documentation(MS Word)", week: 30 },
 ];
 
 export default function StudentUploads() {
@@ -30,12 +32,12 @@ export default function StudentUploads() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [semesterStart, setSemesterStart] = useState(null);
+  const [studentInfo, setStudentInfo] = useState(null);
 
   const headers = ["Template", "Due Date", "Status", "Action"];
   const fileInputRefs = useRef({});
 
-  const storedDept = localStorage.getItem("department") || "";
-  const groupId = localStorage.getItem("groupId");
+  // Get studentId from localStorage
   const studentId = localStorage.getItem("studentId");
 
   /* ================= STATUS ================= */
@@ -56,22 +58,34 @@ export default function StudentUploads() {
       try {
         const res = await fetch("http://localhost:5000/api/semester-start");
         const data = await res.json();
-
-        // IMPORTANT: backend field is "date"
         setSemesterStart(data?.date || null);
       } catch (err) {
         console.error(err);
         toastService.error("Semester start date not found");
       }
     };
-
     loadSemesterStart();
   }, []);
 
+  /* ================= LOAD STUDENT INFO ================= */
+  useEffect(() => {
+    const loadStudentInfo = async () => {
+      if (!studentId) return;
+      try {
+        const data = await TemplateService.getStudentInfo(studentId);
+        setStudentInfo(data);
+      } catch (err) {
+        console.error(err);
+        toastService.error("Could not load student info");
+      }
+    };
+    loadStudentInfo();
+  }, [studentId]);
+
   /* ================= LOAD UPLOADED FILES ================= */
   useEffect(() => {
-    loadTemplates();
-  }, []);
+    if (studentInfo?.groupId) loadTemplates();
+  }, [studentInfo]);
 
   useEffect(() => {
     applyFilters();
@@ -80,17 +94,17 @@ export default function StudentUploads() {
   const loadTemplates = async () => {
     setLoading(true);
     try {
-      const files = await TemplateService.getFiles(groupId);
+      const files = await TemplateService.getFiles(studentInfo.groupId);
       const normalized = files.map((f) => ({
         id: f._id,
-        template: f.template,
-        department: f.department,
+        template: f.templateCode,
         filename: f.originalName,
         filePath: f.filePath,
         status: normalizeStatus(f.status),
       }));
       setAllFiles(normalized);
-    } catch {
+    } catch (err) {
+      console.error(err);
       toastService.error("Could not load templates");
     } finally {
       setLoading(false);
@@ -99,10 +113,9 @@ export default function StudentUploads() {
 
   /* ================= BUILD TABLE ================= */
   const applyFilters = () => {
+    if (!studentInfo) return;
     const tableRows = TEMPLATE_DEFINITIONS.map((tpl) => {
-      const existing = allFiles.find(
-        (f) => f.template === tpl.code && f.department === storedDept
-      );
+      const existing = allFiles.find((f) => f.template === tpl.code);
 
       return {
         Template: tpl.label,
@@ -112,13 +125,11 @@ export default function StudentUploads() {
         __meta: { template: tpl.code, file: existing },
       };
     });
-
     setRows(tableRows);
   };
 
   /* ================= FILE ACTIONS ================= */
-  const buildFileUrl = (path) =>
-    TemplateService.buildFileUrl(path);
+  const buildFileUrl = (path) => TemplateService.buildFileUrl(path);
 
   const handleView = (row) => {
     const file = row.__meta.file;
@@ -148,35 +159,26 @@ export default function StudentUploads() {
 
   const handleFileSelected = async (e, tplCode) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !studentInfo) return;
 
-    const week =
-      TEMPLATE_DEFINITIONS.find((t) => t.code === tplCode)?.week || 1;
+    const week = TEMPLATE_DEFINITIONS.find((t) => t.code === tplCode)?.week || 1;
 
     try {
       setLoading(true);
-      await TemplateService.uploadFile(
-        tplCode,
-        storedDept,
-        file,
-        groupId,
-        studentId,
-        tplCode,
-        week
-      );
+      await TemplateService.uploadFile(tplCode, file, studentId, week);
       toastService.success("File uploaded successfully");
       loadTemplates();
-    } catch {
-      toastService.error("Upload failed");
+    } catch (err) {
+      console.error(err);
+      toastService.error("Upload failed: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  /* ================= ACTION BUTTONS (OLD STYLE) ================= */
+  /* ================= ACTION BUTTONS ================= */
   const renderActions = (row) => {
     const file = row.__meta.file;
-
     return (
       <Box sx={{ display: "flex", gap: 8 }}>
         {file && (
@@ -188,7 +190,6 @@ export default function StudentUploads() {
             >
               View
             </button>
-
             <button
               className="mt-btn"
               style={{ background: "#2563eb" }}
@@ -198,7 +199,6 @@ export default function StudentUploads() {
             </button>
           </>
         )}
-
         <button
           className="mt-btn"
           style={{ background: "#10b981", color: "#fff" }}
@@ -211,7 +211,10 @@ export default function StudentUploads() {
   };
 
   return (
-     <Box sx={{ pb: 3 }}>       <DashboardSectionHeader description={"Here you can upload your project templates or view their status."}>         Uploads Template       </DashboardSectionHeader>
+    <Box sx={{ pb: 3 }}>
+      <DashboardSectionHeader description="Here you can upload your project templates or view their status.">
+        Uploads Template
+      </DashboardSectionHeader>
 
       {loading ? (
         <div className="st-loading">Loading…</div>
