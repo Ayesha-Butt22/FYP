@@ -7,7 +7,7 @@ const StudentUploadedTemplateSchema = new mongoose.Schema({
   studentId: { type: String, required: false },
   templateCode: { type: String, required: true },
   templateLabel: { type: String, required: true },
-  week: { type: Number, enum: [1,2,3,4,5,6,7], required: true },
+  week: { type: Number, enum: [1,2,4,6,13,24,26, 28,30], required: true },
   filePath: { type: String, required: true },
   originalName: { type: String, required: true },
   uploadedAt: { type: Date, default: Date.now },

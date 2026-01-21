@@ -134,12 +134,6 @@ export default function StudentUploads() {
   /* ================= FILE ACTIONS ================= */
   const buildFileUrl = (path) => TemplateService.buildFileUrl(path);
 
-  const handleView = (row) => {
-    const file = row.__meta.file;
-    if (!file?.filePath) return;
-    window.open(buildFileUrl(file.filePath), "_blank");
-  };
-
   const handleDownload = (row) => {
     const file = row.__meta.file;
     if (!file?.filePath) return;
@@ -186,13 +180,6 @@ export default function StudentUploads() {
       <Box sx={{ display: "flex", gap: 8 }}>
         {file && (
           <>
-            <button
-              className="mt-btn"
-              style={{ background: "#0b5ed7" }}
-              onClick={() => handleView(row)}
-            >
-              View
-            </button>
             <button
               className="mt-btn"
               style={{ background: "#2563eb" }}

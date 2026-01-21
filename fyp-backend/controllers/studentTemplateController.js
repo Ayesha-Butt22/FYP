@@ -16,7 +16,7 @@ const ALLOWED_EXT = {
 };
 
 // Template sequence check
-const TEMPLATE_SEQUENCE = ["t01","t02","t03","t04","t05","t06","t07"];
+const TEMPLATE_SEQUENCE = ["t01","t02","t03","t04","t05","t06","t07","t08","t09"];
 
 // ---------------- UPLOAD TEMPLATE ----------------
 exports.uploadTemplate = async (req, res) => {
@@ -77,12 +77,29 @@ exports.uploadTemplate = async (req, res) => {
       await existing.deleteOne();
     }
 
+
+      const TEMPLATE_MAP = {
+          t01: "Project Team List (MS Word)",
+          t02: "Initial Proposal (MS Word)",
+          t03: "Proposal Presentation (MS PowerPoint)",
+          t04: "Proposal & Plan (MS Word)",
+          t05: "Progress Presentation (MS PowerPoint)",
+          t06: "Complete Project Report (MS Word)",
+          t07: "Final Presentation (MS PowerPoint)",
+          t08: "Complete Final Presentation (MS Word)",
+          t09: "Complete Documentation (MS Word)",
+      };
+
+      const templateLabel = TEMPLATE_MAP[templateCode];
+
+
+
     // Save new template
     const newTemplate = await StudentUploadedTemplate.create({
       groupId,
       studentId,
       templateCode,
-      templateLabel: req.file.originalname,
+      templateLabel: templateLabel,
       week,
       filePath: req.file.path,
       originalName: req.file.originalname,
