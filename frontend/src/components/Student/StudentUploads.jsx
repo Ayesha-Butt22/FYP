@@ -1,4 +1,3 @@
-// StudentUploads.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { Box } from "@mui/material";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
@@ -17,16 +16,12 @@ const calculateDueDate = (startDate, week) => {
 
 const getCurrentWeek = (semesterStart) => {
   if (!semesterStart) return 0;
-
   const start = new Date(semesterStart);
   const today = new Date();
-
   const diffTime = today.getTime() - start.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
   return Math.floor(diffDays / 7) + 1;
 };
-
 
 /* ================= TEMPLATE DEFINITIONS ================= */
 const TEMPLATE_DEFINITIONS = [
@@ -51,10 +46,8 @@ export default function StudentUploads() {
   const headers = ["Template", "Due Date", "Status", "Action"];
   const fileInputRefs = useRef({});
 
-  // Get studentId from localStorage
   const studentId = localStorage.getItem("studentId");
 
-  /* ================= STATUS ================= */
   const normalizeStatus = (raw) => {
     if (!raw) return "Pending";
     const map = {
@@ -87,10 +80,7 @@ export default function StudentUploads() {
       if (!studentId) return;
       try {
         const data = await TemplateService.getStudentInfo(studentId);
-       // const data = localStorage.getItem('studentId');
-         setStudentInfo(data);
-
-
+        setStudentInfo(data);
       } catch (err) {
         console.error(err);
         toastService.error("Could not load student info");
@@ -107,6 +97,13 @@ export default function StudentUploads() {
   useEffect(() => {
     applyFilters();
   }, [allFiles, semesterStart]);
+
+  /* ================= SHOW CURRENT WEEK TOAST ON PAGE LOAD ================= */
+  useEffect(() => {
+    if (!semesterStart) return;
+    const currentWeek = getCurrentWeek(semesterStart);
+    toastService.info(`📅 Current week: ${currentWeek}. Check the template to submit this week.`);
+  }, [semesterStart]);
 
   const loadTemplates = async () => {
     setLoading(true);
@@ -128,12 +125,10 @@ export default function StudentUploads() {
     }
   };
 
-  /* ================= BUILD TABLE ================= */
   const applyFilters = () => {
     if (!studentInfo) return;
     const tableRows = TEMPLATE_DEFINITIONS.map((tpl) => {
       const existing = allFiles.find((f) => f.template === tpl.code);
-
       return {
         Template: tpl.label,
         "Due Date": calculateDueDate(semesterStart, tpl.week),
@@ -169,61 +164,48 @@ export default function StudentUploads() {
   };
 
   const handleFileSelected = async (e, tplCode) => {
-  const file = e.target.files?.[0];
-  if (!file || !studentInfo) return;
+    const file = e.target.files?.[0];
+    if (!file || !studentInfo) return;
 
-  const templateDef = TEMPLATE_DEFINITIONS.find(
-    (t) => t.code === tplCode
-  );
+    const templateDef = TEMPLATE_DEFINITIONS.find((t) => t.code === tplCode);
+    const templateWeek = templateDef?.week || 1;
+    const currentWeek = getCurrentWeek(semesterStart);
 
-  const templateWeek = templateDef?.week || 1;
-  const currentWeek = getCurrentWeek(semesterStart);
+    if (templateWeek > currentWeek) {
+      toastService.error(
+        `🚫 Upload blocked!\nTemplate week: ${templateWeek}\nCurrent week: ${currentWeek}`
+      );
+      e.target.value = "";
+      return;
+    }
 
-  /* 🚫 FUTURE WEEK BLOCK */
-  if (templateWeek > currentWeek) {
-    toastService.error(
-      `You cannot upload this template yet. 
-       This template is for Week ${templateWeek}. 
-       Current week is ${currentWeek}.`
-    );
-    e.target.value = "";
-    return;
-  }
+    try {
+      setLoading(true);
+      await TemplateService.uploadFile(tplCode, file, studentId, templateWeek);
+      toastService.success(
+        `✅ File uploaded successfully!\nTemplate week: ${templateWeek}\nCurrent week: ${currentWeek}`
+      );
+      loadTemplates();
+    } catch (err) {
+      console.error(err);
+      toastService.error(`Upload failed: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  try {
-    setLoading(true);
-    await TemplateService.uploadFile(
-      tplCode,
-      file,
-      studentId,
-      templateWeek
-    );
-    toastService.success("File uploaded successfully");
-    loadTemplates();
-  } catch (err) {
-    console.error(err);
-    toastService.error("Upload failed: " + err.message);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  /* ================= ACTION BUTTONS ================= */
   const renderActions = (row) => {
     const file = row.__meta.file;
     return (
       <Box sx={{ display: "flex", gap: 8 }}>
         {file && (
-          <>
-            <button
-              className="mt-btn"
-              style={{ background: "#2563eb" }}
-              onClick={() => handleDownload(row)}
-            >
-              Download
-            </button>
-          </>
+          <button
+            className="mt-btn"
+            style={{ background: "#2563eb" }}
+            onClick={() => handleDownload(row)}
+          >
+            Download
+          </button>
         )}
         <button
           className="mt-btn"

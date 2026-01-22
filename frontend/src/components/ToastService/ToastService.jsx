@@ -1,4 +1,4 @@
-
+// ToastService.jsx
 class ToastService {
     constructor() {
         this.toasts = [];
