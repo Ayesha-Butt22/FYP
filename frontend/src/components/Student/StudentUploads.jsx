@@ -1,3 +1,4 @@
+// StudentUploads.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { Box } from "@mui/material";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
@@ -13,6 +14,19 @@ const calculateDueDate = (startDate, week) => {
   d.setDate(d.getDate() + week * 7);
   return d.toISOString().split("T")[0];
 };
+
+const getCurrentWeek = (semesterStart) => {
+  if (!semesterStart) return 0;
+
+  const start = new Date(semesterStart);
+  const today = new Date();
+
+  const diffTime = today.getTime() - start.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  return Math.floor(diffDays / 7) + 1;
+};
+
 
 /* ================= TEMPLATE DEFINITIONS ================= */
 const TEMPLATE_DEFINITIONS = [
@@ -155,23 +169,45 @@ export default function StudentUploads() {
   };
 
   const handleFileSelected = async (e, tplCode) => {
-    const file = e.target.files?.[0];
-    if (!file || !studentInfo) return;
+  const file = e.target.files?.[0];
+  if (!file || !studentInfo) return;
 
-    const week = TEMPLATE_DEFINITIONS.find((t) => t.code === tplCode)?.week || 1;
+  const templateDef = TEMPLATE_DEFINITIONS.find(
+    (t) => t.code === tplCode
+  );
 
-    try {
-      setLoading(true);
-      await TemplateService.uploadFile(tplCode, file, studentId, week);
-      toastService.success("File uploaded successfully");
-      loadTemplates();
-    } catch (err) {
-      console.error(err);
-      toastService.error("Upload failed: " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const templateWeek = templateDef?.week || 1;
+  const currentWeek = getCurrentWeek(semesterStart);
+
+  /* 🚫 FUTURE WEEK BLOCK */
+  if (templateWeek > currentWeek) {
+    toastService.error(
+      `You cannot upload this template yet. 
+       This template is for Week ${templateWeek}. 
+       Current week is ${currentWeek}.`
+    );
+    e.target.value = "";
+    return;
+  }
+
+  try {
+    setLoading(true);
+    await TemplateService.uploadFile(
+      tplCode,
+      file,
+      studentId,
+      templateWeek
+    );
+    toastService.success("File uploaded successfully");
+    loadTemplates();
+  } catch (err) {
+    console.error(err);
+    toastService.error("Upload failed: " + err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   /* ================= ACTION BUTTONS ================= */
   const renderActions = (row) => {
