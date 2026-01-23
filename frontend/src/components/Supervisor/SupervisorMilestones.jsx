@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+// SupervisorMilestones.jsx
+import React, { useState, useEffect } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import { toastService } from "../ToastService/ToastService.jsx";
+import SemesterStartService from "../Api/SemesterStartService.jsx"; // fetch semester start date
 import "./SupervisorMilestones.css";
 
 Chart.register(ArcElement, Tooltip, Legend);
@@ -18,7 +20,6 @@ const WEEKS = [
   "13th Week before Final Exams",
   "Week After Finals",
 ];
-
 
 const STATUS = {
   completed: { color: "#16a34a", bg: "#d1fadf", text: "Completed", icon: "✅" },
@@ -51,40 +52,44 @@ const TEMPLATE_DETAILS = [
   "Documentation (Hard Binding – 3 Copies), CD with source and appendices.",
 ];
 
+/* ================= TEMPLATE DEFINITIONS ================= */
+const TEMPLATE_DEFINITIONS = [
+  { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1 },
+  { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2 },
+  { code: "t03", label: "Template-03: Proposal Presentation (MS PowerPoint)", week: 4 },
+  { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6 },
+  { code: "t05", label: "Template-05: Progress Presentation (MS PowerPoint)", week: 13 },
+  { code: "t06", label: "Template-06: Complete Project Report (MS Word)", week: 24 },
+  { code: "t07", label: "Template-07: Final Presentation (MS PowerPoint)", week: 26 },
+  { code: "t08", label: "Template-08: Complete Final Presentation (MS Word)", week: 28 },
+  { code: "t09", label: "Template-09: Complete Documentation(MS Word)", week: 30 },
+];
 
 const INITIAL_GROUPS = [
   {
     group: "Group 1",
     title: "Smart Attendance System",
     department: "Software Engineering",
-    milestones: [
-      { name: "Project Team", status: "completed", due: "2025-09-01", uploadedFile: { name: "team.docx", url: "#" }, note: "" },
-      { name: "Initial Proposal", status: "completed", due: "2025-09-08", uploadedFile: { name: "proposal.docx", url: "#" }, note: "" },
-      { name: "Proposal Presentation", status: "completed", due: "2025-09-15", uploadedFile: { name: "proposal_slides.pptx", url: "#" }, note: "" },
-      { name: "Proposal & Plan", status: "pending", due: "2025-09-22", uploadedFile: null, note: "" },
-      { name: "Project Report (Draft)", status: "pending", due: "2025-09-29", uploadedFile: null, note: "" },
-      { name: "Progress Presentation", status: "pending", due: "2025-10-06", uploadedFile: null, note: "" },
-      { name: "Final Presentation Prep", status: "pending", due: "2025-10-13", uploadedFile: null, note: "" },
-      { name: "Pre-Final Deliverables (Posters/Brochure)", status: "pending", due: "2025-10-20", uploadedFile: null, note: "" },
-      { name: "Hardcopy & CD Submission", status: "pending", due: "2025-10-27", uploadedFile: null, note: "" },
-    ],
+    milestones: TEMPLATE_DEFINITIONS.map((t) => ({
+      name: t.label,
+      status: "pending",
+      due: null,
+      uploadedFile: null,
+      note: "",
+    })),
     members: ["Ali Raza", "Sana Tariq", "Bilal Khan"],
   },
   {
     group: "Group 2",
     title: "AI-Based Disease Prediction",
     department: "Computer Science",
-    milestones: [
-      { name: "Project Team", status: "completed", due: "2025-09-01", uploadedFile: { name: "team2.docx", url: "#" }, note: "" },
-      { name: "Initial Proposal", status: "completed", due: "2025-09-08", uploadedFile: { name: "proposal2.docx", url: "#" }, note: "" },
-      { name: "Proposal Presentation", status: "completed", due: "2025-09-15", uploadedFile: null, note: "" },
-      { name: "Proposal & Plan", status: "overdue", due: "2025-09-22", uploadedFile: null, note: "Plan needs more details" },
-      { name: "Project Report (Draft)", status: "pending", due: "2025-09-29", uploadedFile: null, note: "" },
-      { name: "Progress Presentation", status: "pending", due: "2025-10-06", uploadedFile: null, note: "" },
-      { name: "Final Presentation Prep", status: "pending", due: "2025-10-13", uploadedFile: null, note: "" },
-      { name: "Pre-Final Deliverables (Posters/Brochure)", status: "pending", due: "2025-10-20", uploadedFile: null, note: "" },
-      { name: "Hardcopy & CD Submission", status: "pending", due: "2025-10-27", uploadedFile: null, note: "" },
-    ],
+    milestones: TEMPLATE_DEFINITIONS.map((t) => ({
+      name: t.label,
+      status: "pending",
+      due: null,
+      uploadedFile: null,
+      note: "",
+    })),
     members: ["Ayesha Butt", "Madiha Sumbal", "Saad Farooq"],
   },
   {
@@ -92,17 +97,13 @@ const INITIAL_GROUPS = [
     title: "Online Exam Proctoring",
     department: "Computer Arts",
     templateLink: "https://drive.google.com/drive/folders/CA-TEMPLATES-URL",
-    milestones: [
-      { name: "Project Team", status: "completed", due: "2025-09-01", uploadedFile: { name: "team3.docx", url: "#" }, note: "" },
-      { name: "Initial Proposal", status: "completed", due: "2025-09-08", uploadedFile: { name: "proposal3.docx", url: "#" }, note: "" },
-      { name: "Proposal Presentation", status: "completed", due: "2025-09-15", uploadedFile: { name: "proposal3.pptx", url: "#" }, note: "" },
-      { name: "Proposal & Plan", status: "completed", due: "2025-09-22", uploadedFile: { name: "plan3.docx", url: "#" }, note: "" },
-      { name: "Project Report (Draft)", status: "pending", due: "2025-09-29", uploadedFile: null, note: "" },
-      { name: "Progress Presentation", status: "pending", due: "2025-10-06", uploadedFile: null, note: "" },
-      { name: "Final Presentation Prep", status: "pending", due: "2025-10-13", uploadedFile: null, note: "" },
-      { name: "Pre-Final Deliverables (Posters/Brochure)", status: "pending", due: "2025-10-20", uploadedFile: null, note: "" },
-      { name: "Hardcopy & CD Submission", status: "pending", due: "2025-10-27", uploadedFile: null, note: "" },
-    ],
+    milestones: TEMPLATE_DEFINITIONS.map((t) => ({
+      name: t.label,
+      status: "pending",
+      due: null,
+      uploadedFile: null,
+      note: "",
+    })),
     members: ["Fatima Noor", "Usman Ghani", "Hira Qureshi"],
   },
 ];
@@ -112,7 +113,6 @@ function formatDateTime(inp) {
   try {
     const d = new Date(inp);
     if (isNaN(d.getTime())) return String(inp);
-    // Format YYYY-MM-DD HH:MM (local)
     const date = d.toLocaleDateString();
     const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     return `${date} ${time}`;
@@ -123,7 +123,8 @@ function formatDateTime(inp) {
 
 export default function SupervisorMilestones() {
   const [groups, setGroups] = useState(INITIAL_GROUPS);
-  // modal: open + indices + selectedAction + saving flag
+  const [semesterStart, setSemesterStart] = useState(null);
+
   const [modal, setModal] = useState({
     open: false,
     gIndex: null,
@@ -132,15 +133,45 @@ export default function SupervisorMilestones() {
     saving: false,
   });
 
+  // ================== FETCH SEMESTER START ==================
+  useEffect(() => {
+    async function fetchSemesterStart() {
+      try {
+        const data = await SemesterStartService.getDate();
+        if (data?.date) {
+          const start = new Date(data.date);
+          setSemesterStart(start);
+          setGroups((prev) =>
+            prev.map((g) => ({
+              ...g,
+              milestones: g.milestones.map((m, idx) => {
+                const template = TEMPLATE_DEFINITIONS[idx];
+                if (!template || !start) return m;
+                const dueDate = new Date(start);
+                dueDate.setDate(start.getDate() + template.week * 7); // dynamic
+                return { ...m, due: dueDate.toISOString().split("T")[0] };
+              }),
+            }))
+          );
+        }
+      } catch (err) {
+        toastService.error("Failed to fetch semester start date");
+      }
+    }
+    fetchSemesterStart();
+  }, []);
+
+  // ================== MODAL HANDLERS ==================
   const openDetails = (gIndex, mIndex) => {
     const g = groups[gIndex];
-    const m = (g && g.milestones && g.milestones[mIndex]) || null;
+    const m = g.milestones[mIndex];
     const defaultAction =
-      m && m.status === "completed" ? "approve" : m && m.status === "rejected" ? "unapprove" : "pending";
+      m.status === "completed" ? "approve" : m.status === "rejected" ? "unapprove" : "pending";
     setModal({ open: true, gIndex, mIndex, selectedAction: defaultAction, saving: false });
   };
 
-  const closeDetails = () => setModal({ open: false, gIndex: null, mIndex: null, selectedAction: "pending", saving: false });
+  const closeDetails = () =>
+    setModal({ open: false, gIndex: null, mIndex: null, selectedAction: "pending", saving: false });
 
   const handleActionChange = (value) => setModal((s) => ({ ...s, selectedAction: value }));
 
@@ -166,40 +197,33 @@ export default function SupervisorMilestones() {
         : "Mark this milestone as Pending?";
     if (!window.confirm(confirmMsg)) return;
 
-
     const mapped = selectedAction === "approve" ? "completed" : selectedAction === "unapprove" ? "rejected" : "pending";
 
-    
     setGroups((prev) => {
       const next = JSON.parse(JSON.stringify(prev));
-      if (next[gIndex] && next[gIndex].milestones && next[gIndex].milestones[mIndex]) {
-        next[gIndex].milestones[mIndex].status = mapped;
-      }
+      next[gIndex].milestones[mIndex].status = mapped;
       return next;
     });
 
     setModal((s) => ({ ...s, saving: true }));
     try {
-  
       await new Promise((r) => setTimeout(r, 600));
       toastService.success("Milestone updated (frontend only)");
       closeDetails();
-      
     } catch (err) {
       toastService.error("Failed to update milestone");
-     
       setGroups(INITIAL_GROUPS);
       setModal((s) => ({ ...s, saving: false }));
     }
   };
 
-  
   const archiveGroup = (gIndex) => {
     if (!window.confirm("Add this group to archive?")) return;
     setGroups((prev) => prev.map((g, i) => (i === gIndex ? { ...g, _archived: true, _show: false } : g)));
     toastService.success("Group added to archive (frontend only)");
   };
 
+  // ================== RENDER ==================
   return (
     <div>
       <DashboardSectionHeader description="Here you can view all the FYP groups milestones. Click 'Show Timeline' to see groups progress, milestones, and deadlines.">
@@ -209,14 +233,14 @@ export default function SupervisorMilestones() {
       <div className="milestone-groups-row">
         {groups.map((group, gIdx) => {
           const displayedMilestones = WEEKS.map((wk, idx) => {
-            const original = (group.milestones && group.milestones[idx]) || null;
+            const original = group.milestones[idx];
             return {
               week: wk,
-              name: original ? original.name : (TEMPLATE_LABELS[idx] || ""),
-              due: original ? original.due : "—",
-              status: original ? original.status : "pending",
-              uploadedFile: original ? original.uploadedFile : null,
-              note: original ? original.note : "",
+              name: original.name,
+              due: original.due || "—",
+              status: original.status,
+              uploadedFile: original.uploadedFile,
+              note: original.note,
             };
           });
 
@@ -293,7 +317,6 @@ export default function SupervisorMilestones() {
                     </tbody>
                   </table>
 
-                  
                   <div className="archive-button-wrap">
                     {!group._archived ? (
                       <button className="archive-btn" onClick={() => archiveGroup(gIdx)}>Add to Archive</button>
@@ -312,51 +335,24 @@ export default function SupervisorMilestones() {
         })}
       </div>
 
-      
+      {/* ================= MODAL ================= */}
       {modal.open && modal.gIndex != null && modal.mIndex != null && (
         <div className="mmodal-backdrop" role="dialog" aria-modal="true">
           <div className="mmodal modal-centered" role="document" aria-labelledby="milestone-details-title">
             <div className="mmodal-header">
               <h3 id="milestone-details-title">Milestone Details</h3>
-              <button className="mmodal-close" onClick={closeDetails} aria-label="Close">
-                ✖
-              </button>
+              <button className="mmodal-close" onClick={closeDetails} aria-label="Close">✖</button>
             </div>
 
             <div className="mmodal-body centered-body">
               {(() => {
                 const g = groups[modal.gIndex];
-                const m = g && g.milestones && g.milestones[modal.mIndex];
+                const m = g.milestones[modal.mIndex];
                 const templateLabel = TEMPLATE_LABELS[modal.mIndex] || `Template-${String(modal.mIndex + 1).padStart(2, "0")}`;
                 const templateDetail = TEMPLATE_DETAILS[modal.mIndex] || "";
-                const uploadedFile = m && m.uploadedFile ? m.uploadedFile : null;
-                const currentNote = m && m.note ? m.note : "";
-
-               
-                const dueRaw = m && m.due ? m.due : null;
-                let dueDateObj = null;
-                if (dueRaw) {
-                  const maybeIso = new Date(dueRaw);
-                  if (!isNaN(maybeIso.getTime())) {
-                    dueDateObj = maybeIso;
-                  } else {
-                    const parts = String(dueRaw).split("-");
-                    if (parts.length >= 3) {
-                      dueDateObj = new Date(parts[0], Number(parts[1]) - 1, parts[2], 23, 59, 59);
-                    }
-                  }
-                }
-
-                
-                const uploadedAtRaw = uploadedFile && (uploadedFile.uploadedAt || uploadedFile.timestamp || uploadedFile.time);
-                const uploadedDateObj = uploadedAtRaw ? new Date(uploadedAtRaw) : null;
-
-                const isLate = uploadedDateObj && dueDateObj ? uploadedDateObj.getTime() > dueDateObj.getTime() : false;
-
-             
-                const dueDisplay =
-                  dueDateObj && !isNaN(dueDateObj.getTime()) ? formatDateTime(dueDateObj.toISOString()) : (dueRaw || "—");
-                const uploadedDisplay = uploadedDateObj && !isNaN(uploadedDateObj.getTime()) ? formatDateTime(uploadedDateObj.toISOString()) : (uploadedAtRaw ? String(uploadedAtRaw) : "No upload");
+                const uploadedFile = m.uploadedFile || null;
+                const currentNote = m.note || "";
+                const dueDisplay = m.due ? formatDateTime(m.due) : "—";
 
                 return (
                   <div className="modal-stack">
@@ -364,7 +360,7 @@ export default function SupervisorMilestones() {
                       <div className="stack-label">Milestone</div>
                       <div className="stack-value">
                         <strong>{WEEKS[modal.mIndex]}</strong>
-                        <div className="muted">{m?.name || ""}</div>
+                        <div className="muted">{m.name}</div>
                       </div>
                     </div>
 
@@ -381,10 +377,8 @@ export default function SupervisorMilestones() {
                       <div className="stack-value">
                         {uploadedFile && uploadedFile.url ? (
                           <div>
-                            <a href={uploadedFile.url} target="_blank" rel="noreferrer" className="link-inline">
-                              {uploadedFile.name || "View uploaded file"}
-                            </a>
-                            <div className="muted" style={{ marginTop: 6 }}>Uploaded at: {uploadedDisplay}</div>
+                            <a href={uploadedFile.url} target="_blank" rel="noreferrer" className="link-inline">{uploadedFile.name || "View uploaded file"}</a>
+                            {uploadedFile.uploadedAt && <div className="muted" style={{ marginTop: 6 }}>Uploaded at: {formatDateTime(uploadedFile.uploadedAt)}</div>}
                           </div>
                         ) : (
                           <div className="muted">No file uploaded yet</div>
@@ -392,39 +386,9 @@ export default function SupervisorMilestones() {
                       </div>
                     </div>
 
-                   
                     <div className="stack-item">
                       <div className="stack-label">Due Date & Time</div>
-                      <div className="stack-value">
-                        <div>{dueDisplay}</div>
-                      </div>
-                    </div>
-
-                  
-                    <div className="stack-item">
-                      <div className="stack-label">Submission Date & Time</div>
-                      <div className="stack-value">
-                        {uploadedFile && uploadedDateObj ? (
-                          <div>{formatDateTime(uploadedDateObj.toISOString())}</div>
-                        ) : (
-                          <div className="muted">No submission</div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="stack-item">
-                      <div className="stack-label">Submission Status</div>
-                      <div className="stack-value">
-                        {uploadedFile && uploadedDateObj ? (
-                          isLate ? (
-                            <div style={{ color: "#ef4444", fontWeight: 700 }}>Late submission ({formatDateTime(uploadedDateObj.toISOString())})</div>
-                          ) : (
-                            <div style={{ color: "#16a34a", fontWeight: 700 }}>On time ({formatDateTime(uploadedDateObj.toISOString())})</div>
-                          )
-                        ) : (
-                          <div className="muted">No submission yet</div>
-                        )}
-                      </div>
+                      <div className="stack-value">{dueDisplay}</div>
                     </div>
 
                     <div className="stack-item">
