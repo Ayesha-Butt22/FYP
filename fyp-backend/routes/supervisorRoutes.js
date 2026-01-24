@@ -19,4 +19,8 @@ router.get(
   supervisorController.getSupervisorGroups
 );
 
+router.get("/group/:groupId/submissions" , supervisorController.getGroupSubmission);
+router.put("/groups/:groupId/milestones/:code" , supervisorController.SubmitGroupreview);
+
+
 module.exports = router;

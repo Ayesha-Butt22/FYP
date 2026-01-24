@@ -4,6 +4,7 @@
 const Proposal = require("../models/StudentProposal");
 const Group = require("../models/StudentGroup");
 const User = require("../models/User");
+const Template = require("../models/StudentUploadedTemplate");
 
 // GET RECENT ACTIVITIES FOR SUPERVISOR
 exports.getRecentActivities = async (req, res) => {
@@ -113,28 +114,6 @@ exports.getRecentActivities = async (req, res) => {
   }
 };
 
-// Helper function to mask group IDs
-function maskGroupId(originalId) {
-  if (!originalId) return 'Group-001';
-  
-  const strId = originalId.toString();
-  
-
-  if (strId.toLowerCase().startsWith('group-')) {
-    return `Group-${strId.substring(6, 9)}`; 
-  }
-  
-  if (strId.length > 5 && /^\d+$/.test(strId)) {
-    const shortId = parseInt(strId.substring(strId.length - 3));
-    return `Group-${String(shortId).padStart(3, '0')}`;
-  }
-  
-  if (strId.length === 24) { 
-    return `Group-${strId.substring(18, 21).toUpperCase()}`;
-  }
-  
-  return `Group-${strId.substring(0, 3).toUpperCase()}`;
-}
 
 function getTimeAgo(date) {
   const now = new Date();
@@ -159,8 +138,7 @@ function getTimeAgo(date) {
 exports.getSupervisorGroups = async (req, res) => {
   try {
     const supervisorEmail = req.user.email;
-    console.log(supervisorEmail);
-    // 1. Get proposals supervised by this supervisor
+
     const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
       .populate("groupId");
 
@@ -170,14 +148,12 @@ exports.getSupervisorGroups = async (req, res) => {
       const group = proposal.groupId;
       if (!group) continue;
 
-      // 2. Collect member emails safely
       const emails = [
         group.leader?.email,
         group.member2?.email,
         group.member3?.email
       ].filter(Boolean);
 
-      // 3. Fetch user names from User collection
       const users = await User.find(
         { email: { $in: emails } },
         { name: 1, _id: 0 }
@@ -185,6 +161,8 @@ exports.getSupervisorGroups = async (req, res) => {
 
       result.push({
         maskedGroupId: maskGroupId(group.groupId),
+        groupId: (group._id),
+        special: proposal.projectSpecialization,
         description: proposal.projectTitle || "No Description",
         members: users.map(u => u.name)
       });
@@ -206,21 +184,68 @@ exports.getSupervisorGroups = async (req, res) => {
 
 // Helper: Mask Group ID
 function maskGroupId(originalId) {
-  if (!originalId) return 'Group-001';
-  const strId = originalId.toString();
+    if (!originalId) return 'group-00000';
 
-  if (strId.toLowerCase().startsWith('group-')) {
-    return `Group-${strId.substring(6, 9)}`; 
-  }
-  
-  if (strId.length > 5 && /^\d+$/.test(strId)) {
-    const shortId = parseInt(strId.substring(strId.length - 3));
-    return `Group-${String(shortId).padStart(3, '0')}`;
-  }
+    const strId = originalId.toString().toLowerCase();
 
-  if (strId.length === 24) { 
-    return `Group-${strId.substring(18, 21).toUpperCase()}`;
-  }
+    if (strId.startsWith('group-')) {
+        const numericPart = strId.replace('group-', '');
+        const lastFive = numericPart.slice(-5);
+        return `group-${lastFive}`;
+    }
 
-  return `Group-${strId.substring(0, 3).toUpperCase()}`;
+    if (/^\d+$/.test(strId)) {
+        return `group-${strId.slice(-5)}`;
+    }
+
+    return 'group-00000';
 }
+
+
+exports.getGroupSubmission = async (req, res) => {
+    const {groupId} = req.params;
+    try {
+        const submissions = await Template.find({groupId});
+        res.json({submissions});
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: "Failed to fetch submissions"});
+    }
+
+}
+
+exports.SubmitGroupreview = async (req, res) => {
+    try {
+        const { groupId, code } = req.params;
+        const { note, status } = req.body;
+
+        if (!groupId || !code) {
+            return res.status(400).json({ success: false, message: "Missing groupId or templateCode" });
+        }
+
+        const submission = await Template.findOne({ groupId, templateCode: code });
+        if (!submission) {
+            return res.status(404).json({ success: false, message: "Submission not found" });
+        }
+
+
+        submission.status = status;
+        submission.supervisorRemarks = note || "";
+
+        await submission.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Submission updated successfully",
+            submission,
+        });
+    } catch (err) {
+        console.error("Error updating submission:", err);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+
+
+
+

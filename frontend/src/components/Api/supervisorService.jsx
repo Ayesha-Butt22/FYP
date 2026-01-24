@@ -22,7 +22,15 @@ const supervisorService = {
   });
   if (!res.ok) throw new Error("Failed to update milestone");
   return res.json();
-}
+},
+
+   fetchGroupSubmissions: async (groupId) => {
+        const res = await fetch(`${API_BASE_URL}/supervisor/group/${groupId}/submissions`);
+        return res.json();
+    },
+
+
+
 };
 
 export default supervisorService;

@@ -59,7 +59,7 @@ export default function StudentUploads() {
     return map[String(raw).toLowerCase()] || raw;
   };
 
-  /* ================= LOAD SEMESTER START DATE ================= */
+
   useEffect(() => {
     const loadSemesterStart = async () => {
       try {
@@ -74,7 +74,6 @@ export default function StudentUploads() {
     loadSemesterStart();
   }, []);
 
-  /* ================= LOAD STUDENT INFO ================= */
   useEffect(() => {
     const loadStudentInfo = async () => {
       if (!studentId) return;
@@ -88,9 +87,7 @@ export default function StudentUploads() {
     };
     loadStudentInfo();
   }, [studentId]);
-
-  /* ================= LOAD UPLOADED FILES ================= */
-  useEffect(() => {
+ useEffect(() => {
     if (studentInfo?.groupId) loadTemplates();
   }, [studentInfo]);
 
@@ -98,7 +95,6 @@ export default function StudentUploads() {
     applyFilters();
   }, [allFiles, semesterStart]);
 
-  /* ================= SHOW CURRENT WEEK TOAST ON PAGE LOAD ================= */
   useEffect(() => {
     if (!semesterStart) return;
     const currentWeek = getCurrentWeek(semesterStart);

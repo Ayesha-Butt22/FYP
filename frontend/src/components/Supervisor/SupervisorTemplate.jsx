@@ -5,10 +5,9 @@ import AppTable from "./AppTable.jsx";
 import { toastService } from "../ToastService/ToastService.jsx";
 import "./SupervisorTemplates.css";
 
-// API BASE URL
+
 const API_BASE = "http://localhost:5000";
 
-// Template types mapping
 const TEMPLATES = [
   { id: "t01", label: "Template-01: Project Team (MS Word)" },
   { id: "t02", label: "Template-02: Initial Proposal (MS Word)" },
@@ -31,12 +30,11 @@ export default function SupervisorTemplates () {
 
   useEffect(() => {
     loadTemplates();
-  }, [selectedDept]); // selectedDept change hone par reload
-
+  }, [selectedDept]);
   const loadTemplates = async () => {
     setLoading(true);
     try {
-      // Backend se templates fetch karo
+
       const url = selectedDept === "All" 
         ? `${API_BASE}/api/templates`
         : `${API_BASE}/api/templates?department=${selectedDept}`;
@@ -60,7 +58,6 @@ export default function SupervisorTemplates () {
         return;
       }
       
-      // Backend se mili data ko normalize karo
       const normalized = data.data.map((f) => ({
         id: f._id || f.id,
         templateLabel: TEMPLATES.find(t => t.id === f.template)?.label || f.template || "Template",
@@ -88,7 +85,6 @@ export default function SupervisorTemplates () {
     if (!filePath) return "";
     if (filePath.startsWith("http")) return filePath;
     
-    // Backend ka correct URL build karo
     if (filePath.startsWith("/")) {
       return `${API_BASE}${filePath}`;
     } else {
@@ -105,7 +101,6 @@ export default function SupervisorTemplates () {
     const url = buildFileUrl(meta.filePath);
     const filename = row.Filename || meta.filename || url.split("/").pop();
     
-    // Create anchor tag for download
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
@@ -113,7 +108,6 @@ export default function SupervisorTemplates () {
     a.click();
     document.body.removeChild(a);
     
-    // Success message
     toastService.success(`Downloading "${filename}"...`);
   };
 
@@ -134,7 +128,6 @@ export default function SupervisorTemplates () {
     setRows(tableRows);
   }
 
-  // AppTable action renderer - Only Download button
   const renderActions = (row) => {
     const meta = row.__meta || row;
     return (
