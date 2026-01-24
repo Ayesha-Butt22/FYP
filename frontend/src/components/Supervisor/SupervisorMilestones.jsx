@@ -9,17 +9,7 @@ import "./SupervisorMilestones.css";
 
 Chart.register(ArcElement, Tooltip, Legend);
 
-const WEEKS = [
-  "Week 1",
-  "Week 2",
-  "Week 4",
-  "Week 6",
-  "Week 11",
-  "Week 13",
-  "Week 15",
-  "13th Week before Final Exams",
-  "Week After Finals",
-];
+
 
 const STATUS = {
   completed: { color: "#16a34a", bg: "#d1fadf", text: "Completed", icon: "✅" },
@@ -28,29 +18,6 @@ const STATUS = {
   rejected: { color: "#ef4444", bg: "#fff0f0", text: "Rejected", icon: "✖️" },
 };
 
-const TEMPLATE_LABELS = [
-  "Template-01: Project Team (MS Word)",
-  "Template-02: Initial Proposal (MS Word)",
-  "Template-03: Proposal Presentation (MS PowerPoint)",
-  "Template-04: Proposal & Plan (MS Word)",
-  "Template-05: Project Report (MS Word)",
-  "Template-06: Final Presentation (MS PowerPoint)",
-  "Template-07: Progress Presentation (MS PowerPoint)",
-  "Template-08: Posters/Final Deliverables",
-  "Template-09: Hardcopy Documentation & CD",
-];
-
-const TEMPLATE_DETAILS = [
-  "Project team and responsibilities (Template-01).",
-  "Initial proposal document (Template-02).",
-  "Proposal presentation slides (Template-03).",
-  "Detailed proposal & plan (Template-04).",
-  "Complete Project Report (SOFT COPY – Use Template-05).",
-  "Final Presentation (Use Template-06) and Full Working Demo.",
-  "Progress Presentation (Use Template-07).",
-  "Banners, Posters, Brochure, Final Presentation & Demo deliverables.",
-  "Documentation (Hard Binding – 3 Copies), CD with source and appendices.",
-];
 
 /* ================= TEMPLATE DEFINITIONS ================= */
 const TEMPLATE_DEFINITIONS = [
@@ -232,17 +199,18 @@ export default function SupervisorMilestones() {
 
       <div className="milestone-groups-row">
         {groups.map((group, gIdx) => {
-          const displayedMilestones = WEEKS.map((wk, idx) => {
-            const original = group.milestones[idx];
-            return {
-              week: wk,
-              name: original.name,
-              due: original.due || "—",
-              status: original.status,
-              uploadedFile: original.uploadedFile,
-              note: original.note,
-            };
-          });
+          const displayedMilestones = TEMPLATE_DEFINITIONS.map((tpl, idx) => {
+  const original = group.milestones[idx];
+  return {
+    weekLabel: `Week ${tpl.week}`,
+    name: tpl.label,
+    due: original.due || "—",
+    status: original.status,
+    uploadedFile: original.uploadedFile,
+    note: original.note,
+  };
+});
+
 
           const completed = displayedMilestones.filter((m) => m.status === "completed").length;
           const pending = displayedMilestones.filter((m) => m.status === "pending").length;
@@ -303,7 +271,8 @@ export default function SupervisorMilestones() {
                     <tbody>
                       {displayedMilestones.map((m, mIdx) => (
                         <tr key={m.week}>
-                          <td className="milestone-td">{m.week}</td>
+                          <td className="milestone-td">{m.weekLabel}</td>
+
                           <td className="milestone-td">{m.due}</td>
                           <td className="milestone-td">
                             <div className="milestone-action-row">
@@ -348,8 +317,8 @@ export default function SupervisorMilestones() {
               {(() => {
                 const g = groups[modal.gIndex];
                 const m = g.milestones[modal.mIndex];
-                const templateLabel = TEMPLATE_LABELS[modal.mIndex] || `Template-${String(modal.mIndex + 1).padStart(2, "0")}`;
-                const templateDetail = TEMPLATE_DETAILS[modal.mIndex] || "";
+              const template = TEMPLATE_DEFINITIONS[modal.mIndex];
+
                 const uploadedFile = m.uploadedFile || null;
                 const currentNote = m.note || "";
                 const dueDisplay = m.due ? formatDateTime(m.due) : "—";
@@ -359,18 +328,18 @@ export default function SupervisorMilestones() {
                     <div className="stack-item">
                       <div className="stack-label">Milestone</div>
                       <div className="stack-value">
-                        <strong>{WEEKS[modal.mIndex]}</strong>
-                        <div className="muted">{m.name}</div>
+                        <strong>{`Week ${template.week}`}</strong>
+                    
                       </div>
                     </div>
 
                     <div className="stack-item">
-                      <div className="stack-label">Template</div>
-                      <div className="stack-value">
-                        <div>{templateLabel}</div>
-                        {templateDetail && <div className="muted" style={{ marginTop: 6 }}>{templateDetail}</div>}
-                      </div>
-                    </div>
+  <div className="stack-label">Template</div>
+  <div className="stack-value">
+    {template.label}
+  </div>
+</div>
+
 
                     <div className="stack-item">
                       <div className="stack-label">Uploaded File</div>
