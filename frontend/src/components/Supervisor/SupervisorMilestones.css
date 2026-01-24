@@ -5,9 +5,102 @@
   --danger: #ef4444;
   --card-bg: #fff;
   --muted: #6b7280;
+  --soft-gray: #f6f9ff;
 }
 
-/* existing layout kept for cards / timeline */
+/* ---------------- COMPACT GRID TIMELINE (3 columns) ---------------- */
+.supervisor-timeline-wrap {
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+.supervisor-timeline.compact-grid {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(2,6,23,0.03);
+  border: 1px solid rgba(2,6,23,0.04);
+}
+.timeline-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:8px; }
+.timeline-header .summary-title { font-weight:900; color:var(--main-blue); font-size:15px; }
+.timeline-header .summary-meta { color:var(--muted); font-size:12px; margin-top:4px; }
+
+/* Grid container: 3 columns, tighter spacing */
+.timeline-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  align-items: start;
+}
+
+/* Individual compact timeline card */
+.timeline-card {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.03);
+  border: 1px solid rgba(1,51,122,0.04);
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+  min-height: 64px;
+}
+
+/* left marker */
+.card-left {
+  width: 58px;
+  min-width: 58px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  text-align:center;
+}
+.card-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--accent-blue), var(--main-blue));
+  box-shadow: 0 6px 16px rgba(37,99,235,0.18);
+  border: 2px solid #fff;
+}
+.card-week { font-weight:800; color:var(--main-blue); font-size:12px; }
+
+/* content */
+.card-body { display:flex; flex-direction:column; gap:4px; }
+.card-title { font-weight:800; color:#072147; font-size:13px; line-height:1.05; }
+.card-meta { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:12px; }
+.card-date { background: var(--soft-gray); padding:4px 8px; border-radius:6px; color:#123; font-weight:700; font-size:12px; }
+.card-status { padding:3px 8px; border-radius:6px; font-weight:800; font-size:11px; }
+.card-status.done { background: rgba(22,163,74,0.1); color: var(--success); border: 1px solid rgba(22,163,74,0.12); }
+.card-status.now { background: rgba(37,99,235,0.06); color: var(--main-blue); border: 1px solid rgba(37,99,235,0.12); }
+.card-status.upcoming { background: rgba(1,51,122,0.03); color: var(--muted); border: 1px solid rgba(1,51,122,0.03); }
+
+/* active / completed visual tweaks */
+.timeline-card.completed { border-color: rgba(22,163,74,0.12); transform: translateY(-1px); }
+.timeline-card.active { border-color: rgba(37,99,235,0.14); box-shadow: 0 14px 34px rgba(37,99,235,0.05); transform: translateY(-4px); }
+
+/* reduce whitespace overall */
+.supervisor-timeline.compact-grid .timeline-header,
+.supervisor-timeline.compact-grid .timeline-grid {
+  margin: 0;
+  padding: 0;
+}
+
+/* Responsive: 2 columns on medium, 1 column on small */
+@media (max-width: 1100px) {
+  .timeline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+}
+@media (max-width: 640px) {
+  .timeline-grid { grid-template-columns: 1fr; gap: 10px; }
+  .card-left { width: 52px; min-width: 52px; }
+  .card-dot { width: 10px; height: 10px; }
+  .card-week { font-size:11px; }
+  .card-title { font-size:13px; }
+}
+
+/* ---------------- KEEP EXISTING LAYOUT FOR CARDS / TIMELINE ---------------- */
 .milestone-groups-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -89,19 +182,14 @@
 .btn-update:hover { transform: translateY(-2px); }
 .btn-cancel { background:transparent; color:var(--main-blue); border:2px solid rgba(1,51,122,0.06); padding:10px 16px; border-radius:10px; font-weight:700; cursor:pointer; }
 
-/* Override for archive button color — drop into your existing SupervisorMilestones.css
-   This changes the "Add to Archive" button to a blue primary color to match the theme.
-*/
-
+/* Archive button */
 .archive-button-wrap {
   display: flex;
   justify-content: center;
   margin: 14px 0 22px 0;
 }
-
-/* New primary-blue style for Archive button */
 .archive-btn {
-  background: #2563eb;             /* primary blue */
+  background: #2563eb;
   color: #ffffff;
   border: none;
   padding: 10px 22px;
@@ -113,15 +201,9 @@
   font-size: 0.95rem;
 }
 .archive-btn:hover {
-  background: #1e40af;             /* darker blue on hover */
+  background: #1e40af;
   transform: translateY(-2px);
 }
-.archive-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 10px rgba(30,64,175,0.14);
-}
-
-/* Keep archived badge distinct but harmonized with new color */
 .archived-badge {
   display: inline-block;
   padding: 8px 14px;
@@ -131,7 +213,6 @@
   font-weight: 700;
   border: 1px solid #c7d2fe;
 }
-
 
 .milestone-group-card:not(.archived) .archive-button-wrap {
   transform: translateY(0);

@@ -49,6 +49,7 @@ app.use('/api/files', require('./routes/FileRouter'));
 app.use("/api/profile-pic", require("./routes/profile"));
 app.use("/api/deadline", require('./routes/deadline'));
 app.use("/api/noticeboard", NoticeboardRoutes);
+app.use("/api/supervisor", require("./routes/supervisorRoutes"));
 
 
 app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);

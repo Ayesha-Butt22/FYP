@@ -1,15 +1,15 @@
-// SupervisorMilestones.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import { toastService } from "../ToastService/ToastService.jsx";
-import SemesterStartService from "../Api/SemesterStartService.jsx"; // fetch semester start date
+import SemesterStartService from "../Api/SemesterStartService.jsx";
+import supervisorService from "../Api/supervisorService.jsx";
+
 import "./SupervisorMilestones.css";
+import { Typography } from "@mui/material";
 
 Chart.register(ArcElement, Tooltip, Legend);
-
-
 
 const STATUS = {
   completed: { color: "#16a34a", bg: "#d1fadf", text: "Completed", icon: "✅" },
@@ -18,8 +18,6 @@ const STATUS = {
   rejected: { color: "#ef4444", bg: "#fff0f0", text: "Rejected", icon: "✖️" },
 };
 
-
-/* ================= TEMPLATE DEFINITIONS ================= */
 const TEMPLATE_DEFINITIONS = [
   { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1 },
   { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2 },
@@ -32,64 +30,20 @@ const TEMPLATE_DEFINITIONS = [
   { code: "t09", label: "Template-09: Complete Documentation(MS Word)", week: 30 },
 ];
 
-const INITIAL_GROUPS = [
-  {
-    group: "Group 1",
-    title: "Smart Attendance System",
-    department: "Software Engineering",
-    milestones: TEMPLATE_DEFINITIONS.map((t) => ({
-      name: t.label,
-      status: "pending",
-      due: null,
-      uploadedFile: null,
-      note: "",
-    })),
-    members: ["Ali Raza", "Sana Tariq", "Bilal Khan"],
-  },
-  {
-    group: "Group 2",
-    title: "AI-Based Disease Prediction",
-    department: "Computer Science",
-    milestones: TEMPLATE_DEFINITIONS.map((t) => ({
-      name: t.label,
-      status: "pending",
-      due: null,
-      uploadedFile: null,
-      note: "",
-    })),
-    members: ["Ayesha Butt", "Madiha Sumbal", "Saad Farooq"],
-  },
-  {
-    group: "Group 3",
-    title: "Online Exam Proctoring",
-    department: "Computer Arts",
-    templateLink: "https://drive.google.com/drive/folders/CA-TEMPLATES-URL",
-    milestones: TEMPLATE_DEFINITIONS.map((t) => ({
-      name: t.label,
-      status: "pending",
-      due: null,
-      uploadedFile: null,
-      note: "",
-    })),
-    members: ["Fatima Noor", "Usman Ghani", "Hira Qureshi"],
-  },
-];
+function maskGroupId(originalId) {
+  if (!originalId) return "Group-001";
+  if (originalId.toLowerCase().startsWith("group-")) return originalId;
+  return `Group-${originalId.slice(-3).toUpperCase()}`;
+}
 
 function formatDateTime(inp) {
   if (!inp) return "—";
-  try {
-    const d = new Date(inp);
-    if (isNaN(d.getTime())) return String(inp);
-    const date = d.toLocaleDateString();
-    const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    return `${date} ${time}`;
-  } catch {
-    return String(inp);
-  }
+  const d = new Date(inp);
+  return isNaN(d.getTime()) ? String(inp) : d.toLocaleDateString();
 }
 
 export default function SupervisorMilestones() {
-  const [groups, setGroups] = useState(INITIAL_GROUPS);
+  const [groups, setGroups] = useState([]);
   const [semesterStart, setSemesterStart] = useState(null);
 
   const [modal, setModal] = useState({
@@ -100,7 +54,7 @@ export default function SupervisorMilestones() {
     saving: false,
   });
 
-  // ================== FETCH SEMESTER START ==================
+  // fetch semester start and set default due dates if present
   useEffect(() => {
     async function fetchSemesterStart() {
       try {
@@ -108,6 +62,8 @@ export default function SupervisorMilestones() {
         if (data?.date) {
           const start = new Date(data.date);
           setSemesterStart(start);
+
+          // if groups already loaded, update their local due dates as well
           setGroups((prev) =>
             prev.map((g) => ({
               ...g,
@@ -115,7 +71,7 @@ export default function SupervisorMilestones() {
                 const template = TEMPLATE_DEFINITIONS[idx];
                 if (!template || !start) return m;
                 const dueDate = new Date(start);
-                dueDate.setDate(start.getDate() + template.week * 7); // dynamic
+                dueDate.setDate(start.getDate() + template.week * 7);
                 return { ...m, due: dueDate.toISOString().split("T")[0] };
               }),
             }))
@@ -128,7 +84,62 @@ export default function SupervisorMilestones() {
     fetchSemesterStart();
   }, []);
 
-  // ================== MODAL HANDLERS ==================
+  // load groups from backend
+  useEffect(() => {
+    async function loadGroups() {
+      try {
+        const res = await supervisorService.getSupervisorGroups();
+
+        const mapped = res.groups.map((g) => ({
+          group: maskGroupId(g.maskedGroupId),
+          title: g.description,
+          members: g.members,
+          department: g.department || "",
+          milestones: TEMPLATE_DEFINITIONS.map((t) => {
+            const backendMilestone = g.milestones?.find((m) => m.code === t.code) || {};
+            return {
+              name: t.label,
+              week: t.week,
+              status: backendMilestone.status || "pending",
+              due: backendMilestone.due || null,
+              uploadedFile: backendMilestone.uploadedFile || null,
+              note: backendMilestone.note || "",
+            };
+          }),
+        }));
+
+        setGroups(mapped);
+      } catch (err) {
+        console.error("Error fetching supervisor groups:", err);
+        toastService.error("Failed to load groups from backend");
+      }
+    }
+
+    loadGroups();
+  }, []);
+
+  // timeline helpers
+  const now = useMemo(() => new Date(), []);
+  const currentWeekNumber = useMemo(() => {
+    if (!semesterStart) return null;
+    const diffMs = now.getTime() - semesterStart.getTime();
+    if (diffMs < 0) return 0;
+    return Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1;
+  }, [semesterStart, now]);
+
+  const activeTemplateIndex = useMemo(() => {
+    if (currentWeekNumber == null) return null;
+    let idx = TEMPLATE_DEFINITIONS
+      .map((t) => t.week)
+      .reduce((acc, w, i) => (w <= currentWeekNumber ? i : acc), -1);
+    if (idx === -1) idx = 0;
+    if (currentWeekNumber > TEMPLATE_DEFINITIONS[TEMPLATE_DEFINITIONS.length - 1].week) {
+      idx = TEMPLATE_DEFINITIONS.length - 1;
+    }
+    return idx;
+  }, [currentWeekNumber]);
+
+  // modal handlers
   const openDetails = (gIndex, mIndex) => {
     const g = groups[gIndex];
     const m = g.milestones[mIndex];
@@ -164,53 +175,131 @@ export default function SupervisorMilestones() {
         : "Mark this milestone as Pending?";
     if (!window.confirm(confirmMsg)) return;
 
-    const mapped = selectedAction === "approve" ? "completed" : selectedAction === "unapprove" ? "rejected" : "pending";
+    const mapped =
+      selectedAction === "approve"
+        ? "completed"
+        : selectedAction === "unapprove"
+        ? "rejected"
+        : "pending";
 
-    setGroups((prev) => {
-      const next = JSON.parse(JSON.stringify(prev));
-      next[gIndex].milestones[mIndex].status = mapped;
-      return next;
-    });
+    const milestoneCode = TEMPLATE_DEFINITIONS[mIndex].code;
+    const groupId = groups[gIndex].group; // backend ID
 
     setModal((s) => ({ ...s, saving: true }));
+
     try {
-      await new Promise((r) => setTimeout(r, 600));
-      toastService.success("Milestone updated (frontend only)");
+      await supervisorService.updateMilestoneStatus(groupId, milestoneCode, {
+        status: mapped,
+        note: groups[gIndex].milestones[mIndex].note,
+      });
+
+      setGroups((prev) => {
+        const next = JSON.parse(JSON.stringify(prev));
+        next[gIndex].milestones[mIndex].status = mapped;
+        return next;
+      });
+
+      toastService.success("Milestone updated successfully");
       closeDetails();
     } catch (err) {
       toastService.error("Failed to update milestone");
-      setGroups(INITIAL_GROUPS);
       setModal((s) => ({ ...s, saving: false }));
     }
   };
 
   const archiveGroup = (gIndex) => {
     if (!window.confirm("Add this group to archive?")) return;
-    setGroups((prev) => prev.map((g, i) => (i === gIndex ? { ...g, _archived: true, _show: false } : g)));
+    setGroups((prev) =>
+      prev.map((g, i) => (i === gIndex ? { ...g, _archived: true, _show: false } : g))
+    );
     toastService.success("Group added to archive (frontend only)");
   };
 
-  // ================== RENDER ==================
   return (
     <div>
       <DashboardSectionHeader description="Here you can view all the FYP groups milestones. Click 'Show Timeline' to see groups progress, milestones, and deadlines.">
         Milestones & Timeline
       </DashboardSectionHeader>
 
+     {/* COMPACT GRID TIMELINE */}
+<div
+  className="supervisor-timeline-wrap"
+  aria-hidden={!semesterStart}
+>
+  {semesterStart ? (
+    <div className="supervisor-timeline compact-grid">
+
+      {/* ===== HEADER ===== */}
+      <div className="timeline-header">
+        <div>
+          <label>Current Academic Timeline</label>
+
+          <Typography variant="body2">
+            Semester start:
+            <strong> {formatDateTime(semesterStart)}</strong>
+          </Typography>
+
+          <Typography variant="body2">
+            Current week:
+            <strong>
+              {" "}
+              {currentWeekNumber != null ? currentWeekNumber : "—"}
+            </strong>
+          </Typography>
+        </div>
+      </div>
+
+            <div className="timeline-grid">
+              {TEMPLATE_DEFINITIONS.map((tpl, i) => {
+                // correct due date calculation using semesterStart
+                const due = semesterStart ? (() => {
+                  const d = new Date(semesterStart);
+                  d.setDate(semesterStart.getDate() + tpl.week * 7);
+                  return d;
+                })() : null;
+
+                const completed = currentWeekNumber != null && tpl.week < currentWeekNumber;
+                const active = activeTemplateIndex === i;
+
+                return (
+                  <div key={tpl.code} className={`timeline-card ${completed ? "completed" : ""} ${active ? "active" : ""}`}>
+                    <div className="card-left">
+                      <div className="card-dot" />
+                      <div className="card-week">W{tpl.week}</div>
+                    </div>
+                    <div className="card-body">
+                      <div className="card-title">{tpl.label}</div>
+                      <div className="card-meta">
+                        <span className="card-date">{due ? due.toLocaleDateString() : "—"}</span>
+                        <span className={`card-status ${completed ? "done" : active ? "now" : "upcoming"}`}>
+                          {completed ? "Completed" : active ? "In Progress" : "Upcoming"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="supervisor-timeline-placeholder">Timeline not configured (semester start missing)</div>
+        )}
+      </div>
+
+      {/* GROUP CARDS (unchanged behavior) */}
       <div className="milestone-groups-row">
         {groups.map((group, gIdx) => {
           const displayedMilestones = TEMPLATE_DEFINITIONS.map((tpl, idx) => {
-  const original = group.milestones[idx];
-  return {
-    weekLabel: `Week ${tpl.week}`,
-    name: tpl.label,
-    due: original.due || "—",
-    status: original.status,
-    uploadedFile: original.uploadedFile,
-    note: original.note,
-  };
-});
-
+            const original = group.milestones[idx];
+            return {
+              weekLabel: `Week ${tpl.week}`,
+              name: tpl.label,
+              due: original.due || "—",
+              status: original.status,
+              uploadedFile: original.uploadedFile,
+              note: original.note,
+            };
+          });
 
           const completed = displayedMilestones.filter((m) => m.status === "completed").length;
           const pending = displayedMilestones.filter((m) => m.status === "pending").length;
@@ -238,8 +327,7 @@ export default function SupervisorMilestones() {
                     <b>Department:</b> {group.department}
                   </div>
                   <div className="milestone-card-members">
-                    <b>Members:</b> {group.members.join(", ")}
-                  </div>
+                    <b>Members:</b> {group.members?.join(", ")}</div>
                 </div>
 
                 <div className="milestone-card-progress">
@@ -272,7 +360,6 @@ export default function SupervisorMilestones() {
                       {displayedMilestones.map((m, mIdx) => (
                         <tr key={m.week}>
                           <td className="milestone-td">{m.weekLabel}</td>
-
                           <td className="milestone-td">{m.due}</td>
                           <td className="milestone-td">
                             <div className="milestone-action-row">
@@ -304,7 +391,7 @@ export default function SupervisorMilestones() {
         })}
       </div>
 
-      {/* ================= MODAL ================= */}
+      {/* MODAL (unchanged) */}
       {modal.open && modal.gIndex != null && modal.mIndex != null && (
         <div className="mmodal-backdrop" role="dialog" aria-modal="true">
           <div className="mmodal modal-centered" role="document" aria-labelledby="milestone-details-title">
@@ -317,7 +404,7 @@ export default function SupervisorMilestones() {
               {(() => {
                 const g = groups[modal.gIndex];
                 const m = g.milestones[modal.mIndex];
-              const template = TEMPLATE_DEFINITIONS[modal.mIndex];
+                const template = TEMPLATE_DEFINITIONS[modal.mIndex];
 
                 const uploadedFile = m.uploadedFile || null;
                 const currentNote = m.note || "";
@@ -329,17 +416,15 @@ export default function SupervisorMilestones() {
                       <div className="stack-label">Milestone</div>
                       <div className="stack-value">
                         <strong>{`Week ${template.week}`}</strong>
-                    
                       </div>
                     </div>
 
                     <div className="stack-item">
-  <div className="stack-label">Template</div>
-  <div className="stack-value">
-    {template.label}
-  </div>
-</div>
-
+                      <div className="stack-label">Template</div>
+                      <div className="stack-value">
+                        {template.label}
+                      </div>
+                    </div>
 
                     <div className="stack-item">
                       <div className="stack-label">Uploaded File</div>

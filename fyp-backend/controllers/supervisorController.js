@@ -1,3 +1,10 @@
+// supervisorController.js
+
+
+const Proposal = require("../models/StudentProposal");
+const Group = require("../models/StudentGroup");
+const User = require("../models/User");
+
 // GET RECENT ACTIVITIES FOR SUPERVISOR
 exports.getRecentActivities = async (req, res) => {
   try {
@@ -112,27 +119,23 @@ function maskGroupId(originalId) {
   
   const strId = originalId.toString();
   
-  // Agar already "group-" ya "Group-" se start ho raha hai to use karo
+
   if (strId.toLowerCase().startsWith('group-')) {
-    return `Group-${strId.substring(6, 9)}`; // Pehle 3 digits lelo
+    return `Group-${strId.substring(6, 9)}`; 
   }
   
-  // Agar long number hai (like timestamp) to last 3 digits lelo
   if (strId.length > 5 && /^\d+$/.test(strId)) {
     const shortId = parseInt(strId.substring(strId.length - 3));
     return `Group-${String(shortId).padStart(3, '0')}`;
   }
   
-  // Agar ObjectId type ka hai to last 3 characters lelo
-  if (strId.length === 24) { // MongoDB ObjectId length
+  if (strId.length === 24) { 
     return `Group-${strId.substring(18, 21).toUpperCase()}`;
   }
   
-  // Default: first 6 characters with "Group-" prefix
   return `Group-${strId.substring(0, 3).toUpperCase()}`;
 }
 
-// Helper function to calculate time ago
 function getTimeAgo(date) {
   const now = new Date();
   const diffInMs = now - new Date(date);
@@ -149,4 +152,75 @@ function getTimeAgo(date) {
   } else {
     return 'Just now';
   }
+}
+
+
+// GET GROUPS UNDER SUPERVISOR
+exports.getSupervisorGroups = async (req, res) => {
+  try {
+    const supervisorEmail = req.user.email;
+    console.log(supervisorEmail);
+    // 1. Get proposals supervised by this supervisor
+    const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
+      .populate("groupId");
+
+    const result = [];
+
+    for (const proposal of proposals) {
+      const group = proposal.groupId;
+      if (!group) continue;
+
+      // 2. Collect member emails safely
+      const emails = [
+        group.leader?.email,
+        group.member2?.email,
+        group.member3?.email
+      ].filter(Boolean);
+
+      // 3. Fetch user names from User collection
+      const users = await User.find(
+        { email: { $in: emails } },
+        { name: 1, _id: 0 }
+      );
+
+      result.push({
+        maskedGroupId: maskGroupId(group.groupId),
+        description: proposal.projectTitle || "No Description",
+        members: users.map(u => u.name)
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      groups: result
+    });
+
+  } catch (error) {
+    console.error("Error fetching supervisor groups:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch supervisor groups"
+    });
+  }
+};
+
+// Helper: Mask Group ID
+function maskGroupId(originalId) {
+  if (!originalId) return 'Group-001';
+  const strId = originalId.toString();
+
+  if (strId.toLowerCase().startsWith('group-')) {
+    return `Group-${strId.substring(6, 9)}`; 
+  }
+  
+  if (strId.length > 5 && /^\d+$/.test(strId)) {
+    const shortId = parseInt(strId.substring(strId.length - 3));
+    return `Group-${String(shortId).padStart(3, '0')}`;
+  }
+
+  if (strId.length === 24) { 
+    return `Group-${strId.substring(18, 21).toUpperCase()}`;
+  }
+
+  return `Group-${strId.substring(0, 3).toUpperCase()}`;
 }
