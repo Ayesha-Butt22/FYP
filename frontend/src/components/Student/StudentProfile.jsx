@@ -4,6 +4,7 @@ import { Camera, Mail, BookOpen, User as UserIcon, Eye, EyeOff } from "lucide-re
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import { authService } from "../Api/AuthService";
 import "./StudentProfile.css";
+import {FaUserTie} from "react-icons/fa";
 
 export default function StudentProfile() {
   const timeoutRef = useRef(null);
@@ -21,12 +22,20 @@ export default function StudentProfile() {
   const [passwords, setPasswords] = useState({ changePassword: "", confirmPassword: "" });
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [profilePic , setProfilePic ] = useState(null);
   const [message, setMessage] = useState({ type: "", text: "" });
 
-  // Clear timeout on unmount
+
   useEffect(() => {
-    return () => clearTimeout(timeoutRef.current);
+      return () => clearTimeout(timeoutRef.current);
   }, []);
+
+    useEffect(() => {
+        const url = localStorage.getItem('imageurl');
+        if (!url || url === "null") return;
+        setProfilePic(url);
+
+    }, []);
 
   // Handle password inputs
   const handlePasswordChange = (e) => {
@@ -117,8 +126,11 @@ export default function StudentProfile() {
             {/* Avatar */}
             <div className="avatar-section">
               <div className="avatar-wrapper">
-                <img src={student.avatar} alt={student.name} className="avatar" />
-                
+                  {profilePic ? (
+                      <img src={profilePic} alt="Profile" style={{ width: "100%", height: "100%", borderRadius: "50%" }} />
+                  ) : (
+                      <img src={student.avatar} alt={student.name} className="avatar" />
+                  )}
               </div>
             </div>
 

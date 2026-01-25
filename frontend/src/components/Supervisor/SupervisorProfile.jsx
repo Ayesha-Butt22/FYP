@@ -74,15 +74,15 @@ export default function SupervisorProfile({ supervisorInfo }) {
   const [message, setMessage] = useState({ type: "", text: "" });
   const timeoutRef = useRef(null);
 
-  // 🔹 Load Profile Pic
+
+
   useEffect(() => {
-    if (!email) return;
-    authService.makeAPICall("get-profile-pic", { email }).then((res) => {
-      if (res.success) setProfilePic(res.data?.url);
-    });
+      const url = localStorage.getItem('imageurl');
+    if (!url) return;
+    setProfilePic(url);
   }, [email]);
 
-  // 🔹 Load Ideas from DB
+
   useEffect(() => {
     if (!email) return;
 

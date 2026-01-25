@@ -4,6 +4,7 @@ import { User, Mail, Eye, EyeOff, Camera } from 'lucide-react';
 import DashboardSectionHeader from './DashboardSectionHeader';
 import { authService } from '../Api/AuthService';
 import './Profile.css';
+import {FaUserTie} from "react-icons/fa";
 
 export default function Profile() {
   const timeoutRef = useRef(null);
@@ -15,20 +16,27 @@ export default function Profile() {
     email: "",
     avatar: "https://ui-avatars.com/api/?name=Project+Coordinator&size=200&background=0891b2&color=fff&bold=true&font-size=0.4"
   });
+  const [profilePic , setProfilePic] = useState(null)
 
   const [passwords, setPasswords] = useState({ newPassword: '', confirmPassword: '' });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  // Cleanup timeout on unmount
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
-  // Fetch profile via API
+    useEffect(() => {
+        const url = localStorage.getItem('imageurl');
+        if (!url) return;
+        setProfilePic(url);
+    }, []);
+
+
   useEffect(() => {
     const email = localStorage.getItem("email");
     if (!email) return;
@@ -110,11 +118,13 @@ export default function Profile() {
 
       <div className="admin-profile-container">
         <div className="admin-profile-card" role="region" aria-label="Project Coordinator profile">
-          {/* Profile Avatar */}
           <div className="profile-avatar-section-sup">
             <div className="avatar-wrapper">
-              <img src={profile.avatar} alt={profile.name} className="avatar" />
-              
+                {profilePic ? (
+                    <img src={profilePic} alt="Profile" style={{ width: "100%", height: "100%", borderRadius: "50%" }} />
+                ) : (
+                    <img src={profile.avatar} alt={profile.name} className="avatar" />
+                )}
             </div>
           </div>
 

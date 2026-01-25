@@ -21,22 +21,29 @@ export default function AdminProfile() {
     confirmPassword: ''
   });
 
+  const[profilePic , setProfilePic ] = useState(null);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  // Clear timeout on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
-  // Fetch admin profile from API
+    useEffect(() => {
+        const url = localStorage.getItem('imageurl');
+        if (!url) return;
+        setProfilePic(url);
+    }, []);
+
+
+
   useEffect(() => {
     const fetchAdminProfile = async () => {
       try {
-        const email = localStorage.getItem('email') || 'admin@riphah.edu.pk'; // fallback email
+        const email = localStorage.getItem('email') || 'admin@riphah.edu.pk';
         const res = await authService.getUserByEmail(email);
 
         if (res.success && res.data?.user) {
@@ -120,22 +127,24 @@ export default function AdminProfile() {
 
       <div className="admin-profile-container">
         <div className="admin-profile-card" role="region" aria-label="Admin profile">
-          {/* Decorative background */}
           <div className="profile-decorative-bg">
             <div className="overlay" aria-hidden="true"></div>
-            <svg viewBox="0 0 1440 120" className="wave" aria-hidden="true">
-              <path
-                fill="#ffffff"
-                d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
-              ></path>
-            </svg>
+
+                    <svg viewBox="0 0 1440 120" className="wave" aria-hidden="true">
+                        <path
+                            fill="#ffffff"
+                            d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
+                        ></path>
+                    </svg>
           </div>
 
-          {/* Avatar */}
           <div className="profile-avatar-section">
             <div className="avatar-wrapper">
+                {profilePic ? (
+                    <img src={profilePic} alt="Profile" style={{ width: "100%", height: "100%", borderRadius: "50%" }} />
+                ) : (
               <img src={adminData.avatar} alt={adminData.name} className="avatar" />
-             
+                    )}
             </div>
           </div>
 

@@ -76,8 +76,9 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const loadProfilePic = async () => {
-      if (!email) return;
+       if (!email) return;
       const imageUrl = await ProfileService.getProfilePic(email);
+      localStorage.setItem('imageurl' , imageUrl);
       if (imageUrl) setProfilePic(imageUrl);
     };
     loadProfilePic();
@@ -90,6 +91,7 @@ export default function DashboardLayout({
     try {
       await ProfileService.uploadProfilePic(email, file);
       ToastService.success("Profile picture uploaded!");
+      window.location.reload();
       const imageUrl = await ProfileService.getProfilePic(email);
       if (imageUrl) setProfilePic(imageUrl);
     } catch {
