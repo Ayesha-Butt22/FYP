@@ -132,19 +132,40 @@ export default function SupervisorMilestones() {
                 toastService.info("No submissions found for this group");
             }
 
-            const formattedSubmissions = submissions.map((s) => ({
-                weekLabel: `Week ${s.week}`,
-                name: s.templateLabel,
-                week: s.week,
-                due: null,
-                status: s.status.toLowerCase().replace(/\s+/g, "-"),
-                uploadedFile: {
-                    url: s.filePath.replace(/\\/g, "/"),
-                    name: s.originalName,
-                    uploadedAt: s.uploadedAt,
-                },
-                note: s.supervisorRemarks || "",
-            }));
+
+            const groupedByWeek = submissions.reduce((acc, s) => {
+                const key = `week-${s.week}-${s.templateCode}`;
+
+                if (!acc[key]) {
+                    acc[key] = [];
+                }
+
+                acc[key].push({
+                    weekLabel: `Week ${s.week}`,
+                    name: s.templateLabel,
+                    week: s.week,
+                    templateCode: s.templateCode,
+                    due: null,
+                    status: s.status.toLowerCase().replace(/\s+/g, "-"),
+                    uploadedFile: {
+                        url: s.filePath.replace(/\\/g, "/"),
+                        name: s.originalName,
+                        uploadedAt: s.uploadedAt,
+                    },
+                    note: s.supervisorRemarks || "",
+                    _id: s._id,
+                });
+
+                return acc;
+            }, {});
+
+            const formattedSubmissions = Object.values(groupedByWeek)
+                .flatMap(weekSubmissions =>
+                    weekSubmissions.sort((a, b) =>
+                        new Date(b.uploadedFile.uploadedAt) - new Date(a.uploadedFile.uploadedAt)
+                    )
+                )
+                .sort((a, b) => a.week - b.week);
 
             setSubmissionsData((prev) => ({ ...prev, [groupId]: formattedSubmissions }));
             setExpandedGroups((prev) => ({ ...prev, [groupId]: true }));
@@ -234,6 +255,9 @@ export default function SupervisorMilestones() {
         const { groupId, milestoneIndex, selectedAction } = modal;
         if (!groupId || milestoneIndex == null) return;
 
+
+
+
         const confirmMsg =
             selectedAction === "approve"
                 ? "Approve this milestone? This will mark it as Completed."
@@ -244,11 +268,11 @@ export default function SupervisorMilestones() {
         if (!window.confirm(confirmMsg)) return;
 
         const mappedStatus =
-            selectedAction === "approved"
+            selectedAction === "approve"
                 ? "Approved"
-                : selectedAction === "rejected"
+                : selectedAction === "unapprove"
                     ? "Rejected"
-                    : "pending";
+                    : "Pending";
 
         const group = groups.find((g) => g.id === groupId);
         const isExpanded = expandedGroups[groupId];
@@ -256,7 +280,14 @@ export default function SupervisorMilestones() {
         const milestone = milestones[milestoneIndex];
         const milestoneCode = TEMPLATE_DEFINITIONS[milestoneIndex].code;
 
-        setModal((s) => ({ ...s, saving: true }));
+        if(!milestone.note) {
+        toastService.info('comments are required');
+        return;
+        }
+
+
+
+            setModal((s) => ({ ...s, saving: true }));
 
         try {
             await supervisorService.updateMilestoneStatus(groupId, milestoneCode, {

@@ -43,7 +43,7 @@ export default function StudentUploads() {
   const [semesterStart, setSemesterStart] = useState(null);
   const [studentInfo, setStudentInfo] = useState(null);
 
-  const headers = ["Template", "Due Date", "Status", "Action"];
+  const headers = ["Template", "Due Date", "Status", "Remarks"];
   const fileInputRefs = useRef({});
 
   const studentId = localStorage.getItem("studentId");
@@ -111,6 +111,7 @@ export default function StudentUploads() {
         filename: f.originalName,
         filePath: f.filePath,
         status: normalizeStatus(f.status),
+        remarks: f.supervisorRemarks ?? 'No Remarks Provided',
       }));
       setAllFiles(normalized);
     } catch (err) {
@@ -128,8 +129,8 @@ export default function StudentUploads() {
       return {
         Template: tpl.label,
         "Due Date": calculateDueDate(semesterStart, tpl.week),
-        Status: existing ? existing.status : "Pending",
-        Action: existing ? "Re-upload" : "Upload",
+        Status: existing ? existing.status : "Upload Pending",
+        Remarks: existing ? existing.remarks : "N/A",
         __meta: { template: tpl.code, file: existing },
       };
     });
