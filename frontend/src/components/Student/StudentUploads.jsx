@@ -42,8 +42,9 @@ export default function StudentUploads() {
   const [loading, setLoading] = useState(false);
   const [semesterStart, setSemesterStart] = useState(null);
   const [studentInfo, setStudentInfo] = useState(null);
+  const [fypYear , setFypYear] = useState(1);
 
-  const headers = ["Template", "Due Date", "Status", "Remarks"];
+  const headers = ["Template", "Due Date", "Status", "Remarks" , "Upload Date"];
   const fileInputRefs = useRef({});
 
   const studentId = localStorage.getItem("studentId");
@@ -111,6 +112,7 @@ export default function StudentUploads() {
         filename: f.originalName,
         filePath: f.filePath,
         status: normalizeStatus(f.status),
+        uploadedAt: new Date(f.uploadedAt).toLocaleDateString(),
         remarks: f.supervisorRemarks ?? 'No Remarks Provided',
       }));
       setAllFiles(normalized);
@@ -122,22 +124,30 @@ export default function StudentUploads() {
     }
   };
 
-  const applyFilters = () => {
-    if (!studentInfo) return;
-    const tableRows = TEMPLATE_DEFINITIONS.map((tpl) => {
-      const existing = allFiles.find((f) => f.template === tpl.code);
-      return {
-        Template: tpl.label,
-        "Due Date": calculateDueDate(semesterStart, tpl.week),
-        Status: existing ? existing.status : "Upload Pending",
-        Remarks: existing ? existing.remarks : "N/A",
-        __meta: { template: tpl.code, file: existing },
-      };
-    });
-    setRows(tableRows);
-  };
+    const applyFilters = () => {
+        if (!studentInfo) return;
+        const visibleTemplates =
+            fypYear === 1
+                ? TEMPLATE_DEFINITIONS.filter((tpl) => tpl.code <= "t05")
+                : TEMPLATE_DEFINITIONS;
+        const tableRows = visibleTemplates.map((tpl) => {
+            const existing = allFiles.find((f) => f.template === tpl.code);
+            if (existing && existing.template === "t05" && existing.status === "Approved") {
+                setFypYear(2);
+            }
+            return {
+                Template: tpl.label,
+                "Due Date": calculateDueDate(semesterStart, tpl.week),
+                Status: existing ? existing.status : "Upload Pending",
+                Remarks: existing ? existing.remarks : "N/A",
+                "Upload Date": existing ? existing.uploadedAt : "N/A",
+                __meta: { template: tpl.code, file: existing },
+            };
+        });
 
-  /* ================= FILE ACTIONS ================= */
+        setRows(tableRows);
+    }
+
   const buildFileUrl = (path) => TemplateService.buildFileUrl(path);
 
   const handleDownload = (row) => {
@@ -221,11 +231,15 @@ export default function StudentUploads() {
         Uploads Template
       </DashboardSectionHeader>
 
+
       {loading ? (
         <div className="st-loading">Loading…</div>
       ) : (
-        <AppTable headers={headers} rows={rows} renderActions={renderActions} />
-      )}
+          <>
+              <label>Fyp Year = {fypYear}</label>
+              <AppTable headers={headers} rows={rows} renderActions={renderActions} />
+          </>
+        )}
     </Box>
   );
 }
