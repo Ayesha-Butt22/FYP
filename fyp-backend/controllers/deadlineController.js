@@ -1,3 +1,4 @@
+//deadlineController.js
 exports.getDeadLine = async (req, res) => {
     try {
         const { part } = req.query;
@@ -21,6 +22,15 @@ exports.getDeadLine = async (req, res) => {
                 evaluations:"Artifact Submission",
             },
             {
+                week: "Week 3",
+                milestone: "Nill",
+                submitTo: "Nill",
+                deliverables: "Nill",
+                templates:"Nill",
+                evaluations:"Nill",
+                
+            },
+            {
                 week: "Week 4",
                 milestone: "Defend Proposal",
                 submitTo: "Entire Faculty",
@@ -30,6 +40,15 @@ exports.getDeadLine = async (req, res) => {
 
             },
             {
+                week: "Week 5",
+                milestone: "Nill",
+                submitTo: "Nill",
+                deliverables: "Nill",
+                templates:"Nill",
+                evaluations:"Nill",
+                
+            },
+            {
                 week: "Week 6",
                 milestone: "Finalize Project Proposal",
                 submitTo: "Project Coordinator",
@@ -37,6 +56,60 @@ exports.getDeadLine = async (req, res) => {
                     "Submit Project Proposal & Plan (Both SOFT & HARD COPY – Use Template-04)",
                 templates:"Template-04 Project Proposal & Plan",
                      evaluations:"Artifact Submission",
+            },
+            {
+                week: "Week 7",
+                milestone: "Nill",
+                submitTo: "Nill",
+                deliverables: "Nill",
+                templates:"Nill",
+                evaluations:"Nill",
+                
+            },
+            {
+                week: "Week 8",
+                milestone: "Nill",
+                submitTo: "Nill",
+                deliverables: "Nill",
+                templates:"Nill",
+                evaluations:"Nill",
+                
+            },
+            {
+                week: "Week 9",
+                milestone: "Nill",
+                submitTo: "Nill",
+                deliverables: "Nill",
+                templates:"Nill",
+                evaluations:"Nill",
+                
+            },
+            {
+                week: "Week 10",
+                milestone: "Nill",
+                submitTo: "Nill",
+                deliverables: "Nill",
+                templates:"Nill",
+                evaluations:"Nill",
+                
+            },
+            {
+                week: "Week 11",
+                milestone: "Nill",
+                submitTo: "Nill",
+                deliverables: "Nill",
+                templates:"Nill",
+                evaluations:"Nill",
+                
+            },
+            {
+                week: "Week 12",
+                milestone: "Nill",
+                submitTo: "Nill",
+                deliverables: "Nill",
+                templates:"Nill",
+                evaluations:"Nill",
+                
             },
             {
                 week: "13th Week before Final Exams",
@@ -58,6 +131,15 @@ exports.getDeadLine = async (req, res) => {
                 evaluations:"Artifact Submission",
             },
             {
+                week: "Week 12",
+                milestone: "Nill",
+                submitTo: "Nill",
+                deliverables: "Nill",
+                templates:"Nill",
+                evaluations:"Nill",
+                
+            },
+            {
                 week: "Week 13",
                 milestone: "Final Evaluation",
                 submitTo: "Exam Committee / Supervisor",
@@ -65,6 +147,16 @@ exports.getDeadLine = async (req, res) => {
                     "Final Presentation (Use Template-06), Full Working Demo",
                 templates:"Template-06 Final Presentation",
                       evaluations:"presentation Submission",
+            },
+             
+            {
+                week: "Week 14",
+                milestone: "Nill",
+                submitTo: "Nill",
+                deliverables: "Nill",
+                templates:"Nill",
+                evaluations:"Nill",
+                
             },
             {
                 week: "Week 15",
@@ -75,7 +167,8 @@ exports.getDeadLine = async (req, res) => {
                 templates:"Template-06 Final Presentation",
                     evaluations:"presentation Submission",
             },
-            {
+           
+    {
                 week: "Week After Finals",
                 milestone: "Submit Project",
                 submitTo: "Project Coordinator",

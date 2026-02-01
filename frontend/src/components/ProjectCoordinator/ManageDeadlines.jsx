@@ -108,6 +108,11 @@ export default function ManageDeadlines() {
               <strong>Deliverables:</strong> {d.deliverables}
             </p>
           )}
+          {d.templates && (
+  <p className="tooltip-line">
+    <strong>Templates:</strong> {d.templates}
+  </p>
+)}
           <p className="tooltip-line">
             <strong>Evaluation:</strong> {d.evaluations}
           </p>
