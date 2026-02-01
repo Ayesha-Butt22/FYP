@@ -8,6 +8,7 @@ exports.getDeadLine = async (req, res) => {
                 milestone: "Attend Orientation Seminar",
                 submitTo: "Project Coordinator",
                 deliverables: "Submit Project Team List (HARD COPY – Use Template-01)",
+                templates:"Template-01 Project Team List  ",
                 evaluations:"Nill",
                 
             },
@@ -16,6 +17,7 @@ exports.getDeadLine = async (req, res) => {
                 milestone: "Develop Project Ideas; Find a Supervisor",
                 submitTo: "Project Coordinator",
                 deliverables: "Submit Initial Proposal (HARD COPY – Use Template-02)",
+                templates:"Template-02 Initial Proposal",
                 evaluations:"Artifact Submission",
             },
             {
@@ -23,6 +25,7 @@ exports.getDeadLine = async (req, res) => {
                 milestone: "Defend Proposal",
                 submitTo: "Entire Faculty",
                 deliverables: "Project Proposal Presentation (SOFT COPY – Use Template-03)",
+                templates:"Template-03 Project Proposal Presentation",
                  evaluations:"Presentation Submission",
 
             },
@@ -32,6 +35,7 @@ exports.getDeadLine = async (req, res) => {
                 submitTo: "Project Coordinator",
                 deliverables:
                     "Submit Project Proposal & Plan (Both SOFT & HARD COPY – Use Template-04)",
+                templates:"Template-04 Project Proposal & Plan",
                      evaluations:"Artifact Submission",
             },
             {
@@ -39,6 +43,7 @@ exports.getDeadLine = async (req, res) => {
                 milestone: "Progress Presentation / Assessment",
                 submitTo: "Exam Committee / Supervisor",
                 deliverables:"Presentation (Use Template-07), Prototype, Project Report (SOFT COPY – First 5 Chapters – Use Template-05)",
+                templates:"Template-07 Presentation, Template-05 Project Report",
                      evaluations:"Artifact Submission",
             },
         ];
@@ -49,6 +54,7 @@ exports.getDeadLine = async (req, res) => {
                 milestone: "Submit Report",
                 submitTo: "Project Coordinator",
                 deliverables: "Complete Project Report (SOFT COPY – Use Template-05)",
+                templates:"Template-05 Project Report",
                 evaluations:"Artifact Submission",
             },
             {
@@ -57,6 +63,7 @@ exports.getDeadLine = async (req, res) => {
                 submitTo: "Exam Committee / Supervisor",
                 deliverables:
                     "Final Presentation (Use Template-06), Full Working Demo",
+                templates:"Template-06 Final Presentation",
                       evaluations:"presentation Submission",
             },
             {
@@ -65,6 +72,7 @@ exports.getDeadLine = async (req, res) => {
                 submitTo: "Industry, Faculty & Students",
                 deliverables:
                     "Banners, Posters, Brochure, Project Report, Final Presentation (Use Template-06), Full Working Demo",
+                templates:"Template-06 Final Presentation",
                     evaluations:"presentation Submission",
             },
             {
@@ -73,6 +81,7 @@ exports.getDeadLine = async (req, res) => {
                 submitTo: "Project Coordinator",
                 deliverables:
                     "Documentation (Hard Binding – 3 Copies), CD (Including Software – Source Code, Appendix in PDF Format)",
+                templates:"Template-06 Final Presentation",
                     evaluations:"Artifact  and Code Submission ",
             },
         ];
