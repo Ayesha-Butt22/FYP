@@ -6,7 +6,7 @@ import { toastService } from "../ToastService/ToastService.jsx";
 import "./StudentUploads.css";
 import TemplateService from "../Api/TemplateService.jsx";
 
-/* ================= HELPERS ================= */
+const API_BASE = "http://localhost:5000";
 const calculateDueDate = (startDate, week) => {
   if (!startDate) return "—";
   const d = new Date(startDate);
@@ -43,6 +43,9 @@ export default function StudentUploads() {
   const [semesterStart, setSemesterStart] = useState(null);
   const [studentInfo, setStudentInfo] = useState(null);
   const [fypYear , setFypYear] = useState(1);
+  const [depTemplate , setDepTemplate] = useState(null);
+  const storedDept = localStorage.getItem("department");
+
 
   const headers = ["Template", "Due Date", "Status", "Remarks" , "Upload Date"];
   const fileInputRefs = useRef({});
@@ -59,7 +62,14 @@ export default function StudentUploads() {
     };
     return map[String(raw).toLowerCase()] || raw;
   };
-
+  const loadUploadedTemplate = async () => {
+        const url = `${API_BASE}/api/templates?department=${storedDept}`;
+        const res = await fetch(url);
+        if (res.ok) {
+            const data = await res.json();
+            setDepTemplate(data.data);
+        }
+    }
 
   useEffect(() => {
     const loadSemesterStart = async () => {
@@ -76,6 +86,7 @@ export default function StudentUploads() {
   }, []);
 
   useEffect(() => {
+      loadUploadedTemplate();
     const loadStudentInfo = async () => {
       if (!studentId) return;
       try {
@@ -88,6 +99,7 @@ export default function StudentUploads() {
     };
     loadStudentInfo();
   }, [studentId]);
+
  useEffect(() => {
     if (studentInfo?.groupId) loadTemplates();
   }, [studentInfo]);
@@ -114,6 +126,7 @@ export default function StudentUploads() {
         status: normalizeStatus(f.status),
         uploadedAt: new Date(f.uploadedAt).toLocaleDateString(),
         remarks: f.supervisorRemarks ?? 'No Remarks Provided',
+        label: f.templateLabel,
       }));
       setAllFiles(normalized);
     } catch (err) {
@@ -126,11 +139,18 @@ export default function StudentUploads() {
 
     const applyFilters = () => {
         if (!studentInfo) return;
+        if (!depTemplate) return;
         const visibleTemplates =
             fypYear === 1
                 ? TEMPLATE_DEFINITIONS.filter((tpl) => tpl.code <= "t05")
                 : TEMPLATE_DEFINITIONS;
-        const tableRows = visibleTemplates.map((tpl) => {
+        const depTplCodes = depTemplate.map(d => d.template);
+
+        const filteredTemplate = visibleTemplates.filter(
+            (tpl) => depTplCodes.includes(tpl.code)
+        );
+
+        const tableRows = filteredTemplate.map((tpl) => {
             const existing = allFiles.find((f) => f.template === tpl.code);
             if (existing && existing.template === "t05" && existing.status === "Approved") {
                 setFypYear(2);
