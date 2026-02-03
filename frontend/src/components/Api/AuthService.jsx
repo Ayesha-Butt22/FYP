@@ -107,7 +107,7 @@ async getUserByEmail(email) {
             name: data.user?.name || "null",
             specialization: data.user?.specialization || "",
             email: data.user?.email || "",
-            department: data.user?.department || "",
+            department: data.user.department || "",
             studentId: data.user?.studentId || "",
             mustChangePassword: data.user?.mustChangePassword ? 'true' : 'false',
             isGroupMade: data.user?.isGroupMade ? 'true' : 'false',

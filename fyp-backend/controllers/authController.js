@@ -105,6 +105,7 @@ exports.login = async (req, res) => {
         studentId: user.studentId ? user.studentId : 0,
         isGroupMade: user.isGroupMade ? user.isGroupMade : false,
         IsApproved: user.IsApproved,
+        department:user.department,
         user: user,
       }
     });
