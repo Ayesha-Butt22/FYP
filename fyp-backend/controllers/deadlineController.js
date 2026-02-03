@@ -112,7 +112,7 @@ exports.getDeadLine = async (req, res) => {
                 
             },
             {
-                week: "13th Week before Final Exams",
+                week: "Week 13",
                 milestone: "Progress Presentation / Assessment",
                 submitTo: "Exam Committee / Supervisor",
                 deliverables:"Presentation (Use Template-07), Prototype, Project Report (SOFT COPY – First 5 Chapters – Use Template-05)",
