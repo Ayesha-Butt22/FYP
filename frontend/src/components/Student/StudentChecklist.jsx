@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -15,29 +15,23 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import "./StudentChecklist.css";
+import axios from "axios";
+import SupervisorWhiteboardApi from "../Api/Proposals/supervisorWhiteboardApi.jsx";
+import TemplateService from "../Api/TemplateService.jsx";
 
 const PREVIEW_ROW_LIMIT = 3;
 
-const DEMO_TEMPLATES = [
-  { name: "Template-1", due: "2025-10-25", status: "Pending" },
-  { name: "Template-2", due: "2025-10-10", status: "Approved" },
-  { name: "Template-3", due: "2025-10-18", status: "Overdue" },
-  { name: "Template-4", due: "2025-11-01", status: "Pending" },
-  { name: "Template-5", due: "2025-16-01", status: "Pending" },
-];
-
-const DEMO_TASKS = [
-  { title: "Collect dataset", assignedTo: "Team", status: "In Progress" },
-  { title: "Preprocess data", assignedTo: "Member 2", status: "Pending" },
-  { title: "Model baseline", assignedTo: "Member 1", status: "Completed" },
-  { title: "Prepare slides", assignedTo: "Leader", status: "Pending" },
-];
-
-const DEMO_NOTICES = [
-  { description: "Final presentation scheduled", posted: "2025-10-12", status: "Active" },
-  { description: "Supervisor office hours changed", posted: "2025-09-30", status: "Expired" },
-  { description: "Template updates released", posted: "2025-10-01", status: "Active" },
-  { description: "Exam announced", posted: "2025-08-20", status: "Expired" },
+// Template definitions with week mapping
+const TEMPLATE_DEFINITIONS = [
+  { code: "t01", label: "Template-01: Project Team List", week: 1 },
+  { code: "t02", label: "Template-02: Initial Proposal", week: 2 },
+  { code: "t03", label: "Template-03: Proposal Presentation", week: 4 },
+  { code: "t04", label: "Template-04: Proposal & Plan", week: 6 },
+  { code: "t05", label: "Template-05: Progress Presentation", week: 13 },
+  { code: "t06", label: "Template-06: Complete Project Report", week: 24 },
+  { code: "t07", label: "Template-07: Final Presentation", week: 26 },
+  { code: "t08", label: "Template-08: Complete Final Presentation", week: 28 },
+  { code: "t09", label: "Template-09: Complete Documentation", week: 30 },
 ];
 
 function StatusChip({ status }) {
@@ -48,24 +42,217 @@ function StatusChip({ status }) {
   if (s === "overdue" || s === "expired") {
     return <Chip label={status} className="chip chip-danger" size="small" />;
   }
-  if (s === "in progress") {
+  if (s === "in progress" || s === "under review") {
     return <Chip label={status} className="chip chip-info" size="small" />;
   }
   return <Chip label={status} className="chip chip-warning" size="small" />;
 }
 
-export default function StudentChecklist({
-  templates = DEMO_TEMPLATES,
-  tasks = DEMO_TASKS,
-  notices = DEMO_NOTICES,
-}) {
+// Helper function to calculate due date based on semester start and week
+const calculateDueDate = (startDate, week) => {
+  if (!startDate) return "—";
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + week * 7);
+  return d.toLocaleDateString();
+};
+
+export default function StudentChecklist() {
+  const [tasks, setTasks] = useState([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+
+  // Templates state
+  const [templates, setTemplates] = useState([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const [semesterStart, setSemesterStart] = useState(null);
+  const [studentInfo, setStudentInfo] = useState(null);
+
+  // Whiteboard notices state
+  const [notices, setNotices] = useState([]);
+  const [loadingNotices, setLoadingNotices] = useState(true);
+
   const [expanded, setExpanded] = useState({ templates: false, tasks: false, notices: false });
   const [modal, setModal] = useState({ open: false, type: null });
 
   const openModal = (type) => setModal({ open: true, type });
   const closeModal = () => setModal({ open: false, type: null });
 
-  const templatesPreview = templates.slice(0, PREVIEW_ROW_LIMIT);
+  const studentId = localStorage.getItem("studentId");
+  const email = localStorage.getItem("email");
+
+  // Fetch Semester Start Date
+  useEffect(() => {
+    const loadSemesterStart = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/semester-start");
+        setSemesterStart(res.data?.date || null);
+      } catch (err) {
+        console.error("Error loading semester start:", err);
+      }
+    };
+    loadSemesterStart();
+  }, []);
+
+  // Fetch Student Info
+  useEffect(() => {
+    const loadStudentInfo = async () => {
+      if (!studentId) return;
+      try {
+        const data = await TemplateService.getStudentInfo(studentId);
+        setStudentInfo(data);
+      } catch (err) {
+        console.error("Error loading student info:", err);
+      }
+    };
+    loadStudentInfo();
+  }, [studentId]);
+
+  // Fetch Templates
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      if (!studentInfo?.groupId) return;
+      
+      try {
+        console.log("🔍 Fetching templates for group:", studentInfo.groupId);
+        const files = await TemplateService.getFiles(studentInfo.groupId);
+        
+        console.log("📦 Templates Response:", files);
+
+        const normalized = files.map((f) => ({
+          code: f.templateCode,
+          label: f.templateLabel || `Template ${f.templateCode}`,
+          status: f.status || "Pending",
+          uploadedAt: new Date(f.uploadedAt).toLocaleDateString(),
+          week: f.week,
+        }));
+
+        setTemplates(normalized);
+      } catch (err) {
+        console.error("❌ Failed to fetch templates:", err);
+        setTemplates([]);
+      } finally {
+        setLoadingTemplates(false);
+      }
+    };
+
+    if (studentInfo?.groupId) {
+      fetchTemplates();
+    }
+  }, [studentInfo]);
+
+  // Fetch Tasks
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
+        console.log("🔍 Fetching tasks from /api/tasks...");
+        const res = await axios.get("/api/tasks", config);
+        console.log("📦 Tasks API Response:", res.data);
+
+        let fetchedTasks = [];
+
+        if (res.data.success && Array.isArray(res.data.tasks)) {
+          fetchedTasks = res.data.tasks;
+        } else if (Array.isArray(res.data)) {
+          fetchedTasks = res.data;
+        }
+
+        console.log("📋 Fetched tasks count:", fetchedTasks.length);
+
+        const formatted = fetchedTasks.map((t) => {
+          let assignedByName = 
+            t.createdBy ||
+            t.createdByName ||
+            t.createdBy?.name ||
+            null;
+
+          if (!assignedByName && t.createdByEmail) {
+            assignedByName = t.createdByEmail.split('@')[0];
+          }
+
+          if (!assignedByName) {
+            assignedByName = "Unknown";
+          }
+
+          return {
+            title: t.title || "Untitled Task",
+            assignedBy: assignedByName,
+            status: t.status || 
+                    (t.progress === 100 ? "Completed" : 
+                     t.progress > 0 ? "In Progress" : "Pending")
+          };
+        });
+
+        setTasks(formatted);
+      } catch (err) {
+        console.error("❌ Failed to fetch tasks:", err);
+        setTasks([]);
+      } finally {
+        setLoadingTasks(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  // Fetch Whiteboard Notices
+  useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        if (!email) {
+          console.warn("⚠️ No email found");
+          setNotices([]);
+          setLoadingNotices(false);
+          return;
+        }
+
+        console.log("🔍 Fetching whiteboard notes for:", email);
+        const data = await SupervisorWhiteboardApi.StudentWhiteboard(email);
+        console.log("📦 Whiteboard API Response:", data);
+
+        if (data.success && data.notes.length > 0) {
+          const allNotes = Array.isArray(data.notes) 
+            ? data.notes 
+            : Object.values(data.notes).flat();
+
+          const formattedNotices = allNotes
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .map(note => ({
+              description: note.content || note.description || "No content",
+              posted: note.date || "Unknown date",
+              _id: note._id
+            }));
+
+          console.log("✅ Formatted notices:", formattedNotices);
+          setNotices(formattedNotices);
+        } else {
+          console.log("⚠️ No notes found");
+          setNotices([]);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching whiteboard:", err);
+        setNotices([]);
+      } finally {
+        setLoadingNotices(false);
+      }
+    };
+
+    fetchNotes();
+  }, [email]);
+
+  // Prepare template rows with due dates
+  const templateRows = TEMPLATE_DEFINITIONS.map((tpl) => {
+    const uploaded = templates.find((t) => t.code === tpl.code);
+    return {
+      label: tpl.label,
+      dueDate: calculateDueDate(semesterStart, tpl.week),
+      status: uploaded ? uploaded.status : "Pending",
+      uploadedAt: uploaded ? uploaded.uploadedAt : "—",
+    };
+  });
+
+  const templatesPreview = templateRows.slice(0, PREVIEW_ROW_LIMIT);
   const tasksPreview = tasks.slice(0, PREVIEW_ROW_LIMIT);
   const noticesPreview = notices.slice(0, PREVIEW_ROW_LIMIT);
 
@@ -81,25 +268,32 @@ export default function StudentChecklist({
             </TableRow>
           </TableHead>
           <TableBody>
-            {templates.map((t, i) => (
-              <TableRow key={t.name + i} hover>
-                <TableCell>{t.name}</TableCell>
-                <TableCell>{t.due}</TableCell>
+            {templateRows.map((t, i) => (
+              <TableRow key={i} hover>
+                <TableCell>{t.label}</TableCell>
+                <TableCell>{t.dueDate}</TableCell>
                 <TableCell><StatusChip status={t.status} /></TableCell>
               </TableRow>
             ))}
-            {templates.length === 0 && <TableRow><TableCell colSpan={3} align="center">No templates assigned.</TableCell></TableRow>}
+            {templateRows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={3} align="center">
+                  No templates found.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       );
     }
+
     if (type === "tasks") {
       return (
         <Table size="small" className="checklist-table">
           <TableHead>
             <TableRow>
               <TableCell>Task Title</TableCell>
-              <TableCell>Assigned To</TableCell>
+              <TableCell>Assigned By</TableCell>
               <TableCell>Status</TableCell>
             </TableRow>
           </TableHead>
@@ -107,15 +301,22 @@ export default function StudentChecklist({
             {tasks.map((t, i) => (
               <TableRow key={t.title + i} hover>
                 <TableCell>{t.title}</TableCell>
-                <TableCell>{t.assignedTo}</TableCell>
+                <TableCell>{t.assignedBy}</TableCell>
                 <TableCell><StatusChip status={t.status} /></TableCell>
               </TableRow>
             ))}
-            {tasks.length === 0 && <TableRow><TableCell colSpan={3} align="center">No tasks assigned.</TableCell></TableRow>}
+            {tasks.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={3} align="center">
+                  {loadingTasks ? "Loading tasks..." : "No tasks assigned."}
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       );
     }
+
     if (type === "notices") {
       return (
         <Table size="small" className="checklist-table">
@@ -123,18 +324,24 @@ export default function StudentChecklist({
             <TableRow>
               <TableCell>Notice</TableCell>
               <TableCell>Posted Date</TableCell>
-              {/* Status column removed for notices as requested */}
             </TableRow>
           </TableHead>
           <TableBody>
             {notices.map((n, i) => (
-              <TableRow key={n.description + i} hover>
-                <TableCell>{n.description}</TableCell>
+              <TableRow key={n._id || i} hover>
+                <TableCell>
+                  <div dangerouslySetInnerHTML={{ __html: n.description }} />
+                </TableCell>
                 <TableCell>{n.posted}</TableCell>
-               
               </TableRow>
             ))}
-            {notices.length === 0 && <TableRow><TableCell colSpan={2} align="center">No notices.</TableCell></TableRow>}
+            {notices.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={2} align="center">
+                  {loadingNotices ? "Loading notices..." : "No notices."}
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       );
@@ -149,11 +356,13 @@ export default function StudentChecklist({
       </DashboardSectionHeader>
 
       <Box className="checklist-grid">
-        {/* Templates */}
+        {/* Templates - NOW WITH REAL BACKEND DATA */}
         <Box className="checklist-card">
           <Box className="checklist-header">
             <Typography className="checklist-title">Template Submission</Typography>
-            <Typography variant="body2" className="checklist-count">{templates.length} total</Typography>
+            <Typography variant="body2" className="checklist-count">
+              {templates.length} uploaded / {TEMPLATE_DEFINITIONS.length} total
+            </Typography>
           </Box>
 
           <Box className="checklist-body">
@@ -166,20 +375,33 @@ export default function StudentChecklist({
                 </tr>
               </thead>
               <tbody>
-                {templatesPreview.map((t, i) => (
-                  <tr key={t.name + i}>
-                    <td>{t.name}</td>
-                    <td>{t.due}</td>
-                    <td><StatusChip status={t.status} /></td>
-                  </tr>
-                ))}
-                {templates.length === 0 && <tr><td colSpan={3} className="empty">No templates assigned.</td></tr>}
+                {loadingTemplates ? (
+                  <tr><td colSpan={3} className="empty">Loading templates...</td></tr>
+                ) : templatesPreview.length > 0 ? (
+                  templatesPreview.map((t, i) => (
+                    <tr key={i}>
+                      <td>{t.label}</td>
+                      <td>{t.dueDate}</td>
+                      <td><StatusChip status={t.status} /></td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan={3} className="empty">No templates assigned.</td></tr>
+                )}
               </tbody>
             </table>
           </Box>
 
           <Box className="checklist-footer">
-            
+            {templateRows.length > PREVIEW_ROW_LIMIT && (
+              <Button 
+                size="small" 
+                onClick={() => openModal("templates")}
+                sx={{ textTransform: 'none' }}
+              >
+                View All Templates
+              </Button>
+            )}
           </Box>
         </Box>
 
@@ -195,31 +417,45 @@ export default function StudentChecklist({
               <thead>
                 <tr>
                   <th>Task</th>
-                  <th>Assigned</th>
+                  <th>Assigned By</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {tasksPreview.map((t, i) => (
-                  <tr key={t.title + i}>
-                    <td>{t.title}</td>
-                    <td>{t.assignedTo}</td>
-                    <td><StatusChip status={t.status} /></td>
-                  </tr>
-                ))}
-                {tasks.length === 0 && <tr><td colSpan={3} className="empty">No tasks assigned.</td></tr>}
+                {loadingTasks ? (
+                  <tr><td colSpan={3} className="empty">Loading tasks...</td></tr>
+                ) : tasksPreview.length > 0 ? (
+                  tasksPreview.map((t, i) => (
+                    <tr key={t.title + i}>
+                      <td>{t.title}</td>
+                      <td>{t.assignedBy}</td>
+                      <td><StatusChip status={t.status} /></td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan={3} className="empty">No tasks assigned.</td></tr>
+                )}
               </tbody>
             </table>
           </Box>
 
           <Box className="checklist-footer">
-            
+            {tasks.length > PREVIEW_ROW_LIMIT && (
+              <Button 
+                size="small" 
+                onClick={() => openModal("tasks")}
+                sx={{ textTransform: 'none' }}
+              >
+                View All Tasks
+              </Button>
+            )}
           </Box>
         </Box>
 
+        {/* Whiteboard */}
         <Box className="checklist-card">
           <Box className="checklist-header">
-            <Typography className="checklist-title">Whiteboard </Typography>
+            <Typography className="checklist-title">Whiteboard</Typography>
             <Typography variant="body2" className="checklist-count">{notices.length} total</Typography>
           </Box>
 
@@ -229,30 +465,42 @@ export default function StudentChecklist({
                 <tr>
                   <th>Post</th>
                   <th>Posted</th>
-             
                 </tr>
               </thead>
               <tbody>
-                {noticesPreview.map((n, i) => (
-                  <tr key={n.description + i}>
-                    <td>{n.description}</td>
-                    <td>{n.posted}</td>
-                 
-                  </tr>
-                ))}
-                {notices.length === 0 && <tr><td colSpan={2} className="empty">No notices.</td></tr>}
+                {loadingNotices ? (
+                  <tr><td colSpan={2} className="empty">Loading notices...</td></tr>
+                ) : noticesPreview.length > 0 ? (
+                  noticesPreview.map((n, i) => (
+                    <tr key={n._id || i}>
+                      <td>
+                        <div dangerouslySetInnerHTML={{ __html: n.description }} />
+                      </td>
+                      <td>{n.posted}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan={2} className="empty">No notices.</td></tr>
+                )}
               </tbody>
             </table>
           </Box>
 
           <Box className="checklist-footer">
-            
+            {notices.length > PREVIEW_ROW_LIMIT && (
+              <Button 
+                size="small" 
+                onClick={() => openModal("notices")}
+                sx={{ textTransform: 'none' }}
+              >
+                View All Notices
+              </Button>
+            )}
           </Box>
         </Box>
       </Box>
 
-      
-      <Modal open={modal.open} onClose={closeModal} aria-labelledby="full-list-modal" >
+      <Modal open={modal.open} onClose={closeModal} aria-labelledby="full-list-modal">
         <Box className="full-list-modal">
           <Box className="modal-header">
             <Typography variant="h6" id="full-list-modal">

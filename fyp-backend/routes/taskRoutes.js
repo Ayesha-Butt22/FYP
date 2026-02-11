@@ -156,8 +156,8 @@ router.post("/create", protect, async (req, res) => {
       assignedToEmail: assigneeEmail,
       assignedToName: assigneeName,
       groupId: group._id,
-      progress: 0, // Default 0
-      status: "Pending", // Default status
+      progress: 0,
+      status: "Pending",
       comments: comments && comments.trim() ? [{
         text: comments.trim(),
         author: req.user.name,
@@ -173,10 +173,12 @@ router.post("/create", protect, async (req, res) => {
       id: task._id,
       title: task.title,
       createdBy: task.createdByName,
+      createdByEmail: task.createdByEmail,
       createDate: task.createDate.toLocaleString(),
       assignedTo: task.assignedToName,
+      assignedToEmail: task.assignedToEmail,
       progress: task.progress,
-      status: task.status, // Include status
+      status: task.status,
       comments: task.comments.map(comment => ({
         text: comment.text,
         date: comment.date.toLocaleString(),
@@ -199,10 +201,10 @@ router.post("/create", protect, async (req, res) => {
   }
 });
 
-// Get all tasks
+// Get tasks ASSIGNED TO logged-in user - FIXED FOR CHECKLIST
 router.get("/", protect, async (req, res) => {
   try {
-    console.log("📋 Getting tasks for:", req.user.email);
+    console.log("📋 Getting tasks ASSIGNED TO:", req.user.email);
     
     const group = await getStudentGroup(req.user.email);
     
@@ -214,19 +216,26 @@ router.get("/", protect, async (req, res) => {
       });
     }
 
-    const tasks = await Task.find({ groupId: group._id })
-      .sort({ createDate: -1 });
+    // FIXED: Only get tasks assigned to THIS user
+    const tasks = await Task.find({ 
+      groupId: group._id,
+      assignedToEmail: req.user.email  // ← IMPORTANT: Filter by assignee
+    })
+    .sort({ createDate: -1 });
 
-    // Format tasks with status
+    console.log(`✅ Found ${tasks.length} tasks assigned to ${req.user.email}`);
+
+    // Format tasks
     const formattedTasks = tasks.map(task => ({
       id: task._id,
       title: task.title,
       createdBy: task.createdByName,
+      createdByEmail: task.createdByEmail,
       createDate: task.createDate.toLocaleString(),
       assignedTo: task.assignedToName,
+      assignedToEmail: task.assignedToEmail,
       progress: task.progress,
       status: task.status || (() => {
-        // Calculate status if not set
         if (task.progress === 100) return "Completed";
         if (task.progress > 0) return "In Progress";
         return "Pending";
@@ -234,9 +243,12 @@ router.get("/", protect, async (req, res) => {
       comments: task.comments.map(comment => ({
         text: comment.text,
         date: comment.date.toLocaleString(),
-        author: comment.author
+        author: comment.author,
+        authorEmail: comment.authorEmail
       }))
     }));
+
+    console.log("✅ Returning", formattedTasks.length, "tasks for checklist");
 
     res.json({
       success: true,
@@ -253,7 +265,66 @@ router.get("/", protect, async (req, res) => {
   }
 });
 
-// Update task progress - FIXED STATUS UPDATE
+// NEW ROUTE: Get ALL group tasks (for group task board)
+router.get("/group-tasks", protect, async (req, res) => {
+  try {
+    console.log("📋 Getting ALL group tasks for:", req.user.email);
+    
+    const group = await getStudentGroup(req.user.email);
+    
+    if (!group) {
+      return res.json({
+        success: true,
+        tasks: [],
+        message: "No group found"
+      });
+    }
+
+    // Get ALL tasks in the group (not filtered by assignee)
+    const tasks = await Task.find({ groupId: group._id })
+      .sort({ createDate: -1 });
+
+    console.log(`✅ Found ${tasks.length} total tasks in group`);
+
+    // Format tasks
+    const formattedTasks = tasks.map(task => ({
+      id: task._id,
+      title: task.title,
+      createdBy: task.createdByName,
+      createdByEmail: task.createdByEmail,
+      createDate: task.createDate.toLocaleString(),
+      assignedTo: task.assignedToName,
+      assignedToEmail: task.assignedToEmail,
+      progress: task.progress,
+      status: task.status || (() => {
+        if (task.progress === 100) return "Completed";
+        if (task.progress > 0) return "In Progress";
+        return "Pending";
+      })(),
+      comments: task.comments.map(comment => ({
+        text: comment.text,
+        date: comment.date.toLocaleString(),
+        author: comment.author,
+        authorEmail: comment.authorEmail
+      }))
+    }));
+
+    res.json({
+      success: true,
+      tasks: formattedTasks,
+      groupName: group.groupName || "My Group"
+    });
+
+  } catch (error) {
+    console.error("❌ Error fetching group tasks:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
+
+// Update task progress
 router.put("/:id/update", protect, async (req, res) => {
   try {
     console.log("🔄 Updating task:", req.params.id);
@@ -280,10 +351,18 @@ router.put("/:id/update", protect, async (req, res) => {
       });
     }
 
+    // Verify user can update this task (either creator or assignee)
+    if (task.createdByEmail !== req.user.email && task.assignedToEmail !== req.user.email) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to update this task"
+      });
+    }
+
     // Update progress
     task.progress = progressNum;
     
-    // Update status based on progress - FIXED LOGIC
+    // Update status based on progress
     let newStatus = "Pending";
     if (progressNum === 100) {
       newStatus = "Completed";
@@ -307,19 +386,22 @@ router.put("/:id/update", protect, async (req, res) => {
     await task.save();
     console.log("✅ Task updated successfully");
 
-    // Format updated task with status
+    // Format updated task
     const formattedTask = {
       id: task._id,
       title: task.title,
       createdBy: task.createdByName,
+      createdByEmail: task.createdByEmail,
       createDate: task.createDate.toLocaleString(),
       assignedTo: task.assignedToName,
+      assignedToEmail: task.assignedToEmail,
       progress: task.progress,
-      status: task.status, // Include updated status
+      status: task.status,
       comments: task.comments.map(c => ({
         text: c.text,
         date: c.date.toLocaleString(),
-        author: c.author
+        author: c.author,
+        authorEmail: c.authorEmail
       }))
     };
 
