@@ -23,6 +23,7 @@ const SupervisorWhiteboardRoutes = require("./routes/SupervisorWhiteboardRoutes"
 const evaluationRoutes = require("./routes/evaluationRoutes");
 const committeeevaluationRoutes = require("./routes/committeEvalution");
 const projectIdeasRoutes = require("./routes/projectIdeasRoutes");
+const journalRoutes = require("./routes/journalRoutes");
 
 
 
@@ -52,6 +53,7 @@ app.use("/api/noticeboard", NoticeboardRoutes);
 app.use("/api/supervisor", require("./routes/supervisorRoutes"));
 
 
+
 app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);
 app.use("/api/evaluation", evaluationRoutes);
 app.use("/api/committee-evaluation", committeeevaluationRoutes);
@@ -63,8 +65,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/student-templates", require("./routes/studentTemplateRoutes"));
 
 
-
-
+app.use("/api", journalRoutes);
 
 
 
