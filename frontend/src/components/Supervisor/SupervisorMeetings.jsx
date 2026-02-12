@@ -255,20 +255,23 @@ export default function SupervisorMeetings() {
         </Paper>
 
         {/* MEETING HISTORY */}
-        <Paper className="supermeeting-slots-paper">
-          <Typography className="supermeeting-section-title upcoming">
-            <EventAvailable /> Meeting History
-          </Typography>
-          <AppTable
-            headers={["Date", "Time", "Group-id", "Done At"]}
-            rows={meetingHistory.map((h) => [
-              formatDate(h.date),
-              formatTime(h.time),
-              maskGroupId(h.bookedBy),
-              h.doneAt ? new Date(h.doneAt).toLocaleString() : "-",
-            ])}
-          />
-        </Paper>
+        {/* MEETING HISTORY */}
+<Paper className="supermeeting-slots-paper">
+  <Typography className="supermeeting-section-title upcoming">
+    <EventAvailable /> Meeting History
+  </Typography>
+  <AppTable
+    headers={["Date", "Time", "Group-id", "Done At"]}
+    rows={meetingHistory.map((h) => [
+      formatDate(h.date),
+      formatTime(h.time),
+      maskGroupId(h.bookedBy),
+      // ✅ fallback to updatedAt if doneAt is missing
+      h.doneAt ? new Date(h.doneAt).toLocaleString() : h.updatedAt ? new Date(h.updatedAt).toLocaleString() : "-",
+    ])}
+  />
+</Paper>
+
       </Box>
     </>
   );
