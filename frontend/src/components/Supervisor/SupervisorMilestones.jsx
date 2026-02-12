@@ -5,17 +5,22 @@ import SemesterStartService from "../Api/SemesterStartService.jsx";
 import supervisorService from "../Api/supervisorService.jsx";
 
 import "./SupervisorMilestones.css";
+
 const TEMPLATE_DEFINITIONS = [
-    { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1 },
-    { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2 },
-    { code: "t03", label: "Template-03: Proposal Presentation (MS PowerPoint)", week: 4 },
-    { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6 },
-    { code: "t05", label: "Template-05: Progress Presentation (MS PowerPoint)", week: 13 },
-    { code: "t06", label: "Template-06: Complete Project Report (MS Word)", week: 24 },
-    { code: "t07", label: "Template-07: Final Presentation (MS PowerPoint)", week: 26 },
-    { code: "t08", label: "Template-08: Complete Final Presentation (MS Word)", week: 28 },
-    { code: "t09", label: "Template-09: Complete Documentation(MS Word)", week: 30 },
+  // FYP-1 Templates
+  { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1, year: "FYP-1" },
+  { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2, year: "FYP-1" },
+  { code: "t03", label: "Template-03: Proposal Presentation (MS PowerPoint)", week: 4, year: "FYP-1" },
+  { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6, year: "FYP-1" },
+  { code: "t05", label: "Template-07 Presentation, Template-05 Project Report", week: 13, year: "FYP-1" },
+
+  // FYP-2 Templates
+  { code: "t06", label: "Template-05: Project Report", week: 11, year: "FYP-2" },
+  { code: "t07", label: "Template-06 Final Presentation", week: 13, year: "FYP-2" },
+  { code: "t08", label: "Template-06 Final Presentation", week: 15, year: "FYP-2" },
+  { code: "t09", label: "Template-06 Final Presentation", week: "Week after Finals", year: "FYP-2" }
 ];
+
 const formatDateTime = (inp) => {
     if (!inp) return "—";
     const d = new Date(inp);
@@ -23,7 +28,7 @@ const formatDateTime = (inp) => {
 };
 
 const calculateDueDate = (semesterStart, weekNumber) => {
-    if (!semesterStart) return null;
+    if (!semesterStart || !Number.isInteger(weekNumber)) return null;
     const dueDate = new Date(semesterStart);
     dueDate.setDate(semesterStart.getDate() + weekNumber * 7);
     return dueDate;
@@ -34,6 +39,7 @@ const initializeMilestones = (backendMilestones = []) => {
         const backendMilestone = backendMilestones.find((m) => m.code === template.code) || {};
         return {
             code: template.code,
+            templateCode: template.code,
             name: template.label,
             week: template.week,
             status: backendMilestone.status || "pending",
@@ -57,7 +63,6 @@ export default function SupervisorMilestones() {
         saving: false,
     });
 
-
     useEffect(() => {
         const fetchSemesterStart = async () => {
             try {
@@ -71,7 +76,6 @@ export default function SupervisorMilestones() {
         };
         fetchSemesterStart();
     }, []);
-
 
     useEffect(() => {
         const loadGroups = async () => {
@@ -115,7 +119,6 @@ export default function SupervisorMilestones() {
         return idx;
     }, [currentWeekNumber]);
 
-
     const toggleSubmissions = async (groupId) => {
         const isExpanded = expandedGroups[groupId];
 
@@ -131,7 +134,6 @@ export default function SupervisorMilestones() {
             if (submissions.length === 0) {
                 toastService.info("No submissions found for this group");
             }
-
 
             const groupedByWeek = submissions.reduce((acc, s) => {
                 const key = `week-${s.week}-${s.templateCode}`;
@@ -175,7 +177,6 @@ export default function SupervisorMilestones() {
         }
     };
 
-
     const archiveGroup = (groupId) => {
         if (!window.confirm("Add this group to archive?")) return;
         setGroups((prev) =>
@@ -184,7 +185,6 @@ export default function SupervisorMilestones() {
         setExpandedGroups((prev) => ({ ...prev, [groupId]: false }));
         toastService.success("Group added to archive");
     };
-
 
     const openDetails = (groupId, milestoneIndex) => {
         const group = groups.find((g) => g.id === groupId);
@@ -255,13 +255,10 @@ export default function SupervisorMilestones() {
         const { groupId, milestoneIndex, selectedAction } = modal;
         if (!groupId || milestoneIndex == null) return;
 
-
-
-
         const confirmMsg =
             selectedAction === "approve"
                 ? "Approve this milestone? This will mark it as Completed."
-                : selectedAction === "rejected"
+                : selectedAction === "unapprove"
                     ? "Mark this milestone as Rejected?"
                     : "Mark this milestone as Pending?";
 
@@ -278,16 +275,16 @@ export default function SupervisorMilestones() {
         const isExpanded = expandedGroups[groupId];
         const milestones = isExpanded ? submissionsData[groupId] : group.baseMilestones;
         const milestone = milestones[milestoneIndex];
-        const milestoneCode = TEMPLATE_DEFINITIONS[milestoneIndex].code;
 
-        if(!milestone.note) {
-        toastService.info('comments are required');
-        return;
+        // Use milestone.templateCode instead of index
+        const milestoneCode = milestone.templateCode;
+
+        if (!milestone.note) {
+            toastService.info("Comments are required");
+            return;
         }
 
-
-
-            setModal((s) => ({ ...s, saving: true }));
+        setModal((s) => ({ ...s, saving: true }));
 
         try {
             await supervisorService.updateMilestoneStatus(groupId, milestoneCode, {
@@ -325,8 +322,6 @@ export default function SupervisorMilestones() {
         }
     };
 
-
-
     return (
         <div>
             <DashboardSectionHeader description="Here you can view all the FYP groups milestones. Click 'Show Submissions' to see groups progress, milestones, and deadlines.">
@@ -338,11 +333,11 @@ export default function SupervisorMilestones() {
                     <div className="supervisor-timeline compact-grid">
                         <div className="timeline-header">
                             <div style={{ marginTop: 2, marginBottom: 10, paddingRight: 5 }}>
-                <span>
-                  <strong>Current Academic Timeline</strong> | Semester Start:{" "}
-                    <strong>{formatDateTime(semesterStart)}</strong> | Current Week:{" "}
-                    <strong>{currentWeekNumber ?? "—"}</strong>
-                </span>
+                                <span>
+                                    <strong>Current Academic Timeline</strong> | Semester Start:{" "}
+                                    <strong>{formatDateTime(semesterStart)}</strong> | Current Week:{" "}
+                                    <strong>{currentWeekNumber ?? "—"}</strong>
+                                </span>
                             </div>
                         </div>
 
@@ -355,9 +350,7 @@ export default function SupervisorMilestones() {
                                 return (
                                     <div
                                         key={tpl.code}
-                                        className={`timeline-card ${completed ? "completed" : ""} ${
-                                            active ? "active" : ""
-                                        }`}
+                                        className={`timeline-card ${completed ? "completed" : ""} ${active ? "active" : ""}`}
                                     >
                                         <div className="card-left">
                                             <div className="card-dot" />
@@ -366,16 +359,10 @@ export default function SupervisorMilestones() {
                                         <div className="card-body">
                                             <div className="card-title">{tpl.label}</div>
                                             <div className="card-meta">
-                        <span className="card-date">
-                          {due ? due.toLocaleDateString() : "—"}
-                        </span>
-                                                <span
-                                                    className={`card-status ${
-                                                        completed ? "done" : active ? "now" : "upcoming"
-                                                    }`}
-                                                >
-                          {completed ? "Completed" : active ? "In Progress" : "Upcoming"}
-                        </span>
+                                                <span className="card-date">{due ? due.toLocaleDateString() : "—"}</span>
+                                                <span className={`card-status ${completed ? "done" : active ? "now" : "upcoming"}`}>
+                                                    {completed ? "Completed" : active ? "In Progress" : "Upcoming"}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -390,18 +377,14 @@ export default function SupervisorMilestones() {
                 )}
             </div>
 
+            {/* Milestone Groups */}
             <div className="milestone-groups-row">
                 {groups.map((group) => {
                     const isExpanded = expandedGroups[group.id];
-                    const milestones = isExpanded
-                        ? submissionsData[group.id] || []
-                        : group.baseMilestones;
+                    const milestones = isExpanded ? submissionsData[group.id] || [] : group.baseMilestones;
 
                     return (
-                        <div
-                            className={`milestone-group-card ${group.archived ? "archived" : ""}`}
-                            key={group.id}
-                        >
+                        <div className={`milestone-group-card ${group.archived ? "archived" : ""}`} key={group.id}>
                             <div className="milestone-card-header">
                                 <div>
                                     <div className="milestone-card-group">{group.maskedId}</div>
@@ -413,17 +396,9 @@ export default function SupervisorMilestones() {
                                         <b>Members:</b> {group.members?.join(", ")}
                                     </div>
                                 </div>
-
-                                <div className="milestone-card-progress">
-                                    <div className="milestone-percent-complete"></div>
-                                </div>
                             </div>
 
-                            <button
-                                className="milestone-toggle-btn"
-                                onClick={() => toggleSubmissions(group.id)}
-                                disabled={group.archived}
-                            >
+                            <button className="milestone-toggle-btn" onClick={() => toggleSubmissions(group.id)} disabled={group.archived}>
                                 {isExpanded ? "Hide Submissions" : "Show Submissions"}
                             </button>
 
@@ -431,37 +406,29 @@ export default function SupervisorMilestones() {
                                 <div className="milestone-timeline-table-wrap">
                                     <table className="milestone-timeline-table">
                                         <thead>
-                                        <tr>
-                                            <th className="milestone-th">Milestone</th>
-                                            <th className="milestone-th">Uploaded Date</th>
-                                            <th className="milestone-th">Action</th>
-                                        </tr>
+                                            <tr>
+                                                <th className="milestone-th">Milestone</th>
+                                                <th className="milestone-th">Uploaded Date</th>
+                                                <th className="milestone-th">Action</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
-                                        {milestones.map((m, mIdx) => (
-                                            <tr key={mIdx}>
-                                                <td className="milestone-td">{m.weekLabel}</td>
-                                                <td className="milestone-td">{formatDateTime(m.uploadedFile.uploadedAt)}</td>
-                                                <td className="milestone-td">
-                                                    <div className="milestone-action-row">
-                                                        <button
-                                                            className="view-details-btn"
-                                                            onClick={() => openDetails(group.id, mIdx)}
-                                                        >
+                                            {milestones.map((m, mIdx) => (
+                                                <tr key={mIdx}>
+                                                    <td className="milestone-td">{m.weekLabel}</td>
+                                                    <td className="milestone-td">{formatDateTime(m.uploadedFile?.uploadedAt)}</td>
+                                                    <td className="milestone-td">
+                                                        <button className="view-details-btn" onClick={() => openDetails(group.id, mIdx)}>
                                                             View Details
                                                         </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
 
                                     <div className="archive-button-wrap">
-                                        <button
-                                            className="archive-btn"
-                                            onClick={() => archiveGroup(group.id)}
-                                        >
+                                        <button className="archive-btn" onClick={() => archiveGroup(group.id)}>
                                             Add to Archive
                                         </button>
                                     </div>
@@ -478,61 +445,45 @@ export default function SupervisorMilestones() {
                 })}
             </div>
 
-
-            {modal.open && modal.groupId && modal.milestoneIndex != null && (
+            {/* Modal */}
+            {modal.open && modal.groupId != null && modal.milestoneIndex != null && (
                 <div className="mmodal-backdrop" role="dialog" aria-modal="true">
-                    <div
-                        className="mmodal modal-centered"
-                        role="document"
-                        aria-labelledby="milestone-details-title"
-                    >
+                    <div className="mmodal modal-centered" role="document" aria-labelledby="milestone-details-title">
                         <div className="mmodal-header">
                             <h3 id="milestone-details-title">Milestone Details</h3>
-                            <button
-                                className="mmodal-close"
-                                onClick={closeDetails}
-                                aria-label="Close"
-                            >
-                                ✖
-                            </button>
+                            <button className="mmodal-close" onClick={closeDetails} aria-label="Close">✖</button>
                         </div>
 
                         <div className="mmodal-body centered-body">
                             {(() => {
                                 const group = groups.find((g) => g.id === modal.groupId);
                                 const isExpanded = expandedGroups[modal.groupId];
-                                const milestones = isExpanded
-                                    ? submissionsData[modal.groupId]
-                                    : group.baseMilestones;
+                                const milestones = isExpanded ? submissionsData[modal.groupId] : group.baseMilestones;
                                 const milestone = milestones[modal.milestoneIndex];
-                                const template = TEMPLATE_DEFINITIONS[modal.milestoneIndex];
-                                console.log(milestone)
+
+                                // ✅ FIX: find template by milestone.templateCode
+                                const template = TEMPLATE_DEFINITIONS.find(t => t.code === milestone.templateCode);
 
                                 return (
                                     <div className="modal-stack">
                                         <div className="stack-item">
                                             <div className="stack-label">Milestone</div>
                                             <div className="stack-value">
-                                                <strong>{`Week ${template.week}`}</strong>
+                                                <strong>{template ? `Week ${template.week}` : "—"}</strong>
                                             </div>
                                         </div>
 
                                         <div className="stack-item">
                                             <div className="stack-label">Template</div>
-                                            <div className="stack-value">{template.label}</div>
+                                            <div className="stack-value">{template ? template.label : milestone.name}</div>
                                         </div>
 
                                         <div className="stack-item">
                                             <div className="stack-label">Uploaded File</div>
                                             <div className="stack-value">
-                                                {milestone.uploadedFile && milestone.uploadedFile.url ? (
+                                                {milestone.uploadedFile?.url ? (
                                                     <div>
-                                                        <a
-                                                            href={`http://localhost:5000/${milestone.uploadedFile.url}`}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="link-inline"
-                                                        >
+                                                        <a href={`http://localhost:5000/${milestone.uploadedFile.url}`} target="_blank" rel="noreferrer" className="link-inline">
                                                             {milestone.uploadedFile.name || "View uploaded file"}
                                                         </a>
                                                         {milestone.uploadedFile.uploadedAt && (
@@ -545,7 +496,6 @@ export default function SupervisorMilestones() {
                                                     <div className="muted">No file uploaded yet</div>
                                                 )}
                                             </div>
-
                                         </div>
 
                                         <div className="stack-item">
@@ -555,12 +505,7 @@ export default function SupervisorMilestones() {
 
                                         <div className="stack-item">
                                             <div className="stack-label">Update Status</div>
-                                            <select
-                                                className="status-select"
-                                                value={modal.selectedAction}
-                                                onChange={(e) => handleActionChange(e.target.value)}
-                                                aria-label="Milestone decision"
-                                            >
+                                            <select className="status-select" value={modal.selectedAction} onChange={(e) => handleActionChange(e.target.value)}>
                                                 <option value="approve">Approved</option>
                                                 <option value="unapprove">Rejected</option>
                                                 <option value="pending">Pending</option>
@@ -578,11 +523,7 @@ export default function SupervisorMilestones() {
                                         </div>
 
                                         <div className="stack-actions">
-                                            <button
-                                                className="btn-update"
-                                                onClick={handleUpdateStatus}
-                                                disabled={modal.saving}
-                                            >
+                                            <button className="btn-update" onClick={handleUpdateStatus} disabled={modal.saving}>
                                                 {modal.saving ? "Updating..." : "Update"}
                                             </button>
                                             <button className="btn-cancel" onClick={closeDetails}>
