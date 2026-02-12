@@ -1,74 +1,88 @@
 const getStudentMetaData = require("./getStudentMetaData");
 const MeetingSlot = require("../models/MeetingSlot");
 const Task = require("../models/Task");
-const Template = require("../models/Template");
+const Template = require("../models/StudentUploadedTemplate");
+
+
 
 exports.getFYPJournal = async (req, res) => {
   try {
     const { email } = req.query;
-    if (!email) return res.status(400).json({ message: "Student email is required" });
+    if (!email) return res.status(400).json({ message: "Email is required" });
 
+    // STEP 1: Get group metadata
     const { group } = await getStudentMetaData({ email });
-    if (!group) return res.status(404).json({ message: "No group found for this student" });
+    if (!group) return res.status(404).json({ message: "Student group not found" });
 
     const groupId = group._id;
 
+    // STEP 2: Determine last 3 months (fixed with local time)
     const now = new Date();
-    const lastMonths = [];
+    const months = [];
     for (let i = 2; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      lastMonths.push({
-        monthKey: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
-        monthLabel: d.toLocaleString(undefined, { month: "long", year: "numeric" })
+
+      // Month key in YYYY-MM (local)
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0"); // getMonth() is 0-indexed
+      const key = `${year}-${month}`;
+
+      // Month label
+      const monthName = d.toLocaleString("en-US", { month: "long" });
+      months.push({
+        key,
+        label: `${monthName} ${year}`,
       });
     }
 
-    const meetings = await MeetingSlot.find({ bookedBy: email }).sort({ date: -1 });
-    const tasks = await Task.find({ groupId }).sort({ createDate: -1 });
-    const templates = await Template.find({ uploadedBy: email }).sort({ createdAt: -1 });
+    // STEP 3: Fetch meetings
+    const meetingsRaw = await MeetingSlot.find({ bookedBy: groupId }).lean();
+    const meetings = meetingsRaw.map((m) => ({
+      dateISO: new Date(m.date).toISOString().slice(0, 10),
+      type: "Meeting",
+      title: `Meeting with ${group.supervisorName || "Supervisor"}`,
+      description: `${new Date(m.date).toLocaleDateString()} ${m.time}`,
+    }));
 
-    const monthsWithActivities = lastMonths.map(({ monthKey, monthLabel }) => {
-      const [year, month] = monthKey.split("-").map(Number);
-
-      const monthMeetings = meetings.filter((m) => {
-        const d = new Date(m.date);
-        return d.getFullYear() === year && d.getMonth() + 1 === month;
-      }).map((m) => ({
-        type: "Meeting",
-        title: `Meeting with ${m.supervisorEmail || "Supervisor"}`,
-        description: `${m.date} ${m.time}`,
-        raw: m
-      }));
-
-      const monthTasks = tasks.filter((t) => {
-        const d = new Date(t.createDate);
-        return d.getFullYear() === year && d.getMonth() + 1 === month;
-      }).map((t) => ({
+    // STEP 4: Fetch tasks
+    const tasksRaw = await Task.find({ groupId }).lean();
+    const tasks = tasksRaw.map((t) => {
+      const lastComment = t.comments?.length ? t.comments[t.comments.length - 1] : null;
+      return {
+        dateISO: new Date(t.createDate).toISOString().slice(0, 10),
         type: "Task",
         title: t.title,
-        description: `Created: ${t.createDate.toISOString().slice(0,10)} • Status: ${t.status} • Last Comment: ${t.comments?.length ? t.comments[t.comments.length-1].text : "-"}`,
-        raw: t
-      }));
-
-      const monthTemplates = templates.filter((tp) => {
-        const d = new Date(tp.createdAt);
-        return d.getFullYear() === year && d.getMonth() + 1 === month;
-      }).map((tp) => ({
-        type: "Template",
-        title: tp.template,
-        description: `Uploaded: ${tp.createdAt.toISOString().slice(0,10)} • Supervisor Comment: -`,
-        raw: tp
-      }));
-
-      const activities = [...monthMeetings, ...monthTasks, ...monthTemplates]
-        .sort((a, b) => new Date(b.raw.createDate || b.raw.date || b.raw.createdAt) - new Date(a.raw.createDate || a.raw.date || a.raw.createdAt));
-
-      return { monthKey, monthLabel, activities };
+        description: `Created by ${t.createdByName}${lastComment ? ` • Last comment by ${lastComment.author}` : ""}`,
+      };
     });
 
-    res.json({ months: monthsWithActivities });
+    // STEP 5: Fetch templates
+    const templatesRaw = await Template.find({groupId}).lean();
+    const templates = templatesRaw.map((t) => ({
+      dateISO: new Date(t.uploadedAt).toISOString().slice(0, 10),
+      type: "Template",
+      title: t.templateLabel,
+      description: `Uploaded on ${new Date(t.uploadedAt).toLocaleDateString()}${t.supervisorRemarks ? ` • ${t.supervisorRemarks}` : ""}`,
+    }));
+
+    // STEP 6: Merge all activities
+    const allActivities = [...meetings, ...tasks, ...templates];
+
+    // STEP 7: Group by month correctly
+    const grouped = months.map((m) => {
+      const acts = allActivities
+        .filter((a) => a.dateISO.startsWith(m.key))
+        .sort((a, b) => new Date(b.dateISO) - new Date(a.dateISO));
+      return {
+        monthKey: m.key,
+        monthLabel: m.label,
+        activities: acts,
+      };
+    });
+
+    res.json({ months: grouped });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to fetch journal", error: err.message });
+    console.error("getFYPJournal error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

@@ -23,7 +23,10 @@ const SupervisorWhiteboardRoutes = require("./routes/SupervisorWhiteboardRoutes"
 const evaluationRoutes = require("./routes/evaluationRoutes");
 const committeeevaluationRoutes = require("./routes/committeEvalution");
 const projectIdeasRoutes = require("./routes/projectIdeasRoutes");
+
 const journalRoutes = require("./routes/journalRoutes");
+
+
 
 
 
@@ -65,8 +68,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/student-templates", require("./routes/studentTemplateRoutes"));
 
 
-app.use("/api", journalRoutes);
-
+app.use("/api/journal", journalRoutes);
 
 
 // =============== NEW: Add Template Routes Here ===============
