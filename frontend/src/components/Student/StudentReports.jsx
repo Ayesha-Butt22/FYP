@@ -13,26 +13,30 @@ import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import { toastService } from "../ToastService/ToastService";
 import AppTable from "../Admin/AppTable.jsx";
 import "./StudentReports.css";
+import TemplateService from "../Api/TemplateService.jsx";
+import axios from "axios";
 
+const API_BASE = "http://localhost:5000";
 
+// Template definitions with week mapping
+const TEMPLATE_DEFINITIONS = [
+  { code: "t01", label: "Template-01: Project Team List", week: 1 },
+  { code: "t02", label: "Template-02: Initial Proposal", week: 2 },
+  { code: "t03", label: "Template-03: Proposal Presentation", week: 4 },
+  { code: "t04", label: "Template-04: Proposal & Plan", week: 6 },
+  { code: "t05", label: "Template-05: Progress Presentation", week: 13 },
+  { code: "t06", label: "Template-06: Complete Project Report", week: 24 },
+  { code: "t07", label: "Template-07: Final Presentation", week: 26 },
+  { code: "t08", label: "Template-08: Complete Final Presentation", week: 28 },
+  { code: "t09", label: "Template-09: Complete Documentation", week: 30 },
+];
 
 const STORAGE_KEYS = {
-  tasks: "student_tasks_v1",
-  milestones: "student_milestones_v1",
   evaluations: "student_evaluations_v1",
   meetings: "student_meetings_v1",
 };
 
 const DEMO = {
-  tasks: [
-    { id: "T-01", title: "Template-01: Project Team (MS Word)", status: "Completed", completedOn: "2025-10-05" },
-    { id: "T-02", title: "Template-02: Initial Proposal (MS Word)", status: "In Progress", due: "2025-10-11" },
-    { id: "T-03", title: "Template-03: Proposal Presentation (MS PowerPoint)", status: "Overdue", due: "2025-10-15" },
-  ],
-  milestones: [
-    { id: "MS-01", name: "Proposal", submittedOn: "2025-10-04", status: "Completed" },
-    { id: "MS-02", name: "Mid", submittedOn: null, status: "Pending" },
-  ],
   evaluations: [
     {
       projectId: "G-1001",
@@ -90,40 +94,231 @@ function callToast(message, type = "success") {
   alert(message);
 }
 
+const calculateDueDate = (startDate, week) => {
+  if (!startDate) return "—";
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + week * 7);
+  return d.toLocaleDateString();
+};
+
 export default function StudentReports() {
-  const [tasks, setTasks] = useState([]);
-  const [milestones, setMilestones] = useState([]);
+  // Templates state
+  const [templates, setTemplates] = useState([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const [semesterStart, setSemesterStart] = useState(null);
+  const [studentInfo, setStudentInfo] = useState(null);
+  const [depTemplate, setDepTemplate] = useState([]);
+  const [presentationSchedules, setPresentationSchedules] = useState([]);
+
   const [evaluations, setEvaluations] = useState([]);
   const [meetings, setMeetings] = useState([]);
   const reportRef = useRef();
 
+  const studentId = localStorage.getItem("studentId");
+  const storedDept = localStorage.getItem("department");
+
+  // Fetch coordinator uploaded templates
+  const loadCoordinatorTemplates = async () => {
+    try {
+      const url = `${API_BASE}/api/templates?department=${storedDept}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setDepTemplate(data.data || []);
+      }
+    } catch (err) {
+      console.error("Error loading coordinator templates:", err);
+      setDepTemplate([]);
+    }
+  };
+
+  // Fetch Semester Start Date
   useEffect(() => {
-    setTasks(safeRead(STORAGE_KEYS.tasks) || DEMO.tasks);
-    setMilestones(safeRead(STORAGE_KEYS.milestones) || DEMO.milestones);
-    setEvaluations(safeRead(STORAGE_KEYS.evaluations) || DEMO.evaluations);
-    setMeetings(safeRead(STORAGE_KEYS.meetings) || DEMO.meetings);
+    const loadSemesterStart = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/api/semester-start`);
+        setSemesterStart(res.data?.date || null);
+      } catch (err) {
+        console.error("Error loading semester start:", err);
+      }
+    };
+    loadSemesterStart();
   }, []);
 
+  // Fetch Student Info and Coordinator Templates
+  useEffect(() => {
+    const loadStudentInfo = async () => {
+      if (!studentId) return;
+      try {
+        const data = await TemplateService.getStudentInfo(studentId);
+        setStudentInfo(data);
+      } catch (err) {
+        console.error("Error loading student info:", err);
+      }
+    };
+    loadStudentInfo();
+    loadCoordinatorTemplates();
+  }, [studentId]);
+
+  // Fetch Presentation Schedules
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/api/presentation`);
+        if (res.data.success) {
+          setPresentationSchedules(res.data.data || []);
+        }
+      } catch (err) {
+        console.error("Error loading presentation schedules:", err);
+      }
+    };
+    fetchSchedules();
+  }, []);
+
+  // Fetch Uploaded Templates
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      if (!studentInfo?.groupId) return;
+      
+      try {
+        console.log("🔍 Fetching templates for group:", studentInfo.groupId);
+        const files = await TemplateService.getFiles(studentInfo.groupId);
+        console.log("📦 Raw Templates Response:", files);
+        
+        const normalized = files.map((f) => ({
+          code: f.templateCode,
+          label: f.templateLabel || `Template ${f.templateCode}`,
+          status: f.status || "Pending",
+          uploadedAt: f.uploadedAt,
+          uploadedAtFormatted: new Date(f.uploadedAt).toLocaleDateString(),
+          week: f.week,
+        }));
+        
+        console.log("✅ Normalized Templates:", normalized);
+        setTemplates(normalized);
+      } catch (err) {
+        console.error("❌ Failed to fetch templates:", err);
+        setTemplates([]);
+      } finally {
+        setLoadingTemplates(false);
+      }
+    };
+
+    if (studentInfo?.groupId) {
+      fetchTemplates();
+    }
+  }, [studentInfo]);
+
+  // Fetch Student Meetings from Backend
+  useEffect(() => {
+    const fetchMeetings = async () => {
+      try {
+        const email = localStorage.getItem("email");
+        if (!email) {
+          console.warn("No email found for meetings");
+          setMeetings([]);
+          return;
+        }
+
+        console.log("🔍 Fetching meetings for:", email);
+        const res = await axios.get(`${API_BASE}/api/meetings/student/${email}`);
+        
+        console.log("📦 Meetings API Response:", res.data);
+
+        if (res.data.success && Array.isArray(res.data.meetings)) {
+          const formattedMeetings = res.data.meetings.map((m) => ({
+            id: m._id,
+            meetingDate: m.date || "-",
+            meetingTime: m.time || "-",
+            supervisor: m.supervisorEmail ? m.supervisorEmail.split('@')[0] : "Unknown",
+            status: m.status === 2 ? "Done" : m.status === 1 ? "Booked" : "Available",
+            duration: m.duration || 30,
+          }));
+
+          console.log("✅ Formatted Meetings:", formattedMeetings);
+          setMeetings(formattedMeetings);
+        } else {
+          console.log("⚠️ No meetings found");
+          setMeetings([]);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching meetings:", err);
+        setMeetings([]);
+      }
+    };
+
+    fetchMeetings();
+    setEvaluations(safeRead(STORAGE_KEYS.evaluations) || DEMO.evaluations);
+  }, []);
+
+  // Get presentation due date based on week
+  const getPresentationDueDate = (week) => {
+    const schedule = presentationSchedules.find(s => {
+      if (week === 4 && s.week === "Week 4") return true;
+      if (week === 13 && s.week === "13th Week before Final Exams") return true;
+      return false;
+    });
+
+    if (schedule && schedule.slots && schedule.slots.length > 0) {
+      const earliestSlot = schedule.slots.reduce((earliest, slot) => {
+        const slotDate = new Date(slot.startTime);
+        return !earliest || slotDate < earliest ? slotDate : earliest;
+      }, null);
+      return earliestSlot ? earliestSlot.toLocaleDateString() : calculateDueDate(semesterStart, week);
+    }
+
+    return calculateDueDate(semesterStart, week);
+  };
+
+  // Prepare milestone rows (templates with status and due dates)
+  const milestoneRows = useMemo(() => {
+    if (!depTemplate || depTemplate.length === 0) return [];
+    
+    const depTplCodes = depTemplate.map(d => d.template);
+    const coordinatorTemplates = TEMPLATE_DEFINITIONS.filter((tpl) => 
+      depTplCodes.includes(tpl.code)
+    );
+
+    return coordinatorTemplates.map((tpl) => {
+      const uploaded = templates.find((t) => t.code === tpl.code);
+      
+      // Determine due date - use presentation schedule for t03 and t05
+      let dueDate;
+      if (tpl.code === "t03" || tpl.code === "t05") {
+        dueDate = getPresentationDueDate(tpl.week);
+      } else {
+        dueDate = calculateDueDate(semesterStart, tpl.week);
+      }
+
+      return {
+        id: tpl.code,
+        name: tpl.label,
+        status: uploaded ? uploaded.status : "Pending",
+        dueDate: dueDate,
+      };
+    });
+  }, [depTemplate, templates, semesterStart, presentationSchedules]);
+
   const summary = useMemo(() => {
-    const completedMilestones = milestones.filter((m) => (m.status || "").toLowerCase() === "completed").length;
-    const pendingMilestones = milestones.length - completedMilestones;
-    const tasksDone = tasks.filter((t) => (t.status || "").toLowerCase() === "completed").length;
-    const tasksInProgress = tasks.filter((t) => (t.status || "").toLowerCase() === "in progress").length;
-    const tasksOverdue = tasks.filter((t) => (t.status || "").toLowerCase() === "overdue").length;
+    const completedMilestones = milestoneRows.filter((m) => (m.status || "").toLowerCase() === "approved").length;
+    const pendingMilestones = milestoneRows.filter((m) => (m.status || "").toLowerCase() === "pending").length;
+    const underReviewMilestones = milestoneRows.filter((m) => (m.status || "").toLowerCase() === "under review").length;
+    const rejectedMilestones = milestoneRows.filter((m) => (m.status || "").toLowerCase() === "rejected").length;
+    
     const feedbackCount = evaluations.reduce((sum, ev) => {
       return sum + (ev.milestones ? ev.milestones.reduce((ss, m) => ss + (m.rubric ? m.rubric.filter(r => r.feedback && r.feedback.trim()).length : 0), 0) : 0);
     }, 0);
     const totalMeetings = meetings.length;
+    
     return {
       completedMilestones,
       pendingMilestones,
-      tasksDone,
-      tasksInProgress,
-      tasksOverdue,
+      underReviewMilestones,
+      rejectedMilestones,
       feedbackCount,
       totalMeetings,
     };
-  }, [tasks, milestones, evaluations, meetings]);
+  }, [milestoneRows, evaluations, meetings]);
 
   async function exportPDF() {
     try {
@@ -163,17 +358,11 @@ export default function StudentReports() {
       const XLSX = await import("xlsx");
       const wb = XLSX.utils.book_new();
 
-      const tasksSheetData = [
-        ["ID", "Title", "Status", "Completed / Due"],
-        ...tasks.map((t) => [t.id || "", t.title || "", t.status || "", t.completedOn || t.due || ""]),
+      const milestonesData = [
+        ["Template Name", "Due Date", "Status"],
+        ...milestoneRows.map((m) => [m.name || "", m.dueDate || "", m.status || ""]),
       ];
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tasksSheetData), "Tasks");
-
-      const msData = [
-        ["ID", "Name", "Submitted On", "Status"],
-        ...milestones.map((m) => [m.id || "", m.name || "", m.submittedOn || "", m.status || ""]),
-      ];
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(msData), "Milestones");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(milestonesData), "Templates");
 
       const evalRows = [
         ["Project ID", "Project Title", "Evaluated On", "Milestone", "Criterion", "Score", "Max", "Feedback"],
@@ -210,13 +399,13 @@ export default function StudentReports() {
     }
   }
 
-  const tasksTable = {
-    headers: ["Templates", "Status", "DueDate"],
-    rows: tasks.map((t) => ({
-      Templates: t.title || "-",
-      Status: t.status || "-",
-      DueDate: t.completedOn || t.due || "-",
-      __meta: t,
+  const milestonesTable = {
+    headers: ["Template Name", "Due Date", "Status"],
+    rows: milestoneRows.map((m) => ({
+      "Template Name": m.name || "-",
+      "Due Date": m.dueDate || "-",
+      Status: m.status || "-",
+      __meta: m,
     })),
   };
 
@@ -249,7 +438,7 @@ export default function StudentReports() {
 
   return (
     <Box>
-      <DashboardSectionHeader description="Generate and export your personal FYP reports (PDF / Excel). View milestones, tasks, meetings and feedback in one place.">
+      <DashboardSectionHeader description="Generate and export your personal FYP reports (PDF / Excel). View templates, tasks, meetings and feedback in one place.">
         Reports
       </DashboardSectionHeader>
 
@@ -287,12 +476,10 @@ export default function StudentReports() {
           <Divider sx={{ my: 1 }} />
           <Box sx={{ display: "flex", gap: '200px', flexWrap: "wrap" }}>
             <Box className="report-card">
-              <label>Milestones</label>
-              <Typography className="report-card-value">{summary.completedMilestones} completed • {summary.pendingMilestones} pending</Typography>
-            </Box>
-            <Box className="report-card">
-              <label>Tasks</label>
-              <Typography className="report-card-value">{summary.tasksDone} done • {summary.tasksInProgress} in progress • {summary.tasksOverdue} overdue</Typography>
+              <label>Templates</label>
+              <Typography className="report-card-value">
+                {summary.completedMilestones} approved • {summary.underReviewMilestones} under review • {summary.pendingMilestones} pending
+              </Typography>
             </Box>
             <Box className="report-card">
               <label>Feedback</label>
@@ -306,8 +493,12 @@ export default function StudentReports() {
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
-          <label>Milestone</label>
-          <AppTable headers={tasksTable.headers} rows={tasksTable.rows} />
+          <label>Templates & Milestones</label>
+          {loadingTemplates ? (
+            <Typography>Loading templates...</Typography>
+          ) : (
+            <AppTable headers={milestonesTable.headers} rows={milestonesTable.rows} />
+          )}
         </Paper>
 
         <Paper className="report-table-wrap" elevation={0}>
