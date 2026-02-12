@@ -1,3 +1,4 @@
+//Template.js
 const mongoose = require('mongoose');
 
 const templateSchema = new mongoose.Schema({

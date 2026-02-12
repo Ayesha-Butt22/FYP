@@ -1,3 +1,4 @@
+//MeetingSlot.js
 const mongoose = require("mongoose");
 
 const meetingSlotSchema = new mongoose.Schema({
