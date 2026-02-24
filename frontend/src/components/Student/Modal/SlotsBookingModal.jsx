@@ -1,3 +1,4 @@
+//student/SlotsbookimgModel
 import React, { useState } from "react";
 import {
     Dialog,

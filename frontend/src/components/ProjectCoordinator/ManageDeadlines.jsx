@@ -22,10 +22,7 @@ import PresentationModal from "./modal/PresentationModal.jsx";
 export default function ManageDeadlines() {
   const [deadlines, setDeadlines] = useState([]);
   const [selectedPart, setSelectedPart] = useState("fyp-1");
-
-  // 🔹 SEMESTER START DATE FROM DB
   const [semesterStart, setSemesterStart] = useState(null);
-
   const [showPresentationModal, setShowPresentationModal] = useState(false);
   const [selectedYear, setSelectedYear] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState(null);
@@ -48,13 +45,23 @@ export default function ManageDeadlines() {
 
   /* ================= FETCH DEADLINES ================= */
   useEffect(() => {
-    if (!semesterStart) return; // 
+    if (!semesterStart) return;
 
     const fetchDeadlines = async () => {
       const data = await DeadLineService.getDeadLines(selectedPart);
 
       if (data && data.deadlines) {
-        const parsed = data.deadlines.map((d) => {
+        let filteredData = data.deadlines;
+
+        if (selectedPart === "fyp-2") {
+          filteredData = data.deadlines.filter((d) => {
+            const weekMatch = d.week.match(/\d+/);
+            const weekNumber = weekMatch ? parseInt(weekMatch[0]) : 0;
+            return weekNumber >= 13 || d.week.toLowerCase().includes("after");
+          });
+        }
+
+        const parsed = filteredData.map((d) => {
           const weekMatch = d.week.match(/\d+/);
           const weekNumber = weekMatch ? parseInt(weekMatch[0]) : 0;
 
@@ -67,12 +74,18 @@ export default function ManageDeadlines() {
             "dd MMM"
           )}`;
 
+          const isNil =
+            d.milestone?.toLowerCase() === "nill" ||
+            d.submitTo?.toLowerCase() === "nill" ||
+            d.deliverables?.toLowerCase() === "nill";
+
           return {
             ...d,
             timestamp: startDate.getTime(),
             dateLabel,
             weekNumber,
             yValue: 1,
+            isNil,
           };
         });
 
@@ -96,6 +109,9 @@ export default function ManageDeadlines() {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const d = payload[0].payload;
+
+      if (d.isNil) return null;
+
       return (
         <div className="timeline-tooltip">
           <p className="tooltip-week">{d.week}</p>
@@ -109,10 +125,10 @@ export default function ManageDeadlines() {
             </p>
           )}
           {d.templates && (
-  <p className="tooltip-line">
-    <strong>Templates:</strong> {d.templates}
-  </p>
-)}
+            <p className="tooltip-line">
+              <strong>Templates:</strong> {d.templates}
+            </p>
+          )}
           <p className="tooltip-line">
             <strong>Evaluation:</strong> {d.evaluations}
           </p>
@@ -124,80 +140,85 @@ export default function ManageDeadlines() {
   };
 
   /* ================= CUSTOM DOT ================= */
-  const CustomDot = ({ cx, cy, payload }) => (
-    <g>
-      <circle cx={cx} cy={cy} r={9} fill="#01337a" stroke="#fff" strokeWidth={3} />
+  const CustomDot = ({ cx, cy, payload }) => {
+    const isExamCommittee =
+      payload.submitTo?.toLowerCase().includes("exam committee");
 
-      <text
-        x={cx}
-        y={cy - 20}
-        textAnchor="middle"
-        fill="#01337a"
-        fontSize="22px"
-        fontWeight="600"
-      >
-        {payload.week}
-      </text>
+    const isWeek4 =
+      payload.week?.toLowerCase() === "week 4";
 
-      <text
-        x={cx}
-        y={cy + 30}
-        textAnchor="middle"
-        fill="#333"
-        fontSize="15px"
-        fontWeight="500"
-      >
-        {payload.milestone.length > 18
-          ? payload.milestone.substring(0, 18) + "..."
-          : payload.milestone}
-      </text>
+    const isAfterFinals =
+      payload.week?.toLowerCase().includes("after");
 
-      {payload.week.toLowerCase().includes("week 13") &&
-        selectedPart === "fyp-1" && (
-          <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
-            <button
-              className="btn main-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleOpenPresentationModal(payload, "fyp-1");
-              }}
-            >
-              Manage
-            </button>
-          </foreignObject>
-        )}
+    return (
+      <g>
+        <circle
+          cx={cx}
+          cy={cy}
+          r={9}
+          fill={payload.isNil ? "#ccc" : "#01337a"}
+          stroke="#fff"
+          strokeWidth={3}
+        />
 
-{payload.week.toLowerCase().includes("week 4") &&
-        selectedPart === "fyp-1" && (
-          <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
-            <button
-              className="btn main-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleOpenPresentationModal(payload, "fyp-1");
-              }}
-            >
-              Manage
-            </button>
-          </foreignObject>
-        )}
-      
+        <text
+          x={cx}
+          y={cy - 20}
+          textAnchor="middle"
+          fill="#01337a"
+          fontSize="22px"
+          fontWeight="600"
+        >
+          {payload.week}
+        </text>
 
-      {payload.week.toLowerCase().includes("week after finals") && (
-        <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
-          <button
-            className="btn main-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleOpenPresentationModal(payload, "fyp-2");
-            }}
-          >
-            Manage
-          </button>
-        </foreignObject>
-      )}
-    </g>
-  );
+        <text
+          x={cx}
+          y={cy + 30}
+          textAnchor="middle"
+          fill="#333"
+          fontSize="15px"
+          fontWeight="500"
+        >
+          {payload.milestone.length > 18
+            ? payload.milestone.substring(0, 18) + "..."
+            : payload.milestone}
+        </text>
+
+        {/* ✅ FYP-1 Manage Button */}
+        {selectedPart === "fyp-1" &&
+          (isWeek4 || isExamCommittee || isAfterFinals) && (
+            <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
+              <button
+                className="btn main-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenPresentationModal(payload, "fyp-1");
+                }}
+              >
+                Manage
+              </button>
+            </foreignObject>
+          )}
+
+        {/* ✅ FYP-2 Manage Button (ONLY Week 14) */}
+        {selectedPart === "fyp-2" &&
+          payload.week?.toLowerCase() === "week 14" && (
+            <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
+              <button
+                className="btn main-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenPresentationModal(payload, "fyp-2");
+                }}
+              >
+                Manage
+              </button>
+            </foreignObject>
+          )}
+      </g>
+    );
+  };
 
   return (
     <>
@@ -206,7 +227,6 @@ export default function ManageDeadlines() {
           Manage Deadlines
         </DashboardSectionHeader>
 
-        {/* 🔹 SEMESTER DATE PICKER (NO UI DAMAGE) */}
         {semesterStart && (
           <div style={{ margin: "10px 0" }}>
             <label style={{ fontWeight: "600" }}>
@@ -250,35 +270,18 @@ export default function ManageDeadlines() {
               data={deadlines}
               margin={{ top: 40, right: 80, bottom: 80, left: 70 }}
             >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="#e0e0e0"
-                vertical={false}
-              />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="dateLabel"
-                tick={{ fill: "#555", fontSize: 12 }}
                 interval={0}
                 angle={-25}
                 textAnchor="end"
                 height={70}
-                axisLine={{ stroke: "#01337a", strokeWidth: 2 }}
-                tickLine={false}
               />
               <YAxis dataKey="yValue" domain={[0, 2]} hide />
               <Tooltip content={<CustomTooltip />} />
-              <Line
-                type="linear"
-                dataKey="yValue"
-                stroke="#01337a"
-                strokeWidth={3}
-                dot={false}
-              />
-              <Scatter
-                dataKey="yValue"
-                fill="#01337a"
-                shape={<CustomDot />}
-              />
+              <Line type="linear" dataKey="yValue" stroke="#01337a" dot={false} />
+              <Scatter dataKey="yValue" shape={<CustomDot />} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>

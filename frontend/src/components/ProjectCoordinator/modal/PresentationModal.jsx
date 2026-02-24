@@ -7,20 +7,38 @@ import ToastService from "../../ToastService/ToastService.jsx";
 
 
 function generateSlotsForDay(startDateStr, startTimeStr, endTimeStr, durationMinutes = 45, dayOffset = 0) {
-  const baseDate = new Date(startDateStr);
+  if (!startDateStr || !startTimeStr || !endTimeStr) return [];
+
+  const baseDate = new Date(startDateStr + "T00:00:00");
+
   baseDate.setDate(baseDate.getDate() + dayOffset);
-  const dateIso = baseDate.toISOString().slice(0, 10);
-  const startDT = new Date(`${dateIso}T${startTimeStr}:00`);
-  const endDT = new Date(`${dateIso}T${endTimeStr}:00`);
+
+  const [startHour, startMin] = startTimeStr.split(":");
+  const [endHour, endMin] = endTimeStr.split(":");
+
+  const startDT = new Date(baseDate);
+  startDT.setHours(parseInt(startHour), parseInt(startMin), 0, 0);
+
+  const endDT = new Date(baseDate);
+  endDT.setHours(parseInt(endHour), parseInt(endMin), 0, 0);
+
+  if (startDT >= endDT) return [];
 
   const slots = [];
   let current = new Date(startDT);
+
   while (current < endDT) {
-    const slotEnd = new Date(current.getTime() + durationMinutes * 60 * 1000);
+    const slotEnd = new Date(current.getTime() + durationMinutes * 60000);
     if (slotEnd > endDT) break;
-    slots.push({ startTime: current.toISOString(), endTime: slotEnd.toISOString() });
+
+    slots.push({
+      startTime: current.toISOString(),
+      endTime: slotEnd.toISOString(),
+    });
+
     current = slotEnd;
   }
+
   return slots;
 }
 
@@ -84,59 +102,79 @@ export default function PresentationModal({ week, onClose, year }) {
   };
 
   const handleSaveBatch = async () => {
+  // Validation
+  for (let i = 0; i < panelsData.length; i++) {
+    const p = panelsData[i];
 
-    for (let i = 0; i < panelsData.length; i++) {
-      const p = panelsData[i];
-      if (!p.facultyIds || p.facultyIds.length === 0) {
-        ToastService.error(`Panel ${i + 1}: select at least one faculty`);
-        return;
-      }
-      if (!p.venue || !p.startDate || !p.startTime || !p.endTime) {
-        ToastService.error(`Panel ${i + 1}: fill venue/start-date/start-time/end-time`);
-        return;
-      }
+    if (!p.facultyIds?.length) {
+      ToastService.error(`Panel ${i + 1}: select faculty`);
+      return;
     }
 
-  
-    const panelsPayload = panelsData.map(p => {
-      let allSlots = [];
-      for (let d = 0; d < daysCount; d++) {
-        const daySlots = generateSlotsForDay(p.startDate, p.startTime, p.endTime, slotDuration, d);
-        allSlots = allSlots.concat(daySlots);
-      }
-      return {
-        facultyPanels: p.facultyIds,
-        venue: p.venue,
-        slots: allSlots,
-      };
-    });
+    if (!p.venue || !p.startDate || !p.startTime || !p.endTime) {
+      ToastService.error(`Panel ${i + 1}: fill all fields`);
+      return;
+    }
 
-    const payload = {
-      week: week.week,
-      fypPart,
-      durationMinutes: slotDuration,
-      panels: panelsPayload,
+    if (p.startTime >= p.endTime) {
+      ToastService.error(`Panel ${i + 1}: End time must be after start time`);
+      return;
+    }
+  }
+
+  const panelsPayload = panelsData.map((p) => {
+    let allSlots = [];
+
+    for (let d = 0; d < daysCount; d++) {
+      const daySlots = generateSlotsForDay(
+        p.startDate,
+        p.startTime,
+        p.endTime,
+        slotDuration,
+        d
+      );
+
+      allSlots = [...allSlots, ...daySlots];
+    }
+
+    return {
+      facultyPanels: p.facultyIds,
+      venue: p.venue,
+      slots: allSlots,
     };
+  });
 
-    setLoading(true);
-    try {
-      const res = await PresentationService.createBatch(payload);
-      if (res?.success) {
-        ToastService.success("Schedules saved");
-        const refreshed = await PresentationService.getPresentation(week.week, fypPart);
-        setExistingSchedules(Array.isArray(refreshed?.data) ? refreshed.data : (refreshed?.data ? [refreshed.data] : []));
-        onClose();
-      } else {
-        ToastService.error(res?.message || "Error saving schedules");
-      }
-    } catch (err) {
-      console.error(err);
-      ToastService.error("Server error");
-    } finally {
-      setLoading(false);
-    }
+  const payload = {
+    week: week.week,
+    fypPart: year, // IMPORTANT (no change)
+    durationMinutes: slotDuration,
+    panels: panelsPayload,
   };
 
+  setLoading(true);
+
+  try {
+    const res = await PresentationService.createBatch(payload);
+
+    if (res?.success) {
+      ToastService.success("Schedules saved successfully");
+
+      const refreshed =
+        await PresentationService.getPresentation(week.week, year);
+
+      setExistingSchedules(refreshed?.data || []);
+
+      onClose();
+    } else {
+      ToastService.error(res?.message || "Error saving");
+    }
+  } catch (err) {
+    console.error(err);
+    ToastService.error("Server error");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="modal-overlay-week" onClick={onClose}>
       <div className={`modal-content ${mode === "view" ? "" : "large"}`} onClick={e => e.stopPropagation()}>
