@@ -48,7 +48,7 @@ export default function ManageDeadlines() {
 
   /* ================= FETCH DEADLINES ================= */
   useEffect(() => {
-    if (!semesterStart) return; // 🔴 IMPORTANT SAFE GUARD
+    if (!semesterStart) return; // 
 
     const fetchDeadlines = async () => {
       const data = await DeadLineService.getDeadLines(selectedPart);
@@ -152,7 +152,7 @@ export default function ManageDeadlines() {
           : payload.milestone}
       </text>
 
-      {payload.week.toLowerCase().includes("week 4") &&
+      {payload.week.toLowerCase().includes("week 13") &&
         selectedPart === "fyp-1" && (
           <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
             <button
@@ -167,21 +167,21 @@ export default function ManageDeadlines() {
           </foreignObject>
         )}
 
-      {payload.week
-        .toLowerCase()
-        .includes("13th week before final exams") && (
-        <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
-          <button
-            className="btn main-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleOpenPresentationModal(payload, "fyp-1");
-            }}
-          >
-            Manage
-          </button>
-        </foreignObject>
-      )}
+{payload.week.toLowerCase().includes("week 4") &&
+        selectedPart === "fyp-1" && (
+          <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
+            <button
+              className="btn main-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenPresentationModal(payload, "fyp-1");
+              }}
+            >
+              Manage
+            </button>
+          </foreignObject>
+        )}
+      
 
       {payload.week.toLowerCase().includes("week after finals") && (
         <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
