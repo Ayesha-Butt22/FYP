@@ -22,6 +22,7 @@ export default function SlotBookingModal({ open, onClose, slots = [], groupId, s
         if (!selectedSlot) return ToastService.error("Please select a slot");
 
         console.log(selectedSlot);
+       
         setLoading(true);
         try {
             const res = await fetch(`http://localhost:5000/api/deadlineSchedule/book`, {
