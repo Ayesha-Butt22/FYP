@@ -24,6 +24,7 @@ const evaluationRoutes = require("./routes/evaluationRoutes");
 const committeeevaluationRoutes = require("./routes/committeEvalution");
 const projectIdeasRoutes = require("./routes/projectIdeasRoutes");
 
+app.use("/api/committee-evaluation", require("./routes/evaluationRoutes"));
 
 const journalRoutes = require("./routes/journalRoutes");
 

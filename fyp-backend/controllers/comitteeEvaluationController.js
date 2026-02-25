@@ -1,3 +1,4 @@
+//CommitteeEvaluationCOntroller
 const CommiteeEvaluation = require("../models/CommiteeEvaluation");
 const PresentationSchedule = require("../models/DeadlineSchedule");
 const Group = require("../models/StudentGroup");

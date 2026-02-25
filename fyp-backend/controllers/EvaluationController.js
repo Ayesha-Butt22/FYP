@@ -1,3 +1,4 @@
+//EvaluationController
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const Group = require("../models/StudentGroup");
@@ -465,5 +466,95 @@ exports.bulkResolveGroups = async (req, res) => {
   } catch (err) {
     console.error("bulkResolveGroups error", err);
     return res.status(500).json({ ok: false, message: "Server error" });
+  }
+};
+
+exports.resolveFinalEvaluationType = async (req, res) => {
+  try {
+    const { groupId } = req.body;
+
+    if (!groupId) {
+      return res.status(400).json({
+        success: false,
+        message: "groupId required",
+      });
+    }
+
+    const Group = require("../models/StudentGroup");
+    const User = require("../models/User");
+    const Template = require("../models/Template");
+
+    // 1️⃣ Find group by display groupId
+    const group = await Group.findOne({ groupId }).lean();
+
+    if (!group) {
+      return res.status(404).json({
+        success: false,
+        message: "Group not found",
+      });
+    }
+
+    // 2️⃣ Get leader email or sapId
+    const leader = group.leader;
+
+    if (!leader) {
+      return res.status(400).json({
+        success: false,
+        message: "Leader not found in group",
+      });
+    }
+
+    // 3️⃣ Find leader user record
+    let studentUser = null;
+
+    if (leader.email) {
+      studentUser = await User.findOne({ email: leader.email }).lean();
+    } else if (leader.sapId) {
+      studentUser = await User.findOne({ studentId: leader.sapId }).lean();
+    }
+
+    if (!studentUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Student user not found",
+      });
+    }
+
+    const department = studentUser.department;
+
+    if (!department) {
+      return res.status(400).json({
+        success: false,
+        message: "Department not found in student profile",
+      });
+    }
+
+    // 4️⃣ Check Template-5 approved
+    const template5 = await Template.findOne({
+      groupId: group._id,
+      templateNumber: 5,
+      isApproved: true,
+    });
+
+    let fypPart = "fyp-1";
+
+    if (template5) {
+      fypPart = "fyp-2";
+    }
+
+    return res.status(200).json({
+      success: true,
+      groupId: group.groupId,
+      department,  // CS / SE
+      fypPart,     // fyp-1 / fyp-2
+    });
+
+  } catch (err) {
+    console.error("resolveFinalEvaluationType error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: err.message,
+    });
   }
 };
