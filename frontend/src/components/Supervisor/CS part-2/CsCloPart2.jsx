@@ -33,7 +33,7 @@ const CsCloPart2 = () => {
       </button>
 
       {isOpen && (
-        <div className="modal">
+        <div className="modal123">
           <div className="modal-content">
             <div className="modal-header">
               <h2>FYP Rubric Evaluation Form (CS - Part 2)</h2>

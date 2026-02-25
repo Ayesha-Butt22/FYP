@@ -33,7 +33,7 @@ const SeCloPart2 = () => {
       </button>
 
       {isOpen && (
-        <div className="modal">
+        <div className="modal123">
           <div className="modal-content">
 
             <div className="modal-header">

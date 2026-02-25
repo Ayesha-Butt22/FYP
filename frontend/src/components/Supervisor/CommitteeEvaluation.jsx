@@ -375,7 +375,7 @@ const [showCLO, setShowCLO] = useState(false);
 )}
 
 {/* ================= COMMENTS ================= */}
-{selectedGroup && (
+{ week === 4 && selectedGroup && (
   <div className="eval-sup-comments">
     <label>Comments</label>
     <textarea
