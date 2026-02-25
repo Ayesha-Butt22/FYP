@@ -387,7 +387,7 @@ export default function CommitteeEvaluation() {
 )}
 
 {/* ================= COMMENTS ================= */}
-{selectedGroup && (
+{ week === 4 && selectedGroup && (
   <div className="eval-sup-comments">
     <label>Comments</label>
     <textarea

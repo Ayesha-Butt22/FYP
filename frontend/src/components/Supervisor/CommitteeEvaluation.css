@@ -41,7 +41,7 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
     position: relative;
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
 .eval-sup-slot-card::before {
@@ -211,7 +211,7 @@
     border-collapse: separate;
     border-spacing: 0;
     margin: 28px 0;
-    overflow: hidden;
+    /*overflow: hidden;*/
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }

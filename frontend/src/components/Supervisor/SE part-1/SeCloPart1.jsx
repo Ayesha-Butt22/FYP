@@ -32,7 +32,7 @@ const SeCloPart1 = () => {
       </button>
 
       {isOpen && (
-        <div className="modal">
+        <div className="modal123">
           <div className="modal-content">
             <div className="modal-header">
               <h2>FYP Rubric Evaluation Form (SE - Part 1)</h2>

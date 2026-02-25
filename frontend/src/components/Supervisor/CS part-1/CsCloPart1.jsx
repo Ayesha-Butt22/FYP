@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
+import { createPortal } from "react-dom";
 import "./cs-clo-part-1.css";
 
 const CsCloPart1 = () => {
@@ -6,7 +7,13 @@ const CsCloPart1 = () => {
   const [selectedMarks, setSelectedMarks] = useState({});
   const [total, setTotal] = useState(0);
 
+  useEffect(() => {
+    console.log("CsCloPart1 mounted");
+    return () => console.log("CsCloPart1 unmounted");
+  }, []);
+
   const openModal = () => setIsOpen(true);
+  console.log(isOpen);
   const closeModal = () => setIsOpen(false);
 
   const handleChange = (loName, value) => {
@@ -32,8 +39,9 @@ const CsCloPart1 = () => {
         Open CS CLO Part 1
       </button>
 
-      {isOpen && (
-        <div className="modal">
+      {isOpen &&
+          createPortal(
+        <div className="modal123">
           <div className="modal-content">
             <div className="modal-header">
               <h2>FYP Rubric Evaluation Form (CS - Part 1)</h2>
@@ -242,8 +250,10 @@ const CsCloPart1 = () => {
               </div>
             </form>
           </div>
-        </div>
-      )}
+        </div>,
+              document.body
+          )
+      }
     </>
   );
 };
