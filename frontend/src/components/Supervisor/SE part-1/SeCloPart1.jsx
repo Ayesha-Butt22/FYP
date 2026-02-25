@@ -1,3 +1,4 @@
+//SeCloPart1.jsx
 import React, { useState } from "react";
 import "./se-clo-part-1.css";
 

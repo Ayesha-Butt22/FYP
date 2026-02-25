@@ -5,6 +5,8 @@ const Group = require("../models/StudentGroup");
 const PresentationSchedule = require("../models/DeadlineSchedule");
 const Proposal = require("../models/StudentProposal");
 
+ const Template = require("../models/Template");
+
 
 exports.checkFacultyInPublishedPanel = async (req, res) => {
   try {
@@ -480,9 +482,6 @@ exports.resolveFinalEvaluationType = async (req, res) => {
       });
     }
 
-    const Group = require("../models/StudentGroup");
-    const User = require("../models/User");
-    const Template = require("../models/Template");
 
     // 1️⃣ Find group by display groupId
     const group = await Group.findOne({ groupId }).lean();

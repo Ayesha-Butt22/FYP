@@ -19,6 +19,8 @@ export default function CommitteeEvaluation() {
   const [week , setWeek] = useState(4);
   const [schedule , setSchedule] = useState(null);
   const [finalEvaluationInfo, setFinalEvaluationInfo] = useState(null);
+const [showCLO, setShowCLO] = useState(false);
+
 
   const maskGroupId = (groupId) => {
     if (!groupId) return "";
@@ -94,10 +96,11 @@ export default function CommitteeEvaluation() {
       setSelectedGroup(group);
 
       // 🔥 Only resolve when week 13
-      if (panel.week !== "Week 4") {
-        await resolveFinalEvaluation(group.groupId);
-      }
-
+     if (panel.week !== "Week 4") {
+  await resolveFinalEvaluation(group.groupId);
+  setWeek(13);
+  setShowCLO(true);   // OPEN MODAL
+}
       const initialForm = {};
       group.members?.forEach((m) => {
         initialForm[m.studentId] = { presentation: "", performance: "" };
@@ -190,81 +193,62 @@ export default function CommitteeEvaluation() {
   if (loading) return <div className="eval-sup-loading">Loading...</div>;
   if (!facultyData)
     return (
-        <>
-          <DashboardSectionHeader description="View committee evaluation results for groups you supervise (read-only)">
-            Committee Results — Supervisor View
-          </DashboardSectionHeader>
-          <label>
-            No Committee Results to display right now
-          </label>
-        </>
+      <>
+        <DashboardSectionHeader>
+          Committee Results — Supervisor View
+        </DashboardSectionHeader>
+        <label>No Committee Results to display right now</label>
+      </>
     );
 
-
   return (
-      <>
-        <DashboardSectionHeader
-            description={`Committee members evaluate groups (FYP-1 / FYP-2). Evaluate individual students first, then submit group-level evaluation`}
-        >
-          Committee Evaluation
-        </DashboardSectionHeader>
+    <>
+      <DashboardSectionHeader>
+        Committee Evaluation
+      </DashboardSectionHeader>
 
-        <div className="eval-sup-container">
-          {facultyData.map((panel, i) => (
-              <div key={i} className="eval-sup-panel">
-                <div className="eval-sup-header">
-                  <p>
-                    <strong>Week:</strong> {panel.week} &nbsp; | &nbsp;
-                    <strong>FYP Part:</strong> {panel.fypPart?.toUpperCase()} &nbsp; | &nbsp;
-                    <strong>Venue:</strong> {panel.venue}
-                  </p>
-                </div>
+      <div className="eval-sup-container">
 
-                <div className="eval-sup-slots-grid">
-                  {panel.slots?.map((slot, idx) => {
-                    const slotDate = new Date(slot.startTime);
-                    const dateStr = slotDate.toLocaleDateString([], {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                    });
-                    const startTime = slotDate.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    });
-                    const endTime = new Date(slot.endTime).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    });
-                    const bookedBy = slot.bookedBy
-                        ? maskGroupId(slot.bookedBy)
-                        : false;
+        {facultyData.map((panel, i) => (
+          <div key={i} className="eval-sup-panel">
 
-                    return (
-                        <div key={idx} className="eval-sup-slot-card eval-sup-free">
-                          <div className="eval-sup-slot-time">
-                            <span className="eval-sup-slot-date">{dateStr}</span>
-                            <br />
-                            {startTime} - {endTime}
-                          </div>
-                          <div>{bookedBy}</div>
+            <div className="eval-sup-header">
+              <p>
+                <strong>Week:</strong> {panel.week} |
+                <strong> FYP Part:</strong> {panel.fypPart?.toUpperCase()} |
+                <strong> Venue:</strong> {panel.venue}
+              </p>
+            </div>
 
-                          {bookedBy ? (
-                              <button
-                                  className="eval-sup-open-btn"
-                                  onClick={() => handleCheckGroup(slot, panel)}
-                              >
-                                Evaluate
-                              </button>
-                          ) : (
-                              <div className="eval-sup-unbooked">Not Booked</div>
-                          )}
-                        </div>
-                    );
-                  })}
-                </div>
-              </div>
-          ))}
+            <div className="eval-sup-slots-grid">
+              {panel.slots?.map((slot, idx) => {
+
+                const bookedBy = slot.bookedBy
+                  ? maskGroupId(slot.bookedBy)
+                  : false;
+
+                return (
+                  <div key={idx} className="eval-sup-slot-card">
+
+                    <div>{bookedBy}</div>
+
+                    {bookedBy ? (
+                      <button
+                        className="eval-sup-open-btn"
+                        onClick={() => handleCheckGroup(slot, panel)}
+                      >
+                        Evaluate
+                      </button>
+                    ) : (
+                      <div className="eval-sup-unbooked">Not Booked</div>
+                    )}
+
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
 
 
           {selectedGroup && (
@@ -362,11 +346,15 @@ export default function CommitteeEvaluation() {
 )}
 
 {/* ================= FINAL EVALUATION ================= */}
-{week === 13 && selectedGroup && finalEvaluationInfo && (
+{selectedGroup && finalEvaluationInfo && (
   <>
     {finalEvaluationInfo.department === "CS" &&
       finalEvaluationInfo.fypPart === "fyp-1" && (
-        <CsCloPart1 group={selectedGroup} />
+        
+        <CsCloPart1
+          isOpen={showCLO}
+          onClose={() => setShowCLO(false)}
+        />
       )}
 
     {finalEvaluationInfo.department === "CS" &&
