@@ -27,29 +27,30 @@ const CsCloPart2 = () => {
 
   return (
     <>
+      
       <button className="open-btn" onClick={openModal}>
         Open CS CLO Part 2
       </button>
 
       {isOpen && (
-        <div className="modal123">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>FYP Rubric Evaluation Form (CS - Part 2)</h2>
-              <span className="close" onClick={closeModal}>
+        <div className="cs1-modal-overlay">
+          <div className="cs1-modal-box">
+            <div className="cs1-header">
+              <h2 className="h2">FYP Rubric Evaluation Form (CS - Part 2)</h2>
+              <span className="cs1-close" onClick={closeModal}>
                 &times;
               </span>
             </div>
 
             <form>
               {/* LO1 */}
-              <div className="lo-card">
-                <h3>FYP-LO1 (10 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO1 (10 Marks)</h3>
                 <p>
                   Demonstrate knowledge of mathematics, science, and computing
                   appropriate to the discipline.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[2, 5, 7, 8, 10].map((mark, i) => (
                     <label key={i}>
                       <input
@@ -75,12 +76,12 @@ const CsCloPart2 = () => {
               </div>
 
               {/* LO2 */}
-              <div className="lo-card">
-                <h3>FYP-LO2 (10 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO2 (10 Marks)</h3>
                 <p>
                   Analyze a problem, identify, and define computing requirements appropriate to its solution.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[2, 5, 7, 8, 10].map((mark, i) => (
                     <label key={i}>
                       <input
@@ -107,12 +108,12 @@ const CsCloPart2 = () => {
               </div>
 
               {/* LO3 */}
-              <div className="lo-card">
-                <h3>FYP-LO3 (15 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO3 (15 Marks)</h3>
                 <p>
                   Design and implement complex computing solutions for complex problems.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[3.5, 8, 11, 13, 15].map((mark, i) => (
                     <label key={i}>
                       <input
@@ -139,12 +140,12 @@ const CsCloPart2 = () => {
               </div>
 
               {/* LO4 */}
-              <div className="lo-card">
-                <h3>FYP-LO4 (30 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO4 (30 Marks)</h3>
                 <p>
                   Apply mathematical foundations and algorithmic principles in modeling and system design.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[6, 15, 21, 24, 30].map((mark, i) => (
                     <label key={i}>
                       <input
@@ -171,12 +172,12 @@ const CsCloPart2 = () => {
               </div>
 
               {/* LO5 */}
-              <div className="lo-card">
-                <h3>FYP-LO5 (15 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO5 (15 Marks)</h3>
                 <p>
                   Apply modern tools, techniques and resources to solve complex problems.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[3.5, 8, 11, 13, 15].map((mark, i) => (
                     <label key={i}>
                       <input
@@ -202,12 +203,12 @@ const CsCloPart2 = () => {
               </div>
 
               {/* LO6 */}
-              <div className="lo-card">
-                <h3>FYP-LO6 (10 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO6 (10 Marks)</h3>
                 <p>
                   Work effectively in a team to accomplish a goal (Version Control).
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[2, 5, 7, 8, 10].map((mark, i) => (
                     <label key={i}>
                       <input
@@ -229,12 +230,12 @@ const CsCloPart2 = () => {
               </div>
 
               {/* LO7 */}
-              <div className="lo-card">
-                <h3>FYP-LO7 (10 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO7 (10 Marks)</h3>
                 <p>
                   Communicate effectively in oral and written form on complex computing tasks.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[2, 5, 7, 8, 10].map((mark, i) => (
                     <label key={i}>
                       <input
@@ -258,10 +259,19 @@ const CsCloPart2 = () => {
                 </div>
               </div>
 
-              <div className="total-box">
+              <div className="cs1-total">
                 Total Marks: {total.toFixed(1)} / 100
               </div>
             </form>
+
+            <div className="cs1-footer">
+              <button type="button" className="cs1-cancel" onClick={closeModal}>
+                Cancel
+              </button>
+              <button type="submit" className="cs1-submit">
+                Submit
+              </button>
+            </div>
           </div>
         </div>
       )}

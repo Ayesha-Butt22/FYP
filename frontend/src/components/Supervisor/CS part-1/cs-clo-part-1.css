@@ -1,159 +1,134 @@
-:root{
-  --primary: #0f172a;
-  --accent: #2563eb;
-  --accent-light: #3b82f6;
-  --success: #16a34a;
-  --bg-soft: #f8fafc;
-  --border: #e2e8f0;
-}
-
-/* Open Button */
-.open-btn{
-  padding: 10px 22px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.open-btn:hover{
-  transform: translateY(-2px);
-   box-shadow: 0 8px 20px rgba(37,99,235,0.3);
-}
-
-/* Modal Overlay */
-.modal123 {
+/* ===== CS1 MODAL OVERLAY ===== */
+.cs1-modal-overlay{
   position: fixed;
   inset: 0;
-  background: rgba(15,23,42,0.65);
-  backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.6);
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 999999;
-  padding: 20px;
+  align-items: flex-start;
+  padding: 40px 0;
+  overflow-y: auto;
+  z-index: 9999;
 }
 
-/* Modal Card */
-.modal-content {
+/* ===== CS1 MODAL BOX ===== */
+.cs1-modal-box{
   background: white;
-  width: 100%;
-  max-width: 950px;
-  max-height: 90vh;
-  overflow-y: auto;
-  border-radius: 16px;
-  padding: 30px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.25);
-  animation: popIn 0.25s ease-out;
+  width: 98%;
+  max-width: 1600px;
+  min-height: 90vh;
+  padding: 40px;
+  border-radius: 12px;
 }
 
 /* Header */
-.modal-header{
+.cs1-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:25px;
+  border-bottom:2px solid #06b6d4;
+  margin-bottom:20px;
+  padding-bottom:10px;
 }
 
-.modal-header h2{
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--primary);
-}
-
-.close{
-  font-size:22px;
-  width:36px;
-  height:36px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:50%;
+.cs1-close{
+  font-size:28px;
   cursor:pointer;
-  transition: all 0.2s ease;
-}
-
-.close:hover{
-  background:#f1f5f9;
+  color: #ef4444;
+  font-weight: bold;
 }
 
 /* LO Card */
-.lo-card{
-  background: var(--bg-soft);
-  padding: 18px 20px;
-  margin-bottom: 18px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  transition: all 0.2s ease;
+.cs1-card{
+  background:#ffffff;
+  padding:15px;
+  margin-bottom:20px;
+  border-left:5px solid #06b6d4;
+  border-radius:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
 }
 
-.lo-card:hover{
-  box-shadow: 0 8px 25px rgba(0,0,0,0.05);
-  transform: translateY(-2px);
-}
-
-.lo-card h3{
-  margin-bottom:6px;
-  color: var(--accent);
-  font-size: 16px;
-}
-
-.lo-card p{
-  font-size: 14px;
-  color: #475569;
-  margin-bottom: 12px;
-}
-
-/* Options */
-.options{
+.cs1-options{
+  margin-top:10px;
   display:flex;
   flex-direction:column;
   gap:8px;
 }
 
-.options label{
+/* Total Box */
+.cs1-total{
+  text-align:right;
+  font-size:18px;
+  font-weight:bold;
+  color:#16a34a;
+  padding:15px 0;
+  border-top:2px solid #01337a;
+  margin-top:20px;
+}
+
+/* Footer */
+.cs1-footer{
   display:flex;
-  align-items:center;
+  justify-content:flex-end;
   gap:10px;
-  font-size:14px;
-  padding:6px 10px;
+  margin-top:15px;
+}
+
+.cs1-cancel{
+  padding:8px 18px;
+  border:none;
+  background:#ef4444;
+  color:white;
   border-radius:6px;
   cursor:pointer;
-  transition: background 0.2s ease;
 }
 
-.options label:hover{
-  background:#e2e8f0;
+.cs1-submit{
+  padding:8px 18px;
+  border:none;
+  background:#16a34a;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+}
+.cs1-card p {
+      display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    unicode-bidi: isolate; 
+}
+.h2 {
+    display: block;
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
 }
 
-/* Radio Style */
-.options input[type="radio"]{
-  accent-color: var(--accent);
-  transform: scale(1.1);
+.h3 {
+    
+  font-size: 24px;
+  font-weight: 700;
+  color: #01337a;
+  margin-bottom: 10px;
 }
 
-/* Total Box */
-.total-box{
-  margin-top: 25px;
-  text-align: right;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--success);
-  padding-top: 15px;
-  border-top: 1px solid var(--border);
-}
 
-/* Animation */
-@keyframes popIn {
-  from {
-    transform: scale(0.96);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+.cs1-card .cs1-options label {
+  font-weight: 600 !important;
+  color: #01337a !important;
+  font-size: 16px !important;
+}
+.open-btn{
+  padding: 12px 25px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
 }

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./se-clo-part-1.css";
 
+
 const SeCloPart1 = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedMarks, setSelectedMarks] = useState({});
@@ -27,28 +28,29 @@ const SeCloPart1 = () => {
 
   return (
     <>
-      <button className="open-btn" onClick={openModal}>
+     
+ <button className="open-btn" onClick={openModal}>
         Open SE CLO Part 1
       </button>
 
       {isOpen && (
-        <div className="modal123">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>FYP Rubric Evaluation Form (SE - Part 1)</h2>
-              <span className="close" onClick={closeModal}>
+        <div className="cs1-modal-overlay">
+          <div className="cs1-modal-box">
+            <div className="cs1-header">
+              <h2 className="h2">FYP Rubric Evaluation Form (SE - Part 1)</h2>
+              <span className="cs1-close" onClick={closeModal}>
                 &times;
               </span>
             </div>
 
             <form>
               {/* LO1 */}
-              <div className="lo-card">
-                <h3>FYP-LO1 (10 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO1 (10 Marks)</h3>
                 <p>
                   Demonstrate knowledge of mathematics, science, and software engineering fundamentals and processes.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[2, 5, 7, 8, 10].map((m, i) => (
                     <label key={i}>
                       <input type="radio" name="lo1" value={m}
@@ -64,12 +66,12 @@ const SeCloPart1 = () => {
               </div>
 
               {/* LO2 */}
-              <div className="lo-card">
-                <h3>FYP-LO2 (20 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO2 (20 Marks)</h3>
                 <p>
                   Analyze a problem, identify and define software requirements appropriate to its solution.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[4,10,14,16,20].map((m,i)=>(
                     <label key={i}>
                       <input type="radio" name="lo2" value={m}
@@ -85,12 +87,12 @@ const SeCloPart1 = () => {
               </div>
 
               {/* LO3 */}
-              <div className="lo-card">
-                <h3>FYP-LO3 (20 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO3 (20 Marks)</h3>
                 <p>
                   Design and implement software engineering solutions for complex problems.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[4,10,14,16,20].map((m,i)=>(
                     <label key={i}>
                       <input type="radio" name="lo3" value={m}
@@ -106,12 +108,12 @@ const SeCloPart1 = () => {
               </div>
 
               {/* LO4 */}
-              <div className="lo-card">
-                <h3>FYP-LO4 (10 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO4 (10 Marks)</h3>
                 <p>
                   Evaluate a software engineering solution and conduct experiments.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[2,5,7,8,10].map((m,i)=>(
                     <label key={i}>
                       <input type="radio" name="lo4" value={m}
@@ -127,12 +129,12 @@ const SeCloPart1 = () => {
               </div>
 
               {/* LO5 */}
-              <div className="lo-card">
-                <h3>FYP-LO5 (15 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO5 (15 Marks)</h3>
                 <p>
                   Apply appropriate techniques and modern software engineering tools.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[1.5,6,9,12,15].map((m,i)=>(
                     <label key={i}>
                       <input type="radio" name="lo5" value={m}
@@ -148,12 +150,12 @@ const SeCloPart1 = () => {
               </div>
 
               {/* LO6 */}
-              <div className="lo-card">
-                <h3>FYP-LO6 (5 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO6 (5 Marks)</h3>
                 <p>
                   Work effectively in a team to accomplish a goal (Version Control).
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[1,2,3,4,5].map((m,i)=>(
                     <label key={i}>
                       <input type="radio" name="lo6" value={m}
@@ -169,12 +171,12 @@ const SeCloPart1 = () => {
               </div>
 
               {/* LO7 */}
-              <div className="lo-card">
-                <h3>FYP-LO7 (10 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO7 (10 Marks)</h3>
                 <p>
                   Communicate effectively on complex engineering activities and presentations.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[2,5,7,8,10].map((m,i)=>(
                     <label key={i}>
                       <input type="radio" name="lo7" value={m}
@@ -190,12 +192,12 @@ const SeCloPart1 = () => {
               </div>
 
               {/* LO8 */}
-              <div className="lo-card">
-                <h3>FYP-LO8 (10 Marks)</h3>
+              <div className="cs1-card">
+                <h3 className="h3">FYP-LO8 (10 Marks)</h3>
                 <p>
                   Demonstrate knowledge of project management principles and techniques.
                 </p>
-                <div className="options">
+                <div className="cs1-options">
                   {[2,5,7,8,10].map((m,i)=>(
                     <label key={i}>
                       <input type="radio" name="lo8" value={m}
@@ -210,11 +212,20 @@ const SeCloPart1 = () => {
                 </div>
               </div>
 
-              <div className="total-box">
+              <div className="cs1-total">
                 Total Marks: {total.toFixed(1)} / 100
               </div>
 
             </form>
+
+            <div className="cs1-footer">
+              <button type="button" className="cs1-cancel" onClick={closeModal}>
+                Cancel
+              </button>
+              <button type="submit" className="cs1-submit">
+                Submit
+              </button>
+            </div>
           </div>
         </div>
       )}
