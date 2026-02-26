@@ -22,12 +22,17 @@ const upload = multer({ storage });
 // Upload a template
 router.post("/upload", upload.single("file"), studentTemplateController.uploadTemplate);
 
+// Get student info by studentId
 router.get("/students/:studentId", studentTemplateController.getStudentInfo);
-
 
 // Get all templates for a group
 router.get("/group/:groupId", studentTemplateController.getGroupTemplates);
 
-// Get student info by studentId
+// 🆕 FEEDBACK ROUTES - ADD THESE:
+// Get feedback by student ID (SAP ID)
+router.get("/feedback/:studentId", studentTemplateController.getStudentFeedback);
+
+// Get feedback by email (alternative)
+router.get("/feedback/by-email/:email", studentTemplateController.getStudentFeedbackByEmail);
 
 module.exports = router;

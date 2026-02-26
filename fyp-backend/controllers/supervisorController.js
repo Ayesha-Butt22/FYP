@@ -245,7 +245,356 @@ exports.SubmitGroupreview = async (req, res) => {
     }
 };
 
+// 🆕 GET GROUPS WITH COMPLETE DETAILS FOR SUPERVISOR GROUPS PAGE
+exports.getSupervisorGroupsWithDetails = async (req, res) => {
+  try {
+    const supervisorEmail = req.user.email;
+    
+    console.log('🔍 Fetching groups for supervisor:', supervisorEmail);
 
+    // Step 1: Find all proposals assigned to this supervisor
+    const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
+      .populate('groupId')
+      .lean();
 
+    console.log('📝 Proposals found:', proposals.length);
+
+    if (!proposals || proposals.length === 0) {
+      return res.json({
+        success: true,
+        count: 0,
+        groups: []
+      });
+    }
+
+    // Step 2: Get unique group IDs
+    const groupIds = proposals
+      .map(p => p.groupId)
+      .filter(Boolean)
+      .map(g => g._id);
+
+    // Step 3: Get all groups
+    const groups = await Group.find({ _id: { $in: groupIds } }).lean();
+
+    // Step 4: Collect all member emails
+    const emailsSet = new Set();
+    groups.forEach(g => {
+      if (g.leader?.email) emailsSet.add(g.leader.email);
+      if (g.member2?.email) emailsSet.add(g.member2.email);
+      if (g.member3?.email) emailsSet.add(g.member3.email);
+    });
+
+    // Step 5: Fetch user details for all members
+    const emails = Array.from(emailsSet);
+    const users = await User.find({ email: { $in: emails } })
+      .select('email name sapId studentId')
+      .lean();
+
+    const userByEmail = {};
+    users.forEach(u => {
+      userByEmail[u.email] = u;
+    });
+
+    // Step 6: Build response with enriched data
+    const enrichedGroups = groups.map((group, index) => {
+      const gid = String(group._id);
+      
+      // Find proposal for this group
+      const proposal = proposals.find(p => String(p.groupId._id) === gid);
+      
+      // Build members array with names
+      const members = [];
+      
+      ['leader', 'member2', 'member3'].forEach(role => {
+        if (group[role]?.email) {
+          const user = userByEmail[group[role].email];
+          members.push({
+            name: user?.name || extractNameFromEmail(group[role].email),
+            sapId: group[role].sapId || user?.sapId || user?.studentId || 'N/A',
+            email: group[role].email,
+            role: role
+          });
+        }
+      });
+
+      // Determine proposal status
+      let proposalStatus = 'Pending';
+      if (proposal?.projectStatus === 1) proposalStatus = 'Approved';
+      else if (proposal?.projectStatus === 2) proposalStatus = 'Rejected';
+      else if (proposal?.projectStatus === 0) proposalStatus = 'Pending';
+
+      // Mock milestones data
+      const milestonesTotal = 5;
+      const milestonesCompleted = calculateMilestonesCompleted(proposal);
+
+      return {
+        groupNo: index + 1,
+        groupId: group.groupId,
+        _id: group._id,
+        title: proposal?.projectTitle || 'Untitled Project',
+        proposalStatus: proposalStatus,
+        program: proposal?.projectSpecialization || 'Software Engineering',
+        milestonesTotal: milestonesTotal,
+        milestonesCompleted: milestonesCompleted,
+        progress: Math.round((milestonesCompleted / milestonesTotal) * 100),
+        members: members,
+        projectDescription: proposal?.projectDescription || '',
+        projectTools: proposal?.projectTools || '',
+        supervisorComments: proposal?.projectSupervisorComments || '',
+        createdAt: group.createdAt,
+        updatedAt: group.updatedAt,
+        proposalId: proposal?._id
+      };
+    });
+
+    console.log('✅ Returning', enrichedGroups.length, 'groups');
+
+    res.json({
+      success: true,
+      count: enrichedGroups.length,
+      groups: enrichedGroups
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching supervisor groups:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server error'
+    });
+  }
+};
+
+// Helper function to extract name from email
+function extractNameFromEmail(email) {
+  if (!email || typeof email !== 'string') return 'Student';
+  const local = email.split('@')[0] || '';
+  const parts = local.split(/[._-]+/).filter(Boolean);
+  if (parts.length === 0) return local;
+  return parts
+    .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+    .join(' ');
+}
+
+// Helper function to calculate milestones completed
+function calculateMilestonesCompleted(proposal) {
+  if (!proposal) return 0;
+  
+  // Basic calculation based on proposal status
+  if (proposal.projectStatus === 1) return 4; // Approved = 4/5 milestones
+  if (proposal.projectStatus === 0) return 2; // Pending = 2/5 milestones
+  if (proposal.projectStatus === 2) return 1; // Rejected = 1/5 milestones
+  
+  return 0;
+}
+
+/**
+ * Get supervisor's groups with their submission data for reports
+ */
+exports.getSupervisorGroupsForReports = async (req, res) => {
+  try {
+    const supervisorEmail = req.user.email;
+
+    console.log('🔍 Fetching report data for supervisor:', supervisorEmail);
+
+    // Step 1: Find all proposals assigned to this supervisor
+    const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
+      .populate('groupId')
+      .lean();
+
+    if (!proposals || proposals.length === 0) {
+      return res.json({
+        success: true,
+        count: 0,
+        groups: []
+      });
+    }
+
+    // Step 2: Process each group
+    const groupsData = [];
+
+    for (const proposal of proposals) {
+      const group = proposal.groupId;
+      if (!group) continue;
+
+      // Get member names
+      const emails = [
+        group.leader?.email,
+        group.member2?.email,
+        group.member3?.email
+      ].filter(Boolean);
+
+      const users = await User.find({ email: { $in: emails } })
+        .select('email name')
+        .lean();
+
+      const memberNames = users.map(u => u.name);
+
+      // Get all submissions for this group
+      const submissions = await Template.find({ 
+        groupId: group._id 
+      })
+      .sort({ week: 1 })
+      .lean();
+
+      // Format submissions data
+      const milestones = submissions.map(sub => ({
+        week: sub.week,
+        templateCode: sub.templateCode,
+        templateLabel: sub.templateLabel,
+        status: sub.status,
+        feedback: sub.supervisorRemarks || '',
+        uploadedAt: sub.uploadedAt,
+        fileName: sub.originalName,
+        filePath: sub.filePath
+      }));
+
+      groupsData.push({
+        id: group.groupId,
+        _id: group._id,
+        title: proposal.projectTitle || 'Untitled Project',
+        members: memberNames,
+        milestones: milestones
+      });
+    }
+
+    console.log('✅ Returning', groupsData.length, 'groups for reports');
+
+    res.json({
+      success: true,
+      count: groupsData.length,
+      groups: groupsData
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching supervisor reports:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server error'
+    });
+  }
+};
+
+/**
+ * Get detailed report for a specific group
+ */
+exports.getGroupDetailedReport = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const supervisorEmail = req.user.email;
+
+    // Find the group
+    const group = await Group.findById(groupId).lean();
+    if (!group) {
+      return res.status(404).json({
+        success: false,
+        message: 'Group not found'
+      });
+    }
+
+    // Find proposal for this group
+    const proposal = await Proposal.findOne({ 
+      groupId: groupId,
+      projectSupervisor: supervisorEmail 
+    }).lean();
+
+    if (!proposal) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not the supervisor for this group'
+      });
+    }
+
+    // Get member names
+    const emails = [
+      group.leader?.email,
+      group.member2?.email,
+      group.member3?.email
+    ].filter(Boolean);
+
+    const users = await User.find({ email: { $in: emails } })
+      .select('email name')
+      .lean();
+
+    const memberNames = users.map(u => u.name);
+
+    // Get all submissions
+    const submissions = await Template.find({ 
+      groupId: groupId 
+    })
+    .sort({ week: 1 })
+    .lean();
+
+    // Format response
+    const reportData = {
+      groupId: group.groupId,
+      title: proposal.projectTitle || 'Untitled Project',
+      members: memberNames,
+      milestones: submissions.map(sub => ({
+        week: sub.week,
+        templateCode: sub.templateCode,
+        templateLabel: sub.templateLabel,
+        status: sub.status,
+        feedback: sub.supervisorRemarks || '',
+        uploadedAt: sub.uploadedAt,
+        fileName: sub.originalName,
+        filePath: sub.filePath
+      })),
+      proposalDetails: {
+        description: proposal.projectDescription,
+        specialization: proposal.projectSpecialization,
+        tools: proposal.projectTools
+      }
+    };
+
+    res.json({
+      success: true,
+      data: reportData
+    });
+
+  } catch (error) {
+    console.error('Error fetching group detailed report:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server error'
+    });
+  }
+};
+
+/**
+ * Update submission feedback/status
+ */
+exports.updateSubmissionFeedback = async (req, res) => {
+  try {
+    const { submissionId } = req.params;
+    const { status, feedback } = req.body;
+
+    const submission = await Template.findById(submissionId);
+    
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        message: 'Submission not found'
+      });
+    }
+
+    if (status) submission.status = status;
+    if (feedback !== undefined) submission.supervisorRemarks = feedback;
+
+    await submission.save();
+
+    res.json({
+      success: true,
+      message: 'Feedback updated successfully',
+      data: submission
+    });
+
+  } catch (error) {
+    console.error('Error updating feedback:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server error'
+    });
+  }
+};
 
 

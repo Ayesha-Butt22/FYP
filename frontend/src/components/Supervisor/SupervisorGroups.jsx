@@ -2,74 +2,42 @@ import React, { useState, useEffect } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import { FaUsers, FaArrowRight, FaTimes } from "react-icons/fa";
 import DonutChart from "./DonutChart";
+import supervisorGroupsService from "../Api/supervisorGroupsService.jsx";
+import { toastService } from "../ToastService/ToastService.jsx";
 import "./SupervisorGroups.css";
-
-// ----- Dummy Data -----
-const assignedGroups = [
-  {
-    groupNo: 1,
-    groupId: "G-101",
-    title: "Smart Attendance System",
-    proposalStatus: "Approved",
-    program: "Software Engineering",
-    milestonesTotal: 5,
-    milestonesCompleted: 4,
-    progress: 80,
-    members: [
-      { name: "Ali Raza", sapId: "2021001" },
-      { name: "Sana Tariq", sapId: "2021002" },
-      { name: "Bilal Khan", sapId: "2021003" },
-    ],
-    milestones: [
-      { name: "Proposal", score: 95, level: "Completed", timeSpent: "0:45:00", totalTime: "1:00:00", color: "#2563eb" },
-      { name: "Mid Evaluation", score: 70, level: "In Progress", timeSpent: "0:30:00", totalTime: "1:00:00", color: "#22c55e" },
-      { name: "Final Report", score: 35, level: "Not Started", timeSpent: "0:00:00", totalTime: "1:00:00", color: "#f43f5e" }
-    ]
-  },
-  {
-    groupNo: 2,
-    groupId: "G-102",
-    title: "AI-Based Disease Prediction",
-    proposalStatus: "Pending",
-    program: "Computer Science",
-    milestonesTotal: 5,
-    milestonesCompleted: 3,
-    progress: 60,
-    members: [
-      { name: "Ayesha Butt", sapId: "2021004" },
-      { name: "Madiha Sumbal", sapId: "2021005" },
-      { name: "Saad Farooq", sapId: "2021006" },
-    ],
-    milestones: [
-      { name: "Proposal", score: 80, level: "Completed", timeSpent: "0:40:00", totalTime: "1:00:00", color: "#2563eb" },
-      { name: "Mid Evaluation", score: 45, level: "In Progress", timeSpent: "0:20:00", totalTime: "1:00:00", color: "#22c55e" },
-      { name: "Final Report", score: 0, level: "Not Started", timeSpent: "0:00:00", totalTime: "1:00:00", color: "#f43f5e" }
-    ]
-  },
-  {
-    groupNo: 3,
-    groupId: "G-103",
-    title: "Online Exam Proctoring",
-    proposalStatus: "Rejected",
-    program: "Information Technology",
-    milestonesTotal: 5,
-    milestonesCompleted: 2,
-    progress: 35,
-    members: [
-      { name: "Fatima Noor", sapId: "2021007" },
-      { name: "Usman Ghani", sapId: "2021008" },
-      { name: "Hira Qureshi", sapId: "2021009" },
-    ],
-    milestones: [
-      { name: "Proposal", score: 55, level: "Completed", timeSpent: "0:32:00", totalTime: "1:00:00", color: "#2563eb" },
-      { name: "Mid Evaluation", score: 25, level: "In Progress", timeSpent: "0:11:00", totalTime: "1:00:00", color: "#22c55e" },
-      { name: "Final Report", score: 0, level: "Not Started", timeSpent: "0:00:00", totalTime: "1:00:00", color: "#f43f5e" }
-    ]
-  },
-];
 
 export default function SupervisorGroups() {
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [assignedGroups, setAssignedGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        setLoading(true);
+        const response = await supervisorGroupsService.getSupervisorGroupsWithDetails();
+        
+        if (response.success) {
+          // Transform backend data to include milestone analytics
+          const groupsWithMilestones = response.groups.map(group => ({
+            ...group,
+            milestones: generateMilestones(group)
+          }));
+          setAssignedGroups(groupsWithMilestones);
+        } else {
+          toastService.error('Failed to load groups');
+        }
+      } catch (error) {
+        console.error('Error fetching groups:', error);
+        toastService.error('Failed to load groups');
+        setAssignedGroups([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGroups();
+  }, []);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -81,6 +49,69 @@ export default function SupervisorGroups() {
     return () => window.removeEventListener("keydown", onKey);
   }, [selectedGroup]);
 
+  // Generate milestone data based on group progress
+  const generateMilestones = (group) => {
+    const progress = group.progress || 0;
+    const completed = group.milestonesCompleted || 0;
+    
+    return [
+      {
+        name: "Proposal",
+        score: completed >= 1 ? 95 : progress > 0 ? 50 : 0,
+        level: completed >= 1 ? "Completed" : progress > 0 ? "In Progress" : "Not Started",
+        timeSpent: completed >= 1 ? "0:45:00" : progress > 0 ? "0:20:00" : "0:00:00",
+        totalTime: "1:00:00",
+        color: "#2563eb"
+      },
+      {
+        name: "Mid Evaluation",
+        score: completed >= 3 ? 70 : completed >= 2 ? 45 : 0,
+        level: completed >= 3 ? "Completed" : completed >= 2 ? "In Progress" : "Not Started",
+        timeSpent: completed >= 3 ? "0:50:00" : completed >= 2 ? "0:20:00" : "0:00:00",
+        totalTime: "1:00:00",
+        color: "#22c55e"
+      },
+      {
+        name: "Final Report",
+        score: completed >= 5 ? 85 : completed >= 4 ? 35 : 0,
+        level: completed >= 5 ? "Completed" : completed >= 4 ? "In Progress" : "Not Started",
+        timeSpent: completed >= 5 ? "1:00:00" : completed >= 4 ? "0:15:00" : "0:00:00",
+        totalTime: "1:00:00",
+        color: "#f43f5e"
+      }
+    ];
+  };
+
+  if (loading) {
+    return (
+      <div className="supervisor-page-container">
+        <DashboardSectionHeader
+          description="Here you can view all FYP groups assigned to you. Click 'View Group Details' to see members, milestones, and progress analytics."
+        >
+          My Groups
+        </DashboardSectionHeader>
+        <div style={{ textAlign: 'center', padding: '48px 0', fontSize: '18px', color: '#888' }}>
+          Loading groups...
+        </div>
+      </div>
+    );
+  }
+
+  if (assignedGroups.length === 0) {
+    return (
+      <div className="supervisor-page-container">
+        <DashboardSectionHeader
+          description="Here you can view all FYP groups assigned to you. Click 'View Group Details' to see members, milestones, and progress analytics."
+        >
+          My Groups
+        </DashboardSectionHeader>
+        <div style={{ textAlign: 'center', padding: '48px 0', fontSize: '18px', color: '#888' }}>
+          No groups assigned yet.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="supervisor-page-container">
       <DashboardSectionHeader
@@ -91,7 +122,7 @@ export default function SupervisorGroups() {
 
       <div className="supervisor-group-cards-row">
         {assignedGroups.map(group => (
-          <div className="supervisor-group-card" key={group.groupId}>
+          <div className="supervisor-group-card" key={group._id || group.groupId}>
             <div className="supervisor-group-icon"><FaUsers /></div>
             <div className="supervisor-group-no">Group {group.groupNo}</div>
             <div className="supervisor-group-title" title={group.title}>{group.title}</div>
@@ -139,7 +170,7 @@ export default function SupervisorGroups() {
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <b style={{ fontSize: 18 }}>Progress:</b>
                     <span style={{ color: "#15803d", fontWeight: 800, fontSize: 18 }}>
-                      {Math.round((selectedGroup.milestonesCompleted / selectedGroup.milestonesTotal) * 100)}%
+                      {selectedGroup.progress}%
                     </span>
                   </div>
                   <div className="supervisor-progress-subtext">
@@ -151,7 +182,7 @@ export default function SupervisorGroups() {
                 <div
                   className="supervisor-progress-bar-fill"
                   style={{
-                    width: `${Math.round((selectedGroup.milestonesCompleted / selectedGroup.milestonesTotal) * 100)}%`
+                    width: `${selectedGroup.progress}%`
                   }}
                 />
               </div>
@@ -167,8 +198,8 @@ export default function SupervisorGroups() {
                 </tr>
               </thead>
               <tbody>
-                {selectedGroup.members.map((m, idx) => (
-                  <tr key={idx}>
+                {selectedGroup.members && selectedGroup.members.map((m, idx) => (
+                  <tr key={`${m.email || m.sapId}-${idx}`}>
                     <td>{m.name}</td>
                     <td>{m.sapId}</td>
                   </tr>
