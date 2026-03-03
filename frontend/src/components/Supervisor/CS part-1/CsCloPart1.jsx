@@ -18,13 +18,10 @@ const CsCloPart1 = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    const updatedMarks = {
+    setMarks({
       ...marks,
       [name]: parseFloat(value),
-    };
-
-    setMarks(updatedMarks);
+    });
   };
 
   const total =
@@ -36,6 +33,11 @@ const CsCloPart1 = () => {
     marks.lo6 +
     marks.lo7;
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert("Form Submitted Successfully!");
+  };
+
   return (
     <>
       <button className="open-btn" onClick={openModal}>
@@ -45,11 +47,30 @@ const CsCloPart1 = () => {
       {isOpen && (
         <div className="cs1-modal-overlay">
           <div className="cs1-modal-box">
+
+            {/* HEADER */}
             <div className="cs1-header">
-              <h2 className="h2">FYP Rubric Evaluation Form (CS - Part 1)</h2>
-              <span className="cs1-close" onClick={closeModal}>
-                &times;
-              </span>
+              <h2 className="h2">
+                FYP Rubric Evaluation Form (CS - Part 1)
+              </h2>
+
+              <div className="cs1-header-right">
+                <div className="cs1-total-top">
+                  Total: {total} / 100
+                </div>
+
+                <button
+                  type="button"
+                  className="cs1-submit"
+                  onClick={handleSubmit}
+                >
+                  Submit
+                </button>
+
+                <span className="cs1-close" onClick={closeModal}>
+                  &times;
+                </span>
+              </div>
             </div>
 
             <form>
@@ -159,18 +180,18 @@ const CsCloPart1 = () => {
                 </div>
               </div>
 
-              <div className="cs1-total">
+              {/* <div className="cs1-total">
                 Total Marks: {total} / 100
-              </div>
+              </div> */}
 
-              <div className="cs1-footer">
+              {/* <div className="cs1-footer">
                 <button type="button" className="cs1-cancel" onClick={closeModal}>
                   Close
                 </button>
                 <button type="submit" className="cs1-submit">
                   Submit
                 </button>
-              </div>
+              </div> */}
 
             </form>
           </div>

@@ -25,6 +25,11 @@ const SeCloPart2 = () => {
     setTotal(sum);
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert("Form Submitted Successfully!");
+  };
+
   return (
     <>
       
@@ -37,12 +42,31 @@ const SeCloPart2 = () => {
         <div className="cs1-modal-overlay">
           <div className="cs1-modal-box">
 
+             {/* HEADER */}
             <div className="cs1-header">
-              <h2 className="h2">FYP Rubric Evaluation Form (SE - Part 2)</h2>
-              <span className="cs1-close" onClick={closeModal}>
-                &times;
-              </span>
+              <h2 className="h2">
+                FYP Rubric Evaluation Form (SE - Part 2)
+              </h2>
+
+              <div className="cs1-header-right">
+                <div className="cs1-total-top">
+                  Total: {total} / 100
+                </div>
+
+                <button
+                  type="button"
+                  className="cs1-submit"
+                  onClick={handleSubmit}
+                >
+                  Submit
+                </button>
+
+                <span className="cs1-close" onClick={closeModal}>
+                  &times;
+                </span>
+              </div>
             </div>
+
 
             <form>
 
@@ -238,20 +262,7 @@ const SeCloPart2 = () => {
                 </div>
               </div>
 
-              <div className="cs1-total">
-                Total Marks: {total.toFixed(1)} / 100
-              </div>
-
             </form>
-
-            <div className="cs1-footer">
-              <button type="button" className="cs1-cancel" onClick={closeModal}>
-                Cancel
-              </button>
-              <button type="submit" className="cs1-submit">
-                Submit
-              </button>
-            </div>
           </div>
         </div>
       )}
