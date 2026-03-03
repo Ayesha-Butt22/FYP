@@ -5,7 +5,7 @@ exports.getDeadLine = async (req, res) => {
     const { part } = req.query;
 
     // =========================
-    // FYP – I (Part 1)  (Exact Image Structure)
+    // FYP – I (Part 1)  
     // =========================
     const fyp1 = [
       {
@@ -54,8 +54,8 @@ exports.getDeadLine = async (req, res) => {
         evaluations: "Presentation Submission",
       },
       {
-        week: "Week Immediately After Finals",
-        milestone: "Progress Presentation / Assessment",
+        week: "Week 16 ",
+        milestone: "Immediately After Finals (Progress Presentation / Assessment) ",
         submitTo: "Exam Committee / Supervisor",
         deliverables:
           "Presentation (Use Template-07), Prototype, Project Report (SOFT COPY – First 5 Chapters – Use Template-05)",
@@ -98,8 +98,8 @@ exports.getDeadLine = async (req, res) => {
         evaluations: "Presentation Submission",
       },
       {
-        week: "Week Immediately After Finals",
-        milestone: "Submit Project",
+        week: "Week 16 ",
+        milestone: "Immediately After Finals (Submit Project)",
         submitTo: "Project Coordinator",
         deliverables:
           "Documentation (Hard Binding – 3 Copies), CD (Including Software – Source Code, Appendix in PDF Format)",

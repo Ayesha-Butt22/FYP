@@ -61,7 +61,7 @@ export default function ManageDeadlines() {
           });
         }
 
-        const parsed = filteredData.map((d) => {
+        const parsed = filteredData.map((d, index) => {
           const weekMatch = d.week.match(/\d+/);
           const weekNumber = weekMatch ? parseInt(weekMatch[0]) : 0;
 
@@ -80,13 +80,13 @@ export default function ManageDeadlines() {
             d.deliverables?.toLowerCase() === "nill";
 
           return {
-            ...d,
-            timestamp: startDate.getTime(),
-            dateLabel,
-            weekNumber,
-            yValue: 1,
-            isNil,
-          };
+  ...d,
+  timestamp: startDate.getTime(),
+  dateLabel,
+  weekNumber,
+  yValue: index % 2 === 0 ? 1 : 1.5, // 🔥 spacing fix
+  isNil,
+};
         });
 
         setDeadlines(parsed);
@@ -271,14 +271,22 @@ export default function ManageDeadlines() {
               margin={{ top: 40, right: 80, bottom: 80, left: 70 }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis
-                dataKey="dateLabel"
-                interval={0}
-                angle={-25}
-                textAnchor="end"
-                height={70}
-              />
-              <YAxis dataKey="yValue" domain={[0, 2]} hide />
+             <XAxis
+  type="number"
+  dataKey="timestamp"
+  domain={["dataMin", "dataMax"]}
+  ticks={deadlines.map(d => d.timestamp)}   
+  interval={0}                               
+  allowDuplicatedCategory={false}
+  tickFormatter={(tick) => {
+    const item = deadlines.find(d => d.timestamp === tick);
+    return item ? item.dateLabel : "";
+  }}
+  angle={-25}
+  textAnchor="end"
+  height={90}
+/>
+            <YAxis dataKey="yValue" domain={[0.5, 2]} hide />
               <Tooltip content={<CustomTooltip />} />
               <Line type="linear" dataKey="yValue" stroke="#01337a" dot={false} />
               <Scatter dataKey="yValue" shape={<CustomDot />} />
