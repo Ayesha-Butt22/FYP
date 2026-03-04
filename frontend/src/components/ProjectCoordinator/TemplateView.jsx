@@ -49,13 +49,9 @@ function getSupervisorName(proposals = []) {
 }
 
 function getGroupOverallStatus(templates = []) {
-  if (!templates.length) return "No Uploads";
-  const allApproved = templates.every((t) => t.status === "Approved");
-  if (allApproved) return "Approved";
-  const anyRejected = templates.some((t) => t.status === "Rejected");
-  if (anyRejected) return "Rejected";
-  const anyReview = templates.some((t) => t.status === "Under Review");
-  if (anyReview) return "Under Review";
+  if (!templates.length) return "Pending";
+  const anyApproved = templates.some((t) => t.status === "Approved");
+  if (anyApproved) return "Approved";
   return "Pending";
 }
 
@@ -152,12 +148,11 @@ export default function TemplateView() {
       {!loading && !error && (
         <Paper className="stv-card">
           <AppTable
-            headers={["Group ID", "Group Members", "Supervisor", "Status"]}
+            headers={["Group ID", "Group Members", "Supervisor"]}
             rows={groups.map((g) => ({
               "Group ID":      g.groupId || String(g._id).slice(-6).toUpperCase(),
               "Group Members": getMemberNames(g.members),
               "Supervisor":    getSupervisorName(g.proposals),
-              "Status":        "—",   // will be dynamically loaded on open
               __meta:          g,
             }))}
             renderActions={(row) => (

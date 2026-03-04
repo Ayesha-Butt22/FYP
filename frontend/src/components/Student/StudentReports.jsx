@@ -11,45 +11,37 @@ import "./StudentReports.css";
 import TemplateService from "../Api/TemplateService.jsx";
 import axios from "axios";
 
-
 const API_BASE = "http://localhost:5000";
 
-// Template definitions with week mapping
+// ─── Template definitions ─────────────────────
 const TEMPLATE_DEFINITIONS = [
-  { code: "t01", label: "Template-01: Project Team List", week: 1 },
-  { code: "t02", label: "Template-02: Initial Proposal", week: 2 },
-  { code: "t03", label: "Template-03: Proposal Presentation", week: 4 },
-  { code: "t04", label: "Template-04: Proposal & Plan", week: 6 },
-  { code: "t05", label: "Template-05: Progress Presentation", week: 13 },
-  { code: "t06", label: "Template-06: Complete Project Report", week: 24 },
-  { code: "t07", label: "Template-07: Final Presentation", week: 26 },
+  { code: "t01", label: "Template-01: Project Team List",           week: 1  },
+  { code: "t02", label: "Template-02: Initial Proposal",            week: 2  },
+  { code: "t03", label: "Template-03: Proposal Presentation",       week: 4  },
+  { code: "t04", label: "Template-04: Proposal & Plan",             week: 6  },
+  { code: "t05", label: "Template-05: Progress Presentation",       week: 13 },
+  { code: "t06", label: "Template-06: Complete Project Report",     week: 24 },
+  { code: "t07", label: "Template-07: Final Presentation",          week: 26 },
   { code: "t08", label: "Template-08: Complete Final Presentation", week: 28 },
-  { code: "t09", label: "Template-09: Complete Documentation", week: 30 },
+  { code: "t09", label: "Template-09: Complete Documentation",      week: 30 },
 ];
 
-const STORAGE_KEYS = {
-  evaluations: "student_evaluations_v1",
-  meetings: "student_meetings_v1",
-};
-
-function safeRead(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-
+// ─── Token helper ─────────────────────────────
+const getToken = () => {
+  const direct =
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("accessToken");
+  if (direct) return direct;
+  for (const key of ["user", "auth", "userData", "currentUser"]) {
+    try {
+      const obj = JSON.parse(localStorage.getItem(key) || "{}");
+      const tok = obj?.token || obj?.accessToken || obj?.data?.token || obj?.user?.token;
+      if (tok) return tok;
+    } catch {}
   }
   return "";
 };
-
-const authFetch = (path) =>
-  fetch(`${BASE_URL}${path}`, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-      "Content-Type": "application/json",
-    },
-  });
 
 // ─── Toast helper ─────────────────────────────
 function callToast(message, type = "success") {
@@ -64,7 +56,15 @@ function callToast(message, type = "success") {
   alert(message);
 }
 
+// ─── Format date ──────────────────────────────
+function fmtDate(d) {
+  if (!d) return "—";
+  const dt = new Date(d);
+  if (isNaN(dt)) return String(d);
+  return dt.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+}
 
+// ─── Due date calculator ──────────────────────
 const calculateDueDate = (startDate, week) => {
   if (!startDate) return "—";
   const d = new Date(startDate);
@@ -72,270 +72,7 @@ const calculateDueDate = (startDate, week) => {
   return d.toLocaleDateString();
 };
 
-export default function StudentReports() {
-  // Templates state
-  const [templates, setTemplates] = useState([]);
-  const [loadingTemplates, setLoadingTemplates] = useState(true);
-  const [semesterStart, setSemesterStart] = useState(null);
-  const [studentInfo, setStudentInfo] = useState(null);
-  const [depTemplate, setDepTemplate] = useState([]);
-  const [presentationSchedules, setPresentationSchedules] = useState([]);
-
-  const [evaluations, setEvaluations] = useState([]);
-  const [meetings, setMeetings] = useState([]);
-  const [supervisorFeedbacks, setSupervisorFeedbacks] = useState([]);
-
-  const reportRef = useRef();
-
-  const studentId = localStorage.getItem("studentId");
-  const storedDept = localStorage.getItem("department");
-
-  // Fetch coordinator uploaded templates
-  const loadCoordinatorTemplates = async () => {
-    try {
-      const url = `${API_BASE}/api/templates?department=${storedDept}`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        setDepTemplate(data.data || []);
-      }
-    } catch (err) {
-      console.error("Error loading coordinator templates:", err);
-      setDepTemplate([]);
-    }
-  };
-
-  // Fetch Semester Start Date
-  useEffect(() => {
-    const loadSemesterStart = async () => {
-      try {
-        const res = await axios.get(`${API_BASE}/api/semester-start`);
-        setSemesterStart(res.data?.date || null);
-      } catch (err) {
-        console.error("Error loading semester start:", err);
-      }
-    };
-    loadSemesterStart();
-  }, []);
-
-  // Fetch Student Info and Coordinator Templates
-  useEffect(() => {
-    const loadStudentInfo = async () => {
-      if (!studentId) return;
-      try {
-        const data = await TemplateService.getStudentInfo(studentId);
-        setStudentInfo(data);
-      } catch (err) {
-        console.error("Error loading student info:", err);
-      }
-    };
-    loadStudentInfo();
-    loadCoordinatorTemplates();
-  }, [studentId]);
-
-  // Fetch Presentation Schedules
-  useEffect(() => {
-    const fetchSchedules = async () => {
-      try {
-        const res = await axios.get(`${API_BASE}/api/deadline/presentation`);
-        if (res.data.success) {
-          setPresentationSchedules(res.data.data || []);
-        }
-      } catch (err) {
-        console.error("Error loading presentation schedules:", err);
-      }
-    };
-    fetchSchedules();
-  }, []);
-
-  // Fetch Uploaded Templates
-  useEffect(() => {
-    const fetchTemplates = async () => {
-      if (!studentInfo?.groupId) return;
-
-      try {
-        const files = await TemplateService.getFiles(studentInfo.groupId);
-
-        const normalized = files.map((f) => ({
-          code: f.templateCode,
-          label: f.templateLabel || `Template ${f.templateCode}`,
-          status: f.status || "Pending",
-          uploadedAt: f.uploadedAt,
-          uploadedAtFormatted: new Date(f.uploadedAt).toLocaleDateString(),
-          week: f.week,
-        }));
-
-        setTemplates(normalized);
-      } catch (err) {
-        console.error("❌ Failed to fetch templates:", err);
-        setTemplates([]);
-      } finally {
-        setLoadingTemplates(false);
-      }
-    };
-
-    if (studentInfo?.groupId) {
-      fetchTemplates();
-    }
-  }, [studentInfo]);
-
-  // Fetch Meetings + Supervisor Feedback
-  useEffect(() => {
-    const fetchMeetings = async () => {
-      try {
-        const email = localStorage.getItem("email");
-        if (!email) {
-          setMeetings([]);
-          return;
-        }
-
-        const res = await axios.get(`${API_BASE}/api/meetings/student/${email}`);
-
-        if (res.data.success && Array.isArray(res.data.meetings)) {
-          const formattedMeetings = res.data.meetings.map((m) => ({
-            id: m._id,
-            meetingDate: m.date || "-",
-            meetingTime: m.time || "-",
-            supervisor: m.supervisorEmail
-              ? m.supervisorEmail.split("@")[0]
-              : "Unknown",
-            status:
-              m.status === 2
-                ? "Done"
-                : m.status === 1
-                ? "Booked"
-                : "Available",
-            duration: m.duration || 30,
-          }));
-          setMeetings(formattedMeetings);
-        } else {
-          setMeetings([]);
-        }
-      } catch (err) {
-        console.error("❌ Error fetching meetings:", err);
-        setMeetings([]);
-      }
-    };
-
-    const fetchSupervisorFeedback = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        // Try by studentId first  ✅ correct route: /api/student-templates/feedback/
-        if (studentId) {
-          const res = await axios.get(
-            `${API_BASE}/api/student-templates/feedback/${studentId}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (res.data.success && res.data.feedbacks?.length > 0) {
-            setSupervisorFeedbacks(res.data.feedbacks);
-            return;
-          }
-        }
-
-        // Fallback: try by email
-        const email = localStorage.getItem("email");
-        if (email) {
-          const res = await axios.get(
-            `${API_BASE}/api/student-templates/feedback/by-email/${encodeURIComponent(email)}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (res.data.success) {
-            setSupervisorFeedbacks(res.data.feedbacks || []);
-          }
-        }
-      } catch (err) {
-        console.error("❌ Error fetching supervisor feedback:", err);
-        setSupervisorFeedbacks([]);
-      }
-    };
-
-    fetchMeetings();
-    fetchSupervisorFeedback();
-    setEvaluations(safeRead(STORAGE_KEYS.evaluations) || []);
-  }, []);
-
-  // Get presentation due date based on week
-  const getPresentationDueDate = (week) => {
-    const schedule = presentationSchedules.find((s) => {
-      if (week === 4 && s.week === "Week 4") return true;
-      if (week === 13 && s.week === "13th Week before Final Exams") return true;
-      return false;
-    });
-
-    if (schedule && schedule.slots && schedule.slots.length > 0) {
-      const earliestSlot = schedule.slots.reduce((earliest, slot) => {
-        const slotDate = new Date(slot.startTime);
-        return !earliest || slotDate < earliest ? slotDate : earliest;
-      }, null);
-      return earliestSlot
-        ? earliestSlot.toLocaleDateString()
-        : calculateDueDate(semesterStart, week);
-    }
-
-    return calculateDueDate(semesterStart, week);
-  };
-
-  // Prepare milestone rows
-  const milestoneRows = useMemo(() => {
-    if (!depTemplate || depTemplate.length === 0) return [];
-
-    const depTplCodes = depTemplate.map((d) => d.template);
-    const coordinatorTemplates = TEMPLATE_DEFINITIONS.filter((tpl) =>
-      depTplCodes.includes(tpl.code)
-    );
-
-    return coordinatorTemplates.map((tpl) => {
-      const uploaded = templates.find((t) => t.code === tpl.code);
-
-      let dueDate;
-      if (tpl.code === "t03" || tpl.code === "t05") {
-        dueDate = getPresentationDueDate(tpl.week);
-      } else {
-        dueDate = calculateDueDate(semesterStart, tpl.week);
-      }
-
-      return {
-        id: tpl.code,
-        name: tpl.label,
-        status: uploaded ? uploaded.status : "Pending",
-        dueDate: dueDate,
-      };
-    });
-  }, [depTemplate, templates, semesterStart, presentationSchedules]);
-
-  const summary = useMemo(() => {
-    const completedMilestones = milestoneRows.filter(
-      (m) => m.status?.toLowerCase() === "approved"
-    ).length;
-    const pendingMilestones = milestoneRows.filter(
-      (m) => m.status?.toLowerCase() === "pending"
-    ).length;
-    const underReviewMilestones = milestoneRows.filter(
-      (m) => m.status?.toLowerCase() === "under review"
-    ).length;
-    const rejectedMilestones = milestoneRows.filter(
-      (m) => m.status?.toLowerCase() === "rejected"
-    ).length;
-
-    return {
-      completedMilestones,
-      pendingMilestones,
-      underReviewMilestones,
-      rejectedMilestones,
-      feedbackCount: supervisorFeedbacks.length,
-      totalMeetings: meetings.length,
-    };
-  }, [milestoneRows, supervisorFeedbacks, meetings]);
-// ─── Format date ──────────────────────────────
-function fmtDate(d) {
-  if (!d) return "—";
-  const dt = new Date(d);
-  if (isNaN(dt)) return d;
-  return dt.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
-}
-
-// ─── Skeleton ─────────────────────────────────
+// ─── Skeleton loader ──────────────────────────
 function Skeleton({ height = 18, width = "100%", radius = 6 }) {
   return (
     <div style={{
@@ -347,141 +84,218 @@ function Skeleton({ height = 18, width = "100%", radius = 6 }) {
   );
 }
 
-// ─── Main ─────────────────────────────────────
+// ─── Main Component ───────────────────────────
 export default function StudentReports() {
   const studentEmail = localStorage.getItem("email");
+  const studentId    = localStorage.getItem("studentId");
+  const storedDept   = localStorage.getItem("department");
   const reportRef    = useRef();
 
-  const [loading,     setLoading]     = useState(true);
-  const [group,       setGroup]       = useState(null);
-  const [templates,   setTemplates]   = useState([]);
-  const [meetings,    setMeetings]    = useState([]);
-  const [evaluations, setEvaluations] = useState([]);
-  const [error,       setError]       = useState(null);
+  // ── State ──────────────────────────────────
+  const [loadingTemplates,  setLoadingTemplates]  = useState(true);
+  const [loadingMeetings,   setLoadingMeetings]   = useState(true);
+  const [loadingFeedback,   setLoadingFeedback]   = useState(true);
 
-  // ── Fetch all data ──────────────────────────
+  const [semesterStart,         setSemesterStart]         = useState(null);
+  const [studentInfo,           setStudentInfo]           = useState(null);
+  const [depTemplate,           setDepTemplate]           = useState([]);
+  const [uploadedTemplates,     setUploadedTemplates]     = useState([]);
+  const [presentationSchedules, setPresentationSchedules] = useState([]);
+  const [meetings,              setMeetings]              = useState([]);
+  const [supervisorFeedbacks,   setSupervisorFeedbacks]   = useState([]);
+
+  // ── 1. Semester start ──────────────────────
+  useEffect(() => {
+    axios.get(`${API_BASE}/api/semester-start`)
+      .then((r) => setSemesterStart(r.data?.date || null))
+      .catch((e) => console.error("Semester start:", e));
+  }, []);
+
+  // ── 2. Student info + coordinator templates ─
+  useEffect(() => {
+    if (!studentId) return;
+    TemplateService.getStudentInfo(studentId)
+      .then((d) => setStudentInfo(d))
+      .catch((e) => console.error("Student info:", e));
+
+    if (storedDept) {
+      fetch(`${API_BASE}/api/templates?department=${storedDept}`)
+        .then((r) => r.json())
+        .then((d) => setDepTemplate(d.data || []))
+        .catch((e) => console.error("Coordinator templates:", e));
+    }
+  }, [studentId, storedDept]);
+
+  // ── 3. Presentation schedules ──────────────
+  useEffect(() => {
+    axios.get(`${API_BASE}/api/deadline/presentation`)
+      .then((r) => { if (r.data.success) setPresentationSchedules(r.data.data || []); })
+      .catch((e) => console.error("Schedules:", e));
+  }, []);
+
+  // ── 4. Uploaded templates ──────────────────
+  useEffect(() => {
+    if (!studentInfo?.groupId) return;
+    setLoadingTemplates(true);
+    TemplateService.getFiles(studentInfo.groupId)
+      .then((files) => {
+        setUploadedTemplates(files.map((f) => ({
+          code:              f.templateCode,
+          label:             f.templateLabel || `Template ${f.templateCode}`,
+          status:            f.status || "Pending",
+          uploadedAt:        f.uploadedAt,
+          week:              f.week,
+          supervisorRemarks: f.supervisorRemarks || "",
+        })));
+      })
+      .catch((e) => { console.error("Uploaded templates:", e); setUploadedTemplates([]); })
+      .finally(() => setLoadingTemplates(false));
+  }, [studentInfo]);
+
+  // ── 5. Meetings ────────────────────────────
   useEffect(() => {
     if (!studentEmail) return;
-
-    const load = async () => {
-      try {
-        setLoading(true);
-
-        // 1. Group
-        const gRes  = await authFetch(`/groups/by-email/${studentEmail}`);
-        const gData = await gRes.json();
-        const grp   = gRes.ok ? gData : null;
-        setGroup(grp);
-
-        // 2. Templates (needs groupId)
-        if (grp?._id) {
-          try {
-            const tRes  = await authFetch(`/student-templates/group/${grp._id}`);
-            const tData = await tRes.json();
-            if (tData.success) setTemplates(tData.data || []);
-          } catch (e) { console.error("Templates fetch:", e); }
+    setLoadingMeetings(true);
+    axios.get(`${API_BASE}/api/meetings/student/${studentEmail}`)
+      .then((r) => {
+        if (r.data.success && Array.isArray(r.data.meetings)) {
+          setMeetings(r.data.meetings.map((m) => ({
+            id:          m._id,
+            meetingDate: m.date || "—",
+            meetingTime: m.time || "—",
+            supervisor:  m.supervisorEmail ? m.supervisorEmail.split("@")[0] : "Unknown",
+            status:      m.status === 2 ? "Done" : m.status === 1 ? "Booked" : "Available",
+          })));
+        } else {
+          setMeetings([]);
         }
-
-        // 3. Meetings
-        try {
-          const mRes  = await fetch(`${BASE_URL}/meetings/student/${studentEmail}`);
-          const mData = await mRes.json();
-          if (mData.success) setMeetings(mData.meetings || []);
-        } catch (e) { console.error("Meetings fetch:", e); }
-
-        // 4. Committee Evaluations (feedback)
-        try {
-          const eRes  = await fetch(`${BASE_URL}/committee-evaluation/student/${studentEmail}`);
-          const eData = await eRes.json();
-          if (eData.success) setEvaluations(eData.data || []);
-        } catch (e) { console.error("Evaluations fetch:", e); }
-
-      } catch (err) {
-        console.error("StudentReports load error:", err);
-        setError("Data load karne mein masla hua.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-
-    load();
+      })
+      .catch((e) => { console.error("Meetings:", e); setMeetings([]); })
+      .finally(() => setLoadingMeetings(false));
   }, [studentEmail]);
 
-  // ── Summary ─────────────────────────────────
-  const summary = useMemo(() => {
-    const totalTemplates     = templates.length;
-    const approvedTemplates  = templates.filter((t) => t.status === "Approved").length;
-    const pendingTemplates   = templates.filter((t) => t.status === "Under Review" || t.status === "Pending").length;
-    const rejectedTemplates  = templates.filter((t) => t.status === "Rejected").length;
-
-    const totalMeetings    = meetings.length;
-    const doneMeetings     = meetings.filter((m) => m.status === 2).length;
-    const upcomingMeetings = meetings.filter((m) => m.status === 1).length;
-
-    // feedback from evaluations
-    const feedbackCount = evaluations.reduce((sum, ev) => {
-      return sum + (ev.evaluations || []).reduce((s, e) => s + (e.comments ? 1 : 0), 0);
-    }, 0);
-
-    const totalEvals = evaluations.length;
-
-    return {
-      totalTemplates, approvedTemplates, pendingTemplates, rejectedTemplates,
-      totalMeetings, doneMeetings, upcomingMeetings,
-      feedbackCount, totalEvals,
+  // ── 6. Supervisor feedback ─────────────────
+  useEffect(() => {
+    const token = getToken();
+    setLoadingFeedback(true);
+    const tryFetch = async () => {
+      try {
+        if (studentId) {
+          const r = await axios.get(
+            `${API_BASE}/api/student-templates/feedback/${studentId}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (r.data.success && r.data.feedbacks?.length > 0) {
+            setSupervisorFeedbacks(r.data.feedbacks);
+            return;
+          }
+        }
+        if (studentEmail) {
+          const r = await axios.get(
+            `${API_BASE}/api/student-templates/feedback/by-email/${encodeURIComponent(studentEmail)}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (r.data.success) setSupervisorFeedbacks(r.data.feedbacks || []);
+        }
+      } catch (e) {
+        console.error("Supervisor feedback:", e);
+        setSupervisorFeedbacks([]);
+      } finally {
+        setLoadingFeedback(false);
+      }
     };
-  }, [templates, meetings, evaluations]);
+    tryFetch();
+  }, [studentId, studentEmail]);
 
-  // ── Table data ───────────────────────────────
-
-  // Templates table
-  const templatesTable = {
-    headers: ["Template", "Status", "Uploaded On", "Remarks"],
-    rows: templates.map((t) => ({
-      Template:    t.templateLabel || t.templateCode?.toUpperCase() || "—",
-      Status:      t.status || "—",
-      "Uploaded On": fmtDate(t.uploadedAt),
-      Remarks:     t.supervisorRemarks || "—",
-      __meta: t,
-    })),
+  // ── Presentation due date helper ───────────
+  const getPresentationDueDate = (week) => {
+    const schedule = presentationSchedules.find((s) => {
+      if (week === 4  && s.week === "Week 4") return true;
+      if (week === 13 && s.week === "13th Week before Final Exams") return true;
+      return false;
+    });
+    if (schedule?.slots?.length > 0) {
+      const earliest = schedule.slots.reduce((min, slot) => {
+        const d = new Date(slot.startTime);
+        return !min || d < min ? d : min;
+      }, null);
+      return earliest ? earliest.toLocaleDateString() : calculateDueDate(semesterStart, week);
+    }
+    return calculateDueDate(semesterStart, week);
   };
 
-  // Meetings table
-  const meetingsTable = {
-    headers: ["Date", "Time", "Supervisor", "Status"],
-    rows: meetings.map((m) => ({
-      Date:       fmtDate(m.date),
-      Time:       m.time || "—",
-      Supervisor: m.supervisorEmail || "—",
-      Status:     m.status === 2 ? "Done" : m.status === 1 ? "Booked" : "Available",
+  // ── Milestone rows ─────────────────────────
+  const milestoneRows = useMemo(() => {
+    if (!depTemplate.length) return [];
+    const depCodes = depTemplate.map((d) => d.template);
+    return TEMPLATE_DEFINITIONS
+      .filter((tpl) => depCodes.includes(tpl.code))
+      .map((tpl) => {
+        const uploaded = uploadedTemplates.find((t) => t.code === tpl.code);
+        const dueDate  = (tpl.code === "t03" || tpl.code === "t05")
+          ? getPresentationDueDate(tpl.week)
+          : calculateDueDate(semesterStart, tpl.week);
+        return {
+          code:    tpl.code,
+          name:    tpl.label,
+          status:  uploaded?.status || "Pending",
+          dueDate,
+          remarks: uploaded?.supervisorRemarks || "—",
+        };
+      });
+  }, [depTemplate, uploadedTemplates, semesterStart, presentationSchedules]);
+
+  // ── Summary ────────────────────────────────
+  const summary = useMemo(() => ({
+    approved:         milestoneRows.filter((m) => m.status?.toLowerCase() === "approved").length,
+    underReview:      milestoneRows.filter((m) => m.status?.toLowerCase() === "under review").length,
+    pending:          milestoneRows.filter((m) => m.status?.toLowerCase() === "pending").length,
+    doneMeetings:     meetings.filter((m) => m.status === "Done").length,
+    upcomingMeetings: meetings.filter((m) => m.status === "Booked").length,
+    totalMeetings:    meetings.length,
+    feedbackCount:    supervisorFeedbacks.length,
+  }), [milestoneRows, meetings, supervisorFeedbacks]);
+
+  // ── Table definitions ──────────────────────
+  const milestonesTable = {
+    headers: ["Template Name", "Due Date", "Status", "Remarks"],
+    rows: milestoneRows.map((m) => ({
+      "Template Name": m.name    || "—",
+      "Due Date":      m.dueDate || "—",
+      "Status":        m.status  || "—",
+      "Remarks":       m.remarks || "—",
       __meta: m,
     })),
   };
 
-  // Feedback / Evaluations table
-  const feedbackRows = evaluations.flatMap((ev) =>
-    (ev.evaluations || []).map((e) => ({
-      Week:         ev.scheduleId?.week || "—",
-      "FYP Part":   ev.scheduleId?.fypPart || "—",
-      "Evaluated By": e.evaluatedBy?.name || e.evaluatedBy?.email || "—",
-      Comments:     e.comments || "—",
-      "Submitted On": fmtDate(e.submittedAt),
-      __meta: { evaluation: ev, entry: e },
-    }))
-  );
-
-  const feedbackTable = {
-    headers: ["Week", "FYP Part", "Evaluated By", "Comments", "Submitted On"],
-    rows: feedbackRows,
+  const meetingsTable = {
+    headers: ["Meeting Date", "Time", "Supervisor", "Status"],
+    rows: meetings.map((m) => ({
+      "Meeting Date": m.meetingDate || "—",
+      "Time":         m.meetingTime || "—",
+      "Supervisor":   m.supervisor  || "—",
+      "Status":       m.status      || "—",
+      __meta: m,
+    })),
   };
 
-  // ── Export PDF ───────────────────────────────
+  const feedbackTable = {
+    headers: ["Project", "Milestone", "Feedback", "Evaluated On"],
+    rows: supervisorFeedbacks.map((fb) => ({
+      "Project":      fb.project    || "—",
+      "Milestone":    fb.milestone  || "—",
+      "Feedback":     fb.feedback   || "—",
+      "Evaluated On": fb.evaluatedOn ? fmtDate(fb.evaluatedOn) : "—",
+      __meta: fb,
+    })),
+  };
+
+  // ── Export PDF ─────────────────────────────
   async function exportPDF() {
     try {
       const [{ default: jsPDF }, html2canvas] = await Promise.all([
-        import("jspdf").then((m) => (m.default ? m.default : m)),
-        import("html2canvas").then((m) => (m.default ? m.default : m)),
+        import("jspdf").then((m) => m.default || m),
+        import("html2canvas").then((m) => m.default || m),
       ]);
       const node = reportRef.current;
       if (!node) { callToast("Nothing to export", "error"); return; }
@@ -496,69 +310,41 @@ export default function StudentReports() {
       callToast("PDF exported", "success");
     } catch (err) {
       console.error(err);
-      callToast(
-        "PDF export failed. Ensure jspdf and html2canvas are installed.",
-        "error"
-      );
+      callToast("PDF export failed. Ensure jspdf and html2canvas are installed.", "error");
     }
   }
 
-  // ── Export Excel ─────────────────────────────
+  // ── Export Excel ───────────────────────────
   async function exportExcel() {
     try {
       const XLSX = await import("xlsx");
       const wb   = XLSX.utils.book_new();
 
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+        ["Template Name", "Due Date", "Status", "Remarks"],
+        ...milestoneRows.map((m) => [m.name, m.dueDate, m.status, m.remarks]),
+      ]), "Templates");
 
-      const milestonesData = [
-        ["Template Name", "Due Date", "Status"],
-        ...milestoneRows.map((m) => [m.name || "", m.dueDate || "", m.status || ""]),
-      ];
-      XLSX.utils.book_append_sheet(
-        wb,
-        XLSX.utils.aoa_to_sheet(milestonesData),
-        "Templates"
-      );
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+        ["Meeting Date", "Time", "Supervisor", "Status"],
+        ...meetings.map((m) => [m.meetingDate, m.meetingTime, m.supervisor, m.status]),
+      ]), "Meetings");
 
-      const feedbackData = [
-        ["Project", "Milestone", "Feedback", "Evaluated On", "Status"],
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+        ["Project", "Milestone", "Feedback", "Evaluated On"],
         ...supervisorFeedbacks.map((fb) => [
-          fb.project || "",
-          fb.milestone || "",
-          fb.feedback || "",
-          fb.evaluatedOn ? new Date(fb.evaluatedOn).toLocaleDateString() : "",
-          fb.status || "",
+          fb.project, fb.milestone, fb.feedback,
+          fb.evaluatedOn ? fmtDate(fb.evaluatedOn) : "—",
         ]),
-      ];
-      XLSX.utils.book_append_sheet(
-        wb,
-        XLSX.utils.aoa_to_sheet(feedbackData),
-        "Feedback"
-      );
-
-      const meetingsData = [
-        ["ID", "Meeting Date", "Time", "Supervisor"],
-        ...meetings.map((m) => [
-          m.id || "",
-          m.meetingDate || "",
-          m.meetingTime || "",
-          m.supervisor || "",
-        ]),
-      ];
-      XLSX.utils.book_append_sheet(
-        wb,
-        XLSX.utils.aoa_to_sheet(meetingsData),
-        "Meetings"
-      );
-
-
+      ]), "Feedback");
 
       const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
       const blob  = new Blob([wbout], { type: "application/octet-stream" });
       const url   = URL.createObjectURL(blob);
-      const a     = document.createElement("a");
-      a.href      = url;
-      a.download  = `FYP-Report-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      const a     = Object.assign(document.createElement("a"), {
+        href: url,
+        download: `FYP-Report-${new Date().toISOString().slice(0, 10)}.xlsx`,
+      });
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -566,59 +352,26 @@ export default function StudentReports() {
       callToast("Excel exported", "success");
     } catch (err) {
       console.error(err);
-      callToast(
-        "Excel export failed. Ensure xlsx (SheetJS) is installed.",
-        "error"
-      );
+      callToast("Excel export failed. Ensure xlsx (SheetJS) is installed.", "error");
     }
   }
 
-
-  const milestonesTable = {
-    headers: ["Template Name", "Due Date", "Status"],
-    rows: milestoneRows.map((m) => ({
-      "Template Name": m.name || "-",
-      "Due Date": m.dueDate || "-",
-      Status: m.status || "-",
-      __meta: m,
-    })),
-  };
-
-  const meetingsTable = {
-    headers: ["Meeting Date", "Time", "Supervisor"],
-    rows: meetings.map((m) => ({
-      "Meeting Date": m.meetingDate || "-",
-      Time: m.meetingTime || "-",
-      Supervisor: m.supervisor || "-",
-      __meta: m,
-    })),
-  };
-
-  // ✅ Supervisor feedback from backend (supervisorRemarks field)
-  const feedbackTable = {
-    headers: ["Project", "Milestone", "Feedback", "Evaluated On"],
-    rows: supervisorFeedbacks.map((fb) => ({
-      Project: fb.project || "-",
-      Milestone: fb.milestone || "-",
-      Feedback: fb.feedback || "-",
-      "Evaluated On": fb.evaluatedOn
-        ? new Date(fb.evaluatedOn).toLocaleDateString()
-        : "-",
-      __meta: fb,
-    })),
-  };
-
+  // ── Render ─────────────────────────────────
   return (
     <Box>
-      <DashboardSectionHeader description="Generate and export your personal FYP reports (PDF / Excel). View templates, tasks, meetings and feedback in one place.">
+      <style>{`
+        @keyframes shimmer {
+          0%   { background-position: -200% 0; }
+          100% { background-position:  200% 0; }
+        }
+      `}</style>
+
+      <DashboardSectionHeader description="Generate and export your personal FYP reports (PDF / Excel). View templates, meetings and feedback in one place.">
         Reports
       </DashboardSectionHeader>
 
-      <Box
-        className="reports-controls"
-        sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mb: 2 }}
-      >
-
+      {/* ── Export Buttons ── */}
+      <Box className="reports-controls" sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mb: 2 }}>
         <Tooltip title="Export Excel (SheetJS)">
           <span>
             <Button className="export-btn export-excel-btn" variant="outlined" startIcon={<DescriptionIcon />} onClick={exportExcel}>
@@ -635,88 +388,86 @@ export default function StudentReports() {
         </Tooltip>
       </Box>
 
-      {/* Error */}
-      {error && (
-        <Box sx={{ background: "#fff1f2", border: "1px solid #fca5a5", borderRadius: 2, p: 1.5, mb: 2, color: "#b91c1c", fontSize: 13 }}>
-          ⚠️ {error}
-        </Box>
-      )}
-
       <div ref={reportRef} className="report-content">
 
         {/* ── Summary ── */}
         <Paper className="report-summary" elevation={1}>
-
-          <label variant="label" sx={{ fontWeight: 800, color: "#01337a" }}>
+          <label style={{ fontWeight: 800, color: "#01337a", fontSize: 15 }}>
             Personal Progress Summary
           </label>
           <Divider sx={{ my: 1 }} />
-          <Box sx={{ display: "flex", gap: "200px", flexWrap: "wrap" }}>
-            <Box className="report-card">
-              <label>Templates</label>
-              <Typography className="report-card-value">
-                {summary.completedMilestones} approved •{" "}
-                {summary.underReviewMilestones} under review •{" "}
-                {summary.pendingMilestones} pending
-              </Typography>
+          {loadingTemplates ? (
+            <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+              {[1,2,3].map((i) => (
+                <Box key={i} sx={{ width: 180 }}>
+                  <Skeleton height={14} />
+                  <Skeleton height={20} />
+                </Box>
+              ))}
             </Box>
-            <Box className="report-card">
-              <label>Feedback</label>
-              <Typography className="report-card-value">
-                {summary.feedbackCount} comments
-              </Typography>
+          ) : (
+            <Box sx={{ display: "flex", gap: "48px", flexWrap: "wrap" }}>
+              <Box className="report-card">
+                <label>Templates</label>
+                <Typography className="report-card-value">
+                  {summary.approved} approved &bull; {summary.underReview} under review &bull; {summary.pending} pending
+                </Typography>
+              </Box>
+              <Box className="report-card">
+                <label>Meetings</label>
+                <Typography className="report-card-value">
+                  {summary.doneMeetings} done &bull; {summary.upcomingMeetings} upcoming &bull; {summary.totalMeetings} total
+                </Typography>
+              </Box>
+              <Box className="report-card">
+                <label>Supervisor Feedback</label>
+                <Typography className="report-card-value">
+                  {summary.feedbackCount} comment{summary.feedbackCount !== 1 ? "s" : ""}
+                </Typography>
+              </Box>
             </Box>
-            <Box className="report-card">
-              <label>Meetings</label>
-              <Typography className="report-card-value">
-                {summary.totalMeetings} booked
-              </Typography>
-            </Box>
-          </Box>
-
+          )}
         </Paper>
 
         {/* ── Templates Table ── */}
         <Paper className="report-table-wrap" elevation={0}>
-
-          <label>Templates &amp; Milestones</label>
+          <label style={{ fontWeight: 700, color: "#01337a" }}>Templates &amp; Milestones</label>
           {loadingTemplates ? (
-            <Typography>Loading templates...</Typography>
+            [1,2,3].map((i) => <Skeleton key={i} height={32} radius={4} />)
+          ) : milestoneRows.length === 0 ? (
+            <Typography sx={{ color: "#94a3b8", fontSize: 13, mt: 1 }}>
+              Koi template nahi mila.
+            </Typography>
           ) : (
-            <AppTable
-              headers={milestonesTable.headers}
-              rows={milestonesTable.rows}
-            />
-
+            <AppTable headers={milestonesTable.headers} rows={milestonesTable.rows} />
           )}
         </Paper>
 
         {/* ── Meetings Table ── */}
         <Paper className="report-table-wrap" elevation={0}>
-
-          <label>Meetings</label>
-          <AppTable
-            headers={meetingsTable.headers}
-            rows={meetingsTable.rows}
-          />
-
-        </Paper>
-
-        {/* ── Feedback / Evaluations Table ── */}
-        <Paper className="report-table-wrap" elevation={0}>
-
-          <label>Feedback / Evaluations</label>
-          {supervisorFeedbacks.length === 0 ? (
-            <Typography sx={{ color: "#888", mt: 1, fontSize: 14 }}>
-              No feedback received from supervisor yet.
+          <label style={{ fontWeight: 700, color: "#01337a" }}>Meetings</label>
+          {loadingMeetings ? (
+            [1,2].map((i) => <Skeleton key={i} height={32} radius={4} />)
+          ) : meetings.length === 0 ? (
+            <Typography sx={{ color: "#94a3b8", fontSize: 13, mt: 1 }}>
+              Koi meeting book nahi hui abhi.
             </Typography>
           ) : (
-            <AppTable
-              headers={feedbackTable.headers}
-              rows={feedbackTable.rows}
-            />
+            <AppTable headers={meetingsTable.headers} rows={meetingsTable.rows} />
+          )}
+        </Paper>
 
-          
+        {/* ── Supervisor Feedback Table ── */}
+        <Paper className="report-table-wrap" elevation={0}>
+          <label style={{ fontWeight: 700, color: "#01337a" }}>Supervisor Feedback</label>
+          {loadingFeedback ? (
+            [1,2].map((i) => <Skeleton key={i} height={32} radius={4} />)
+          ) : supervisorFeedbacks.length === 0 ? (
+            <Typography sx={{ color: "#94a3b8", fontSize: 13, mt: 1 }}>
+              Abhi koi supervisor feedback nahi aya.
+            </Typography>
+          ) : (
+            <AppTable headers={feedbackTable.headers} rows={feedbackTable.rows} />
           )}
         </Paper>
 
