@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const studentTemplateController = require("../controllers/studentTemplateController");
+const { protect, isCoordinator } = require("../middlewares/authMiddleware");
 
 // ---------------- SETUP MULTER ----------------
 const storage = multer.diskStorage({
@@ -19,7 +20,7 @@ const upload = multer({ storage });
 
 // ---------------- ROUTES ----------------
 
-// Upload a template
+// Upload a template (student uploads — no coordinator check needed)
 router.post("/upload", upload.single("file"), studentTemplateController.uploadTemplate);
 
 // Get student info by studentId
@@ -34,5 +35,7 @@ router.get("/feedback/:studentId", studentTemplateController.getStudentFeedback)
 
 // Get feedback by email (alternative)
 router.get("/feedback/by-email/:email", studentTemplateController.getStudentFeedbackByEmail);
+
+
 
 module.exports = router;

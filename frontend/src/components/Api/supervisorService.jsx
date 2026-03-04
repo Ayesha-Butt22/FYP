@@ -5,7 +5,7 @@ const supervisorService = {
   getSupervisorGroups: async () => {
     const res = await fetch(`${API_BASE_URL}/supervisor/groups`, {
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}` // ya session cookie
+        "Authorization": `Bearer ${localStorage.getItem("token")}` 
       }
     });
     if (!res.ok) throw new Error("Failed to fetch groups");

@@ -1,11 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Box,
-  Button,
-  Typography,
-  Paper,
-  Divider,
-  Tooltip,
+  Box, Button, Typography, Paper, Divider, Tooltip,
 } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -15,6 +10,7 @@ import AppTable from "../Admin/AppTable.jsx";
 import "./StudentReports.css";
 import TemplateService from "../Api/TemplateService.jsx";
 import axios from "axios";
+
 
 const API_BASE = "http://localhost:5000";
 
@@ -42,34 +38,32 @@ function safeRead(key) {
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
-  }
-}
 
+  }
+  return "";
+};
+
+const authFetch = (path) =>
+  fetch(`${BASE_URL}${path}`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+// ─── Toast helper ─────────────────────────────
 function callToast(message, type = "success") {
   try {
     if (toastService) {
-      if (type === "success" && typeof toastService.success === "function") {
-        toastService.success(message);
-        return;
-      }
-      if (type === "error" && typeof toastService.error === "function") {
-        toastService.error(message);
-        return;
-      }
-      if (typeof toastService.show === "function") {
-        toastService.show(message, { type });
-        return;
-      }
-      if (typeof toastService === "function") {
-        toastService(message);
-        return;
-      }
+      if (type === "success" && typeof toastService.success === "function") { toastService.success(message); return; }
+      if (type === "error"   && typeof toastService.error   === "function") { toastService.error(message);   return; }
+      if (typeof toastService.show === "function") { toastService.show(message, { type }); return; }
+      if (typeof toastService === "function") { toastService(message); return; }
     }
-  } catch (e) {
-    console.warn("toastService call failed", e);
-  }
+  } catch (e) { console.warn("toastService call failed", e); }
   alert(message);
 }
+
 
 const calculateDueDate = (startDate, week) => {
   if (!startDate) return "—";
@@ -333,32 +327,171 @@ export default function StudentReports() {
       totalMeetings: meetings.length,
     };
   }, [milestoneRows, supervisorFeedbacks, meetings]);
+// ─── Format date ──────────────────────────────
+function fmtDate(d) {
+  if (!d) return "—";
+  const dt = new Date(d);
+  if (isNaN(dt)) return d;
+  return dt.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+}
 
+// ─── Skeleton ─────────────────────────────────
+function Skeleton({ height = 18, width = "100%", radius = 6 }) {
+  return (
+    <div style={{
+      height, width, borderRadius: radius, marginBottom: 8,
+      background: "linear-gradient(90deg,#e0e7ef 25%,#f0f4fa 50%,#e0e7ef 75%)",
+      backgroundSize: "200% 100%",
+      animation: "shimmer 1.4s infinite",
+    }} />
+  );
+}
+
+// ─── Main ─────────────────────────────────────
+export default function StudentReports() {
+  const studentEmail = localStorage.getItem("email");
+  const reportRef    = useRef();
+
+  const [loading,     setLoading]     = useState(true);
+  const [group,       setGroup]       = useState(null);
+  const [templates,   setTemplates]   = useState([]);
+  const [meetings,    setMeetings]    = useState([]);
+  const [evaluations, setEvaluations] = useState([]);
+  const [error,       setError]       = useState(null);
+
+  // ── Fetch all data ──────────────────────────
+  useEffect(() => {
+    if (!studentEmail) return;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+
+        // 1. Group
+        const gRes  = await authFetch(`/groups/by-email/${studentEmail}`);
+        const gData = await gRes.json();
+        const grp   = gRes.ok ? gData : null;
+        setGroup(grp);
+
+        // 2. Templates (needs groupId)
+        if (grp?._id) {
+          try {
+            const tRes  = await authFetch(`/student-templates/group/${grp._id}`);
+            const tData = await tRes.json();
+            if (tData.success) setTemplates(tData.data || []);
+          } catch (e) { console.error("Templates fetch:", e); }
+        }
+
+        // 3. Meetings
+        try {
+          const mRes  = await fetch(`${BASE_URL}/meetings/student/${studentEmail}`);
+          const mData = await mRes.json();
+          if (mData.success) setMeetings(mData.meetings || []);
+        } catch (e) { console.error("Meetings fetch:", e); }
+
+        // 4. Committee Evaluations (feedback)
+        try {
+          const eRes  = await fetch(`${BASE_URL}/committee-evaluation/student/${studentEmail}`);
+          const eData = await eRes.json();
+          if (eData.success) setEvaluations(eData.data || []);
+        } catch (e) { console.error("Evaluations fetch:", e); }
+
+      } catch (err) {
+        console.error("StudentReports load error:", err);
+        setError("Data load karne mein masla hua.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+
+    load();
+  }, [studentEmail]);
+
+  // ── Summary ─────────────────────────────────
+  const summary = useMemo(() => {
+    const totalTemplates     = templates.length;
+    const approvedTemplates  = templates.filter((t) => t.status === "Approved").length;
+    const pendingTemplates   = templates.filter((t) => t.status === "Under Review" || t.status === "Pending").length;
+    const rejectedTemplates  = templates.filter((t) => t.status === "Rejected").length;
+
+    const totalMeetings    = meetings.length;
+    const doneMeetings     = meetings.filter((m) => m.status === 2).length;
+    const upcomingMeetings = meetings.filter((m) => m.status === 1).length;
+
+    // feedback from evaluations
+    const feedbackCount = evaluations.reduce((sum, ev) => {
+      return sum + (ev.evaluations || []).reduce((s, e) => s + (e.comments ? 1 : 0), 0);
+    }, 0);
+
+    const totalEvals = evaluations.length;
+
+    return {
+      totalTemplates, approvedTemplates, pendingTemplates, rejectedTemplates,
+      totalMeetings, doneMeetings, upcomingMeetings,
+      feedbackCount, totalEvals,
+    };
+  }, [templates, meetings, evaluations]);
+
+  // ── Table data ───────────────────────────────
+
+  // Templates table
+  const templatesTable = {
+    headers: ["Template", "Status", "Uploaded On", "Remarks"],
+    rows: templates.map((t) => ({
+      Template:    t.templateLabel || t.templateCode?.toUpperCase() || "—",
+      Status:      t.status || "—",
+      "Uploaded On": fmtDate(t.uploadedAt),
+      Remarks:     t.supervisorRemarks || "—",
+      __meta: t,
+    })),
+  };
+
+  // Meetings table
+  const meetingsTable = {
+    headers: ["Date", "Time", "Supervisor", "Status"],
+    rows: meetings.map((m) => ({
+      Date:       fmtDate(m.date),
+      Time:       m.time || "—",
+      Supervisor: m.supervisorEmail || "—",
+      Status:     m.status === 2 ? "Done" : m.status === 1 ? "Booked" : "Available",
+      __meta: m,
+    })),
+  };
+
+  // Feedback / Evaluations table
+  const feedbackRows = evaluations.flatMap((ev) =>
+    (ev.evaluations || []).map((e) => ({
+      Week:         ev.scheduleId?.week || "—",
+      "FYP Part":   ev.scheduleId?.fypPart || "—",
+      "Evaluated By": e.evaluatedBy?.name || e.evaluatedBy?.email || "—",
+      Comments:     e.comments || "—",
+      "Submitted On": fmtDate(e.submittedAt),
+      __meta: { evaluation: ev, entry: e },
+    }))
+  );
+
+  const feedbackTable = {
+    headers: ["Week", "FYP Part", "Evaluated By", "Comments", "Submitted On"],
+    rows: feedbackRows,
+  };
+
+  // ── Export PDF ───────────────────────────────
   async function exportPDF() {
     try {
       const [{ default: jsPDF }, html2canvas] = await Promise.all([
         import("jspdf").then((m) => (m.default ? m.default : m)),
         import("html2canvas").then((m) => (m.default ? m.default : m)),
       ]);
-
       const node = reportRef.current;
-      if (!node) {
-        callToast("Nothing to export", "error");
-        return;
-      }
-
-      const canvas = await html2canvas(node, { scale: 2 });
+      if (!node) { callToast("Nothing to export", "error"); return; }
+      const canvas  = await html2canvas(node, { scale: 2 });
       const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "pt",
-        format: "a4",
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const imgWidth = pageWidth - 40;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 20, 20, imgWidth, imgHeight);
+      const pdf     = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const pw      = pdf.internal.pageSize.getWidth();
+      const iw      = pw - 40;
+      const ih      = (canvas.height * iw) / canvas.width;
+      pdf.addImage(imgData, "PNG", 20, 20, iw, ih);
       pdf.save(`FYP-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
       callToast("PDF exported", "success");
     } catch (err) {
@@ -370,10 +503,12 @@ export default function StudentReports() {
     }
   }
 
+  // ── Export Excel ─────────────────────────────
   async function exportExcel() {
     try {
       const XLSX = await import("xlsx");
-      const wb = XLSX.utils.book_new();
+      const wb   = XLSX.utils.book_new();
+
 
       const milestonesData = [
         ["Template Name", "Due Date", "Status"],
@@ -416,12 +551,14 @@ export default function StudentReports() {
         "Meetings"
       );
 
+
+
       const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      const blob = new Blob([wbout], { type: "application/octet-stream" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `FYP-Report-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      const blob  = new Blob([wbout], { type: "application/octet-stream" });
+      const url   = URL.createObjectURL(blob);
+      const a     = document.createElement("a");
+      a.href      = url;
+      a.download  = `FYP-Report-${new Date().toISOString().slice(0, 10)}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -435,6 +572,7 @@ export default function StudentReports() {
       );
     }
   }
+
 
   const milestonesTable = {
     headers: ["Template Name", "Due Date", "Status"],
@@ -480,35 +618,35 @@ export default function StudentReports() {
         className="reports-controls"
         sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mb: 2 }}
       >
+
         <Tooltip title="Export Excel (SheetJS)">
           <span>
-            <Button
-              className="export-btn export-excel-btn"
-              variant="outlined"
-              startIcon={<DescriptionIcon />}
-              onClick={exportExcel}
-            >
+            <Button className="export-btn export-excel-btn" variant="outlined" startIcon={<DescriptionIcon />} onClick={exportExcel}>
               Export Excel
             </Button>
           </span>
         </Tooltip>
-
         <Tooltip title="Export PDF (jsPDF + html2canvas)">
           <span>
-            <Button
-              className="export-btn export-pdf-btn"
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              onClick={exportPDF}
-            >
+            <Button className="export-btn export-pdf-btn" variant="contained" startIcon={<DownloadIcon />} onClick={exportPDF}>
               Export PDF
             </Button>
           </span>
         </Tooltip>
       </Box>
 
+      {/* Error */}
+      {error && (
+        <Box sx={{ background: "#fff1f2", border: "1px solid #fca5a5", borderRadius: 2, p: 1.5, mb: 2, color: "#b91c1c", fontSize: 13 }}>
+          ⚠️ {error}
+        </Box>
+      )}
+
       <div ref={reportRef} className="report-content">
+
+        {/* ── Summary ── */}
         <Paper className="report-summary" elevation={1}>
+
           <label variant="label" sx={{ fontWeight: 800, color: "#01337a" }}>
             Personal Progress Summary
           </label>
@@ -535,9 +673,12 @@ export default function StudentReports() {
               </Typography>
             </Box>
           </Box>
+
         </Paper>
 
+        {/* ── Templates Table ── */}
         <Paper className="report-table-wrap" elevation={0}>
+
           <label>Templates &amp; Milestones</label>
           {loadingTemplates ? (
             <Typography>Loading templates...</Typography>
@@ -546,18 +687,24 @@ export default function StudentReports() {
               headers={milestonesTable.headers}
               rows={milestonesTable.rows}
             />
+
           )}
         </Paper>
 
+        {/* ── Meetings Table ── */}
         <Paper className="report-table-wrap" elevation={0}>
+
           <label>Meetings</label>
           <AppTable
             headers={meetingsTable.headers}
             rows={meetingsTable.rows}
           />
+
         </Paper>
 
+        {/* ── Feedback / Evaluations Table ── */}
         <Paper className="report-table-wrap" elevation={0}>
+
           <label>Feedback / Evaluations</label>
           {supervisorFeedbacks.length === 0 ? (
             <Typography sx={{ color: "#888", mt: 1, fontSize: 14 }}>
@@ -568,8 +715,11 @@ export default function StudentReports() {
               headers={feedbackTable.headers}
               rows={feedbackTable.rows}
             />
+
+          
           )}
         </Paper>
+
       </div>
     </Box>
   );

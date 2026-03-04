@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { AddCircleOutline, EventAvailable, EventBusy, CheckCircleOutline, Group as GroupIcon, AccessTime } from "@mui/icons-material";
 import DashboardSectionHeader from "./DashboardSectionHeader";
-import AppTable from "./AppTable.jsx";  // <--- custom table
+import AppTable from "./AppTable.jsx";  
 import "./SupervisorMeetings.css";
 import { toastService } from "../ToastService/ToastService.jsx";
 

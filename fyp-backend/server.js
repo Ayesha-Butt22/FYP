@@ -24,6 +24,8 @@ const evaluationRoutes = require("./routes/evaluationRoutes");
 const committeeevaluationRoutes = require("./routes/committeEvalution");
 const projectIdeasRoutes = require("./routes/projectIdeasRoutes");
 
+app.use("/api/committee-evaluation", require("./routes/evaluationRoutes"));
+
 const journalRoutes = require("./routes/journalRoutes");
 
 
@@ -54,7 +56,7 @@ app.use("/api/profile-pic", require("./routes/profile"));
 app.use("/api/deadline", require('./routes/deadline'));
 app.use("/api/noticeboard", NoticeboardRoutes);
 app.use("/api/supervisor", require("./routes/supervisorRoutes"));
-
+app.use("/api/deadlineSchedule" , require("./routes/deadlineSchedule"));
 
 
 app.use("/api/supervisor-whiteboard", SupervisorWhiteboardRoutes);

@@ -5,326 +5,302 @@ import {
   Typography,
   Modal,
   Button,
+  CircularProgress,
+  Chip,
+  Alert,
 } from "@mui/material";
 import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import AppTable from "../Admin/AppTable.jsx";
 import "./TemplateView.css";
 
-const STORAGE_KEY = "pc_student_templates";
-const DEADLINE_KEY = "pc_deadlines";
+// ─── API BASE URL ────────────────────────────────────────────────────────────
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-const STATUS_OPTIONS = ["Submitted", "Under Review", "Reviewed", "Approved", "Rejected"];
-
-const DUMMY_TEMPLATES = [
-  {
-    id: "t-001",
-    uploadedBy: "Ali Raza",
-    supervisedBy: "",
-    groupId: "G-101",
-    department: "SE",
-    templateName: "Proposal_Template_G101.pdf",
-    uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
-    mime: "application/pdf",
-    dataUrl: "",
-    driveLink: "https://drive.google.com/file/d/DRIVE_ID_1/view",
-    status: "Submitted",
-  },
-  {
-    id: "t-002",
-    uploadedBy: "Ayesha Butt",
-    supervisedBy: "",
-    groupId: "G-102",
-    department: "CS",
-    templateName: "SRS_G102.docx",
-    uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
-    mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    dataUrl: "",
-    driveLink: "https://drive.google.com/file/d/DRIVE_ID_2/view",
-    status: "Submitted",
-  },
-  {
-    id: "t-003",
-    uploadedBy: "Fatima Noor",
-    supervisedBy: "",
-    groupId: "G-103",
-    department: "IT",
-    templateName: "Design_G103.pdf",
-    uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-    mime: "application/pdf",
-    dataUrl: "",
-    driveLink: "https://drive.google.com/file/d/DRIVE_ID_3/view",
-    status: "Reviewed",
-  },
-];
-
-const AUTO_SUPERVISORS = [
-  "Dr Rimsha",
-  "Dr Bilal",
-  "Dr Ayesha",
-  "Dr Saeed",
-  "Dr Ahmed",
-  "Dr Sana",
-  "Dr Hira",
-];
-
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
 function formatDate(iso) {
+  if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString();
+    return new Date(iso).toLocaleString("en-PK", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
   } catch {
     return iso;
   }
 }
 
-function readDeadlinesFromStorage() {
-  try {
-    const raw = localStorage.getItem(DEADLINE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw);
-  } catch (e) {
-    console.warn("Failed to parse deadlines from storage", e);
-    return [];
+function getStatusColor(status) {
+  switch (status) {
+    case "Approved":    return "success";
+    case "Rejected":    return "error";
+    case "Under Review":return "warning";
+    case "Pending":     return "default";
+    default:            return "default";
   }
 }
 
-function checkOnTimeByGroup(template, deadlines) {
-  if (!template || !template.groupId) return null;
-  const match = deadlines.find((d) => d.groupId === template.groupId);
-  if (!match) return null;
-  try {
-    const due = new Date(match.dueDate);
-    const uploaded = new Date(template.uploadedAt);
-    return uploaded <= due;
-  } catch {
-    return null;
-  }
+function getMemberNames(members = []) {
+  return members.map((m) => m.name || m.email || m.sapId || "Student").join(", ") || "—";
 }
 
+function getSupervisorName(proposals = []) {
+  const p = proposals[0];
+  return p?.projectSupervisor || "—";
+}
+
+function getGroupOverallStatus(templates = []) {
+  if (!templates.length) return "No Uploads";
+  const allApproved = templates.every((t) => t.status === "Approved");
+  if (allApproved) return "Approved";
+  const anyRejected = templates.some((t) => t.status === "Rejected");
+  if (anyRejected) return "Rejected";
+  const anyReview = templates.some((t) => t.status === "Under Review");
+  if (anyReview) return "Under Review";
+  return "Pending";
+}
+
+// ─── COMPONENT ───────────────────────────────────────────────────────────────
 export default function TemplateView() {
-  const [templates, setTemplates] = useState([]);
-  const [groupView, setGroupView] = useState(null); 
+  const [groups, setGroups]           = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState(null);
 
-  const [filterStatus, setFilterStatus] = useState("");
-  const [filterGroup, setFilterGroup] = useState("");
-  const [search, setSearch] = useState("");
-  const [deadlines, setDeadlines] = useState([]);
-  const [assignedSup, setAssignedSup] = useState({});
+  const [groupView, setGroupView]     = useState(null); // { group, templates }
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState(null);
 
+  // ── Auth helper ───────────────────────────────────────────────────────────
+  const authHeaders = () => ({
+    "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
+    "Content-Type": "application/json",
+  });
+
+  // ── Fetch all groups on mount ──────────────────────────────────────────────
   useEffect(() => {
-    let loaded = [];
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        loaded = JSON.parse(raw);
-      } else {
-        loaded = DUMMY_TEMPLATES;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(DUMMY_TEMPLATES));
+    const fetchGroups = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch(`${API_BASE}/groupsinfo/info`, { headers: authHeaders() });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || "Failed to fetch groups");
+        setGroups(json.data || []);
+      } catch (err) {
+        console.error("fetchGroups error:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.warn("Failed to read templates from storage", err);
-      loaded = DUMMY_TEMPLATES;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DUMMY_TEMPLATES));
-    }
-
-
-    const groups = Array.from(new Set(loaded.map((t) => t.groupId))).sort();
-    const map = {};
-    let idx = 0;
-    groups.forEach((g) => {
-      const existing = loaded.find((t) => t.groupId === g && t.supervisedBy && t.supervisedBy.trim());
-      if (existing) {
-        map[g] = existing.supervisedBy;
-      } else {
-        map[g] = AUTO_SUPERVISORS[idx % AUTO_SUPERVISORS.length];
-        idx += 1;
-      }
-    });
-
-    const updatedTemplates = loaded.map((t) => ({
-      ...t,
-      supervisedBy: t.supervisedBy && t.supervisedBy.trim() ? t.supervisedBy : map[t.groupId],
-    }));
-
-    setAssignedSup(map);
-    setTemplates(updatedTemplates);
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTemplates));
-    } catch (e) {
-      console.warn("Failed to persist assigned supervisors", e);
-    }
-
-    setDeadlines(readDeadlinesFromStorage());
+    };
+    fetchGroups();
   }, []);
 
-  const persistTemplates = (updated) => {
-    setTemplates(updated);
+  // ── Open details modal ─────────────────────────────────────────────────────
+  const openGroupView = async (group) => {
+    setGroupView({ group, templates: [] });
+    setDetailLoading(true);
+    setDetailError(null);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch (e) {
-      console.warn("Failed to persist templates:", e);
+      const res = await fetch(`${API_BASE}/student-templates/group/${group._id}`, { headers: authHeaders() });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "Failed to fetch templates");
+      setGroupView({ group, templates: json.data || [] });
+    } catch (err) {
+      console.error("fetchTemplates error:", err);
+      setDetailError(err.message);
+    } finally {
+      setDetailLoading(false);
     }
   };
 
-  const updateStatus = (templateId, newStatus) => {
-    const updated = templates.map((t) => (t.id === templateId ? { ...t, status: newStatus } : t));
-    persistTemplates(updated);
-    setGroupView((gv) => (gv ? { ...gv, items: gv.items.map((i) => (i.id === templateId ? { ...i, status: newStatus } : i)) } : gv));
+  const closeGroupView = () => {
+    setGroupView(null);
+    setDetailError(null);
   };
 
-  const uniqGroups = Array.from(new Set(templates.map((t) => t.groupId))).sort();
-  const uniqStatus = Array.from(new Set(templates.map((t) => t.status))).sort();
+  // ── Table rows for groups ──────────────────────────────────────────────────
+  const tableRows = groups.map((g) => ({
+    "Group ID":       g.groupId || g._id,
+    "Group Members":  getMemberNames(g.members),
+    "Supervisor":     getSupervisorName(g.proposals),
+    "Status":         g._overallStatus || "—",   // filled below
+    __meta:           g,
+  }));
 
-  const filtered = templates.filter((t) => {
-    if (filterStatus && t.status !== filterStatus) return false;
-    if (filterGroup && t.groupId !== filterGroup) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      return t.groupId.toLowerCase().includes(q) || (t.supervisedBy || "").toLowerCase().includes(q);
-    }
-    return true;
-  });
-
-  
-  const groups = Array.from(new Set(filtered.map((t) => t.groupId))).sort();
-  const tableRows = groups.map((g) => {
-    const rep = filtered.find((t) => t.groupId === g) || templates.find((t) => t.groupId === g) || {};
-    return {
-      Group: g,
-      "Supervised By": rep.supervisedBy || assignedSup[g] || "—",
-      Department: rep.department || "—",
-      Status: rep.status || "—",
-      __meta: { groupId: g, representative: rep },
-    };
-  });
-
-  const openGroupView = (groupId) => {
-    const items = templates.filter((t) => t.groupId === groupId);
-    setGroupView({ groupId, items });
-  };
-
-  const closeGroupView = () => setGroupView(null);
-
-  const openDriveFile = (driveLink, groupId) => {
-    const url = driveLink && driveLink.trim()
-      ? driveLink
-      : `https://example.com/student/${encodeURIComponent(groupId)}`;
-    window.open(url, "_blank", "noopener");
-  };
-
-  const openGroupDriveFolder = (groupId) => {
-    const folderUrl = `https://drive.google.com/drive/folders/${encodeURIComponent(groupId)}`;
-    window.open(folderUrl, "_blank", "noopener");
-  };
-
-  const headers = ["Group", "Supervised By", "Department", "Status"];
-
-  const renderActions = (row) => {
-    const groupId = row.__meta?.groupId;
-    return (
-      <div style={{ display: "flex", gap: 8 }}>
-        <button className="mt-btn" onClick={() => openGroupView(groupId)} style={{ background: "#01337a" }}>Details</button>
-      </div>
-    );
-  };
-
-  const clearFilters = () => {
-    setFilterStatus("");
-    setFilterGroup("");
-    setSearch("");
-  };
-
+  // ─── RENDER ────────────────────────────────────────────────────────────────
   return (
     <Box mx="auto" py={3}>
-      <DashboardSectionHeader description="Coordinator view: groups only. Click View to open the group's Drive folder.">
+      <DashboardSectionHeader description="Coordinator View">
         View Reports / Templates
       </DashboardSectionHeader>
 
-      <Paper className="stv-card">
-        {/* top controls: use StudentTemplates-style controls (st-controls) for visual parity */}
-        <Box className="st-controls" sx={{ mb: 1 }}>
-          <div className="st-filter">
-            <label>Status</label>
-            <select
-              className="st-dept-select"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="">All</option>
-              {uniqStatus.concat(STATUS_OPTIONS.filter((s) => !uniqStatus.includes(s))).map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="st-filter">
-            <label>Group</label>
-            <select
-              className="st-dept-select"
-              value={filterGroup}
-              onChange={(e) => setFilterGroup(e.target.value)}
-            >
-              <option value="">All</option>
-              {uniqGroups.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select>
-          </div>
-
-          <div className="st-filter" style={{ minWidth: 240 }}>
-            <label>Search</label>
-            <input
-              className="st-dept-select"
-              type="text"
-              placeholder="Search supervised by or group..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-            <button className="st-clear-btn" onClick={clearFilters}>Clear filters</button>
-          </div>
+      {/* ── Loading / Error ── */}
+      {loading && (
+        <Box display="flex" justifyContent="center" mt={4}>
+          <CircularProgress />
         </Box>
+      )}
+      {error && (
+        <Alert severity="error" sx={{ my: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-        <Box style={{ marginTop: 8 }}>
-          <AppTable headers={headers} rows={tableRows} renderActions={(r) => renderActions(r)} />
-        </Box>
-      </Paper>
+      {/* ── Groups Table ── */}
+      {!loading && !error && (
+        <Paper className="stv-card">
+          <AppTable
+            headers={["Group ID", "Group Members", "Supervisor", "Status"]}
+            rows={groups.map((g) => ({
+              "Group ID":      g.groupId || String(g._id).slice(-6).toUpperCase(),
+              "Group Members": getMemberNames(g.members),
+              "Supervisor":    getSupervisorName(g.proposals),
+              "Status":        "—",   // will be dynamically loaded on open
+              __meta:          g,
+            }))}
+            renderActions={(row) => (
+              <button
+                className="mt-btn"
+                onClick={() => openGroupView(row.__meta)}
+              >
+                Details
+              </button>
+            )}
+          />
+        </Paper>
+      )}
 
-      <Modal open={Boolean(groupView)} onClose={closeGroupView} aria-labelledby="group-view-title">
-        <Box className="stv-student-modal">
+      {/* ═══════════════════ MODAL ═══════════════════ */}
+      <Modal
+        open={Boolean(groupView)}
+        onClose={closeGroupView}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <Box
+          sx={{
+            width: "95vw",
+            maxWidth: "1200px",
+            maxHeight: "90vh",
+            bgcolor: "white",
+            borderRadius: 2,
+            p: 3,
+            overflow: "auto",
+            boxShadow: 24,
+          }}
+        >
           {groupView && (
             <>
-              <Box className="stv-preview-header" sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <Typography id="group-view-title" sx={{ fontWeight: 800 }}>Uploads for {groupView.groupId}</Typography>
+              {/* Modal Header */}
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                 <Box>
-                  <Button variant="outlined" size="small" sx={{ mr: 1 }} onClick={() => openGroupDriveFolder(groupView.groupId)}>
-                    Open Group Drive
-                  </Button>
-                  <Button onClick={closeGroupView} variant="text">Close</Button>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                    Milestones — Group{" "}
+                    {groupView.group.groupId ||
+                      String(groupView.group._id).slice(-6).toUpperCase()}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Members: {getMemberNames(groupView.group.members)} &nbsp;|&nbsp; Supervisor:{" "}
+                    {getSupervisorName(groupView.group.proposals)}
+                  </Typography>
                 </Box>
+                <Button variant="outlined" onClick={closeGroupView}>
+                  Close
+                </Button>
               </Box>
 
-              <Box className="stv-preview-body" sx={{ mt: 2 }}>
-                <Box sx={{ width: "100%", overflowX: "auto" }}>
-                  <AppTable
-                    headers={["Uploaded By", "Uploaded On", "On-time?", "Status", "Drive"]}
-                    rows={groupView.items.map((it) => ({
-                      "Uploaded By": it.uploadedBy,
-                      "Uploaded On": it.uploadedAt ? formatDate(it.uploadedAt) : "—",
-                      "On-time?": checkOnTimeByGroup(it, deadlines) === null ? "No deadline" : (checkOnTimeByGroup(it, deadlines) ? "On time" : "Late"),
-                      Status: it.status,
-                      __meta: it,
-                    }))}
-                    renderActions={(row) => {
-                      const meta = row.__meta;
-                      return (
-                        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                          <button className="mt-btn" onClick={() => openDriveFile(meta.driveLink, meta.groupId)}>Open in Drive</button>
-                        </div>
-                      );
-                    }}
-                  />
+              {/* Loading / Error inside modal */}
+              {detailLoading && (
+                <Box display="flex" justifyContent="center" my={4}>
+                  <CircularProgress />
                 </Box>
-              </Box>
+              )}
+              {detailError && (
+                <Alert severity="error" sx={{ my: 2 }}>
+                  {detailError}
+                </Alert>
+              )}
+
+              {/* Templates Table */}
+              {!detailLoading && !detailError && (
+                <>
+                  {groupView.templates.length === 0 ? (
+                    <Alert severity="info">No templates uploaded by this group yet.</Alert>
+                  ) : (
+                    <AppTable
+                      headers={[
+                        "Uploaded By",
+                        "Template Name",
+                        "Template Label",
+                        "Uploaded On",
+                        "Status",
+                        "Supervisor Comment",
+                      ]}
+                      rows={groupView.templates.map((t) => {
+                        // Find uploader name from group members by studentId / sapId
+                        const uploader = groupView.group.members?.find(
+                          (m) => m.sapId === t.studentId || m.sapId === String(t.studentId)
+                        );
+                        const uploaderName = uploader?.name || t.studentId || "—";
+
+                        return {
+                          "Uploaded By":       uploaderName,
+                          "Template Name":     t.originalName || t.templateCode || "—",
+                          "Template Label":    t.templateLabel || "—",
+                          "Uploaded On":       formatDate(t.uploadedAt),
+                          "Status": (
+                            <Chip
+                              label={t.status || "—"}
+                              color={getStatusColor(t.status)}
+                              size="small"
+                            />
+                          ),
+                          "Supervisor Comment": t.supervisorRemarks || "—",
+                          __meta: t,
+                        };
+                      })}
+                      renderActions={(row) => {
+                        const t = row.__meta;
+                        const fileUrl = t.filePath
+                          ? `${API_BASE.replace("/api", "")}/${t.filePath.replace(/\\/g, "/")}`
+                          : null;
+
+                        return (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            disabled={!t.filePath}
+                            onClick={() => {
+                              if (fileUrl) window.open(fileUrl, "_blank", "noopener");
+                            }}
+                          >
+                            Open
+                          </Button>
+                        );
+                      }}
+                    />
+                  )}
+
+                  {/* Overall group status summary */}
+                  {groupView.templates.length > 0 && (
+                    <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Overall Status:
+                      </Typography>
+                      <Chip
+                        label={getGroupOverallStatus(groupView.templates)}
+                        color={getStatusColor(getGroupOverallStatus(groupView.templates))}
+                        size="small"
+                      />
+                      <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
+                        {groupView.templates.filter((t) => t.status === "Approved").length} /{" "}
+                        {groupView.templates.length} Approved
+                      </Typography>
+                    </Box>
+                  )}
+                </>
+              )}
             </>
           )}
         </Box>

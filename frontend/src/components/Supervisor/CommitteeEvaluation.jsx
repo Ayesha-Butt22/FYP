@@ -1,8 +1,14 @@
+//CommitteEvaluation
 import React, { useEffect, useState } from "react";
 import "./CommitteeEvaluation.css";
 import EvaluationService from "../Api/EvaluationService.jsx";
 import ToastService from "../ToastService/ToastService.jsx";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
+import CsCloPart1 from "./CS part-1/CsCloPart1.jsx";
+import CsCloPart2 from "./CS part-2/CsCloPart2.jsx";
+import SeCloPart1 from "./SE part-1/SeCloPart1.jsx";
+import SeCloPart2 from "./SE part-2/SeCloPart2.jsx";
+
 
 export default function CommitteeEvaluation() {
   const [facultyData, setFacultyData] = useState(null);
@@ -12,12 +18,35 @@ export default function CommitteeEvaluation() {
   const [activeSlot, setActiveSlot] = useState(null);
   const [week , setWeek] = useState(4);
   const [schedule , setSchedule] = useState(null);
+  const [finalEvaluationInfo, setFinalEvaluationInfo] = useState(null);
 
   const maskGroupId = (groupId) => {
     if (!groupId) return "";
     const lastFive = groupId.slice(-5);
     return `Group-${lastFive}`;
   };
+  const resolveFinalEvaluation = async (groupId) => {
+  try {
+    const res = await fetch(
+      "http://localhost:5000/api/committee-evaluation/resolve-final-evaluation",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ groupId }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+      setFinalEvaluationInfo(data);
+    } else {
+      ToastService.error("Unable to resolve final evaluation type");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   useEffect(() => {
     const fetchFacultyPanel = async () => {
@@ -47,36 +76,44 @@ export default function CommitteeEvaluation() {
   }, []);
 
   const handleCheckGroup = async (slot , panel) => {
-    try {
-      setLoading(true);
-      setActiveSlot({ ...slot, panel });
-      setWeek(panel.week === 'Week 4' ? 4 : 13);
-      setSchedule(panel._id);
-      const bookedRes = await EvaluationService.getSingleGroups({
-        scheduleId: panel._id,
-        slotId: slot._id,
-      });
+  try {
+    setLoading(true);
+    setFinalEvaluationInfo(null);   // 🔥 Important reset
 
-      if (bookedRes?.success && bookedRes.data?.length > 0) {
-        const group = bookedRes.data[0];
-        setSelectedGroup(group);
+    setActiveSlot({ ...slot, panel });
+    setWeek(panel.week === 'Week 4' ? 4 : 13);
+    setSchedule(panel._id);
 
-        const initialForm = {};
-        group.members?.forEach((m) => {
-          initialForm[m.studentId] = { presentation: "", performance: "" };
-        });
-        initialForm.comments = "";
-        setFormData(initialForm);
-      } else {
-        ToastService.error("No group booked for this slot.");
+    const bookedRes = await EvaluationService.getSingleGroups({
+      scheduleId: panel._id,
+      slotId: slot._id,
+    });
+
+    if (bookedRes?.success && bookedRes.data?.length > 0) {
+      const group = bookedRes.data[0];
+      setSelectedGroup(group);
+
+      // 🔥 Only resolve when week 13
+      if (panel.week !== "Week 4") {
+        await resolveFinalEvaluation(group.groupId);
       }
-    } catch (err) {
-      console.error(err);
-      ToastService.error("Error fetching group data.");
-    } finally {
-      setLoading(false);
+
+      const initialForm = {};
+      group.members?.forEach((m) => {
+        initialForm[m.studentId] = { presentation: "", performance: "" };
+      });
+      initialForm.comments = "";
+      setFormData(initialForm);
+    } else {
+      ToastService.error("No group booked for this slot.");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    ToastService.error("Error fetching group data.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleInputChange = (studentId, field, value) => {
     
@@ -269,87 +306,119 @@ export default function CommitteeEvaluation() {
                   )}
                 </div>
 
-                <table className="eval-sup-table">
-                  <thead>
-                  <tr>
-                    <th>Name</th>
-                    {week && week !== 4 && (
-                        <>
-                          <th>Presentation Marks</th>
-                          <th>Performance Marks</th>
-                        </>
-                    )}
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {selectedGroup.members?.map((m) => (
-                      <tr key={m.studentId}>
-                        <td>{m.name}</td>
-                        {week && week !== 4 && (
-                            <>
-                        <td>
-                          <input
-                              type="text"
-                              inputMode="decimal"
-                              placeholder="0-10"
-                              value={formData[m.studentId]?.presentation || ""}
-                              onChange={(e) =>
-                                  handleInputChange(
-                                      m.studentId,
-                                      "presentation",
-                                      e.target.value
-                                  )
-                              }
-                          />
-                        </td>
-                        <td>
-                          <input
-                              type="text"
-                              inputMode="decimal"
-                              placeholder="0-10"
-                              value={formData[m.studentId]?.performance || ""}
-                              onChange={(e) =>
-                                  handleInputChange(
-                                      m.studentId,
-                                      "performance",
-                                      e.target.value
-                                  )
-                              }
-                          />
-                        </td>
-                            </>
-                        )}
-                      </tr>
-                  ))}
-                  </tbody>
-                </table>
 
-                <div className="eval-sup-comments">
-                  <label>Comments</label>
-                  <textarea
-                      rows="4"
-                      placeholder="Write overall feedback..."
-                      value={formData.comments || ""}
-                      onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            comments: e.target.value,
-                          }))
-                      }
-                  />
-                </div>
 
-                <div className="eval-sup-form-footer">
-                  <button className="eval-sup-cancel-btn" onClick={handleCancel}>
-                    Cancel
-                  </button>
-                  <button className="eval-sup-submit-btn" onClick={handleSubmit}>
-                    Submit Evaluation
-                  </button>
-                </div>
-              </div>
-          )}
-        </div>
-      </>
-  );
+               {/* ================= WEEK 4 FORM ================= */}
+{week === 4 && selectedGroup && (
+  <table className="eval-sup-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Presentation Marks</th>
+        <th>Performance Marks</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {selectedGroup.members?.map((m) => (
+        <tr key={m.studentId}>
+          <td>{m.name}</td>
+
+          <td>
+            <input
+              type="text"
+              inputMode="decimal"
+              placeholder="0-10"
+              value={formData[m.studentId]?.presentation || ""}
+              onChange={(e) =>
+                handleInputChange(
+                  m.studentId,
+                  "presentation",
+                  e.target.value
+                )
+              }
+            />
+          </td>
+
+          <td>
+            <input
+              type="text"
+              inputMode="decimal"
+              placeholder="0-10"
+              value={formData[m.studentId]?.performance || ""}
+              onChange={(e) =>
+                handleInputChange(
+                  m.studentId,
+                  "performance",
+                  e.target.value
+                )
+              }
+            />
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)}
+
+{/* ================= FINAL EVALUATION ================= */}
+{week === 13 && selectedGroup && finalEvaluationInfo && (
+  <>
+    {finalEvaluationInfo.department === "CS" &&
+      finalEvaluationInfo.fypPart === "fyp-1" && (
+        <CsCloPart1 group={selectedGroup} />
+      )}
+
+    {finalEvaluationInfo.department === "CS" &&
+      finalEvaluationInfo.fypPart === "fyp-2" && (
+        <CsCloPart2 group={selectedGroup} />
+      )}
+
+    {finalEvaluationInfo.department === "SE" &&
+      finalEvaluationInfo.fypPart === "fyp-1" && (
+        <SeCloPart1 group={selectedGroup} />
+      )}
+
+    {finalEvaluationInfo.department === "SE" &&
+      finalEvaluationInfo.fypPart === "fyp-2" && (
+        <SeCloPart2 group={selectedGroup} />
+      )}
+  </>
+)}
+
+{/* ================= COMMENTS ================= */}
+{ week === 4 && selectedGroup && (
+  <div className="eval-sup-comments">
+    <label>Comments</label>
+    <textarea
+      rows="4"
+      placeholder="Write overall feedback..."
+      value={formData.comments || ""}
+      onChange={(e) =>
+        setFormData((prev) => ({
+          ...prev,
+          comments: e.target.value,
+        }))
+      }
+    />
+  </div>
+)}
+
+{/* ================= FOOTER BUTTONS ================= */}
+{selectedGroup && (
+  <div className="eval-sup-form-footer">
+    <button className="eval-sup-cancel-btn" onClick={handleCancel}>
+      Cancel
+    </button>
+
+    <button className="eval-sup-submit-btn" onClick={handleSubmit}>
+      Submit Evaluation
+    </button>
+  </div>
+)}
+      </div>
+    )}
+  </div>
+</>
+);
 }

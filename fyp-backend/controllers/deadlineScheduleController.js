@@ -198,85 +198,47 @@ exports.checkSlot = async (req, res) => {
       ],
     });
 
-    if (!group) {
+    if (!group)
       return res.status(404).json({ success: false, message: "Group not found" });
-    }
 
-    const bookedWeek13 = await PresentationSchedule.findOne({
+    // 1️⃣ Check if group already booked in ANY published schedule
+    const alreadyBookedSchedule = await PresentationSchedule.findOne({
       "slots.bookedBy": group._id,
       isPublish: true,
-      week: "13th Week before Final Exams",
     });
 
-    if (bookedWeek13) {
+    if (alreadyBookedSchedule) {
       return res.json({
         success: true,
-        week: "13",
         alreadyBooked: true,
         groupId: group._id,
-        details: bookedWeek13,
+        details: alreadyBookedSchedule,
       });
     }
 
-    const week13Schedule = await PresentationSchedule.findOne({
+    // 2️⃣ Get latest published schedule
+    const schedule = await PresentationSchedule.findOne({
       fypPart: "fyp-1",
       isPublish: true,
-      week: "13th Week before Final Exams",
-    });
+    }).sort({ createdAt: -1 });
 
-    if (week13Schedule) {
-      const availableSlots = week13Schedule.slots.filter(s => !s.bookedBy);
+    if (!schedule) {
       return res.json({
         success: true,
-        week: "13",
         alreadyBooked: false,
-        scheduleId: week13Schedule._id,
-        groupId: group._id,
-        wholeData: week13Schedule,
-        availableSlots,
+        availableSlots: [],
       });
     }
 
-    const bookedWeek4 = await PresentationSchedule.findOne({
-      "slots.bookedBy": group._id,
-      isPublish: true,
-      week: "Week 4",
-    });
-
-    if (bookedWeek4) {
-      return res.json({
-        success: true,
-        week: "4",
-        alreadyBooked: true,
-        groupId: group._id,
-        details: bookedWeek4,
-      });
-    }
-
-    const week4Schedule = await PresentationSchedule.findOne({
-      fypPart: "fyp-1",
-      isPublish: true,
-      week: "Week 4",
-    });
-
-    if (week4Schedule) {
-      const availableSlots = week4Schedule.slots.filter(s => !s.bookedBy);
-      return res.json({
-        success: true,
-        week: "4",
-        alreadyBooked: false,
-        scheduleId: week4Schedule._id,
-        groupId: group._id,
-        wholeData: week4Schedule,
-        availableSlots,
-      });
-    }
+    const availableSlots = schedule.slots.filter(s => !s.bookedBy);
 
     return res.json({
       success: true,
       alreadyBooked: false,
-      availableSlots: [],
-      message: "No schedules found for Week 13 or Week 4",
+      scheduleId: schedule._id,
+      groupId: group._id,
+      wholeData: schedule,
+      availableSlots,
     });
 
   } catch (err) {

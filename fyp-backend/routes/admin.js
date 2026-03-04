@@ -42,7 +42,7 @@ router.get('/coordinators', protect, isAdmin, adminController.getCoordinators);
 router.get('/alladmins', protect, isAdmin, adminController.getAdmins);
 
 // GET SUPERVISORS
-router.get('/supervisors',adminController.getSupervisors);
+router.get('/supervisors', adminController.getSupervisors);
 
 // GET ALL STUDENTS for admin
 router.get('/students', protect, isAdmin, adminController.getAllStudents);
@@ -69,7 +69,7 @@ router.put(
 );
 
 // DELETE USER
-router.delete('/:id',  adminController.deleteUser);
+router.delete('/:id', adminController.deleteUser);
 
 // REMOVE COORDINATOR (convert to supervisor)
 router.patch('/remove-coordinator/:id', protect, isAdmin, adminController.removeCoordinator);
@@ -77,13 +77,13 @@ router.patch('/remove-coordinator/:id', protect, isAdmin, adminController.remove
 // MAKE FYP INCHARGE
 router.post('/make-fyp-incharge/:id', protect, isAdmin, adminController.makeFYPIncharge);
 
-// SYSTEM STATS
-router.get('/stats', protect, isAdmin, adminController.getSystemStats);
+// SYSTEM STATS — isAdmin removed so coordinator can access too
+router.get('/stats', protect, adminController.getSystemStats);
 
 // PROMOTE TO COORDINATOR
 router.post('/promote/:id', protect, isAdmin, adminController.makeCoordinator);
 
-// TOGGLE STUDENT APPROVAL  
+// TOGGLE STUDENT APPROVAL
 router.patch(
   '/toggle-approval/:id',
   protect,
@@ -93,6 +93,7 @@ router.patch(
 
 router.post("/supervisor/update-slots", adminController.updateSupervisorSlotsByEmail);
 
-router.get("/supervisors-for-coordinator", protect, isAdmin, adminController.getSupervisorsForCoordinator);
+// SUPERVISORS FOR COORDINATOR — isAdmin removed so coordinator can access too
+router.get("/supervisors-for-coordinator", protect, adminController.getSupervisorsForCoordinator);
 
 module.exports = router;

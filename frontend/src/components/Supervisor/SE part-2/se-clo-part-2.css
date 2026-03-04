@@ -1,0 +1,136 @@
+/* ===== CS1 MODAL OVERLAY ===== */
+.cs1-modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 0;
+  overflow-y: auto;
+  z-index: 9999;
+}
+
+/* ===== CS1 MODAL BOX ===== */
+.cs1-modal-box{
+  background: white;
+  width: 98%;
+  max-width: 1600px;
+  min-height: 90vh;
+  padding: 40px;
+  border-radius: 12px;
+}
+
+/* Header */
+.cs1-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:2px solid #06b6d4;
+  margin-bottom:20px;
+  padding-bottom:10px;
+}
+
+.cs1-close{
+  font-size:28px;
+  cursor:pointer;
+  color: #ef4444;
+  font-weight: bold;
+}
+
+/* LO Card */
+.cs1-card{
+  background:#ffffff;
+  padding:15px;
+  margin-bottom:20px;
+  border-left:5px solid #06b6d4;
+  border-radius:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+.cs1-options{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+/* Total Box */
+.cs1-total{
+  text-align:right;
+  font-size:18px;
+  font-weight:bold;
+  color:#16a34a;
+  padding:15px 0;
+  border-top:2px solid #01337a;
+  margin-top:20px;
+}
+
+/* Footer */
+.cs1-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:15px;
+}
+
+.cs1-cancel{
+  padding:8px 18px;
+  border:none;
+  background:#ef4444;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.cs1-submit{
+  padding:8px 18px;
+  border:none;
+  background:#16a34a;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+}
+.cs1-card p {
+      display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    unicode-bidi: isolate; 
+}
+.h2 {
+    display: block;
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+}
+
+.h3 {
+    
+  font-size: 24px;
+  font-weight: 700;
+  color: #01337a;
+  margin-bottom: 10px;
+}
+
+
+.cs1-card .cs1-options label {
+  font-weight: 600 !important;
+  color: #01337a !important;
+  font-size: 16px !important;
+}
+
+
+.open-btn{
+  padding: 12px 25px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+}

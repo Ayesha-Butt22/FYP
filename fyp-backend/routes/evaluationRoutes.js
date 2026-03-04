@@ -1,3 +1,4 @@
+//Evaluation Routes
 const express = require("express");
 const router = express.Router();
 const {
@@ -6,6 +7,7 @@ const {
   bulkResolveGroups,
   getBookedGroupsForSchedule,
   getSingleGroups,
+  resolveFinalEvaluationType ,
 } = require("../controllers/EvaluationController");
 
 // Faculty check route (used by Overview/Committee)
@@ -18,5 +20,8 @@ router.post("/bulkResolveGroups", bulkResolveGroups);
 // New: get groups that booked slots for schedule(s)
 router.post("/getBookedGroups", getBookedGroupsForSchedule);
 router.post("/getSingleGroups", getSingleGroups);
+
+router.post("/resolve-final-evaluation",resolveFinalEvaluationType);
+
 
 module.exports = router;
