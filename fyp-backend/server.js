@@ -42,6 +42,9 @@ const taskRoutes = require("./routes/taskRoutes");
 
 const meetingRoutes = require("./routes/meetingRoutes");
 
+const activityRoutes = require("./routes/activityRoutes");
+
+
 
 app.use('/Filesk', express.static(path.join(__dirname, 'Filesk')));
 app.use('/api/auth', require('./routes/auth'));
@@ -76,6 +79,7 @@ app.use("/api/journal", journalRoutes);
 // =============== NEW: Add Template Routes Here ===============
 app.use("/api/templates", templateRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/activity", activityRoutes);
 
 // Test route
 app.get('/', (req, res) => res.send('API Running'));

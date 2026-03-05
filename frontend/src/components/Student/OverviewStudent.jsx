@@ -108,7 +108,7 @@ export default function OverviewStudent({ onTabChange }) {
 
     if (!studentEmail) return;
 
-    // slot booking check (existing logic)
+    // slot booking check
     const checkSlotBooking = async () => {
       try {
         const res  = await fetch(`${BASE_URL}/deadlineSchedule/getSlots/${studentEmail}`);
@@ -137,49 +137,59 @@ export default function OverviewStudent({ onTabChange }) {
 
     checkSlotBooking();
 
-    // fetch group → then proposal, meetings, templates, tasks
     const loadData = async () => {
       try {
         setLoading(true);
 
-        // 1. Group
-        const gRes  = await authFetch(`/groups/by-email/${studentEmail}`);
-        const gData = await gRes.json();
-        const grp   = gRes.ok ? gData : null;
-        setGroup(grp);
+        // ── 1. Group ──
+        let grp = null;
+        try {
+          const gRes  = await authFetch(`/groups/by-email/${studentEmail}`);
+          const gData = await gRes.json();
+          grp = gRes.ok && gData?._id ? gData : null;
+          setGroup(grp);
+        } catch (e) { console.error("Group fetch error:", e); }
 
         if (grp?._id) {
-          // 2. Proposal
+          // ── 2. Proposal ──
           try {
             const pRes  = await fetch(`${BASE_URL}/proposals/${grp._id}`);
             const pData = await pRes.json();
-            // returns array — take latest
+            // Backend returns array — take latest
             if (Array.isArray(pData) && pData.length > 0) {
               setProposal(pData[pData.length - 1]);
+            } else if (pData && !Array.isArray(pData) && pData._id) {
+              setProposal(pData);
             }
-          } catch {}
+          } catch (e) { console.error("Proposal fetch error:", e); }
 
-          // 3. Templates
+          // ── 3. Templates ──
+          // Backend: GET /api/student-templates/group/:groupId
+          // Response: { success, data: [ { templateCode, status, uploadedAt, ... } ] }
           try {
             const tRes  = await authFetch(`/student-templates/group/${grp._id}`);
             const tData = await tRes.json();
             if (tData.success) setTemplates(tData.data || []);
-          } catch {}
+          } catch (e) { console.error("Templates fetch error:", e); }
         }
 
-        // 4. Meetings
+        // ── 4. Meetings ──
+        // Backend: GET /api/meetings/student/:email
+        // Response: { success, meetings: [ { date, time, status(1=booked,2=done), ... } ] }
         try {
           const mRes  = await fetch(`${BASE_URL}/meetings/student/${studentEmail}`);
           const mData = await mRes.json();
           if (mData.success) setMeetings(mData.meetings || []);
-        } catch {}
+        } catch (e) { console.error("Meetings fetch error:", e); }
 
-        // 5. Tasks assigned to me
+        // ── 5. Tasks assigned to me ──
+        // Backend: GET /api/tasks (protect - returns tasks assigned to logged-in user)
+        // Response: { success, tasks: [ { id, title, status, progress, createDate, ... } ] }
         try {
           const tkRes  = await authFetch(`/tasks`);
           const tkData = await tkRes.json();
           if (tkData.success) setTasks(tkData.tasks || []);
-        } catch {}
+        } catch (e) { console.error("Tasks fetch error:", e); }
 
       } catch (err) {
         console.error("Overview data load error:", err);
@@ -199,74 +209,96 @@ export default function OverviewStudent({ onTabChange }) {
     : "Not Created";
 
   // Proposal status label
+  // Backend status: 0=Pending, 1=Under Review (Supervisor Approved), 2=Rejected, 3=Rejected
   const proposalStatusMap = {
     0: "Pending",
-    1: "Under Review",
-    2: "Approved",
+    1: "Approved",
+    2: "Rejected",
     3: "Rejected",
   };
   const proposalLabel = proposal
     ? proposalStatusMap[proposal.projectStatus] ?? "Submitted"
     : "Not Submitted";
 
-  // Next meeting
+  // Next meeting — status 1 = booked (not done yet)
+  // No future-date filter — show latest booked meeting regardless of time
   const upcomingMeetings = meetings
-    .filter((m) => m.status === 1 && new Date(`${m.date}T${m.time}`) > new Date())
-    .sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+    .filter((m) => m.status === 1)
+    .sort((a, b) => {
+      const aDate = new Date(`${a.date || ""}T${a.time || "00:00"}`);
+      const bDate = new Date(`${b.date || ""}T${b.time || "00:00"}`);
+      return aDate - bDate;
+    });
   const nextMeeting = upcomingMeetings[0];
   const nextMeetingLabel = nextMeeting
-    ? new Date(`${nextMeeting.date}T${nextMeeting.time}`).toLocaleDateString("en-US", { day: "numeric", month: "short" })
+    ? (() => {
+        const d = new Date(`${nextMeeting.date}T${nextMeeting.time || "00:00"}`);
+        return isNaN(d.getTime())
+          ? nextMeeting.date
+          : d.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+      })()
     : "None";
 
-  // Templates progress
-  const totalTemplates    = 7; // t01–t07
-  const uploadedTemplates = templates.filter((t) => t.status !== "Rejected").length;
+  // Templates progress — backend stores templateCode like "t01","t02"...t09
+  // total expected = 9 templates (t01-t09)
+  const totalTemplates    = 9;
+  const uploadedTemplates = templates.filter(
+    (t) => t.status === "Approved" || t.status === "Submitted" || t.status === "Pending Review"
+  ).length;
 
-  // Tasks progress
+  // Tasks progress — backend returns { status: "Pending"/"In Progress"/"Completed", progress: 0-100 }
   const totalTasks     = tasks.length;
-  const completedTasks = tasks.filter((t) => t.status === "Completed" || t.progress === 100).length;
-  const taskLabel      = totalTasks > 0 ? `${completedTasks}/${totalTasks}` : "0/0";
+  const completedTasks = tasks.filter(
+    (t) => t.status === "Completed" || t.progress === 100
+  ).length;
+  const taskLabel = totalTasks > 0 ? `${completedTasks}/${totalTasks}` : "0/0";
+
+  // Meetings attended (status=2 means done)
+  const attendedMeetings = meetings.filter((m) => m.status === 2).length;
+
+  // Proposal progress percent
+  const proposalProgressPct = proposal
+    ? proposal.projectStatus === 1 ? 100   // approved
+    : proposal.projectStatus === 0 ? 40    // pending
+    : proposal.projectStatus === 2 ? 10    // rejected
+    : 10
+    : 0;
 
   // Progress bars
   const progressBars = [
     {
-      label:   "Templates Uploaded",
+      label:   `Templates Uploaded (${uploadedTemplates}/${totalTemplates})`,
       percent: totalTemplates > 0 ? Math.round((uploadedTemplates / totalTemplates) * 100) : 0,
       color:   "#2563eb",
     },
     {
-      label:   "Tasks Completed",
+      label:   `Tasks Completed (${completedTasks}/${totalTasks || 0})`,
       percent: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
       color:   "#fbc73d",
     },
     {
-      label:   "Meetings Attended",
-      percent: meetings.length > 0
-        ? Math.round((meetings.filter((m) => m.status === 2).length / meetings.length) * 100)
-        : 0,
+      label:   `Meetings Attended (${attendedMeetings}/${meetings.length || 0})`,
+      percent: meetings.length > 0 ? Math.round((attendedMeetings / meetings.length) * 100) : 0,
       color:   "#16a34a",
     },
     {
-      label:   "Proposal Progress",
-      percent: proposal
-        ? proposal.projectStatus === 2 ? 100
-        : proposal.projectStatus === 1 ? 60
-        : proposal.projectStatus === 0 ? 30
-        : 10
-        : 0,
-      color:   "#f43f5e",
+      label:   `Proposal: ${proposalLabel}`,
+      percent: proposalProgressPct,
+      color:   proposal?.projectStatus === 1 ? "#16a34a"
+             : proposal?.projectStatus === 2 || proposal?.projectStatus === 3 ? "#ef4444"
+             : "#f43f5e",
     },
   ];
 
   // ── Recent Activity (last 3 real actions) ──
   const activityItems = [];
 
-  // Tasks
+  // Tasks (most recent first)
   tasks.slice(0, 3).forEach((t) => {
     activityItems.push({
-      text:     `Task "${t.title?.slice(0, 35) || "Untitled"}" — ${t.status || "Pending"}`,
-      date:     t.createdAt || t.createDate,
-      sortDate: new Date(t.createdAt || t.createDate || 0).getTime(),
+      text:     `Task "${(t.title || "Untitled").slice(0, 35)}" — ${t.status || "Pending"}`,
+      date:     t.createDate || t.createdAt,
+      sortDate: new Date(t.createDate || t.createdAt || 0).getTime(),
     });
   });
 
@@ -286,16 +318,16 @@ export default function OverviewStudent({ onTabChange }) {
   // Proposal
   if (proposal) {
     activityItems.push({
-      text:     `Proposal "${(proposal.projectTitle || "").slice(0, 32) || "Untitled"}" — ${proposalLabel}`,
+      text:     `Proposal "${(proposal.projectTitle || "Untitled").slice(0, 32)}" — ${proposalLabel}`,
       date:     proposal.updatedAt || proposal.createdAt,
       sortDate: new Date(proposal.updatedAt || proposal.createdAt || 0).getTime(),
     });
   }
 
-  // Templates
+  // Templates (most recent uploads)
   templates.slice(0, 2).forEach((t) => {
     activityItems.push({
-      text:     `Template ${t.templateCode?.toUpperCase() || ""} uploaded — ${t.status || ""}`,
+      text:     `Template ${(t.templateCode || "").toUpperCase()} uploaded — ${t.status || ""}`,
       date:     t.uploadedAt,
       sortDate: new Date(t.uploadedAt || 0).getTime(),
     });

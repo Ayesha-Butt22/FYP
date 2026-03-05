@@ -1,7 +1,19 @@
+// controllers/deadlineScheduleController.js - UPDATED
+// logActivity call added in createOrUpdatePresentationBatch and publishSchedule
+
 const PresentationSchedule = require("../models/DeadlineSchedule");
 const User = require("../models/User");
 const Group = require("../models/StudentGroup");
 const mongoose = require("mongoose");
+// Inline activity logger
+const _logActivity = async (action, description, category, performedBy = "system", meta = {}) => {
+  try {
+    const ActivityLog = require("../models/ActivityLog");
+    await ActivityLog.create({ action, description, category, performedBy, meta });
+  } catch (err) {
+    console.error("logActivity error (non-fatal):", err.message);
+  }
+};
 
 function intervalsOverlap(aStart, aEnd, bStart, bEnd) {
   return aStart < bEnd && bStart < aEnd;
@@ -25,14 +37,13 @@ async function validateFacultyIds(ids = []) {
   return count === ids.length;
 }
 
-
+// ─── CREATE OR UPDATE PRESENTATION BATCH ───
 exports.createOrUpdatePresentationBatch = async (req, res) => {
   try {
     const { week, fypPart, panels = [], durationMinutes = 45 } = req.body;
 
     if (!week || !fypPart)
       return res.status(400).json({ success: false, message: "week and fypPart are required" });
-
     if (!Array.isArray(panels) || panels.length === 0)
       return res.status(400).json({ success: false, message: "panels array required" });
 
@@ -41,9 +52,8 @@ exports.createOrUpdatePresentationBatch = async (req, res) => {
     for (const panel of panels) {
       const { facultyPanels = [], venue, slots = [] } = panel;
 
-      if (!(await validateFacultyIds(facultyPanels))) {
+      if (!(await validateFacultyIds(facultyPanels)))
         return res.status(400).json({ success: false, message: "Invalid faculty IDs" });
-      }
 
       const normalizedSlots = (slots || []).map(normalizeSlot);
       for (const s of normalizedSlots) {
@@ -56,7 +66,6 @@ exports.createOrUpdatePresentationBatch = async (req, res) => {
       let schedule = await PresentationSchedule.findOne({ week, fypPart, venue });
 
       if (schedule) {
-        
         const existingFacultyIds = schedule.facultyPanels.map(f => f.toString());
         const newFaculty = facultyPanels.filter(id => !existingFacultyIds.includes(id.toString()));
         schedule.facultyPanels.push(...newFaculty);
@@ -68,16 +77,14 @@ exports.createOrUpdatePresentationBatch = async (req, res) => {
 
         for (const ns of normalizedSlots) {
           for (const es of existingSlots) {
-            if (intervalsOverlap(ns.startTime, ns.endTime, es.startTime, es.endTime)) {
+            if (intervalsOverlap(ns.startTime, ns.endTime, es.startTime, es.endTime))
               return res.status(400).json({ success: false, message: "Slot overlaps existing slot" });
-            }
           }
         }
 
         const existingSlotKeys = new Set(
           schedule.slots.map(s => `${new Date(s.startTime).toISOString()}|${new Date(s.endTime).toISOString()}`)
         );
-
         const toAdd = normalizedSlots.filter(s => {
           const key = `${s.startTime.toISOString()}|${s.endTime.toISOString()}`;
           if (existingSlotKeys.has(key)) return false;
@@ -88,23 +95,33 @@ exports.createOrUpdatePresentationBatch = async (req, res) => {
         if (toAdd.length) schedule.slots.push(...toAdd);
         schedule.durationMinutes = durationMinutes;
         await schedule.save();
-
         results.push({ action: "updated", schedule });
+
+        // ─── ACTIVITY LOG ───
+        await _logActivity(
+          "Deadline Schedule Updated",
+          `Presentation schedule updated for ${fypPart.toUpperCase()} — ${week}, Venue: ${venue || "N/A"}, ${toAdd.length} new slot(s) added`,
+          "deadline",
+          req.body.updatedBy || "coordinator",
+          { week, fypPart, venue, slotsAdded: toAdd.length }
+        );
       } else {
-        // Create new
         const newSchedule = await PresentationSchedule.create({
-          week,
-          fypPart,
-          facultyPanels,
-          venue,
-          slots: normalizedSlots.map(s => ({
-            startTime: s.startTime,
-            endTime: s.endTime,
-          })),
+          week, fypPart, facultyPanels, venue,
+          slots: normalizedSlots.map(s => ({ startTime: s.startTime, endTime: s.endTime })),
           durationMinutes,
           isPublish: false,
         });
         results.push({ action: "created", schedule: newSchedule });
+
+        // ─── ACTIVITY LOG ───
+        await _logActivity(
+          "Deadline Schedule Created",
+          `New presentation schedule created for ${fypPart.toUpperCase()} — ${week}, Venue: ${venue || "N/A"}, ${normalizedSlots.length} slot(s)`,
+          "deadline",
+          req.body.createdBy || "coordinator",
+          { week, fypPart, venue, totalSlots: normalizedSlots.length }
+        );
       }
     }
 
@@ -115,7 +132,7 @@ exports.createOrUpdatePresentationBatch = async (req, res) => {
   }
 };
 
-// ---------------- PUBLISH FLAG UPDATE ---------------- //
+// ─── PUBLISH SCHEDULE ───
 exports.publishSchedule = async (req, res) => {
   try {
     const { id } = req.params;
@@ -125,6 +142,15 @@ exports.publishSchedule = async (req, res) => {
     schedule.isPublish = true;
     await schedule.save();
 
+    // ─── ACTIVITY LOG ───
+    await _logActivity(
+      "Schedule Published",
+      `Presentation schedule published for ${schedule.fypPart?.toUpperCase()} — ${schedule.week}, Venue: ${schedule.venue || "N/A"}`,
+      "deadline",
+      "coordinator",
+      { scheduleId: id, week: schedule.week, fypPart: schedule.fypPart, venue: schedule.venue }
+    );
+
     res.json({ success: true, message: "Schedule published", data: schedule });
   } catch (err) {
     console.error(err);
@@ -132,19 +158,16 @@ exports.publishSchedule = async (req, res) => {
   }
 };
 
-
+// ─── GET PRESENTATION ───
 exports.getPresentation = async (req, res) => {
   try {
     const { week, fypPart } = req.query;
-
     const filter = {};
     if (week) filter.week = week;
     if (fypPart) filter.fypPart = fypPart;
-
     const schedules = await PresentationSchedule.find(filter)
       .populate("facultyPanels", "name email")
-      .populate("slots.bookedBy","groupId");
-
+      .populate("slots.bookedBy", "groupId");
     res.json({ success: true, data: schedules });
   } catch (err) {
     console.error(err);
@@ -152,44 +175,37 @@ exports.getPresentation = async (req, res) => {
   }
 };
 
-// ---------------- GET FACULTY ---------------- //
+// ─── GET FACULTY ───
 exports.getFaculty = async (req, res) => {
   try {
-    const faculty = await User.find({ role: { $in: ["supervisor", "coordinator"] } }).select(
-      "_id name email"
-    );
+    const faculty = await User.find({ role: { $in: ["supervisor", "coordinator"] } }).select("_id name email");
     res.json({ success: true, data: faculty });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// ---------------- BOOK SLOT ---------------- //
+// ─── BOOK SLOT ───
 exports.bookSlot = async (req, res) => {
   try {
-    const { slotId, groupId , selectedSlot } = req.body;
+    const { slotId, groupId, selectedSlot } = req.body;
     const schedule = await PresentationSchedule.findOne({ "slots._id": selectedSlot });
     if (!schedule) return res.status(404).json({ success: false, message: "Schedule not found" });
-
     const slot = schedule.slots.id(selectedSlot);
     if (!slot) return res.status(404).json({ success: false, message: "Slot not found" });
-
     if (slot.bookedBy) return res.status(400).json({ success: false, message: "Slot already booked" });
-
     slot.bookedBy = groupId;
     await schedule.save();
-
     res.json({ success: true, message: "Slot booked successfully" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// ---------------- CHECK SLOT (only published schedules) ---------------- //
+// ─── CHECK SLOT ───
 exports.checkSlot = async (req, res) => {
   try {
     const { email } = req.params;
-
     const group = await Group.findOne({
       $or: [
         { "leader.email": email },
@@ -198,49 +214,30 @@ exports.checkSlot = async (req, res) => {
       ],
     });
 
-    if (!group)
-      return res.status(404).json({ success: false, message: "Group not found" });
+    if (!group) return res.status(404).json({ success: false, message: "Group not found" });
 
-    // 1️⃣ Check if group already booked in ANY published schedule
     const alreadyBookedSchedule = await PresentationSchedule.findOne({
       "slots.bookedBy": group._id,
       isPublish: true,
     });
 
     if (alreadyBookedSchedule) {
-      return res.json({
-        success: true,
-        alreadyBooked: true,
-        groupId: group._id,
-        details: alreadyBookedSchedule,
-      });
+      return res.json({ success: true, alreadyBooked: true, groupId: group._id, details: alreadyBookedSchedule });
     }
 
-    // 2️⃣ Get latest published schedule
     const schedule = await PresentationSchedule.findOne({
       fypPart: "fyp-1",
       isPublish: true,
     }).sort({ createdAt: -1 });
 
-    if (!schedule) {
-      return res.json({
-        success: true,
-        alreadyBooked: false,
-        availableSlots: [],
-      });
-    }
+    if (!schedule) return res.json({ success: true, alreadyBooked: false, availableSlots: [] });
 
     const availableSlots = schedule.slots.filter(s => !s.bookedBy);
-
     return res.json({
-      success: true,
-      alreadyBooked: false,
-      scheduleId: schedule._id,
-      groupId: group._id,
-      wholeData: schedule,
-      availableSlots,
+      success: true, alreadyBooked: false,
+      scheduleId: schedule._id, groupId: group._id,
+      wholeData: schedule, availableSlots,
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Server error" });

@@ -23,6 +23,7 @@ const glow = keyframes`
   100% { box-shadow: 0 0 5px #1976d2; }
 `;
 
+// ✅ $glow transient prop — $ prefix prevents forwarding to DOM
 const GlowingIconWrapper = styled.div`
   border-radius: 50%;
   display: inline-flex;
@@ -30,7 +31,7 @@ const GlowingIconWrapper = styled.div`
   justify-content: center;
   transition: transform 0.3s;
   ${(props) =>
-    props.glow &&
+    props.$glow &&
     css`
       animation: ${glow} 1.5s infinite;
     `}
@@ -71,8 +72,7 @@ export default function DashboardLayout({
   const [hasNewNotification, setHasNewNotification] = useState(true);
   const navigate = useNavigate();
 
-
-    const [noticeboardOpen, setNoticeboardOpen] = useState(false);
+  const [noticeboardOpen, setNoticeboardOpen] = useState(false);
 
   useEffect(() => {
     const loadProfilePic = async () => {
@@ -155,20 +155,21 @@ export default function DashboardLayout({
           <h1 className="dashboard-title">{headerTitle}</h1>
           <div className="dashboard-profile">
             <Tooltip title="Notifications">
-                <GlowingIconWrapper glow={hasNewNotification}>
-                    <NotificationsActiveIcon
-                        sx={{
-                            width: 40,
-                            height: 40,
-                            marginRight: "2px",
-                            color: "#01337a",
-                            cursor: "pointer",
-                            transition: "0.3s",
-                            "&:hover": { transform: "scale(1.05)" },
-                        }}
-                        onClick={handleNotificationClick}
-                    />
-                </GlowingIconWrapper>
+              {/* ✅ $glow instead of glow */}
+              <GlowingIconWrapper $glow={hasNewNotification}>
+                <NotificationsActiveIcon
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    marginRight: "2px",
+                    color: "#01337a",
+                    cursor: "pointer",
+                    transition: "0.3s",
+                    "&:hover": { transform: "scale(1.05)" },
+                  }}
+                  onClick={handleNotificationClick}
+                />
+              </GlowingIconWrapper>
             </Tooltip>
 
             <Tooltip title="Click to change profile picture">

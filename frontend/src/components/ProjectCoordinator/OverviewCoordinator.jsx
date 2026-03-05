@@ -7,10 +7,12 @@ import {
   FaArrowRight,
   FaUserTie,
   FaLayerGroup,
-  FaCheckCircle,
-  FaHourglassHalf,
-  FaTimesCircle,
-} from "react-icons/fa";
+  FaCircleCheck,
+  FaHourglass,
+  FaCircleXmark,
+  FaFileLines,
+  FaClockRotateLeft,
+} from "react-icons/fa6";
 import "./OverviewCoordinator.css";
 
 const BASE_URL = "http://localhost:5000/api";
@@ -53,45 +55,12 @@ function getTimeAgo(dateStr) {
   return "Just now";
 }
 
-// ─── Build last 3 activities in timeline style ─
-function buildActivity(groups) {
-  const all = [];
-
-  groups.forEach((g) => {
-    const proposals = g.proposals || [];
-
-    if (proposals.length === 0) {
-      all.push({
-        sortDate: new Date(g.createdAt || 0).getTime(),
-        text: `New group registered: ${g.groupId || "—"}`,
-        time: getTimeAgo(g.createdAt),
-      });
-    } else {
-      const latest   = proposals[proposals.length - 1];
-      const status   = latest?.projectStatus;
-      const title    = latest?.projectTitle || "Untitled";
-      const short    = title.length > 32 ? title.slice(0, 32) + "…" : title;
-      const actDate  = latest?.updatedAt || latest?.createdAt || g.updatedAt || g.createdAt;
-
-      const actionMap = {
-        0: `Proposal submitted: ${short}`,
-        1: `Proposal under review: ${short}`,
-        2: `Approved proposal: ${short}`,
-        3: `Rejected proposal: ${short}`,
-      };
-
-      all.push({
-        sortDate: new Date(actDate || 0).getTime(),
-        text: actionMap[status] ?? `Proposal updated: ${short}`,
-        time: getTimeAgo(actDate),
-      });
-    }
-  });
-
-  return all
-    .sort((a, b) => b.sortDate - a.sortDate)
-    .slice(0, 3);
-}
+// ─── Category icon + color map ────────────────
+const CATEGORY_CONFIG = {
+  supervisor: { icon: <FaUserTie />,          color: "#2563eb", bg: "#dbeafe" },
+  template:   { icon: <FaFileLines />,        color: "#7c3aed", bg: "#ede9fe" },
+  deadline:   { icon: <FaCalendarCheck />,    color: "#16a34a", bg: "#dcfce7" },
+};
 
 // ─── Sub-components ───────────────────────────
 function StatCard({ icon, label, value, color }) {
@@ -129,16 +98,31 @@ function Skeleton({ height = 18, width = "100%", radius = 8 }) {
   );
 }
 
+// ─── Activity Item — dot timeline style ──────
+function ActivityItem({ log }) {
+  return (
+    <div className="activity-item">
+      {log.description}
+      <span className="time">{getTimeAgo(log.createdAt)}</span>
+    </div>
+  );
+}
+
 // ─── Main ─────────────────────────────────────
 export default function OverviewCoordinator({ onTabChange }) {
-  const [statsData,     setStatsData]     = useState(null);
-  const [groupsData,    setGroupsData]    = useState(null);
-  const [supervisors,   setSupervisors]   = useState(null);
-  const [loadingStats,  setLoadingStats]  = useState(true);
-  const [loadingGroups, setLoadingGroups] = useState(true);
-  const [loadingSup,    setLoadingSup]    = useState(true);
-  const [apiErrors,     setApiErrors]     = useState({});
+  const [statsData,      setStatsData]      = useState(null);
+  const [groupsData,     setGroupsData]     = useState(null);
+  const [supervisors,    setSupervisors]     = useState(null);
+  const [activityLogs,   setActivityLogs]   = useState(null);
 
+  const [loadingStats,    setLoadingStats]    = useState(true);
+  const [loadingGroups,   setLoadingGroups]   = useState(true);
+  const [loadingSup,      setLoadingSup]      = useState(true);
+  const [loadingActivity, setLoadingActivity] = useState(true);
+
+  const [apiErrors, setApiErrors] = useState({});
+
+  // ── Fetch stats ──
   useEffect(() => {
     authFetch("/admin/stats")
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
@@ -147,14 +131,26 @@ export default function OverviewCoordinator({ onTabChange }) {
       .finally(() => setLoadingStats(false));
   }, []);
 
+  // ── Fetch groups ──
   useEffect(() => {
     authFetch("/groupsinfo/info")
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-      .then((d) => { if (d.success) setGroupsData(d.data || []); })
+      .then((d) => {
+        if (d.success) {
+          setGroupsData(d.data || []);
+          // DEBUG
+          console.log("=== GROUPS DEBUG ===");
+          (d.data || []).forEach((g, i) => {
+            const lastProp = g.proposals?.at(-1);
+            console.log(`Group ${i+1} [${g.groupId}]: proposalsCount=${g.proposals?.length}, lastStatus=${lastProp?.projectStatus ?? "NO PROPOSAL"}, title=${lastProp?.projectTitle ?? "none"}`);
+          });
+        }
+      })
       .catch((e) => { setApiErrors((p) => ({ ...p, Groups: e.message })); setGroupsData([]); })
       .finally(() => setLoadingGroups(false));
   }, []);
 
+  // ── Fetch supervisors ──
   useEffect(() => {
     authFetch("/admin/supervisors-for-coordinator")
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
@@ -163,27 +159,59 @@ export default function OverviewCoordinator({ onTabChange }) {
       .finally(() => setLoadingSup(false));
   }, []);
 
+  // ── Fetch recent activity logs (NEW) ──
+  useEffect(() => {
+    authFetch("/activity/recent")
+      .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then((d) => { if (d.success) setActivityLogs(d.data || []); })
+      .catch((e) => { setApiErrors((p) => ({ ...p, Activity: e.message })); setActivityLogs([]); })
+      .finally(() => setLoadingActivity(false));
+  }, []);
+
+  // ── Derived values ──
   const groups = groupsData  || [];
   const sups   = supervisors || [];
+  const logs   = activityLogs || [];
 
   const totalGroups   = statsData?.totalGroups       ?? groups.length;
   const totalStudents = statsData?.totalStudents     ?? "—";
   const totalSups     = statsData?.totalSupervisors  ?? sups.length;
   const totalCoords   = statsData?.totalCoordinators ?? "—";
 
-  const approvedCount = groups.filter((g) => (g.proposals||[]).at?.(-1)?.projectStatus === 2).length;
-  const pendingCount  = groups.filter((g) => !(g.proposals||[]).length || (g.proposals||[]).at?.(-1)?.projectStatus === 0).length;
-  const rejectedCount = groups.filter((g) => (g.proposals||[]).at?.(-1)?.projectStatus === 3).length;
+  // ── Proposal counts from groupsData ──
+  // Status: 0=Pending, 1=Approved by Supervisor, 2=Rejected by Supervisor, 3=Rejected
 
-  const total       = groups.length || 1;
-  const approvedPct = Math.round((approvedCount / total) * 100);
-  const pendingPct  = Math.round((pendingCount  / total) * 100);
-  const supAllocPct = sups.length
-    ? Math.round((sups.filter((s) => (s.bookedSlots||0) > 0).length / sups.length) * 100)
+  const approvedCount = groups.filter((g) => {
+    const last = (g.proposals || []).at?.(-1);
+    return last?.projectStatus === 1;
+  }).length;
+
+  const rejectedCount = groups.filter((g) => {
+    const last = (g.proposals || []).at?.(-1);
+    return last?.projectStatus === 2 || last?.projectStatus === 3;
+  }).length;
+
+  const pendingCount = groups.filter((g) => {
+    const last = (g.proposals || []).at?.(-1);
+    return !last || last.projectStatus === 0;
+  }).length;
+
+  const underReviewCount = 0; // not used separately
+
+  // ── Progress percentages ──
+  const totalForPct    = groups.length || 1;
+  const approvedPct    = Math.round((approvedCount  / totalForPct) * 100);
+  const underReviewPct = 0;
+  const rejectedPct    = Math.round((rejectedCount  / totalForPct) * 100);
+  const pendingPct     = Math.round((pendingCount   / totalForPct) * 100);
+  const supAllocPct    = sups.length
+    ? Math.round((sups.filter((s) => (s.bookedSlots || 0) > 0).length / sups.length) * 100)
     : 0;
 
-  const recentActivity = buildActivity(groups);
   const hasError = Object.keys(apiErrors).length > 0;
+
+  // ── Last 3 activity logs ──
+  const recentLogs = logs.slice(0, 3);
 
   return (
     <div className="overview-container">
@@ -212,7 +240,10 @@ export default function OverviewCoordinator({ onTabChange }) {
           margin: 8px auto 12px auto;
           width: 100%; max-width: 1120px;
         }
-        .no-activity { color: #94a3b8; font-size: 1rem; padding: 12px 0; }
+        .no-activity {
+          color: #94a3b8; font-size: 1rem; padding: 16px 0;
+          display: flex; align-items: center; gap: 8px;
+        }
       `}</style>
 
       {/* ── Banner ── */}
@@ -273,13 +304,12 @@ export default function OverviewCoordinator({ onTabChange }) {
       {/* ── Proposal Chips ── */}
       {!loadingGroups && groups.length > 0 && (
         <div className="chip-row">
-          <div className="chip chip-approved"><FaCheckCircle /> Approved: {approvedCount}</div>
-          <div className="chip chip-pending"><FaHourglassHalf /> Pending: {pendingCount}</div>
-          <div className="chip chip-rejected"><FaTimesCircle /> Rejected: {rejectedCount}</div>
+          <div className="chip chip-approved"><FaCircleCheck /> Approved (by Supervisor): {approvedCount}</div>
+          <div className="chip chip-rejected"><FaCircleXmark /> Rejected: {rejectedCount}</div>
         </div>
       )}
 
-      {/* ── Progress ── */}
+      {/* ── Progress Overview ── */}
       <div className="progress-section-gap" />
       <div className="section-chip">Progress Overview</div>
       <div className="progress-box">
@@ -290,34 +320,53 @@ export default function OverviewCoordinator({ onTabChange }) {
               <Skeleton height={18} />
             </div>
           ))
+        ) : groups.length === 0 ? (
+          <p style={{ color: "#94a3b8", fontSize: 14 }}>Abhi koi group registered nahi hai.</p>
         ) : (
           <>
-            <ProgressBar label="Proposals Approved"    percent={approvedPct} color="#16a34a" />
-            <ProgressBar label="Proposals Pending"     percent={pendingPct}  color="#f59e0b" />
-            <ProgressBar label="Supervisor Allocation" percent={supAllocPct} color="#2563eb" />
+            <ProgressBar
+              label={`Proposals Approved (${approvedCount} / ${groups.length})`}
+              percent={approvedPct}
+              color="#16a34a"
+            />
+            <ProgressBar
+              label={`Proposals Rejected (${rejectedCount} / ${groups.length})`}
+              percent={rejectedPct}
+              color="#ef4444"
+            />
+
+            <ProgressBar
+              label={`Supervisor Slots Filled (${sups.filter(s => (s.bookedSlots||0) > 0).length} / ${sups.length})`}
+              percent={supAllocPct}
+              color="#2563eb"
+            />
           </>
         )}
       </div>
 
-      {/* ── Recent Activity — timeline style like image ── */}
+      {/* ── Recent Activity (from real API) ── */}
       <div className="progress-section-gap" />
       <div className="section-chip">Recent Activity</div>
       <div className="activity-list">
-        {loadingGroups ? (
+        {loadingActivity ? (
           [1,2,3].map((i) => (
-            <div key={i} style={{ marginBottom: 14 }}>
-              <Skeleton height={16} />
+            <div key={i} style={{ display: "flex", gap: 12, padding: "12px 0" }}>
+              <Skeleton height={36} width={36} radius={50} />
+              <div style={{ flex: 1 }}>
+                <Skeleton height={14} width="60%" />
+                <Skeleton height={12} width="80%" />
+              </div>
             </div>
           ))
-        ) : recentActivity.length === 0 ? (
-          <p className="no-activity">Abhi koi activity nahi hai.</p>
+        ) : recentLogs.length === 0 ? (
+          <p className="no-activity">
+            <FaClockRotateLeft style={{ fontSize: 18 }} />
+            Abhi koi activity nahi hui. Jab aap deadlines, supervisor slots ya templates manage karein ge to yahan show hoga.
+          </p>
         ) : (
           <div className="timeline">
-            {recentActivity.map((act, i) => (
-              <div className="activity-item" key={i}>
-                {act.text}
-                <span className="time">{act.time}</span>
-              </div>
+            {recentLogs.map((log) => (
+              <ActivityItem key={log._id} log={log} />
             ))}
           </div>
         )}
