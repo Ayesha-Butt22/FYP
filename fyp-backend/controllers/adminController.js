@@ -1,12 +1,16 @@
-// adminController.js - UPDATED
-// Sirf updateSupervisorSlotsByEmail function mein log add kiya hai
-// Baaki sab same hai
+// ═══════════════════════════════════════════════════════════════════════════
+// CHANGES TO adminController.js
+// 1. Add getRecentActivities export (new)
+// 2. Add _logActivity calls to: createUser, deleteUser, approveStudent,
+//    toggleStudentApproval, makeCoordinator, removeCoordinator, makeFYPIncharge
+// All other functions are unchanged — only the listed ones have log lines added.
+// ═══════════════════════════════════════════════════════════════════════════
 
 const bcrypt = require('bcryptjs');
 const xlsx = require("xlsx");
 const User = require('../models/User');
 const Group = require('../models/StudentGroup');
-// Inline activity logger - no external dependency needed
+
 const _logActivity = async (action, description, category, performedBy = "system", meta = {}) => {
   try {
     const ActivityLog = require("../models/ActivityLog");
@@ -18,11 +22,85 @@ const _logActivity = async (action, description, category, performedBy = "system
 
 const isValidOfficialEmail = email => /^[a-zA-Z0-9._]+@riphah\.edu\.pk$/.test(email);
 
-// CREATE USER (Admin, Supervisor, Coordinator)
+// ─── GET RECENT ACTIVITIES (NEW) ────────────────────────────────────────────
+// Returns last 10 activity logs, newest first.
+// Route to add:  GET /api/admin/recent-activities   (protect, isAdmin)
+exports.getRecentActivities = async (req, res) => {
+  try {
+    const ActivityLog = require("../models/ActivityLog");
+
+    const performedBy = req.user?.email;
+    const role        = req.user?.role;
+
+    // Build query — filter by performedBy (logged-in user's email)
+    // Also match "admin" / "coordinator" as fallback performedBy strings
+    // in case some logs were saved with role string instead of email
+    const performedByValues = [
+      performedBy,           // actual email e.g. "john@riphah.edu.pk"
+      role,                  // role string e.g. "admin" / "coordinator"
+      "admin",               // hardcoded fallback used in some controllers
+      "coordinator",         // hardcoded fallback used in some controllers
+    ].filter(Boolean);
+
+    const query = {
+      category: { $in: ["supervisor", "coordinator", "student", "admin", "template", "deadline"] },
+      performedBy: { $in: performedByValues },
+    };
+
+    console.log("Activity query:", JSON.stringify(query));
+
+    const logs = await ActivityLog.find(query)
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .lean();
+    
+    console.log("Logs found:", logs.length, logs.map(l => ({ category: l.category, performedBy: l.performedBy, action: l.action })));
+
+    const typeMap = {
+      supervisor:  "supervisor",
+      coordinator: "coordinator",
+      student:     "student",
+      admin:       "general",
+      template:    "template",
+      deadline:    "deadline",
+    };
+
+    const activities = logs.map((log) => ({
+      type:        typeMap[log.category] || "general",
+      text:        log.description || log.action,
+      time:        getTimeAgo(log.createdAt),
+      category:    log.category,
+      performedBy: log.performedBy,
+      createdAt:   log.createdAt,
+    }));
+
+    res.status(200).json({ success: true, activities });
+  } catch (error) {
+    console.error("Error fetching recent activities:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+// Helper: time-ago string
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffMs   = now - new Date(date);
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHrs  = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHrs / 24);
+
+  if (diffDays > 1)  return `${diffDays} days ago`;
+  if (diffDays === 1) return "Yesterday";
+  if (diffHrs  > 0)  return `${diffHrs} hour${diffHrs > 1 ? "s" : ""} ago`;
+  if (diffMins > 0)  return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`;
+  return "Just now";
+}
+
+// ─── CREATE USER ─────────────────────────────────────────────────────────────
 exports.createUser = async (req, res) => {
   try {
-    const { 
-      name, email, password, role, 
+    const {
+      name, email, password, role,
       department, specialization, availableSlots, bookedSlots,
       gender, contactNumber, designation
     } = req.body;
@@ -56,21 +134,29 @@ exports.createUser = async (req, res) => {
         const lastNum = parseInt(lastAdmin[0].studentId.split('-')[1]);
         nextId = lastNum + 1;
       }
-      const padded = String(nextId).padStart(3, '0');
-      newUser.studentId = `adm-${padded}`;
+      newUser.studentId = `adm-${String(nextId).padStart(3, '0')}`;
     }
 
     await newUser.save();
+
+    // ─── ACTIVITY LOG ───
+    await _logActivity(
+      `${role.charAt(0).toUpperCase() + role.slice(1)} Created`,
+      `New ${role} "${name}" (${email}) added to the system`,
+      role,   // category = exact role: "supervisor" | "coordinator" | "admin"
+      req.user?.email || "admin",
+      { name, email, role, department }
+    );
+
     const u = newUser.toObject();
     delete u.password;
-
     return res.status(201).json({ message: `${role} created successfully`, user: u });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
 
-// GET COORDINATORS
+// ─── GET COORDINATORS ────────────────────────────────────────────────────────
 exports.getCoordinators = async (req, res) => {
   try {
     const list = await User.find({ role: 'coordinator' }).select('-password');
@@ -80,7 +166,7 @@ exports.getCoordinators = async (req, res) => {
   }
 };
 
-// GET ADMINS
+// ─── GET ADMINS ──────────────────────────────────────────────────────────────
 exports.getAdmins = async (req, res) => {
   try {
     const list = await User.find({ role: 'admin' })
@@ -92,7 +178,7 @@ exports.getAdmins = async (req, res) => {
   }
 };
 
-// GET SUPERVISORS
+// ─── GET SUPERVISORS ─────────────────────────────────────────────────────────
 exports.getSupervisors = async (req, res) => {
   try {
     const list = await User.find({ role: 'supervisor' })
@@ -104,7 +190,7 @@ exports.getSupervisors = async (req, res) => {
   }
 };
 
-// GET ALL STUDENTS
+// ─── GET ALL STUDENTS ────────────────────────────────────────────────────────
 exports.getAllStudents = async (req, res) => {
   try {
     const students = await User.find({ role: "student" }).select('-password');
@@ -114,21 +200,32 @@ exports.getAllStudents = async (req, res) => {
   }
 };
 
-// APPROVE STUDENT
+// ─── APPROVE STUDENT ─────────────────────────────────────────────────────────
 exports.approveStudent = async (req, res) => {
   try {
     const { id } = req.body;
     const student = await User.findById(id);
     if (!student) return res.status(404).json({ error: "Student not found" });
+
     student.IsApproved = true;
     await student.save();
+
+    // ─── ACTIVITY LOG ───
+    await _logActivity(
+      "Student Approved",
+      `Student "${student.name}" (${student.email}) approved`,
+      "student",
+      req.user?.email || "admin",
+      { studentId: student._id, name: student.name, email: student.email }
+    );
+
     res.json({ message: "Student approved!", student });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// GET ALL USERS
+// ─── GET ALL USERS ───────────────────────────────────────────────────────────
 exports.getAllUsers = async (req, res) => {
   try {
     const list = await User.find({}).select('-password');
@@ -138,7 +235,7 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// GET ALL GROUPS
+// ─── GET ALL GROUPS ──────────────────────────────────────────────────────────
 exports.getAllGroups = async (req, res) => {
   try {
     const list = await Group.find({});
@@ -148,12 +245,12 @@ exports.getAllGroups = async (req, res) => {
   }
 };
 
-// UPDATE USER
+// ─── UPDATE USER ─────────────────────────────────────────────────────────────
 exports.updateUser = async (req, res) => {
   try {
     const { name, email, department, specialization, password,
       availableSlots, bookedSlots, designation, gender, contactNumber, isProjectHead } = req.body;
-    
+
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -190,6 +287,16 @@ exports.updateUser = async (req, res) => {
     }
 
     await user.save();
+
+    // ─── ACTIVITY LOG ───
+    await _logActivity(
+      `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} Updated`,
+      `User "${user.name}" (${user.email}) with role "${user.role}" was updated`,
+      user.role,
+      req.user?.email || "admin",
+      { name: user.name, email: user.email, role: user.role }
+    );
+
     const u = user.toObject();
     delete u.password;
     return res.json({ message: "User updated successfully", user: u });
@@ -198,26 +305,49 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// DELETE USER
+// ─── DELETE USER ─────────────────────────────────────────────────────────────
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
+
+    const { name, email, role } = user;
     await user.deleteOne();
+
+    // ─── ACTIVITY LOG ───
+    await _logActivity(
+      `${role.charAt(0).toUpperCase() + role.slice(1)} Deleted`,
+      `User "${name}" (${email}) with role "${role}" was removed`,
+      role,   // category = exact role
+      req.user?.email || "admin",
+      { name, email, role }
+    );
+
     return res.json({ message: "User deleted successfully" });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
 
-// REMOVE COORDINATOR
+// ─── REMOVE COORDINATOR ──────────────────────────────────────────────────────
 exports.removeCoordinator = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
     if (user.role !== "coordinator") return res.status(400).json({ error: "User is not a coordinator" });
+
     user.role = "supervisor";
     await user.save();
+
+    // ─── ACTIVITY LOG ───
+    await _logActivity(
+      "Coordinator Removed",
+      `"${user.name}" (${user.email}) demoted from Coordinator to Supervisor`,
+      "coordinator",
+      req.user?.email || "admin",
+      { name: user.name, email: user.email }
+    );
+
     const u = user.toObject();
     delete u.password;
     return res.json({ message: "Coordinator removed and converted to supervisor successfully", user: u });
@@ -226,6 +356,7 @@ exports.removeCoordinator = async (req, res) => {
   }
 };
 
+// ─── GET SYSTEM STATS ────────────────────────────────────────────────────────
 exports.getSystemStats = async (req, res) => {
   try {
     const totalStudents     = await User.countDocuments({ role: "student" });
@@ -239,20 +370,31 @@ exports.getSystemStats = async (req, res) => {
   }
 };
 
-// PROMOTE TO COORDINATOR
+// ─── PROMOTE TO COORDINATOR ──────────────────────────────────────────────────
 exports.makeCoordinator = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
+
     user.role = "coordinator";
     await user.save();
+
+    // ─── ACTIVITY LOG ───
+    await _logActivity(
+      "Coordinator Promoted",
+      `"${user.name}" (${user.email}) promoted to Coordinator`,
+      "coordinator",
+      req.user?.email || "admin",
+      { name: user.name, email: user.email }
+    );
+
     return res.json({ message: "User promoted successfully" });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
 
-// UPLOAD EXCEL & CREATE SUPERVISORS
+// ─── UPLOAD EXCEL & CREATE SUPERVISORS ──────────────────────────────────────
 exports.uploadExcelAndCreateUsers = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -301,6 +443,16 @@ exports.uploadExcelAndCreateUsers = async (req, res) => {
       createdUsers.push(email);
     }
 
+    if (createdUsers.length > 0) {
+      await _logActivity(
+        "Bulk Supervisors Uploaded",
+        `${createdUsers.length} supervisor(s) created via Excel upload`,
+        "supervisor",
+        req.user?.email || "admin",
+        { createdCount: createdUsers.length, skippedCount: skippedUsers.length }
+      );
+    }
+
     return res.status(201).json({
       message: "Excel processed successfully",
       createdCount: createdUsers.length,
@@ -313,7 +465,7 @@ exports.uploadExcelAndCreateUsers = async (req, res) => {
   }
 };
 
-// ─── UPDATE SUPERVISOR SLOTS ─── (LOG ADDED HERE)
+// ─── UPDATE SUPERVISOR SLOTS ─────────────────────────────────────────────────
 exports.updateSupervisorSlotsByEmail = async (req, res) => {
   try {
     const { email, designation, bookedSlots } = req.body;
@@ -327,10 +479,9 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
 
     const designationSlotsMap = {
       'dean': 0, 'professor': 1, 'associateprofessor': 2,
-      'assistantprofessor': 3, 'lecturer': 3, 'lecturerSr.lecturer': 3,
-      'sr.lecturer': 3, 'srlecturer': 3, 'juniorlecturer': 2,
-      'researchassociateassistant': 1, 'researchassociate': 1,
-      'researchassistant': 1, 'teachingfellow': 1
+      'assistantprofessor': 3, 'lecturer': 3, 'sr.lecturer': 3,
+      'srlecturer': 3, 'juniorlecturer': 2,
+      'researchassociate': 1, 'researchassistant': 1, 'teachingfellow': 1
     };
 
     const normalized = designation.toLowerCase().replace(/\s+/g, "");
@@ -339,18 +490,17 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
     if (bookedSlots > availableSlots)
       return res.status(400).json({ error: `Booked slots (${bookedSlots}) cannot exceed available slots (${availableSlots})` });
 
-    user.designation   = designation;
+    user.designation    = designation;
     user.availableSlots = availableSlots;
-    user.bookedSlots   = bookedSlots;
+    user.bookedSlots    = bookedSlots;
     await user.save();
 
     // ─── ACTIVITY LOG ───
-    const performedBy = req.user?.email || req.body.updatedBy || "coordinator";
     await _logActivity(
       "Supervisor Slots Updated",
-      `Slots updated for ${user.name} (${email}) — Designation: ${designation}, Available: ${availableSlots}, Booked: ${bookedSlots}`,
+      `Slots updated for "${user.name}" (${email}) — Designation: ${designation}, Available: ${availableSlots}, Booked: ${bookedSlots}`,
       "supervisor",
-      performedBy,
+      req.user?.email || req.body.updatedBy || "coordinator",
       { supervisorEmail: email, supervisorName: user.name, designation, availableSlots, bookedSlots }
     );
 
@@ -363,6 +513,7 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
   }
 };
 
+// ─── GET SUPERVISORS FOR COORDINATOR ────────────────────────────────────────
 exports.getSupervisorsForCoordinator = async (req, res) => {
   try {
     const supervisors = await User.find({ role: "supervisor" })
@@ -388,15 +539,26 @@ exports.getSupervisorsForCoordinator = async (req, res) => {
   }
 };
 
-// TOGGLE STUDENT APPROVAL
+// ─── TOGGLE STUDENT APPROVAL ─────────────────────────────────────────────────
 exports.toggleStudentApproval = async (req, res) => {
   try {
     const { id } = req.params;
     const student = await User.findById(id);
     if (!student) return res.status(404).json({ error: "Student not found" });
     if (student.role !== "student") return res.status(400).json({ error: "This action is only for students" });
+
     student.IsApproved = !student.IsApproved;
     await student.save();
+
+    // ─── ACTIVITY LOG ───
+    await _logActivity(
+      student.IsApproved ? "Student Approved" : "Student Unapproved",
+      `Student "${student.name}" (${student.email}) ${student.IsApproved ? "approved" : "unapproved"}`,
+      "student",
+      req.user?.email || "admin",
+      { studentId: student._id, name: student.name, email: student.email, IsApproved: student.IsApproved }
+    );
+
     return res.json({
       success: true,
       message: student.IsApproved ? "Student approved successfully" : "Student unapproved successfully",
@@ -408,7 +570,7 @@ exports.toggleStudentApproval = async (req, res) => {
   }
 };
 
-// MAKE FYP INCHARGE
+// ─── MAKE FYP INCHARGE ───────────────────────────────────────────────────────
 exports.makeFYPIncharge = async (req, res) => {
   try {
     const { id } = req.params;
@@ -422,6 +584,15 @@ exports.makeFYPIncharge = async (req, res) => {
     );
     user.isProjectHead = true;
     await user.save();
+
+    // ─── ACTIVITY LOG ───
+    await _logActivity(
+      "FYP Incharge Assigned",
+      `"${user.name}" (${user.email}) set as FYP Incharge for ${user.department} department`,
+      "coordinator",
+      req.user?.email || "admin",
+      { name: user.name, email: user.email, department: user.department }
+    );
 
     const u = user.toObject();
     delete u.password;

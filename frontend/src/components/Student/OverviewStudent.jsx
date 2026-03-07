@@ -155,7 +155,6 @@ export default function OverviewStudent({ onTabChange }) {
           try {
             const pRes  = await fetch(`${BASE_URL}/proposals/${grp._id}`);
             const pData = await pRes.json();
-            // Backend returns array — take latest
             if (Array.isArray(pData) && pData.length > 0) {
               setProposal(pData[pData.length - 1]);
             } else if (pData && !Array.isArray(pData) && pData._id) {
@@ -164,8 +163,6 @@ export default function OverviewStudent({ onTabChange }) {
           } catch (e) { console.error("Proposal fetch error:", e); }
 
           // ── 3. Templates ──
-          // Backend: GET /api/student-templates/group/:groupId
-          // Response: { success, data: [ { templateCode, status, uploadedAt, ... } ] }
           try {
             const tRes  = await authFetch(`/student-templates/group/${grp._id}`);
             const tData = await tRes.json();
@@ -174,17 +171,13 @@ export default function OverviewStudent({ onTabChange }) {
         }
 
         // ── 4. Meetings ──
-        // Backend: GET /api/meetings/student/:email
-        // Response: { success, meetings: [ { date, time, status(1=booked,2=done), ... } ] }
         try {
           const mRes  = await fetch(`${BASE_URL}/meetings/student/${studentEmail}`);
           const mData = await mRes.json();
           if (mData.success) setMeetings(mData.meetings || []);
         } catch (e) { console.error("Meetings fetch error:", e); }
 
-        // ── 5. Tasks assigned to me ──
-        // Backend: GET /api/tasks (protect - returns tasks assigned to logged-in user)
-        // Response: { success, tasks: [ { id, title, status, progress, createDate, ... } ] }
+        // ── 5. Tasks ──
         try {
           const tkRes  = await authFetch(`/tasks`);
           const tkData = await tkRes.json();
@@ -209,58 +202,73 @@ export default function OverviewStudent({ onTabChange }) {
     : "Not Created";
 
   // Proposal status label
-  // Backend status: 0=Pending, 1=Under Review (Supervisor Approved), 2=Rejected, 3=Rejected
-  const proposalStatusMap = {
-    0: "Pending",
-    1: "Approved",
-    2: "Rejected",
-    3: "Rejected",
-  };
+  const proposalStatusMap = { 0: "Pending", 1: "Approved", 2: "Rejected", 3: "Rejected" };
   const proposalLabel = proposal
     ? proposalStatusMap[proposal.projectStatus] ?? "Submitted"
     : "Not Submitted";
 
-  // Next meeting — status 1 = booked (not done yet)
-  // No future-date filter — show latest booked meeting regardless of time
+  // ── Next meeting (FIXED) ───────────────────────────────────────────────────
+  //
+  // Fix 1: Parse date+time as LOCAL time by appending ":00" (no Z / UTC shift).
+  //        "2025-03-10T09:30:00" is parsed as local; adding "Z" would make it
+  //        UTC and shift the displayed date by the user's UTC offset.
+  //
+  // Fix 2: Filter to FUTURE meetings only.
+  //        status=1 just means "booked" — it stays 1 even after the time passes
+  //        unless the supervisor explicitly marks it done (status=2).
+  //        Without this filter, old unresolved bookings show as "upcoming".
+  //
+  // Fix 3: Show date + time so the student knows the exact slot.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const nowTs = new Date();
+
+  // Helper: parse "YYYY-MM-DD" + "HH:mm" into a local Date
+  const parseMeetingDate = (m) =>
+    new Date(`${m.date}T${m.time ? m.time + ":00" : "00:00:00"}`);
+
   const upcomingMeetings = meetings
-    .filter((m) => m.status === 1)
-    .sort((a, b) => {
-      const aDate = new Date(`${a.date || ""}T${a.time || "00:00"}`);
-      const bDate = new Date(`${b.date || ""}T${b.time || "00:00"}`);
-      return aDate - bDate;
-    });
+    .filter((m) => {
+      if (m.status !== 1) return false;         // must be booked, not done/available
+      const dt = parseMeetingDate(m);
+      return !isNaN(dt.getTime()) && dt > nowTs; // must be in the future
+    })
+    .sort((a, b) => parseMeetingDate(a) - parseMeetingDate(b)); // nearest first
+
   const nextMeeting = upcomingMeetings[0];
+
   const nextMeetingLabel = nextMeeting
     ? (() => {
-        const d = new Date(`${nextMeeting.date}T${nextMeeting.time || "00:00"}`);
-        return isNaN(d.getTime())
-          ? nextMeeting.date
-          : d.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+        const d = parseMeetingDate(nextMeeting);
+        if (isNaN(d.getTime())) return nextMeeting.date; // fallback
+        // Show only "Jan 8" — same style as other stat cards
+        return d.toLocaleDateString("en-US", { day: "numeric", month: "short" });
       })()
     : "None";
 
-  // Templates progress — backend stores templateCode like "t01","t02"...t09
-  // total expected = 9 templates (t01-t09)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Templates progress
   const totalTemplates    = 9;
   const uploadedTemplates = templates.filter(
     (t) => t.status === "Approved" || t.status === "Submitted" || t.status === "Pending Review"
   ).length;
 
-  // Tasks progress — backend returns { status: "Pending"/"In Progress"/"Completed", progress: 0-100 }
+  // Tasks progress
   const totalTasks     = tasks.length;
   const completedTasks = tasks.filter(
     (t) => t.status === "Completed" || t.progress === 100
   ).length;
   const taskLabel = totalTasks > 0 ? `${completedTasks}/${totalTasks}` : "0/0";
 
-  // Meetings attended (status=2 means done)
+  // Meetings attended (status=2)
   const attendedMeetings = meetings.filter((m) => m.status === 2).length;
 
   // Proposal progress percent
   const proposalProgressPct = proposal
-    ? proposal.projectStatus === 1 ? 100   // approved
-    : proposal.projectStatus === 0 ? 40    // pending
-    : proposal.projectStatus === 2 ? 10    // rejected
+    ? proposal.projectStatus === 1 ? 100
+    : proposal.projectStatus === 0 ? 40
+    : proposal.projectStatus === 2 ? 10
     : 10
     : 0;
 
@@ -290,10 +298,9 @@ export default function OverviewStudent({ onTabChange }) {
     },
   ];
 
-  // ── Recent Activity (last 3 real actions) ──
+  // ── Recent Activity ──
   const activityItems = [];
 
-  // Tasks (most recent first)
   tasks.slice(0, 3).forEach((t) => {
     activityItems.push({
       text:     `Task "${(t.title || "Untitled").slice(0, 35)}" — ${t.status || "Pending"}`,
@@ -302,11 +309,10 @@ export default function OverviewStudent({ onTabChange }) {
     });
   });
 
-  // Meetings
   meetings.slice(0, 3).forEach((m) => {
     const label =
       m.status === 2 ? "Meeting attended" :
-      m.status === 1 ? "Meeting booked" :
+      m.status === 1 ? "Meeting booked"   :
       "Meeting slot available";
     activityItems.push({
       text:     `${label} on ${m.date || ""}`,
@@ -315,7 +321,6 @@ export default function OverviewStudent({ onTabChange }) {
     });
   });
 
-  // Proposal
   if (proposal) {
     activityItems.push({
       text:     `Proposal "${(proposal.projectTitle || "Untitled").slice(0, 32)}" — ${proposalLabel}`,
@@ -324,7 +329,6 @@ export default function OverviewStudent({ onTabChange }) {
     });
   }
 
-  // Templates (most recent uploads)
   templates.slice(0, 2).forEach((t) => {
     activityItems.push({
       text:     `Template ${(t.templateCode || "").toUpperCase()} uploaded — ${t.status || ""}`,
@@ -333,7 +337,6 @@ export default function OverviewStudent({ onTabChange }) {
     });
   });
 
-  // Sort newest first → take 3
   const recentActivity = activityItems
     .sort((a, b) => b.sortDate - a.sortDate)
     .slice(0, 3);
