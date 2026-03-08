@@ -46,6 +46,7 @@ const activityRoutes = require("./routes/activityRoutes");
 
 
 
+
 app.use('/Filesk', express.static(path.join(__dirname, 'Filesk')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));

@@ -30,43 +30,17 @@ exports.getRecentActivities = async (req, res) => {
     const ActivityLog = require("../models/ActivityLog");
 
     const performedBy = req.user?.email;
-    const role        = req.user?.role;
 
-    // Build query — filter by performedBy (logged-in user's email)
-    // Also match "admin" / "coordinator" as fallback performedBy strings
-    // in case some logs were saved with role string instead of email
-    const performedByValues = [
-      performedBy,           // actual email e.g. "john@riphah.edu.pk"
-      role,                  // role string e.g. "admin" / "coordinator"
-      "admin",               // hardcoded fallback used in some controllers
-      "coordinator",         // hardcoded fallback used in some controllers
-    ].filter(Boolean);
-
-    const query = {
-      category: { $in: ["supervisor", "coordinator", "student", "admin", "template", "deadline"] },
-      performedBy: { $in: performedByValues },
-    };
-
-    console.log("Activity query:", JSON.stringify(query));
-
-    const logs = await ActivityLog.find(query)
+    const logs = await ActivityLog.find({
+      category:    { $in: ["supervisor", "coordinator", "student", "admin"] },
+      performedBy: performedBy,   // ← sirf is admin ki activities
+    })
       .sort({ createdAt: -1 })
       .limit(3)
       .lean();
-    
-    console.log("Logs found:", logs.length, logs.map(l => ({ category: l.category, performedBy: l.performedBy, action: l.action })));
-
-    const typeMap = {
-      supervisor:  "supervisor",
-      coordinator: "coordinator",
-      student:     "student",
-      admin:       "general",
-      template:    "template",
-      deadline:    "deadline",
-    };
 
     const activities = logs.map((log) => ({
-      type:        typeMap[log.category] || "general",
+      type:        log.category,
       text:        log.description || log.action,
       time:        getTimeAgo(log.createdAt),
       category:    log.category,

@@ -19,23 +19,39 @@ const DESIGNATION_DEFAULTS = {
 
 const STORAGE_KEY = "pc_supervisor_slots";
 
+// ─── Token helper ─────────────────────────────────────────────────────────────
+const getToken = () =>
+  localStorage.getItem("token") ||
+  localStorage.getItem("authToken") ||
+  localStorage.getItem("accessToken") || "";
+
+// ─── Log activity helper ──────────────────────────────────────────────────────
+const logCoordinatorActivity = async (action, description, category) => {
+  try {
+    await fetch("http://localhost:5000/api/activity/log", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({ action, description, category }),
+    });
+  } catch (err) {
+    console.warn("Activity log failed:", err);
+  }
+};
+
 export default function SupervisorSlots() {
   const [supervisors, setSupervisors] = useState([]);
   const [editing, setEditing] = useState(null);
-  const [viewForCoordinator, setViewForCoordinator] = useState(false); // toggle new API
+  const [viewForCoordinator, setViewForCoordinator] = useState(false);
 
- 
   useEffect(() => {
     const fetchSupervisors = async () => {
       try {
         const url = "http://localhost:5000/api/admin/supervisors";
-
         const { data } = await axios.get(url);
-
-        const supArray = Array.isArray(data)
-            ? data
-            : data?.data ?? [];
-
+        const supArray = Array.isArray(data) ? data : data?.data ?? [];
         setSupervisors(supArray);
       } catch (err) {
         console.warn("Failed to fetch supervisors", err);
@@ -94,56 +110,59 @@ export default function SupervisorSlots() {
       return;
     }
     if (booked > available) {
-      toastService.error(
-        `Booked slots (${booked}) cannot exceed available slots (${available}).`
-      );
+      toastService.error(`Booked slots (${booked}) cannot exceed available slots (${available}).`);
       return;
     }
 
     try {
-      const { data } = await axios.post("http://localhost:5000/api/admin/supervisor/update-slots", {
-        email: editing.email,
-        designation: editing.designation,
-        bookedSlots: booked,
-      });
+      const { data } = await axios.post(
+        "http://localhost:5000/api/admin/supervisor/update-slots",
+        {
+          email:       editing.email,
+          designation: editing.designation,
+          bookedSlots: booked,
+        }
+      );
 
       const updated = supervisors.map((s) =>
         s._id === data.data._id
           ? {
               ...s,
-              bookedSlots: data.data.bookedSlots,
+              bookedSlots:    data.data.bookedSlots,
               availableSlots: data.data.availableSlots,
-              designation: data.data.designation,
+              designation:    data.data.designation,
             }
           : s
       );
       setSupervisors(updated);
       saveToStorage(updated);
-      setEditing(null);
+
       toastService.success("Supervisor slots updated successfully");
+
+      // ─── Log activity ───
+      await logCoordinatorActivity(
+        "Supervisor Slots Updated",
+        `Slots updated for "${editing.name}" — Designation: ${editing.designation}, Booked: ${booked}/${available}`,
+        "supervisor"
+      );
+
+      setEditing(null);
     } catch (err) {
       const message = err.response?.data?.error || "Failed to update supervisor";
       toastService.error(message);
     }
   };
 
-  const headers = [
-    "Name",
-    "Department",
-    "Speciality",
-    "Designation",
-    "Available Slots",
-    "Booked Slots",
-  ];
+  const headers = ["Name", "Department", "Speciality", "Designation", "Available Slots", "Booked Slots"];
 
   const rows = Array.isArray(supervisors)
     ? supervisors.map((s) => ({
-        Name: <strong className="sup-name">{s.name}</strong>,
-        Department: s.department,
-        Speciality: s.specialization || s.speciality,
-        Designation: s.designation || "—",
+        Name:              <strong className="sup-name">{s.name}</strong>,
+        Department:        s.department,
+        Speciality:        s.specialization || s.speciality,
+        Designation:       s.designation || "—",
         "Available Slots": s.availableSlots,
-        "Booked Slots": s.bookedSlots,
+        "Booked Slots":    s.bookedSlots,
         __raw: s,
       }))
     : [];
@@ -152,13 +171,9 @@ export default function SupervisorSlots() {
     const sup = rowObj.__raw || supervisors[index];
     return (
       <>
-        <button className="table-action-btn" onClick={() => openEdit(sup)}>
-          Edit
-        </button>
+        <button className="table-action-btn" onClick={() => openEdit(sup)}>Edit</button>
         {!viewForCoordinator && (
-          <button className="table-action-btn delete" onClick={() => handleDelete(sup)}>
-            Delete
-          </button>
+          <button className="table-action-btn delete" onClick={() => handleDelete(sup)}>Delete</button>
         )}
       </>
     );
@@ -166,11 +181,7 @@ export default function SupervisorSlots() {
 
   return (
     <>
-      <DashboardSectionHeader
-        description={
-          "Manage supervisor slots. Available slots are fixed based on designation and are not editable."
-        }
-      >
+      <DashboardSectionHeader description="Manage supervisor slots. Available slots are fixed based on designation and are not editable.">
         Supervisor Slots
       </DashboardSectionHeader>
 
@@ -203,31 +214,19 @@ export default function SupervisorSlots() {
                 onChange={(e) => {
                   const newDes = e.target.value;
                   const defaultSlots = DESIGNATION_DEFAULTS[newDes] ?? 0;
-                  setEditing((prev) => ({
-                    ...prev,
-                    designation: newDes,
-                    available: defaultSlots,
-                  }));
+                  setEditing((prev) => ({ ...prev, designation: newDes, available: defaultSlots }));
                 }}
               >
                 <option value="">-- Select designation --</option>
                 {Object.keys(DESIGNATION_DEFAULTS).map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
+                  <option key={d} value={d}>{d}</option>
                 ))}
               </select>
             </div>
 
             <div className="sup-edit-row">
               <label className="sup-edit-label">Available Slots</label>
-              <input
-                className="sup-edit-input"
-                type="number"
-                value={String(editing.available)}
-                disabled
-                readOnly
-              />
+              <input className="sup-edit-input" type="number" value={String(editing.available)} disabled readOnly />
             </div>
 
             <div className="sup-edit-row">
@@ -237,19 +236,13 @@ export default function SupervisorSlots() {
                 type="number"
                 min="0"
                 value={String(editing.booked)}
-                onChange={(e) =>
-                  setEditing((prev) => ({ ...prev, booked: e.target.value }))
-                }
+                onChange={(e) => setEditing((prev) => ({ ...prev, booked: e.target.value }))}
               />
             </div>
 
             <div className="sup-modal-actions">
-              <button className="sup-btn-save" onClick={handleSave}>
-                Save
-              </button>
-              <button className="sup-btn-cancel" onClick={closeEdit}>
-                Cancel
-              </button>
+              <button className="sup-btn-save" onClick={handleSave}>Save</button>
+              <button className="sup-btn-cancel" onClick={closeEdit}>Cancel</button>
             </div>
           </div>
         </div>

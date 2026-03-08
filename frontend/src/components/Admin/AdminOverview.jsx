@@ -5,29 +5,6 @@ import toastService from "../ToastService/ToastService.jsx";
 import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import { FaPeopleGroup, FaUserPen } from "react-icons/fa6";
 
-// ─── Type → icon color mapping ───────────────────────────────────────────────
-const TYPE_COLORS = {
-  supervisor:  "#16a34a",
-  coordinator: "#2563eb",
-  student:     "#fbc73d",
-  group:       "#f43f5e",
-  template:    "#8b5cf6",
-  deadline:    "#0ea5e9",
-  proposal:    "#f97316",
-  general:     "#6b7280",
-};
-
-const TYPE_DOTS = {
-  supervisor:  "🟢",
-  coordinator: "🔵",
-  student:     "🟡",
-  group:       "🔴",
-  template:    "🟣",
-  deadline:    "🔵",
-  proposal:    "🟠",
-  general:     "⚪",
-};
-
 export default function AdminOverview({ onTabChange }) {
   const [stats, setStats] = useState({
     totalStudents: 0,
@@ -35,12 +12,11 @@ export default function AdminOverview({ onTabChange }) {
     totalCoordinators: 0,
     totalGroups: 0,
   });
-  const [loading,            setLoading]            = useState(true);
-  const [activitiesLoading,  setActivitiesLoading]  = useState(true);
-  const [recentActivities,   setRecentActivities]   = useState([]);
+  const [loading,           setLoading]           = useState(true);
+  const [activitiesLoading, setActivitiesLoading] = useState(true);
+  const [recentActivities,  setRecentActivities]  = useState([]);
 
   useEffect(() => {
-    // ── Stats ──
     const fetchStats = async () => {
       try {
         setLoading(true);
@@ -54,7 +30,6 @@ export default function AdminOverview({ onTabChange }) {
       }
     };
 
-    // ── Recent Activities ──
     const fetchRecentActivities = async () => {
       try {
         setActivitiesLoading(true);
@@ -64,7 +39,6 @@ export default function AdminOverview({ onTabChange }) {
         }
       } catch (error) {
         console.error("Error fetching recent activities:", error);
-        // Show empty — no fake fallback data
         setRecentActivities([]);
       } finally {
         setActivitiesLoading(false);
@@ -126,7 +100,6 @@ export default function AdminOverview({ onTabChange }) {
       <div className="section-chip">Recent Activity</div>
       <div className="activity-list">
         {activitiesLoading ? (
-          // Skeleton rows
           [1, 2, 3].map((i) => (
             <div key={i} style={{
               height: 18, borderRadius: 8, marginBottom: 14,
@@ -143,9 +116,6 @@ export default function AdminOverview({ onTabChange }) {
           <div className="timeline">
             {recentActivities.map((act, i) => (
               <div className="activity-item" key={i}>
-                <span style={{ marginRight: 6 }}>
-                  {TYPE_DOTS[act.type] || "⚪"}
-                </span>
                 {act.text}
                 <span className="time">{act.time}</span>
               </div>

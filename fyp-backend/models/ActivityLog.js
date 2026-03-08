@@ -1,4 +1,3 @@
-// models/ActivityLog.js
 const mongoose = require("mongoose");
 
 const activityLogSchema = new mongoose.Schema(
@@ -7,7 +6,7 @@ const activityLogSchema = new mongoose.Schema(
     description: { type: String, required: true },
     category: {
       type: String,
-      enum: ["supervisor", "template", "deadline"],
+      enum: ["supervisor", "coordinator", "student", "admin", "template", "deadline"],
       required: true,
     },
     performedBy: { type: String, default: "system" },
