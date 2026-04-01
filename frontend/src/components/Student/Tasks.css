@@ -81,7 +81,7 @@
 }
 
 /* Create button */
-..form-actions {
+.form-actions {
   grid-column: 1 / -1;
   display: flex;
   justify-content: center;

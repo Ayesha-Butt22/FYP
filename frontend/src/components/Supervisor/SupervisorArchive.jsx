@@ -38,11 +38,41 @@ export default function SupervisorArchive() {
     const [query, setQuery] = useState("");
     const [tech, setTech] = useState("");
     const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+   const [expandedDesc, setExpandedDesc] = useState({});
+const [expandedTech, setExpandedTech] = useState({});
+    
+const toggleDesc = (id) => {
+  setExpandedDesc((prev) => ({
+    ...prev,
+    [id]: !prev[id],
+  }));
+};
+
+const toggleTech = (id) => {
+  setExpandedTech((prev) => ({
+    ...prev,
+    [id]: !prev[id],
+  }));
+};
+
+    const loadProjects = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch("http://localhost:5000/api/archive");
+            const data = await res.json();
+            if (data.success) {
+                setProjects(data.data);
+            }
+        } catch (err) {
+            console.error("Error loading archive:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        
-        // load demo data (replace with API when available)
-        setProjects(dummyProjects);
+        loadProjects();
     }, []);
 
     const filtered = projects.filter((proj) => {
@@ -62,21 +92,40 @@ export default function SupervisorArchive() {
         "Project Name": (
             <div style={{fontWeight: 700, color: "#01337a"}}>{proj.title}</div>
         ),
-        Description: proj.description,
-        Technology: (
-            <Stack direction="row" spacing={1}>
-                {proj.technologies.map((t) => (
-                    <Tooltip title={t} key={t}>
-                        <Chip
-                            icon={<CodeIcon fontSize="small"/>}
-                            label={t}
-                            size="small"
-                            className="tech-chip"
-                        />
-                    </Tooltip>
-                ))}
-            </Stack>
-        ),
+       Description: (
+  <div>
+    <span>
+      {expandedDesc[proj.projectId]
+        ? proj.description
+        : proj.description.slice(0, 40) + "..."}
+    </span>
+
+    <span
+      onClick={() => toggleDesc(proj.projectId)}
+      style={{ color: "blue", cursor: "pointer", marginLeft: "5px" }}
+    >
+      {expandedDesc[proj.projectId] ? "Show Less" : "Read More"}
+    </span>
+  </div>
+),
+Technology: (
+  <div>
+    <span>
+      {expandedTech[proj.projectId]
+        ? proj.technologies.join(", ")
+        : proj.technologies.slice(0, 2).join(", ") + "..."}
+    </span>
+
+    {proj.technologies.length > 2 && (
+      <span
+        onClick={() => toggleTech(proj.projectId)}
+        style={{ color: "#1976d2", cursor: "pointer", marginLeft: "5px" }}
+      >
+        {expandedTech[proj.projectId] ? "Show Less" : "Read More"}
+      </span>
+    )}
+  </div>
+),
         "Supervised By": proj.supervisor,
     }));
 
@@ -150,18 +199,24 @@ export default function SupervisorArchive() {
 
 
                 <div style={{maxWidth: "100%"}}>
-                    <AppTable headers={headers} rows={rows}/>
-                    {rows.length === 0 && (
-                        <div
-                            style={{
-                                textAlign: "center",
-                                color: "#888",
-                                padding: "28px 0",
-                                fontSize: 18,
-                            }}
-                        >
-                            No projects found.
-                        </div>
+                    {loading ? (
+                        <div style={{ textAlign: "center", padding: "20px" }}>Loading Archive...</div>
+                    ) : (
+                        <>
+                            <AppTable headers={headers} rows={rows}/>
+                            {rows.length === 0 && (
+                                <div
+                                    style={{
+                                        textAlign: "center",
+                                        color: "#888",
+                                        padding: "28px 0",
+                                        fontSize: 18,
+                                    }}
+                                >
+                                    No projects found.
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
               <Stack spacing={0.5} mt={2} ml={2}>

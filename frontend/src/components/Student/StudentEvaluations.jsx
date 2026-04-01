@@ -1,182 +1,143 @@
 import React, { useEffect, useState } from "react";
-import { Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import DashboardSectionHeader from "../Supervisor/DashboardSectionHeader";
 import AppTable from "../Admin/AppTable.jsx";
 import { toastService } from "../ToastService/ToastService";
 import "./StudentEvaluations.css";
 
-const DEMO_EVALS = [
-  {
-    projectId: "G-1001",
-    projectTitle: "Smart Attendance System",
-    supervisor: "Dr Ayesha",
-    evaluatedOn: "2025-10-15",
-    members: ["Ali Raza", "Sana Tariq", "Bilal Khan"],
-    milestones: [
-      {
-        id: "proposal",
-        name: "Proposal",
-        weight: 0.2,
-        rubric: [
-          { id: "r1", criterion: "Problem definition", max: 10, score: 8, feedback: "Clear but needs minor scope reduction" },
-          { id: "r2", criterion: "Objectives", max: 10, score: 9, feedback: "Good objectives" },
-          { id: "r3", criterion: "Literature review", max: 10, score: 7, feedback: "Add 2 more refs" },
-        ],
-      },
-      {
-        id: "mid",
-        name: "Mid",
-        weight: 0.3,
-        rubric: [
-          { id: "r1", criterion: "Design completeness", max: 15, score: 11, feedback: "Design OK" },
-          { id: "r2", criterion: "Implementation progress", max: 15, score: 12, feedback: "Working prototype" },
-        ],
-      },
-      {
-        id: "final",
-        name: "Final Report / Defense",
-        weight: 0.5,
-        rubric: [
-          { id: "r1", criterion: "Report quality", max: 20, score: 0, feedback: "" },
-          { id: "r2", criterion: "Defense", max: 30, score: 0, feedback: "" },
-        ],
-      },
-    ],
-  },
- 
-];
-
-const STORAGE_KEY = "student_evaluations_v1";
-
-function readEvals() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : DEMO_EVALS;
-  } catch {
-    return DEMO_EVALS;
-  }
-}
-
-function writeEvals(data) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {}
-}
-
-function computeRubricTotal(rubric) {
-  const max = rubric.reduce((s, r) => s + (r.max || 0), 0);
-  const scored = rubric.reduce((s, r) => s + (r.score || 0), 0);
-  const percent = max > 0 ? Math.round((scored / max) * 100) : 0;
-  return { max, scored, percent };
-}
-
-function computeFinalWeighted(milestones) {
-  let total = 0;
-  let hasAny = false;
-  milestones.forEach((m) => {
-    const { percent } = computeRubricTotal(m.rubric);
-    if (m.weight && typeof percent === "number") {
-      total += percent * m.weight;
-      hasAny = true;
-    }
-  });
-  return hasAny ? Math.round(total) : null;
-}
+const API_BASE_URL = "http://localhost:5000/api";
 
 export default function StudentEvaluations() {
-  const [evals, setEvals] = useState(() => readEvals());
+  const [evals, setEvals] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [openProjectId, setOpenProjectId] = useState(null);
+  const loggedName = localStorage.getItem("name");
 
   useEffect(() => {
-    writeEvals(evals);
-  }, [evals]);
+    const fetchEvals = async () => {
+      const email = localStorage.getItem("email");
+      if (!email) return;
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_BASE_URL}/supervisor/student-evaluations/${email}`, {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+          }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setEvals(data.evaluations || []);
+        } else {
+          toastService.error(data.message || "Failed to fetch evaluations");
+        }
+      } catch (err) {
+        console.error(err);
+        toastService.error("Server error while fetching evaluations");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvals();
+  }, []);
 
-  const summaryHeaders = ["Project ID", "Project Title", "Supervisor", "Weighted Final %"];
+  const summaryHeaders = ["FYP Year", "Evaluated By", "Date", "Final Score %"];
+  
   const summaryRows = evals.map((rec) => {
-    const finalPercent = computeFinalWeighted(rec.milestones);
+    // Each rec is a SupervisorEvaluation document
+    // We want to show a summary for each Milestone submission
+    const date = rec.createdAt ? new Date(rec.createdAt).toLocaleDateString() : "N/A";
+    
+    // Average marks across all sub-evaluations within this submission
+    let totalMarks = 0;
+    let maxMarks = 0;
+    (rec.evaluations || []).forEach(ev => {
+        totalMarks += ev.marks || 0;
+        maxMarks += ev.maxMarks || 0;
+    });
+    
+    const scorePercent = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0;
+
     return {
-      "Project ID": rec.projectId,
-      "Project Title": rec.projectTitle,
-      Supervisor: rec.supervisor,
-      "Weighted Final %": finalPercent !== null ? `${finalPercent}%` : "In Progress",
+      "FYP Year": rec.fypYear || "N/A",
+      "Evaluated By": rec.evaluatedBy?.name || "Supervisor",
+      "Date": date,
+      "Final Score %": `${scorePercent}%`,
       __raw: rec,
     };
   });
 
   const renderSummaryActions = (rowObj) => {
-    const pid = rowObj["Project ID"];
+    const recId = rowObj.__raw._id;
     return (
       <button
         className="st-clear-btn"
         onClick={() => {
-          setOpenProjectId(openProjectId === pid ? null : pid);
+          setOpenProjectId(openProjectId === recId ? null : recId);
         }}
       >
-        Open
+        {openProjectId === recId ? "Close" : "View Rubrics"}
       </button>
     );
   };
 
+  if (loading && evals.length === 0) return <Box sx={{ p: 4, textAlign: 'center' }}><CircularProgress /></Box>;
+
   return (
     <Box>
-      <DashboardSectionHeader description="View rubric-based evaluations from your supervisors. See per-milestone breakdowns and weighted final score.">
-        Evaluations
+      <DashboardSectionHeader description="View rubric-based evaluations from your supervisors. See per-milestone breakdowns and detailed feedback.">
+        Supervisor Evaluations
       </DashboardSectionHeader>
 
       <Box sx={{ mb: 2 }}>
-        <AppTable headers={summaryHeaders} rows={summaryRows} renderActions={renderSummaryActions} />
+        {evals.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "2rem", color: "#666", background: "white", borderRadius: "8px" }}>
+                No supervisor evaluations found for your group yet.
+            </div>
+        ) : (
+            <AppTable headers={summaryHeaders} rows={summaryRows} renderActions={renderSummaryActions} />
+        )}
       </Box>
 
-      <Box display="grid" gridTemplateColumns="1fr" gap={12}>
+      <Box display="grid" gridTemplateColumns="1fr" gap={2}>
         {evals.map((rec) => {
-          if (openProjectId !== rec.projectId) return null;
-
-          // Compute group-level totals
-          const totals = rec.milestones.reduce(
-            (acc, m) => {
-              const rTotal = computeRubricTotal(m.rubric);
-              acc.scored += rTotal.scored;
-              acc.max += rTotal.max;
-              return acc;
-            },
-            { scored: 0, max: 0 }
-          );
-
-          const scorePercent = totals.max > 0 ? Math.round((totals.scored / totals.max) * 100) : 0;
-
-       
-          const memberRows = (Array.isArray(rec.members) && rec.members.length > 0)
-            ? rec.members.map((member) => ({
-                "FYP Year": "FYP1",
-                "Group Member": member,
-                Score: totals.scored,
-                Max: totals.max,
-                "Percentage": totals.max ? `${scorePercent}%` : "—",
-                __raw: rec,
-              }))
-            : [
-                {
-                  "FYP Year": "FYP1",
-                  "Group Member": "—",
-                  Score: totals.scored,
-                  Max: totals.max,
-                  "Percentage": totals.max ? `${scorePercent}%` : "—",
-                  __raw: rec,
-                },
-              ];
+          if (openProjectId !== rec._id) return null;
 
           return (
-            <Box key={rec.projectId} className="eval-expanded-wrap">
-              <div className="eval-expanded-title" style={{ marginBottom: 18 }}>
-                {rec.projectTitle} — Members Summary
+            <Box key={rec._id} className="eval-expanded-wrap" sx={{ p: 2, background: '#fff', borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+              <div className="eval-expanded-title" style={{ marginBottom: 18, fontWeight: 700, color: '#013379' }}>
+                Detailed Rubric — {rec.fypYear} ({new Date(rec.createdAt).toLocaleDateString()})
               </div>
 
-              <div style={{ marginTop: 6 }}>
-                <AppTable
-                  headers={["FYP Year", "Group Member", "Score", "Max", "Percentage"]}
-                  rows={memberRows}
-                />
-              </div>
+              {rec.evaluations
+                .filter(subEval => String(subEval.studentName || subEval.name || "").trim() === String(loggedName || "").trim())
+                .map((subEval, idx) => (
+                <div key={idx} style={{ marginBottom: 24, borderBottom: '1px solid #eee', paddingBottom: 16 }}>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#333', marginBottom: 8 }}>
+                        {subEval.studentName} {subEval.studentId ? `(SAP: ${subEval.studentId})` : ""}
+                    </div>
+                    
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 12 }}>
+                        <thead>
+                            <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                                <th style={{ textAlign: 'left', padding: 8 }}>Evaluation</th>
+                                <th style={{ textAlign: 'center', padding: 8 }}>Marks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style={{ borderBottom: '1px solid #edf2f7' }}>
+                                <td style={{ padding: 8 }}>Overall Score</td>
+                                <td style={{ textAlign: 'center', padding: 8 }}><strong>{subEval.marks ?? "—"}</strong> / {subEval.maxMarks ?? "—"}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    {subEval.feedback && (
+                        <div style={{ background: '#f0f7ff', padding: '10px 15px', borderRadius: 8, fontSize: '0.9rem', color: '#1e40af' }}>
+                            <strong>Feedback:</strong> {subEval.feedback}
+                        </div>
+                    )}
+                </div>
+              ))}
             </Box>
           );
         })}

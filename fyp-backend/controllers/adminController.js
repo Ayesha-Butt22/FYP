@@ -258,7 +258,9 @@ exports.getSystemStats = async (req, res) => {
     const totalStudents = await User.countDocuments({ role: "student" });
     const totalSupervisors = await User.countDocuments({ role: "supervisor" });
     const totalCoordinators = await User.countDocuments({ role: "coordinator" });
-    const totalGroups = await Group.countDocuments();
+    
+    // Only count active (non-archived) groups
+    const totalGroups = await Group.countDocuments({ isArchived: { $ne: true } });
 
     res.status(200).json({
       success: true,

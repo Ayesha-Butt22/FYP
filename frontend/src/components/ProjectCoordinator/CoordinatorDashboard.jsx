@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DashboardLayout from "../DashboardLayout";
 import {
+  Dashboard as DashboardIcon,
   CalendarMonth as CalendarMonthIcon,
   Groups as GroupsIcon,
   Settings as SettingsIcon,
@@ -20,8 +21,10 @@ import Noticeboard from "../Admin/Noticeboard";
 import TemplateView from "./TemplateView";
 import Profile from "./Profile";
 import CoordinatorCommitteeResults from "./CoordinatorCommitteeResults.jsx";
+import CoordinatorFinalResults from "./CoordinatorFinalResults.jsx";
 
 const menu = [
+  { label: "Overview", icon: <DashboardIcon /> },
   { label: "Manage Deadlines", icon: <CalendarMonthIcon /> },
   { label: "Groups", icon: <GroupsIcon /> },
   { label: "Supervisor Slots", icon: <SettingsIcon /> },
@@ -29,6 +32,7 @@ const menu = [
   { label: "Noticeboard", icon: <AnnouncementIcon /> },
   { label: "View Reports", icon: <DescriptionIcon /> },
   { label: "Committee Results", icon: <GroupsIcon /> },
+  { label: "Final Results", icon: <GroupsIcon /> },
   { label: "FYP Archive", icon: <ArchiveIcon /> },
   { label: "Profile", icon: <PersonIcon /> }
 ];
@@ -58,6 +62,7 @@ export default function CoordinatorDashboard() {
     "Noticeboard": <Noticeboard />,
     "View Reports": <TemplateView />,
     "Committee Results": <CoordinatorCommitteeResults />,
+    "Final Results": <CoordinatorFinalResults />,
     "FYP Archive": <SupervisorArchive />,
     "Profile": <Profile />
   };

@@ -231,7 +231,9 @@ export default function PresentationModal({ week, onClose, year }) {
                         {sched.slots.map((s, i) => (
                           <li key={s._id || i} style={{ padding: "6px 0" }}>
                             {new Date(s.startTime).toLocaleString()} — {new Date(s.endTime).toLocaleString()}
-                            {s.bookedBy ? ` — Booked (${s.bookedBy.groupId || s.bookedBy})` : " — Available"}
+                            {s.bookedBy 
+                              ? ` — Booked (${s.bookedBy.groupId || (typeof s.bookedBy === 'object' ? s.bookedBy._id : s.bookedBy)}${s.bookedBy.leader ? ` / ${s.bookedBy.leader.name || s.bookedBy.leader.email || ''}` : ""})` 
+                              : " — Available"}
                           </li>
                         ))}
                       </ul>

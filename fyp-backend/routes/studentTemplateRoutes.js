@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const studentTemplateController = require("../controllers/studentTemplateController");
+const { protect, isStudent } = require("../middlewares/authMiddleware");
 
 // ---------------- SETUP MULTER ----------------
 const storage = multer.diskStorage({
@@ -22,8 +23,10 @@ const upload = multer({ storage });
 // Upload a template
 router.post("/upload", upload.single("file"), studentTemplateController.uploadTemplate);
 
-router.get("/students/:studentId", studentTemplateController.getStudentInfo);
+// Get authenticated student info (Recommended)
+router.get("/me", protect, isStudent, studentTemplateController.getAuthenticatedStudentInfo);
 
+router.get("/students/:studentId", studentTemplateController.getStudentInfo);
 
 // Get all templates for a group
 router.get("/group/:groupId", studentTemplateController.getGroupTemplates);

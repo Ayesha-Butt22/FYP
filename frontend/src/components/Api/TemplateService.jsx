@@ -5,7 +5,7 @@ const API_BASE = "http://localhost:5000/api/student-templates";
 
 export default class TemplateService {
   // ---------------- UPLOAD FILE ----------------
-  static async uploadFile(templateCode, file, studentId, week) {
+  static async uploadFile(templateCode, file, studentId, week, fypPart) {
     if (!studentId) throw new Error("Student ID is required.");
     
     const formData = new FormData();
@@ -13,6 +13,7 @@ export default class TemplateService {
     formData.append("templateCode", templateCode);
     formData.append("studentId", studentId);
     formData.append("week", week);
+    formData.append("fypPart", fypPart);
 
     const res = await axios.post(`${API_BASE}/upload`, formData, {
       headers: { "Content-Type": "multipart/form-data" },

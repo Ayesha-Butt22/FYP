@@ -53,14 +53,6 @@ export default function ManageDeadlines() {
       if (data && data.deadlines) {
         let filteredData = data.deadlines;
 
-        if (selectedPart === "fyp-2") {
-          filteredData = data.deadlines.filter((d) => {
-            const weekMatch = d.week.match(/\d+/);
-            const weekNumber = weekMatch ? parseInt(weekMatch[0]) : 0;
-            return weekNumber >= 13 || d.week.toLowerCase().includes("after");
-          });
-        }
-
         const parsed = filteredData.map((d, index) => {
           const weekMatch = d.week.match(/\d+/);
           const weekNumber = weekMatch ? parseInt(weekMatch[0]) : 0;
@@ -80,13 +72,13 @@ export default function ManageDeadlines() {
             d.deliverables?.toLowerCase() === "nill";
 
           return {
-  ...d,
-  timestamp: startDate.getTime(),
-  dateLabel,
-  weekNumber,
-  yValue: index % 2 === 0 ? 1 : 1.5, // 🔥 spacing fix
-  isNil,
-};
+            ...d,
+            timestamp: startDate.getTime(),
+            dateLabel,
+            weekNumber,
+            yValue: 1, // 🔥 spacing fix
+            isNil,
+          };
         });
 
         setDeadlines(parsed);
@@ -163,53 +155,37 @@ export default function ManageDeadlines() {
 
         <text
           x={cx}
-          y={cy - 20}
+          y={cy - 25}
           textAnchor="middle"
           fill="#01337a"
-          fontSize="22px"
-          fontWeight="600"
+          fontSize="16px"
+          fontWeight="700"
         >
           {payload.week}
         </text>
 
         <text
           x={cx}
-          y={cy + 30}
+          y={cy + 35}
           textAnchor="middle"
-          fill="#333"
-          fontSize="15px"
+          fill="#555"
+          fontSize="12px"
           fontWeight="500"
         >
-          {payload.milestone.length > 18
-            ? payload.milestone.substring(0, 18) + "..."
+          {payload.milestone.length > 25
+            ? payload.milestone.substring(0, 22) + "..."
             : payload.milestone}
         </text>
 
-        {/* ✅ FYP-1 Manage Button */}
-        {selectedPart === "fyp-1" &&
-          (isWeek4 || isExamCommittee || isAfterFinals) && (
+        {/* ✅ Manage Button for Specific Milestones */}
+        {((selectedPart === "fyp-1" && (payload.weekNumber === 4 || payload.weekNumber === 16)) ||
+          (selectedPart === "fyp-2" && payload.weekNumber === 14)) && (
             <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
               <button
                 className="btn main-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleOpenPresentationModal(payload, "fyp-1");
-                }}
-              >
-                Manage
-              </button>
-            </foreignObject>
-          )}
-
-        {/* ✅ FYP-2 Manage Button (ONLY Week 14) */}
-        {selectedPart === "fyp-2" &&
-          payload.week?.toLowerCase() === "week 14" && (
-            <foreignObject x={cx - 50} y={cy + 45} width={120} height={50}>
-              <button
-                className="btn main-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenPresentationModal(payload, "fyp-2");
+                  handleOpenPresentationModal(payload, selectedPart);
                 }}
               >
                 Manage
@@ -248,17 +224,15 @@ export default function ManageDeadlines() {
         <div className="fyp-toggle-container">
           <button
             onClick={() => setSelectedPart("fyp-1")}
-            className={`fyp-toggle-btn ${
-              selectedPart === "fyp-1" ? "active" : ""
-            }`}
+            className={`fyp-toggle-btn ${selectedPart === "fyp-1" ? "active" : ""
+              }`}
           >
             FYP-I
           </button>
           <button
             onClick={() => setSelectedPart("fyp-2")}
-            className={`fyp-toggle-btn ${
-              selectedPart === "fyp-2" ? "active" : ""
-            }`}
+            className={`fyp-toggle-btn ${selectedPart === "fyp-2" ? "active" : ""
+              }`}
           >
             FYP-II
           </button>
@@ -271,22 +245,22 @@ export default function ManageDeadlines() {
               margin={{ top: 40, right: 80, bottom: 80, left: 70 }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-             <XAxis
-  type="number"
-  dataKey="timestamp"
-  domain={["dataMin", "dataMax"]}
-  ticks={deadlines.map(d => d.timestamp)}   
-  interval={0}                               
-  allowDuplicatedCategory={false}
-  tickFormatter={(tick) => {
-    const item = deadlines.find(d => d.timestamp === tick);
-    return item ? item.dateLabel : "";
-  }}
-  angle={-25}
-  textAnchor="end"
-  height={90}
-/>
-            <YAxis dataKey="yValue" domain={[0.5, 2]} hide />
+              <XAxis
+                type="number"
+                dataKey="timestamp"
+                domain={["dataMin", "dataMax"]}
+                ticks={deadlines.map(d => d.timestamp)}
+                interval={0}
+                allowDuplicatedCategory={false}
+                tickFormatter={(tick) => {
+                  const item = deadlines.find(d => d.timestamp === tick);
+                  return item ? item.dateLabel : "";
+                }}
+                angle={-25}
+                textAnchor="end"
+                height={90}
+              />
+              <YAxis dataKey="yValue" domain={[0.5, 2]} hide />
               <Tooltip content={<CustomTooltip />} />
               <Line type="linear" dataKey="yValue" stroke="#01337a" dot={false} />
               <Scatter dataKey="yValue" shape={<CustomDot />} />

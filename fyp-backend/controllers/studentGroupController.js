@@ -109,3 +109,30 @@ exports.deleteGroup = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+exports.getAllGroups = async (req, res) => {
+  try {
+    const groups = await Group.find({}).lean();
+    
+    // Get all leader emails
+    const emails = groups.map(g => g.leader?.email).filter(Boolean);
+    
+    // Fetch users (names) for these emails
+    const users = await User.find({ email: { $in: emails } }).select("email name");
+    const emailNameMap = {};
+    users.forEach(u => { emailNameMap[u.email] = u.name; });
+
+    // Map names back to groups
+    const result = groups.map(g => ({
+      ...g,
+      leader: {
+        ...g.leader,
+        name: emailNameMap[g.leader?.email] || "Unknown"
+      }
+    }));
+
+    return res.json({ success: true, data: result });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};

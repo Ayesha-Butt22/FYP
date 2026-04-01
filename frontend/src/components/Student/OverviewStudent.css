@@ -36,9 +36,9 @@
   background: linear-gradient(90deg, var(--main-blue) 0%, var(--accent-blue) 100%);
   color: #fff;
   border-radius: 28px;
-  padding: 36px 28px 28px 32px;
-  margin-bottom: 36px;
-  box-shadow: 0 6px 36px rgba(37, 99, 235, 0.12);
+  padding: 44px 56px 34px 42px;
+  margin-bottom: 54px;
+  box-shadow: 0 2px 32px rgba(37, 99, 235, 0.13);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -164,51 +164,53 @@
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 24px;
-  margin-bottom: 36px;
+  gap: 38px;
+  margin-bottom: 54px;
   width: 100%;
   max-width: 1120px;
   margin: 0 auto;
 }
 .stat-card {
   background: var(--card-bg);
-  border-radius: 14px;
-  box-shadow: 0 6px 18px var(--shadow-weak);
-  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(1, 51, 122, 0.07);
+  padding: 38px 18px 26px 18px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   border: 1px solid var(--glass-border);
 }
 .stat-icon-circle {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: var(--accent-blue);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 2.6rem;
   color: #fff;
-  margin-bottom: 6px;
+  margin-bottom: 18px;
 }
 .stat-title {
-  font-size: 1.05rem;
+  font-size: 1.3rem !important;
   font-weight: 700;
-  margin-bottom: 2px;
+  margin-bottom: 7px;
   color: var(--main-blue);
+  text-align: center;
 }
 .stat-value-studentonly {
-  font-size: 1.6rem;
-  font-weight: 800;
+  font-size: 1.8rem;
+  font-weight: 900;
   color: var(--accent-blue);
+  text-align: center;
 }
 
 
-.progress-section-gap { height: 20px; }
+.progress-section-gap { height: 35px; }
 .progress-box {
-  margin-bottom: 36px;
+  margin-bottom: 54px;
   width: 100%;
   max-width: 1120px;
   margin: 0 auto;

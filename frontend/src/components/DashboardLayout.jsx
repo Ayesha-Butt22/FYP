@@ -30,7 +30,7 @@ const GlowingIconWrapper = styled.div`
   justify-content: center;
   transition: transform 0.3s;
   ${(props) =>
-    props.glow &&
+    props.$glow &&
     css`
       animation: ${glow} 1.5s infinite;
     `}
@@ -155,7 +155,7 @@ export default function DashboardLayout({
           <h1 className="dashboard-title">{headerTitle}</h1>
           <div className="dashboard-profile">
             <Tooltip title="Notifications">
-                <GlowingIconWrapper glow={hasNewNotification}>
+                <GlowingIconWrapper $glow={hasNewNotification}>
                     <NotificationsActiveIcon
                         sx={{
                             width: 40,

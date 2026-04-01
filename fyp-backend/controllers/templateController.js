@@ -97,7 +97,7 @@ exports.uploadTemplate = async (req, res) => {
 // @route   GET /api/templates
 exports.getAllTemplates = async (req, res) => {
     try {
-        console.log('Get templates called with query:', req.query);
+
         
         const { department } = req.query;
         

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import supervisorService from "../Api/supervisorService.jsx";
 import {
   Box,
   Paper,
@@ -23,45 +24,8 @@ import * as XLSX from "xlsx";
 import "./SupervisorReports.css";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 
-// Dummy data
-const GROUPS = [
-  {
-    id: "G-101",
-    title: "Smart Attendance System",
-    members: ["Ali Raza", "Sana Tariq", "Bilal Khan"],
-    milestones: [
-      { name: "Proposal", status: "Completed", feedback: "Great proposal!", score: 18, max: 20 },
-      { name: "SRS", status: "Completed", feedback: "Detailed doc.", score: 27, max: 30 },
-      { name: "Design", status: "Pending", feedback: "", score: 0, max: 25 },
-      { name: "Report", status: "In Progress", feedback: "Needs more detail.", score: 15, max: 25 },
-      { name: "Defense", status: "Pending", feedback: "", score: 0, max: 30 },
-    ],
-  },
-  {
-    id: "G-102",
-    title: "AI-Based Disease Prediction",
-    members: ["Ayesha Butt", "Madiha Sumbal", "Saad Farooq"],
-    milestones: [
-      { name: "Proposal", status: "Completed", feedback: "Innovative!", score: 19, max: 20 },
-      { name: "SRS", status: "Completed", feedback: "Well researched.", score: 28, max: 30 },
-      { name: "Design", status: "Completed", feedback: "Good diagrams.", score: 22, max: 25 },
-      { name: "Report", status: "Pending", feedback: "", score: 0, max: 25 },
-      { name: "Defense", status: "Pending", feedback: "", score: 0, max: 30 },
-    ],
-  },
-  {
-    id: "G-103",
-    title: "Online Exam Proctoring",
-    members: ["Fatima Noor", "Usman Ghani", "Hira Qureshi"],
-    milestones: [
-      { name: "Proposal", status: "Completed", feedback: "Clear and concise.", score: 16, max: 20 },
-      { name: "SRS", status: "Completed", feedback: "Covers all cases.", score: 25, max: 30 },
-      { name: "Design", status: "Completed", feedback: "Nice architecture.", score: 21, max: 25 },
-      { name: "Report", status: "Pending", feedback: "", score: 0, max: 25 },
-      { name: "Defense", status: "Pending", feedback: "", score: 0, max: 30 },
-    ],
-  },
-];
+// ----- Dummy Data Removed -----
+
 
 // Template name mapping
 const getTemplateName = (milestoneName) => {
@@ -110,9 +74,65 @@ const statusColor = (status) =>
     : "default";
 
 export default function SupervisorReports() {
-  const [selectedGroup, setSelectedGroup] = useState("");
+  const [groups, setGroups] = useState([]);
+  const [selectedGroupId, setSelectedGroupId] = useState("");
+  const [groupData, setGroupData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const group = GROUPS.find((g) => g.id === selectedGroup);
+  useEffect(() => {
+    const loadGroups = async () => {
+      try {
+        const res = await supervisorService.getSupervisorGroups();
+        if (res.success) {
+          const mapped = res.groups.map(g => ({
+            id: g.groupId,
+            maskedId: g.maskedGroupId,
+            title: g.description,
+            members: g.members.map(m => m.name) // Just names for reporting
+          }));
+          setGroups(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load groups:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadGroups();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedGroupId) {
+      setGroupData(null);
+      return;
+    }
+
+    const loadGroupDetails = async () => {
+      try {
+        const res = await supervisorService.fetchGroupSubmissions(selectedGroupId);
+        const submissions = res.submissions || [];
+        const group = groups.find(g => g.id === selectedGroupId);
+
+        setGroupData({
+          ...group,
+          milestones: submissions.map(s => ({
+            name: s.templateLabel,
+            week: s.week,
+            status: s.status,
+            feedback: s.supervisorRemarks || "-",
+            score: 0, // No scores in submission model yet
+            max: 0
+          }))
+        });
+      } catch (err) {
+        console.error("Failed to load group details:", err);
+      }
+    };
+
+    loadGroupDetails();
+  }, [selectedGroupId, groups]);
+
+  const group = groupData;
 
   // Progress summary calculation
   const completed = group ? group.milestones.filter((m) => m.status === "Completed").length : 0;
@@ -165,15 +185,15 @@ export default function SupervisorReports() {
         <FormControl className="reports-group-select">
           <InputLabel>Select Group</InputLabel>
           <Select
-            value={selectedGroup}
+            value={selectedGroupId}
             label="Select Group"
-            onChange={(e) => setSelectedGroup(e.target.value)}
+            onChange={(e) => setSelectedGroupId(e.target.value)}
             size="small"
             style={{ height: '60px'}}
           >
-            {GROUPS.map((g) => (
+            {groups.map((g) => (
               <MenuItem key={g.id} value={g.id}>
-                {g.id} - {g.title}
+                {g.maskedId} - {g.title}
               </MenuItem>
             ))}
           </Select>

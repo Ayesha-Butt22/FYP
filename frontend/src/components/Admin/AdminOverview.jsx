@@ -7,10 +7,10 @@ import {FaPeopleGroup, FaUserPen} from "react-icons/fa6";
 
 async function getSystemStats() {
     const response = await adminSupervisorApi.getstats();
-    if (!response.status === 200) {
+    if (response.status !== 200) {
         throw new Error('Failed to fetch stats from the server.');
     }
-    const data = await response.data;
+    const data = response.data; // response.data is already an object
     if (!data.success) {
         throw new Error(data.message || 'API returned an error.');
     }
@@ -20,11 +20,11 @@ async function getSystemStats() {
 // NEW: Function to fetch recent activities
 async function getRecentActivities() {
     const response = await adminSupervisorApi.getRecentActivities();
-    console.log("Recent Activities API Response:", response); // DEBUG
-    if (!response.status === 200) {
+    console.log("Recent Activities API Response:", response);
+    if (response.status !== 200) {
         throw new Error('Failed to fetch recent activities from the server.');
     }
-    const data = await response.data;
+    const data = response.data; // response.data is already an object
     if (!data.success) {
         throw new Error(data.message || 'API returned an error.');
     }

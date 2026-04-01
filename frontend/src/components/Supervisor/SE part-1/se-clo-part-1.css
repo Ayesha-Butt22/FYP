@@ -2,23 +2,32 @@
 .cs1-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 40px 0;
-  overflow-y: auto;
+  align-items: center; /* Center the box */
+  padding: 20px;
   z-index: 9999;
+  backdrop-filter: blur(4px);
 }
 
 /* ===== CS1 MODAL BOX ===== */
 .cs1-modal-box {
   background: white;
-  width: 98%;
-  max-width: 1600px;
-  min-height: 90vh;
-  padding: 40px;
-  border-radius: 12px;
+  width: 95%;
+  max-width: 1400px;
+  max-height: 90vh; /* Fixed max height */
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden; /* Clips the inner content */
+  animation: modalPop 0.3s ease-out;
+}
+
+@keyframes modalPop {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 /* ===== HEADER ===== */
@@ -26,297 +35,216 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #06b6d4;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
+  padding: 20px 30px;
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
 }
 
-/* Title */
 .h2 {
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 800;
   color: #01337a;
+  margin: 0;
 }
 
-/* ===== PROFESSIONAL TOTAL BOX ===== */
+.cs1-header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ===== FORM SCROLL CONTAINER ===== */
+form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cs1-form-content {
+  flex: 1;
+  overflow-y: auto; /* THIS ADDS THE SCROLLBAR */
+  padding: 30px;
+  background: #ffffff;
+}
+
+/* Custom Scrollbar Styling */
+.cs1-form-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.cs1-form-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 5px;
+}
+
+.cs1-form-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 5px;
+  border: 2px solid #f1f5f9;
+}
+
+.cs1-form-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ===== TOTAL BOX ===== */
 .cs1-total-top {
   font-size: 16px;
   font-weight: 700;
-  color: white;
-  background: linear-gradient(135deg, #01337a, #06b6d4);
-  padding: 8px 18px;
-  border-radius: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  color: #01337a;
+  background: #e6f0ff;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #01337a;
+  white-space: nowrap;
 }
 
-/* ===== PROFESSIONAL SUBMIT BUTTON ===== */
+/* ===== SUBMIT BUTTON ===== */
 .cs1-submit {
-  padding: 10px 25px;
+  padding: 10px 24px;
   border: none;
-  background: linear-gradient(135deg, #16a34a, #22c55e);
+  background: #16a34a;
   color: white;
-  border-radius: 25px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: 0.3s ease;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .cs1-submit:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  background: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-/* ===== CLOSE BUTTON SEPARATE LOOK ===== */
+.cs1-submit:active {
+  transform: translateY(0);
+}
+
+/* ===== CLOSE BUTTON ===== */
 .cs1-close {
-  font-size: 26px;
+  font-size: 32px;
   cursor: pointer;
-  color: white;
-  background: #ef4444;
-  padding: 5px 12px;
-  border-radius: 50%;
-  font-weight: bold;
-  margin-left: 10px;
-  transition: 0.3s ease;
+  color: #64748b;
+  font-weight: 300;
+  line-height: 1;
+  transition: color 0.2s;
 }
 
 .cs1-close:hover {
-  background: #dc2626;
+  color: #ef4444;
 }
 
 /* ===== LO CARD ===== */
 .cs1-card {
   background: #ffffff;
-  padding: 25px;
-  margin-bottom: 25px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
   border-left: 6px solid #06b6d4;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* LO Heading */
+.cs1-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
 .h3 {
-  font-size: 26px;
+  font-size: 20px;
   font-weight: 700;
   color: #01337a;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
-/* Description */
 .cs1-card p {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 25px;
-  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
 /* ===== OPTIONS GRID ===== */
 .cs1-options {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
 }
 
-/* OPTION BOX */
 .cs1-options label {
   background: #f8fafc;
-  border: 2px solid #06b6d4;
-  border-radius: 14px;
-  padding: 22px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
   cursor: pointer;
-  transition: 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  font-size: 17px !important;
-  font-weight: 600;
-  color: #01337a;
-  line-height: 1.6;
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.4;
 }
 
-/* ===== RADIO BUTTON ===== */
-.cs1-options input[type="radio"] {
-  transform: scale(1.4);
-  margin-bottom: 12px;
-  cursor: pointer;
-}
-
-/* Hover */
 .cs1-options label:hover {
-  background: #e0f7fa;
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  background: #f0f9ff;
+  border-color: #06b6d4;
+  transform: translateY(-2px);
 }
 
-/* ===== MAKE ALL MARKS BOLD ===== */
-.cs1-card p span,
-.cs1-card p {
-  font-weight: 700 !important;
+.cs1-options input[type="radio"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.cs1-options input[type="radio"]:checked {
+  border-color: #06b6d4;
+  background: #06b6d4;
+}
+
+.cs1-options input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+}
+
+.cs1-options label:has(input[type="radio"]:checked) {
+  background: #f0f9ff;
+  border-color: #06b6d4;
+  color: #01337a;
 }
 
 /* ===== OPEN BUTTON ===== */
 .open-btn {
-  padding: 12px 25px;
+  padding: 12px 24px;
   background: #01337a;
   color: white;
   border: none;
   cursor: pointer;
-  border-radius: 8px;
-  font-weight: 600;
-}
-/* ===== HEADER FIXED ALIGNMENT ===== */
-.cs1-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  border-bottom: 2px solid #06b6d4;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-}
-
-/* Header Right Section Proper Inline */
-.cs1-header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* ===== TOTAL PROFESSIONAL (SINGLE LINE) ===== */
-.cs1-total-top {
-  font-size: 16px;
-  font-weight: 700;
-  color: white;
-  background: linear-gradient(135deg, #01337a, #06b6d4);
-  padding: 8px 16px;
-  border-radius: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  white-space: nowrap; /* IMPORTANT FIX */
-}
-
-/* ===== SUBMIT BUTTON PROPER ALIGN ===== */
-.cs1-submit {
-  padding: 9px 22px;
-  border: none;
-  background: linear-gradient(135deg, #16a34a, #22c55e);
-  color: white;
-  border-radius: 25px;
-  cursor: pointer;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: 0.3s ease;
-  white-space: nowrap;
-}
-
-.cs1-submit:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-}
-
-/* ===== CLOSE BUTTON SEPARATE ===== */
-.cs1-close {
-  font-size: 24px;
-  cursor: pointer;
-  color: white;
-  background: #ef4444;
-  padding: 6px 12px;
-  border-radius: 50%;
-  font-weight: bold;
-  transition: 0.3s ease;
-}
-
-.cs1-close:hover {
-  background: #dc2626;
-}
-
-/* ===== FIX THIRD SPACING ISSUE ===== */
-.cs1-card p {
-  margin-bottom: 20px;
-}
-
-/* ===== MAKE ALL MARKS BOLD (FULL FIX) ===== */
-.cs1-card label {
-  font-weight: 700 !important;
-}
-
-/* Extra Safety For Numbers */
-.cs1-card label {
-  font-size: 17px;
-}
-/* ===== HEADER CLEAN FIX ===== */
-.cs1-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  border-bottom: 2px solid #06b6d4;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-}
-
-.cs1-header-right {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-/* ===== TOTAL (NOT BUTTON LOOK) ===== */
-.cs1-total-top {
-  font-size: 16px;
-  font-weight: 700;
-  color: #01337a; /* DARK BLUE */
-  background: #e6f0ff; /* LIGHT BLUE */
-  padding: 6px 14px;
   border-radius: 10px;
-  border: 1px solid #01337a;
-  white-space: nowrap;
-  box-shadow: none; /* remove button feel */
+  font-weight: 600;
+  transition: background 0.2s;
 }
 
-/* ===== SUBMIT BUTTON (SAME COLOR, JUST CLEANED) ===== */
-.cs1-submit {
-  padding: 9px 22px;
-  border: none;
-  background: #16a34a; /* SAME GREEN */
-  color: white;
-  border-radius: 8px; /* less button look */
-  cursor: pointer;
-  font-weight: 700;
-  transition: 0.3s ease;
-}
-
-.cs1-submit:hover {
-  opacity: 0.9;
-}
-
-/* ===== CLOSE BUTTON (NO RED CIRCLE) ===== */
-.cs1-close {
-  font-size: 28px;
-  cursor: pointer;
-  color: #01337a; /* DARK BLUE */
-  font-weight: bold;
-  margin-left: 5px;
-  background: none; /* remove circle */
-  padding: 0;
-}
-
-.cs1-close:hover {
-  color: #06b6d4;
-}
-
-/* ===== MAKE ALL MARKS BOLD ===== */
-.cs1-options label {
-  font-weight: 700 !important;
-}
-
-/* Extra bold for marks text inside brackets */
-.cs1-options label {
-  line-height: 1.6;
-}
-
-.cs1-options label::after {
-  font-weight: 900;
+.open-btn:hover {
+  background: #06b6d4;
 }

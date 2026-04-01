@@ -14,7 +14,8 @@ const groupSchema = new mongoose.Schema({
   member3: {
     sapId: { type: String },
     email: { type: String }
-  }
+  },
+  isArchived: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Group", groupSchema);

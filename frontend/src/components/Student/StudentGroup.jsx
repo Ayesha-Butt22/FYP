@@ -27,8 +27,11 @@ const sapidToEmail = (sapid) => (sapid ? `${sapid}@students.riphah.edu.pk` : "")
 const maskGroupId = (id) => {
   if (!id) return "group-unknown";
   const str = String(id);
-  const last5 = str.slice(-5);
-  return "group-" + last5;
+  // Only slice if it looks like a MongoDB ObjectId (24 hex characters)
+  if (/^[0-9a-fA-F]{24}$/.test(str)) {
+    return "Group-" + str.slice(-5);
+  }
+  return str;
 };
 
 export default function StudentGroup() {

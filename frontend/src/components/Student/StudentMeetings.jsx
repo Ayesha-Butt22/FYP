@@ -114,21 +114,23 @@ export default function StudentMeetings() {
 
         <AppTable
           headers={["Date", "Time", "Duration", "Action"]}
-          rows={availableSlots.map((s) => [
-            formatDate(s.date),
-            formatTime(s.time),
-            `${s.duration} min`,
-            <Button
-              variant="contained"
-              size="small"
-              onClick={() => {
-                setSelectedSlot(s);
-                setOpenConfirm(true);
-              }}
-            >
-              Book
-            </Button>,
-          ])}
+          rows={availableSlots
+            .filter((s) => !s.isBooked)
+            .map((s) => [
+              formatDate(s.date),
+              formatTime(s.time),
+              `${s.duration} min`,
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => {
+                  setSelectedSlot(s);
+                  setOpenConfirm(true);
+                }}
+              >
+                Book
+              </Button>,
+            ])}
         />
       </Paper>
 

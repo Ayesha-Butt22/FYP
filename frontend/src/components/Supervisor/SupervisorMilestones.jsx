@@ -7,18 +7,17 @@ import supervisorService from "../Api/supervisorService.jsx";
 import "./SupervisorMilestones.css";
 
 const TEMPLATE_DEFINITIONS = [
-  // FYP-1 Templates
-  { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1, year: "FYP-1" },
-  { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2, year: "FYP-1" },
-  { code: "t03", label: "Template-03: Proposal Presentation (MS PowerPoint)", week: 4, year: "FYP-1" },
-  { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6, year: "FYP-1" },
-  { code: "t05", label: "Template-07 Presentation, Template-05 Project Report", week: 13, year: "FYP-1" },
+    // FYP-1 Templates (6)
+    { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1, year: "FYP-1" },
+    { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2, year: "FYP-1" },
+    { code: "t03", label: "Template-03: Proposal Presentation (PPT)", week: 4, year: "FYP-1" },
+    { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6, year: "FYP-1" },
+    { code: "t05", label: "Template-05: Project Report (MS Word)", week: 8, year: "FYP-1" },
+    { code: "t07", label: "Template-07: Final Presentation (PPT)", week: 15, year: "FYP-1" },
 
-  // FYP-2 Templates
-  { code: "t06", label: "Template-05: Project Report", week: 11, year: "FYP-2" },
-  { code: "t07", label: "Template-06 Final Presentation", week: 13, year: "FYP-2" },
-  { code: "t08", label: "Template-06 Final Presentation", week: 15, year: "FYP-2" },
-  { code: "t09", label: "Template-06 Final Presentation", week: "Week after Finals", year: "FYP-2" }
+    // FYP-2 Templates (2)
+    { code: "t05", label: "FYP-2: Template-05: Project Report (MS Word)", week: 13, year: "FYP-2" },
+    { code: "t06", label: "FYP-2: Template-06: Complete Project Report (PPT)", week: 14, year: "FYP-2" }
 ];
 
 const formatDateTime = (inp) => {
@@ -62,6 +61,7 @@ export default function SupervisorMilestones() {
         selectedAction: "pending",
         saving: false,
     });
+    const [confirmModal, setConfirmModal] = useState({ open: false, message: "", onConfirm: null });
 
     useEffect(() => {
         const fetchSemesterStart = async () => {
@@ -88,6 +88,8 @@ export default function SupervisorMilestones() {
                     members: g.members,
                     special: g.special,
                     archived: false,
+                    milestonesTotal: g.milestonesTotal || 9,
+                    milestonesCompleted: g.milestonesCompleted || 0,
                     baseMilestones: initializeMilestones(g.milestones),
                 }));
                 setGroups(mapped);
@@ -156,6 +158,7 @@ export default function SupervisorMilestones() {
                     },
                     note: s.supervisorRemarks || "",
                     _id: s._id,
+                    fypPart: s.fypPart, // Critical: Ensure we store fypPart for backend updates
                 });
 
                 return acc;
@@ -178,12 +181,28 @@ export default function SupervisorMilestones() {
     };
 
     const archiveGroup = (groupId) => {
-        if (!window.confirm("Add this group to archive?")) return;
-        setGroups((prev) =>
-            prev.map((g) => (g.id === groupId ? { ...g, archived: true } : g))
-        );
-        setExpandedGroups((prev) => ({ ...prev, [groupId]: false }));
-        toastService.success("Group added to archive");
+        setConfirmModal({
+            open: true,
+            message: "Are you sure you want to move this project to the official FYP Archive? This will remove it from your active milestones.",
+            onConfirm: () => executeArchiveGroup(groupId)
+        });
+    };
+
+    const executeArchiveGroup = async (groupId) => {
+        setConfirmModal({ open: false, message: "", onConfirm: null });
+        try {
+            const res = await supervisorService.archiveGroup(groupId);
+            if (res.success) {
+                setGroups((prev) => prev.filter((g) => g.id !== groupId));
+                setExpandedGroups((prev) => ({ ...prev, [groupId]: false }));
+                toastService.success(res.message || "Group added to archive");
+            } else {
+                toastService.error(res.message || "Failed to archive group");
+            }
+        } catch (err) {
+            console.error("Archive error:", err);
+            toastService.error("Error archiving group.");
+        }
     };
 
     const openDetails = (groupId, milestoneIndex) => {
@@ -193,9 +212,9 @@ export default function SupervisorMilestones() {
         const milestone = milestones[milestoneIndex];
 
         const defaultAction =
-            milestone.status === "completed"
+            milestone.status === "approved" || milestone.status === "Approved" || milestone.status === "completed"
                 ? "approve"
-                : milestone.status === "rejected"
+                : milestone.status === "rejected" || milestone.status === "Rejected"
                     ? "unapprove"
                     : "pending";
 
@@ -251,9 +270,19 @@ export default function SupervisorMilestones() {
         }
     };
 
-    const handleUpdateStatus = async () => {
+    const handleUpdateStatusClick = () => {
         const { groupId, milestoneIndex, selectedAction } = modal;
         if (!groupId || milestoneIndex == null) return;
+
+        const group = groups.find((g) => g.id === groupId);
+        const isExpanded = expandedGroups[groupId];
+        const milestones = isExpanded ? submissionsData[groupId] : group.baseMilestones;
+        const milestone = milestones[milestoneIndex];
+
+        if (!milestone.note) {
+            toastService.info("Comments are required");
+            return;
+        }
 
         const confirmMsg =
             selectedAction === "approve"
@@ -262,7 +291,17 @@ export default function SupervisorMilestones() {
                     ? "Mark this milestone as Rejected?"
                     : "Mark this milestone as Pending?";
 
-        if (!window.confirm(confirmMsg)) return;
+        setConfirmModal({ 
+            open: true, 
+            message: confirmMsg,
+            onConfirm: executeUpdateStatus
+        });
+    };
+
+    const executeUpdateStatus = async () => {
+        const { groupId, milestoneIndex, selectedAction } = modal;
+        setConfirmModal({ open: false, message: "", onConfirm: null });
+        if (!groupId || milestoneIndex == null) return;
 
         const mappedStatus =
             selectedAction === "approve"
@@ -275,14 +314,7 @@ export default function SupervisorMilestones() {
         const isExpanded = expandedGroups[groupId];
         const milestones = isExpanded ? submissionsData[groupId] : group.baseMilestones;
         const milestone = milestones[milestoneIndex];
-
-        // Use milestone.templateCode instead of index
         const milestoneCode = milestone.templateCode;
-
-        if (!milestone.note) {
-            toastService.info("Comments are required");
-            return;
-        }
 
         setModal((s) => ({ ...s, saving: true }));
 
@@ -290,6 +322,7 @@ export default function SupervisorMilestones() {
             await supervisorService.updateMilestoneStatus(groupId, milestoneCode, {
                 status: mappedStatus,
                 note: milestone.note,
+                fypPart: milestone.fypPart, // Pass fypPart to distinguish duplicate codes like t05
             });
 
             if (isExpanded) {
@@ -393,7 +426,10 @@ export default function SupervisorMilestones() {
                                         <b>Domain:</b> {group.special}
                                     </div>
                                     <div className="milestone-card-members">
-                                        <b>Members:</b> {group.members?.join(", ")}
+                                        <b>Members:</b> {group.members?.map(m => typeof m === 'object' ? m.name : m).join(", ")}
+                                    </div>
+                                    <div className="milestone-card-progress" style={{ marginTop: 8, fontSize: "0.9rem", color: "#16a34a", fontWeight: 700 }}>
+                                        <b>Progress:</b> {group.milestonesCompleted} / {group.milestonesTotal} Milestones
                                     </div>
                                 </div>
                             </div>
@@ -409,6 +445,7 @@ export default function SupervisorMilestones() {
                                             <tr>
                                                 <th className="milestone-th">Milestone</th>
                                                 <th className="milestone-th">Uploaded Date</th>
+                                                <th className="milestone-th">Status</th>
                                                 <th className="milestone-th">Action</th>
                                             </tr>
                                         </thead>
@@ -417,6 +454,7 @@ export default function SupervisorMilestones() {
                                                 <tr key={mIdx}>
                                                     <td className="milestone-td">{m.weekLabel}</td>
                                                     <td className="milestone-td">{formatDateTime(m.uploadedFile?.uploadedAt)}</td>
+                                                    <td className="milestone-td">{m.status}</td>
                                                     <td className="milestone-td">
                                                         <button className="view-details-btn" onClick={() => openDetails(group.id, mIdx)}>
                                                             View Details
@@ -523,7 +561,7 @@ export default function SupervisorMilestones() {
                                         </div>
 
                                         <div className="stack-actions">
-                                            <button className="btn-update" onClick={handleUpdateStatus} disabled={modal.saving}>
+                                            <button className="btn-update" onClick={handleUpdateStatusClick} disabled={modal.saving}>
                                                 {modal.saving ? "Updating..." : "Update"}
                                             </button>
                                             <button className="btn-cancel" onClick={closeDetails}>
@@ -533,6 +571,38 @@ export default function SupervisorMilestones() {
                                     </div>
                                 );
                             })()}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Separate Custom Confirmation Modal */}
+            {confirmModal.open && (
+                <div className="mmodal-backdrop" style={{ zIndex: 1300 }}>
+                    <div className="mmodal" style={{ maxWidth: "400px", textAlign: "center", padding: "30px" }}>
+                        <div style={{ fontSize: "1.2rem", fontWeight: "600", marginBottom: "20px", color: "#1e293b" }}>
+                            Confirm Action
+                        </div>
+                        <div style={{ marginBottom: "30px", color: "#475569", lineHeight: "1.5" }}>
+                            {confirmModal.message}
+                        </div>
+                        <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+                            <button
+                                className="btn-update"
+                                style={{ width: "120px" }}
+                                onClick={() => {
+                                    if (confirmModal.onConfirm) confirmModal.onConfirm();
+                                }}
+                            >
+                                Yes, Confirm
+                            </button>
+                            <button
+                                className="btn-cancel"
+                                style={{ width: "120px" }}
+                                onClick={() => setConfirmModal({ open: false, message: "", onConfirm: null })}
+                            >
+                                Cancel
+                            </button>
                         </div>
                     </div>
                 </div>

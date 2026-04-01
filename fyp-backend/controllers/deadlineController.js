@@ -66,9 +66,64 @@ exports.getDeadLine = async (req, res) => {
     ];
 
     // =========================
-    // FYP – II (Part 2) (Exact Image Structure)
-    // =========================
     const fyp2 = [
+
+      {
+        week: "Week 1",
+        milestone: "Nill",
+        submitTo: "Nill",
+        deliverables: "Nill",
+        templates: "Nill",
+        evaluations: "Nill",
+      },
+      {
+        week: "Week 2",
+        milestone: "Nill",
+        submitTo: "Nill",
+        deliverables: "Nill",
+        templates: "Nill",
+        evaluations: "Nill",
+      },
+      {
+        week: "Week 4",
+        milestone: "Nill",
+        submitTo: "Nill",
+        deliverables: "Nill",
+        templates: "Nill",
+        evaluations: "Nill",
+      },
+      {
+        week: "Week 6",
+        milestone: "Nill",
+        submitTo: "Nill",
+        deliverables: "Nill",
+        templates: "Nill",
+        evaluations: "Nill",
+      },
+      {
+        week: "Week 8",
+        milestone: "Nill",
+        submitTo: "Nill",
+        deliverables: "Nill",
+        templates: "Nill",
+        evaluations: "Nill",
+      },
+      {
+        week: "Week 10",
+        milestone: "Nill",
+        submitTo: "Nill",
+        deliverables: "Nill",
+        templates: "Nill",
+        evaluations: "Nill",
+      },
+      {
+        week: "Week 12",
+        milestone: "Internal Mock Defense",
+        submitTo: "Supervisor",
+        deliverables: "Complete Project Demo",
+        templates: "Nill",
+        evaluations: "Progress Submission",
+      },
       {
         week: "Week 13",
         milestone: "Submit Report",

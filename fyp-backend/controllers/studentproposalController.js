@@ -97,13 +97,16 @@ exports.deleteProposal = async (req, res) => {
 exports.getMyProposals = async (req, res) => {
   try {
     const supervisorEmail = req.user.email;
-    const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
+    let proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
       .populate({
         path: "groupId",
         select: "groupId leader member2 member3",
+        match: { isArchived: { $ne: true } }
       })
       .sort({ createdAt: -1 })
       .lean();
+
+    proposals = proposals.filter(p => p.groupId !== null);
 
     for (const proposal of proposals) {
       const group = proposal.groupId;
@@ -153,13 +156,16 @@ exports.getPendingProposals = async (req, res) => {
       ...pendingStatusClause,
     };
 
-    const proposals = await Proposal.find(query)
+    let proposals = await Proposal.find(query)
       .populate({
         path: "groupId",
         select: "groupId leader member2 member3",
+        match: { isArchived: { $ne: true } }
       })
       .sort({ createdAt: -1 })
       .lean();
+
+    proposals = proposals.filter(p => p.groupId !== null);
 
     // Enrich group members' names
     for (const proposal of proposals) {

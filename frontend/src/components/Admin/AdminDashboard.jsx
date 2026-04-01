@@ -23,6 +23,7 @@ import SupervisorArchive from "../Supervisor/SupervisorArchive";
 import AdminTemplates from "./AdminTemplate";
 import Noticeboard from "./Noticeboard";
 import AdminProfile from "./AdminProfile";
+import CoordinatorCommitteeResults from "../ProjectCoordinator/CoordinatorCommitteeResults";
 
 const menu = [
   
@@ -33,6 +34,7 @@ const menu = [
   { label: "Templates", icon: <DescriptionIcon /> },
   { label: "Noticeboard", icon: <CampaignIcon /> },
   { label: "View Groups", icon: <GroupsIcon /> },
+  // { label: "Committee Results", icon: <GroupsIcon /> },
   { label: "FYP Archive", icon: <ArchiveIcon /> },
   { label: "Profile", icon: <AccountCircleIcon /> }, 
 ];
@@ -62,6 +64,7 @@ export default function AdminDashboard() {
     Templates: <AdminTemplates />,
     Noticeboard: <Noticeboard />,
     "View Groups": <GroupsGrid />,
+    "Committee Results": <CoordinatorCommitteeResults />,
     "FYP Archive": <SupervisorArchive />,
     Profile: <AdminProfile />, 
   };

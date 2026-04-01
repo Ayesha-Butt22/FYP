@@ -1,12 +1,13 @@
-import React, {useEffect, useState, useRef} from "react";
-import {Box} from "@mui/material";
+// StudentUploads - Template upload manager (SRS-14.9 / SRS-14.10)
+import React, { useEffect, useState, useRef } from "react";
+import { Box } from "@mui/material";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
 import AppTable from "../Admin/AppTable.jsx";
-import ToastService, {toastService} from "../ToastService/ToastService.jsx";
+import { toastService } from "../ToastService/ToastService.jsx";
 import "./StudentUploads.css";
 import TemplateService from "../Api/TemplateService.jsx";
 
-const API_BASE = "http://localhost:5000";
+
 const calculateDueDate = (startDate, week) => {
     if (!startDate) return "—";
     const d = new Date(startDate);
@@ -25,16 +26,18 @@ const getCurrentWeek = (semesterStart) => {
 
 /* ================= TEMPLATE DEFINITIONS ================= */
 const TEMPLATE_DEFINITIONS = [
-    {code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1},
-    {code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2},
-    {code: "t03", label: "Template-03: Proposal Presentation (MS PowerPoint)", week: 4},
-    {code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6},
-    {code: "t05", label: "Template-05: Progress Presentation (MS PowerPoint)", week: 13},
-    {code: "t06", label: "Template-06: Complete Project Report (MS Word)", week: 24},
-    {code: "t07", label: "Template-07: Final Presentation (MS PowerPoint)", week: 26},
-    {code: "t08", label: "Template-08: Complete Final Presentation (MS Word)", week: 28},
-    {code: "t09", label: "Template-09: Complete Documentation(MS Word)", week: 30},
+    { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1, fypPart: 1 },
+    { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2, fypPart: 1 },
+    { code: "t03", label: "Template-03: Proposal Presentation (PPT)", week: 4, fypPart: 1 },
+    { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6, fypPart: 1 },
+    { code: "t05", label: "Template-05: Project Report (MS Word)", week: 16, fypPart: 1 },
+    { code: "t07", label: "Template-07: Final Presentation (PPT)", week: 16, fypPart: 1 },
+    // FYP-2 
+    { code: "t05", label: "Template-05: Project Report (MS Word)", week: 13, fypPart: 2 },
+    { code: "t06", label: "Template-06: Complete Project Report (PPT)", week: 14, fypPart: 2 },
 ];
+
+const API_BASE = "http://localhost:5000";
 
 export default function StudentUploads() {
     const [allFiles, setAllFiles] = useState([]);
@@ -42,15 +45,17 @@ export default function StudentUploads() {
     const [loading, setLoading] = useState(false);
     const [semesterStart, setSemesterStart] = useState(null);
     const [studentInfo, setStudentInfo] = useState(null);
-    const [fypYear, setFypYear] = useState(1);
+    const [fypYear, setFypYear] = useState(() => {
+        return parseInt(localStorage.getItem("fypYear") || "1");
+    });
     const [depTemplate, setDepTemplate] = useState(null);
+    const [fypResults, setFypResults] = useState([]);
     const storedDept = localStorage.getItem("department");
-
 
     const headers = ["Template", "Due Date", "Status", "Remarks", "Upload Date"];
     const fileInputRefs = useRef({});
-
-    const studentId = localStorage.getItem("studentId");
+    const studentId = localStorage.getItem("studentId") || localStorage.getItem("sapId");
+    const studentEmail = localStorage.getItem("email");
 
     const normalizeStatus = (raw) => {
         if (!raw) return "Pending";
@@ -62,19 +67,25 @@ export default function StudentUploads() {
         };
         return map[String(raw).toLowerCase()] || raw;
     };
-    const loadUploadedTemplate = async () => {
-        const url = `${API_BASE}/api/templates?department=${storedDept}`;
-        const res = await fetch(url);
-        if (res.ok) {
-            const data = await res.json();
-            setDepTemplate(data.data);
+
+    const loadUploadedTemplate = async (dept) => {
+        if (!dept) return;
+        try {
+            const url = `${API_BASE}/api/templates?department=${dept}`;
+            const res = await fetch(url);
+            if (res.ok) {
+                const data = await res.json();
+                setDepTemplate(data.data || []);
+            }
+        } catch (err) {
+            console.error("Error loading templates:", err);
         }
-    }
+    };
 
     useEffect(() => {
         const loadSemesterStart = async () => {
             try {
-                const res = await fetch("http://localhost:5000/api/semester-start");
+                const res = await fetch(`${API_BASE}/api/semester-start`);
                 const data = await res.json();
                 setSemesterStart(data?.date || null);
             } catch (err) {
@@ -86,27 +97,82 @@ export default function StudentUploads() {
     }, []);
 
     useEffect(() => {
-        loadUploadedTemplate();
-        const loadStudentInfo = async () => {
-            if (!studentId) return;
+        const loadInitialData = async () => {
+            const currentId = localStorage.getItem("studentId") || localStorage.getItem("sapId");
+            const currentEmail = localStorage.getItem("email");
+
+            if (!currentId && !currentEmail) return;
+
             try {
-                const data = await TemplateService.getStudentInfo(studentId);
-                setStudentInfo(data);
+                setLoading(true);
+                let data = null;
+                if (currentId) {
+                    try {
+                        data = await TemplateService.getStudentInfo(currentId);
+                    } catch (e) { console.log("ID lookup failed, trying email..."); }
+                }
+
+                // Fallback to finding user by email if ID lookup fails
+                if (!data && currentEmail) {
+                    const profileRes = await fetch(`${API_BASE}/api/auth/user-by-email/${currentEmail}`);
+                    if (profileRes.ok) {
+                        const pData = await profileRes.json();
+                        if (pData.success && pData.user) {
+                            const resolvedId = pData.user.studentId || pData.user.sapId;
+                            if (resolvedId) data = await TemplateService.getStudentInfo(resolvedId);
+                            else if (pData.user._id) data = await TemplateService.getStudentInfo(pData.user._id);
+                        }
+                    }
+                }
+
+                if (data) {
+                    setStudentInfo(data);
+                    const dept = data.department || localStorage.getItem("department");
+                    if (dept) await loadUploadedTemplate(dept);
+
+                    // --- AUTOMATIC FYP YEAR TRANSITION CHECK ---
+                    if (currentEmail) {
+                        try {
+                            const res = await fetch(`${API_BASE}/api/coordinator/final-results`, {
+                                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+                            });
+                            if (res.ok) {
+                                const rData = await res.json();
+                                if (rData.success) {
+                                    const myResults = rData.data.filter(r => String(r.sapId) === String(currentId));
+                                    setFypResults(myResults);
+
+                                    // Auto check transition
+                                    const fyp1Pass = myResults.find(r => r.year === "FYP-1" && r.status === "Pass");
+                                    if (fyp1Pass) {
+                                        setFypYear(2);
+                                        localStorage.setItem("fypYear", "2");
+                                    }
+                                }
+                            }
+                        } catch (e) { console.warn("Final results fetch failed"); }
+                    }
+                }
             } catch (err) {
                 console.error(err);
                 toastService.error("Could not load student info");
+            } finally {
+                setLoading(false);
             }
         };
-        loadStudentInfo();
-    }, [studentId]);
+        loadInitialData();
+    }, [studentId, studentEmail]);
+
 
     useEffect(() => {
-        if (studentInfo?.groupId) loadTemplates();
+        if (studentInfo?.groupId) {
+            loadTemplates();
+        }
     }, [studentInfo]);
 
     useEffect(() => {
         applyFilters();
-    }, [allFiles, semesterStart]);
+    }, [allFiles, semesterStart, depTemplate, fypYear, studentInfo]);
 
     useEffect(() => {
         if (!semesterStart) return;
@@ -127,6 +193,7 @@ export default function StudentUploads() {
                 uploadedAt: new Date(f.uploadedAt).toLocaleDateString(),
                 remarks: f.supervisorRemarks ?? 'No Remarks Provided',
                 label: f.templateLabel,
+                fypPart: Number(f.fypPart),
             }));
             setAllFiles(normalized);
         } catch (err) {
@@ -137,32 +204,61 @@ export default function StudentUploads() {
         }
     };
 
+    useEffect(() => {
+        if (!allFiles || allFiles.length === 0) return;
+        const FYP1_TEMPLATES = ["t01", "t02", "t03", "t04", "t05", "t07"];
+
+        const fyp1TemplatesApproved = allFiles.filter(
+            f =>
+                FYP1_TEMPLATES.includes(f.template) &&
+                Number(f.fypPart) === 1 &&
+                f.status === "Approved"
+        ).length === FYP1_TEMPLATES.length;
+
+        if (fyp1TemplatesApproved && fypYear === 1) {
+            setFypYear(2);
+            localStorage.setItem("fypYear", "2");
+        }
+    }, [allFiles, fypYear]);
+
     const applyFilters = () => {
-        if (!studentInfo) return;
-        if (!depTemplate) return;
-        const visibleTemplates =
-            fypYear === 1
-                ? TEMPLATE_DEFINITIONS.filter((tpl) => tpl.code <= "t05")
-                : TEMPLATE_DEFINITIONS;
-        const depTplCodes = depTemplate.map(d => d.template);
+        if (!studentInfo || !depTemplate) return;
 
-        const filteredTemplate = visibleTemplates.filter(
-            (tpl) => depTplCodes.includes(tpl.code)
-        );
+        // We want to show ALL templates for a better overview
+        const visibleTemplates = TEMPLATE_DEFINITIONS;
 
-        const tableRows = filteredTemplate.map((tpl) => {
-            const existing = allFiles.find((f) => f.template === tpl.code);
-            if (existing && existing.template === "t05" && existing.status === "Approved") {
-                setFypYear(2);
-            }
-            return {
-                Template: tpl.label,
+        const tableRows = [];
+
+        visibleTemplates.forEach((tpl) => {
+            const isFyp2Template = tpl.fypPart === 2;
+
+            // Should we show this template row?
+            // Rule: Show FYP-1 always. Show FYP-2 only if fypYear >= 2.
+            if (isFyp2Template && fypYear < 2) return;
+
+            const file = allFiles.find(
+                (f) =>
+                    f.template === tpl.code &&
+                    Number(f.fypPart) === Number(tpl.fypPart)
+            );
+            const partLabel = isFyp2Template ? "FYP-2" : "FYP-1";
+
+            // Adjust Week for FYP-2 (usually offset or dynamic)
+            // const weekForCalc = isFyp2Template ? tpl.week : tpl.week;
+
+            tableRows.push({
+                Template: `${tpl.label} (${partLabel})`,
                 "Due Date": calculateDueDate(semesterStart, tpl.week),
-                Status: existing ? existing.status : "Upload Pending",
-                Remarks: existing ? existing.remarks : "N/A",
-                "Upload Date": existing ? existing.uploadedAt : "N/A",
-                __meta: {template: tpl.code, file: existing, dueDate: calculateDueDate(semesterStart, tpl.week)},
-            };
+                Status: file ? file.status : "Upload Pending",
+                Remarks: file ? file.remarks : "N/A",
+                "Upload Date": file ? file.uploadedAt : "N/A",
+                __meta: {
+                    template: tpl.code,
+                    file: file,
+                    dueDate: calculateDueDate(semesterStart, tpl.week),
+                    fypPart: tpl.fypPart
+                },
+            });
         });
 
         setRows(tableRows);
@@ -179,67 +275,61 @@ export default function StudentUploads() {
         a.click();
     };
 
-    const handleTriggerUpload = (tplCode, row) => {
-        const dueDate = new Date(row.__meta.dueDate);
-        const now = new Date();
-        const checkUpload = row.__meta?.file?.uploadedAt;
+    const handleTriggerUpload = (row) => {
+        const tplCode = row.__meta.template;
+        const fypPart = row.__meta.fypPart;
+        const key = `${tplCode}_${fypPart}`;
 
-        if (checkUpload) {
-            if (now > dueDate) {
-                ToastService.error("⛔ Deadline passed, You cant Upload Now");
-                return;
-            }
-        }
-
-        if (!fileInputRefs.current[tplCode]) {
+        if (!fileInputRefs.current[key]) {
             const input = document.createElement("input");
             input.type = "file";
-            input.accept = ".doc,.docx,.pdf,.ppt,.pptx,.zip";
-            input.onchange = (e) => handleFileSelected(e, tplCode);
-            fileInputRefs.current[tplCode] = input;
+            input.accept = ".doc,.docx,.ppt,.pptx";
+            input.onchange = (e) => handleFileSelected(e, tplCode, fypPart);
+            fileInputRefs.current[key] = input;
         }
-        fileInputRefs.current[tplCode].click();
+        fileInputRefs.current[key].click();
     };
 
-    const handleFileSelected = async (e, tplCode) => {
-        const file = e.target.files?.[0];
-        if (!file || !studentInfo) return;
+    const handleFileSelected = async (e, tplCode, fypPart) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-        const templateDef = TEMPLATE_DEFINITIONS.find((t) => t.code === tplCode);
-        const templateWeek = templateDef?.week || 1;
-        const currentWeek = getCurrentWeek(semesterStart);
-
-        if (templateWeek > currentWeek) {
-            toastService.error(
-                `🚫 Upload blocked!\nTemplate week: ${templateWeek}\nCurrent week: ${currentWeek}`
-            );
-            e.target.value = "";
+        const currentId = localStorage.getItem("studentId") || localStorage.getItem("sapId");
+        if (!currentId) {
+            toastService.error("Student ID missing. Please log in again.");
             return;
         }
 
+        const tplDef = TEMPLATE_DEFINITIONS.find(t => t.code === tplCode && t.fypPart === fypPart);
+        const week = tplDef ? tplDef.week : 1;
+
         try {
             setLoading(true);
-            await TemplateService.uploadFile(tplCode, file, studentId, templateWeek);
-            toastService.success(
-                `✅ File uploaded successfully!\nTemplate week: ${templateWeek}\nCurrent week: ${currentWeek}`
-            );
-            loadTemplates();
+            const res = await TemplateService.uploadFile(tplCode, file, currentId, week, fypPart);
+            if (res.success) {
+                toastService.success(`Successfully uploaded ${tplCode}`);
+                await loadTemplates();
+            } else {
+                toastService.error(res.message || "Upload failed");
+            }
         } catch (err) {
             console.error(err);
-            toastService.error(`Upload failed: ${err.message}`);
+            toastService.error(err.response?.data?.message || "Error uploading file");
         } finally {
             setLoading(false);
+            // reset input
+            e.target.value = null;
         }
     };
 
     const renderActions = (row) => {
         const file = row.__meta.file;
         return (
-            <Box sx={{display: "flex", gap: 8}}>
+            <Box sx={{ display: "flex", gap: 8 }}>
                 {file && (
                     <button
                         className="mt-btn"
-                        style={{background: "#2563eb"}}
+                        style={{ background: "#2563eb" }}
                         onClick={() => handleDownload(row)}
                     >
                         Download
@@ -247,8 +337,8 @@ export default function StudentUploads() {
                 )}
                 <button
                     className="mt-btn"
-                    style={{background: "#10b981", color: "#fff"}}
-                    onClick={() => handleTriggerUpload(row.__meta.template, row)}
+                    style={{ background: "#10b981", color: "#fff" }}
+                    onClick={() => handleTriggerUpload(row)}
                 >
                     {file ? "Re-upload" : "Upload"}
                 </button>
@@ -257,7 +347,7 @@ export default function StudentUploads() {
     };
 
     return (
-        <Box sx={{pb: 3}}>
+        <Box sx={{ pb: 3 }}>
             <DashboardSectionHeader description="Here you can upload your project templates or view their status.">
                 Uploads Template
             </DashboardSectionHeader>
@@ -267,8 +357,36 @@ export default function StudentUploads() {
                 <div className="st-loading">Loading…</div>
             ) : (
                 <>
-                    <label>Fyp Year = {fypYear}</label>
-                    <AppTable headers={headers} rows={rows} renderActions={renderActions}/>
+                    {/* Dynamic Status Banners */}
+                    {fypResults.find(r => r.year === "FYP-2" && r.status === "Pass") ? (
+                        <Box className="completion-message-banner" sx={{ bgcolor: '#ecfdf5', borderColor: '#10b981' }}>
+                            <span className="completion-icon">🎓</span>
+                            <div>
+                                <strong style={{ color: '#047857' }}>Project Fully Completed!</strong>
+                                <p style={{ color: '#065f46' }}>Congratulations! You have passed FYP-2. Your project is successfully completed.</p>
+                            </div>
+                        </Box>
+                    ) : fypResults.find(r => r.year === "FYP-1" && r.status === "Pass") && fyp1TemplatesApproved ? (
+                        <Box className="completion-message-banner" sx={{ bgcolor: '#eff6ff', borderColor: '#3b82f6' }}>
+                            <span className="completion-icon">🚀</span>
+                            <div>
+                                <strong style={{ color: '#1d4ed8' }}>FYP-1 Successfully Passed!</strong>
+                                <p style={{ color: '#1e40af' }}>You have passed FYP-1 and ALLtemplates are approved. You are now authorized to upload FYP-2 specific templates (Progress & Final Report).</p>
+                            </div>
+                        </Box>
+                    ) : studentInfo?.isArchived && (
+                        <Box className="completion-message-banner">
+                            <span className="completion-icon">🏆</span>
+                            <div>
+                                <strong>Project Archived</strong>
+                                <p>This project has been moved to the FYP Archive.</p>
+                            </div>
+                        </Box>
+                    )}
+                    {/* <label>Fyp Year = {fypYear}</label> */}
+                    {!studentInfo?.isArchived && (
+                        <AppTable headers={headers} rows={rows} renderActions={renderActions} />
+                    )}
                 </>
             )}
         </Box>

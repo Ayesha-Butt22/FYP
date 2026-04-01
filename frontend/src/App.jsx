@@ -19,7 +19,6 @@ function ProtectedRoute({ children, allowedRole }) {
   const role = user.role;
   const mustChangePass = user.mustChangePassword;
   if (!token || role !== allowedRole) return <Navigate to={`/auth`} replace />;
-    console.log(mustChangePass);
   if (mustChangePass === 'true') return <Navigate to={`/user-changepassword`} replace />;
   return children;
 }

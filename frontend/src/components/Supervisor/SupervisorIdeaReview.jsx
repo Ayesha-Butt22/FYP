@@ -139,9 +139,11 @@ const mapProposalToIdea = (proposal) => {
 const maskGroupLabel = (groupName) => {
   if (!groupName) return "";
   const s = String(groupName);
-  const m = s.match(/^([^\d]*?)(\d{1,})$/);
-  if (m) return `${m[1] || "group-"}${m[2].slice(-5)}`;
-  return `group-${s.slice(-5)}`;
+  // Only slice if it looks like a MongoDB ObjectId (24 hex characters)
+  if (/^[0-9a-fA-F]{24}$/.test(s)) {
+    return `Group-${s.slice(-5)}`;
+  }
+  return s; // Keep custom group IDs intact
 };
 
 export default function SupervisorIdeaReview() {

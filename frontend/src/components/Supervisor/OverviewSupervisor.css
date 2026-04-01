@@ -178,10 +178,8 @@
   color: #01337a;
   box-shadow: 0 5px 16px #01337a22;
 
-  -webkit-transform:;
-  -moz-transform:;
-  -ms-transform:;
-  -o-transform:;
+  transform: translateY(-3px);
+  -webkit-transform: translateY(-3px);
 }
 .stat-card {
   background: #fff;

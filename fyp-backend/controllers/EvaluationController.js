@@ -26,7 +26,7 @@ exports.checkFacultyInPublishedPanel = async (req, res) => {
     const alreadyAssigned = await PresentationSchedule.find({
       isPublish: true,
       facultyPanels: user._id,
-    });
+    }).populate("slots.bookedBy", "groupId projectTitle");
 
 
 
@@ -42,18 +42,18 @@ exports.checkFacultyInPublishedPanel = async (req, res) => {
         "_id": group.groupId,
       });
       groupsWithSlots.push({
-        displayId : grp.groupId,
+        displayId: grp.groupId,
         groupId: group.groupId,
         bookedSlot: schedule
-            ? schedule.slots.find((s) => s.bookedBy?.toString() === group.groupId.toString())
-            : null,
+          ? schedule.slots.find((s) => s.bookedBy?.toString() === group.groupId.toString())
+          : null,
         scheduleInfo: schedule
-            ? {
-              week: schedule.week,
-              fypPart: schedule.fypPart,
-              venue: schedule.venue,
-            }
-            : null,
+          ? {
+            week: schedule.week,
+            fypPart: schedule.fypPart,
+            venue: schedule.venue,
+          }
+          : null,
       });
     }
 
@@ -130,7 +130,7 @@ exports.getBookedGroupsForSchedule = async (req, res) => {
     const bookedGroupIds = Array.from(bookedSet);
     if (!bookedGroupIds.length) return res.json({ success: true, data: [] });
 
-  
+
     const groups = await Group.find({ _id: { $in: bookedGroupIds } }).lean();
     if (!groups.length) return res.json({ success: true, data: [] });
 
@@ -162,39 +162,39 @@ exports.getBookedGroupsForSchedule = async (req, res) => {
 
 
     const result = await Promise.all(
-        groups.map(async (g) => {
-          const members = [];
+      groups.map(async (g) => {
+        const members = [];
 
-          ["leader", "member2", "member3"].forEach((k) => {
-            const m = g[k];
-            if (!m) return;
-            const email = m.email ? String(m.email).toLowerCase() : null;
-            const sap = m.sapId ? String(m.sapId) : null;
-            const matchedUser =
-                (email && userByEmail[email]) ||
-                (sap && userByStudentId[sap]) ||
-                null;
+        ["leader", "member2", "member3"].forEach((k) => {
+          const m = g[k];
+          if (!m) return;
+          const email = m.email ? String(m.email).toLowerCase() : null;
+          const sap = m.sapId ? String(m.sapId) : null;
+          const matchedUser =
+            (email && userByEmail[email]) ||
+            (sap && userByStudentId[sap]) ||
+            null;
 
-            members.push({
-              role: k === "leader" ? "leader" : "member",
-              name: matchedUser?.name || m.name || null,
-              email: matchedUser?.email || m.email || null,
-              studentId: matchedUser?.studentId || m.sapId || null,
-              userId: matchedUser?._id || null,
-            });
+          members.push({
+            role: k === "leader" ? "leader" : "member",
+            name: matchedUser?.name || m.name || (k === "leader" ? "Leader" : `Member ${k.slice(-1)}`),
+            email: matchedUser?.email || m.email || null,
+            studentId: matchedUser?.studentId || m.sapId || null,
+            userId: matchedUser?._id || null,
           });
+        });
 
-          const project = await Proposal.findOne({ groupId: g._id }).lean();
+        const project = await Proposal.findOne({ groupId: g._id }).lean();
 
-          return {
-            groupId: g.groupId || null,
-            groupMongoId: g._id,
-            proposalTitle: g.proposalTitle || g.projectTitle || null,
-            members,
-            raw: g,
-            project: project || null,
-          };
-        })
+        return {
+          groupId: g.groupId || null,
+          groupMongoId: g._id,
+          proposalTitle: g.proposalTitle || g.projectTitle || null,
+          members,
+          raw: g,
+          project: project || null,
+        };
+      })
     );
 
 
@@ -209,7 +209,7 @@ exports.getBookedGroupsForSchedule = async (req, res) => {
 
 exports.getSingleGroups = async (req, res) => {
   try {
-    const { scheduleId, slotId,week, fypPart, venue } = req.body || {};
+    const { scheduleId, slotId, week, fypPart, venue } = req.body || {};
 
     let schedules = [];
 
@@ -231,7 +231,7 @@ exports.getSingleGroups = async (req, res) => {
       }
       if (slotId) {
         sched.slots = sched.slots.filter(
-            (slot) => String(slot._id) === String(slotId)
+          (slot) => String(slot._id) === String(slotId)
         );
       }
       schedules = [sched];
@@ -300,39 +300,39 @@ exports.getSingleGroups = async (req, res) => {
 
 
     const result = await Promise.all(
-        groups.map(async (g) => {
-          const members = [];
+      groups.map(async (g) => {
+        const members = [];
 
-          ["leader", "member2", "member3"].forEach((k) => {
-            const m = g[k];
-            if (!m) return;
-            const email = m.email ? String(m.email).toLowerCase() : null;
-            const sap = m.sapId ? String(m.sapId) : null;
-            const matchedUser =
-                (email && userByEmail[email]) ||
-                (sap && userByStudentId[sap]) ||
-                null;
+        ["leader", "member2", "member3"].forEach((k) => {
+          const m = g[k];
+          if (!m) return;
+          const email = m.email ? String(m.email).toLowerCase() : null;
+          const sap = m.sapId ? String(m.sapId) : null;
+          const matchedUser =
+            (email && userByEmail[email]) ||
+            (sap && userByStudentId[sap]) ||
+            null;
 
-            members.push({
-              role: k === "leader" ? "leader" : "member",
-              name: matchedUser?.name || m.name || null,
-              email: matchedUser?.email || m.email || null,
-              studentId: matchedUser?.studentId || m.sapId || null,
-              userId: matchedUser?._id || null,
-            });
+          members.push({
+            role: k === "leader" ? "leader" : "member",
+            name: matchedUser?.name || m.name || (k === "leader" ? "Leader" : `Member ${k.slice(-1)}`),
+            email: matchedUser?.email || m.email || null,
+            studentId: matchedUser?.studentId || m.sapId || null,
+            userId: matchedUser?._id || null,
           });
+        });
 
-          const project = await Proposal.findOne({ groupId: g._id }).lean();
+        const project = await Proposal.findOne({ groupId: g._id }).lean();
 
-          return {
-            groupId: g.groupId || null,
-            groupMongoId: g._id,
-            proposalTitle: g.proposalTitle || g.projectTitle || null,
-            members,
-            raw: g,
-            project: project || null,
-          };
-        })
+        return {
+          groupId: g.groupId || null,
+          groupMongoId: g._id,
+          proposalTitle: g.proposalTitle || g.projectTitle || null,
+          members,
+          raw: g,
+          project: project || null,
+        };
+      })
     );
 
 
@@ -374,19 +374,19 @@ exports.resolveGroupById = async (req, res) => {
 
       return matched
         ? {
-            role: m.role,
-            sapId: matched.studentId || m.sapId || null,
-            email: matched.email,
-            name: matched.name || "",
-            userId: matched._id,
-          }
+          role: m.role,
+          sapId: matched.studentId || m.sapId || null,
+          email: matched.email,
+          name: matched.name || "",
+          userId: matched._id,
+        }
         : {
-            role: m.role,
-            sapId: m.sapId || null,
-            email: m.email || null,
-            name: null,
-            userId: null,
-          };
+          role: m.role,
+          sapId: m.sapId || null,
+          email: m.email || null,
+          name: null,
+          userId: null,
+        };
     });
 
     return res.json({
@@ -439,19 +439,19 @@ exports.bulkResolveGroups = async (req, res) => {
         );
         return matched
           ? {
-              role: m.role,
-              sapId: matched.studentId || m.sapId || null,
-              email: matched.email,
-              name: matched.name || "",
-              userId: matched._id,
-            }
+            role: m.role,
+            sapId: matched.studentId || m.sapId || null,
+            email: matched.email,
+            name: matched.name || "",
+            userId: matched._id,
+          }
           : {
-              role: m.role,
-              sapId: m.sapId || null,
-              email: m.email || null,
-              name: null,
-              userId: null,
-            };
+            role: m.role,
+            sapId: m.sapId || null,
+            email: m.email || null,
+            name: null,
+            userId: null,
+          };
       });
 
       return {
@@ -529,24 +529,42 @@ exports.resolveFinalEvaluationType = async (req, res) => {
       });
     }
 
-    // 4️⃣ Check Template-5 approved
-    const template5 = await Template.findOne({
+    // 4️⃣ Check how many templates (t01-t05) are approved
+    const StudentUploadedTemplate = require("../models/StudentUploadedTemplate");
+    const CommitteeEvaluation = require("../models/CommitteeEvaluation");
+    const PresentationSchedule = require("../models/DeadlineSchedule"); // which is PresentationSchedule model
+
+    const approvedTemplatesCount = await StudentUploadedTemplate.countDocuments({
       groupId: group._id,
-      templateNumber: 5,
-      isApproved: true,
+      templateCode: { $in: ["t01", "t02", "t03", "t04", "t05", "t07"] },
+      status: "Approved",
     });
 
-    let fypPart = "fyp-1";
+    // 5️⃣ Check if FYP-1 Week 4 and Week 16 are cleared (evaluated)
+    const evals = await CommitteeEvaluation.find({ groupId: group._id }).populate("scheduleId");
 
-    if (template5) {
+    // Check if evaluation exists for fyp-1 Week 4 and fyp-1 Week 16
+    const week4Cleared = evals.some(e => e.scheduleId && e.scheduleId.fypPart === "fyp-1" && /week\s*4/i.test(e.scheduleId.week));
+    const week16Cleared = evals.some(e => e.scheduleId && e.scheduleId.fypPart === "fyp-1" && /week\s*16/i.test(e.scheduleId.week));
+
+    let fypPart = "fyp-1";
+    const isEligibleForFyp2 = (approvedTemplatesCount >= 6) && week4Cleared && week16Cleared;
+
+    if (isEligibleForFyp2) {
       fypPart = "fyp-2";
     }
 
     return res.status(200).json({
       success: true,
       groupId: group.groupId,
-      department,  // CS / SE
-      fypPart,     // fyp-1 / fyp-2
+      department,
+      fypPart,
+      eligibility: {
+        templatesApproved: approvedTemplatesCount >= 6,
+        week4Cleared,
+        week16Cleared,
+        isEligibleForFyp2
+      }
     });
 
   } catch (err) {

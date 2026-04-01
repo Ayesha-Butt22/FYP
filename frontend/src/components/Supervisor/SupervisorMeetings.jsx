@@ -24,7 +24,7 @@ import { toastService } from "../ToastService/ToastService.jsx";
 
 /* ================= CONFIG ================= */
 const API = "http://localhost:5000/api/meetings";
-const SUPERVISOR_EMAIL = localStorage.getItem("email");
+
 
 /* ================= HELPERS ================= */
 function formatDate(dateStr) {
@@ -37,7 +37,11 @@ function formatDate(dateStr) {
 
 function maskGroupId(id) {
   if (!id) return "-";
-  return "group-" + id.slice(0, 5); // group- prefix + first 5 chars
+  const strId = String(id);
+  // If it's already a masked ID or doesn't look like an ObjectId
+  if (strId.startsWith("group-")) return strId;
+  const last5 = strId.slice(-5);
+  return "group-" + last5;
 }
 
 function formatTime(timeStr) {
@@ -66,8 +70,14 @@ export default function SupervisorMeetings() {
 
   /* ================= LOAD DATA FROM API ================= */
   const loadMeetings = async () => {
+    const supervisorEmail = localStorage.getItem("email");
+    if (!supervisorEmail) return;
     try {
-      const res = await fetch(`${API}/supervisor/${SUPERVISOR_EMAIL}`);
+      const res = await fetch(`${API}/supervisor/${supervisorEmail}`);
+      if (!res.ok) {
+        console.error("Meetings fetch failed:", res.status);
+        return;
+      }
       const data = await res.json();
       if (data.success) {
         setSlots(data.futureSlots || []);
@@ -76,7 +86,6 @@ export default function SupervisorMeetings() {
       }
     } catch (err) {
       console.error("Failed to fetch supervisor meetings", err);
-      toastService.error("Failed to load meetings");
     }
   };
 
@@ -86,6 +95,7 @@ export default function SupervisorMeetings() {
 
   /* ================= ADD SLOT ================= */
   const handleAddSlot = async () => {
+    const supervisorEmail = localStorage.getItem("email");
     if (!date || !time || !duration) {
       setFormError("All fields required");
       return;
@@ -95,7 +105,7 @@ export default function SupervisorMeetings() {
       const res = await fetch(`${API}/create-slot`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ supervisorEmail: SUPERVISOR_EMAIL, date, time, duration }),
+        body: JSON.stringify({ supervisorEmail, date, time, duration }),
       });
       const data = await res.json();
 
@@ -118,11 +128,16 @@ export default function SupervisorMeetings() {
 
   /* ================= MARK DONE ================= */
   const handleMarkDone = async (slotId) => {
+    const idStr = slotId?.toString() || String(slotId);
+    if (!idStr || idStr === "undefined" || idStr === "null") {
+      toastService.error("Invalid meeting ID");
+      return;
+    }
     try {
       const res = await fetch(`${API}/mark-done`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotId }),
+        body: JSON.stringify({ slotId: idStr }),
       });
       const data = await res.json();
 
@@ -139,15 +154,26 @@ export default function SupervisorMeetings() {
   };
 
   /* ================= UI HELPERS ================= */
-  const statusChip = (bookedBy) =>
-    bookedBy ? (
-      <Chip
-        label={`Booked by ${maskGroupId(bookedBy)}`}
-        color="success"
-        icon={<GroupIcon />}
-        size="small"
-      />
-    ) : (
+  const statusChip = (slot) => {
+    if (slot.bookedBy) {
+      const displayId = slot.groupInfo?.readableId 
+        ? maskGroupId(slot.groupInfo.readableId) 
+        : maskGroupId(slot.bookedBy);
+      
+      const label = slot.groupInfo?.leaderName 
+        ? `${displayId} (${slot.groupInfo.leaderName})`
+        : `Booked by ${displayId}`;
+
+      return (
+        <Chip
+          label={label}
+          color="success"
+          icon={<GroupIcon />}
+          size="small"
+        />
+      );
+    }
+    return (
       <Chip
         label="Available"
         color="warning"
@@ -156,6 +182,7 @@ export default function SupervisorMeetings() {
         variant="outlined"
       />
     );
+  };
 
   /* ================= RENDER ================= */
   return (
@@ -225,7 +252,7 @@ export default function SupervisorMeetings() {
               formatDate(s.date),
               formatTime(s.time),
               `${s.duration} min`,
-              statusChip(s.bookedBy),
+              statusChip(s),
             ])}
           />
         </Paper>
@@ -237,20 +264,31 @@ export default function SupervisorMeetings() {
           </Typography>
           <AppTable
             headers={["Date", "Time", "Group-id", "Action"]}
-            rows={todayMeetings.map((m) => [
-              formatDate(m.date),
-              formatTime(m.time),
-              maskGroupId(m.bookedBy),
-              <Button
-                size="small"
-                variant="contained"
-                color="success"
-                startIcon={<CheckCircleOutline />}
-                onClick={() => handleMarkDone(m._id)}
-              >
-                Mark Done
-              </Button>,
-            ])}
+            rows={todayMeetings.map((m) => {
+              const displayId = m.groupInfo?.readableId 
+                ? maskGroupId(m.groupInfo.readableId) 
+                : maskGroupId(m.bookedBy);
+              
+              const groupLabel = m.groupInfo?.leaderName 
+                ? `${displayId} - ${m.groupInfo.leaderName}`
+                : displayId;
+
+              return [
+                formatDate(m.date),
+                formatTime(m.time),
+                groupLabel,
+                <Button
+                  key={m._id}
+                  size="small"
+                  variant="contained"
+                  color="success"
+                  startIcon={<CheckCircleOutline />}
+                  onClick={() => handleMarkDone(m._id)}
+                >
+                  Mark Done
+                </Button>,
+              ];
+            })}
           />
         </Paper>
 
@@ -262,13 +300,18 @@ export default function SupervisorMeetings() {
   </Typography>
   <AppTable
     headers={["Date", "Time", "Group-id", "Done At"]}
-    rows={meetingHistory.map((h) => [
-      formatDate(h.date),
-      formatTime(h.time),
-      maskGroupId(h.bookedBy),
-      // ✅ fallback to updatedAt if doneAt is missing
-      h.doneAt ? new Date(h.doneAt).toLocaleString() : h.updatedAt ? new Date(h.updatedAt).toLocaleString() : "-",
-    ])}
+    rows={meetingHistory.map((h) => {
+      const displayId = h.groupInfo?.readableId 
+        ? maskGroupId(h.groupInfo.readableId) 
+        : maskGroupId(h.bookedBy);
+
+      return [
+        formatDate(h.date),
+        formatTime(h.time),
+        displayId,
+        h.doneAt ? new Date(h.doneAt).toLocaleString() : h.updatedAt ? new Date(h.updatedAt).toLocaleString() : "-",
+      ];
+    })}
   />
 </Paper>
 
