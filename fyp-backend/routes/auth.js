@@ -16,7 +16,8 @@ router.post('/change-password-email', authController.changePasswordByEmail);
 
 router.get('/user-by-email/:email', authController.getUserByEmail);
 
-
+router.post('/forgot-password', authController.forgotPassword);   
+router.post('/reset-password', authController.resetPassword);
 
 
 

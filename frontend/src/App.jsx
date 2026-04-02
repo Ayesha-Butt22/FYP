@@ -13,6 +13,8 @@ import ProtectedAuthRoute from "./components/Auth/ProtectedAuthRoute.jsx";
 import ChangePassword from "./components/Auth/ChangePassword.jsx";
 import {ConfirmService} from "./components/ConfirmService/ConfirmService.jsx";
 
+import ResetPassword from "./components/Auth/ResetPassword"; // adjust path to match where you saved the file
+
 function ProtectedRoute({ children, allowedRole }) {
   const user = getUserInfoFromStorage();
   const token = user.token;
@@ -52,6 +54,7 @@ export default function App() {
                   <Auth />
               </ProtectedAuthRoute>
           } />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/dashboard/admin"
             element={

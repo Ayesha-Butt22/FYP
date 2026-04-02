@@ -231,21 +231,38 @@ export default function Auth() {
     setConfirmNewPassword("");
     setErrors({});
   };
-
-  const handleForgotEmailSubmit = (e) => {
-    e.preventDefault();
-    // simple email validation (don't call API)
-    if (!forgotEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
-      setErrors({ forgotEmail: "Enter a valid email address." });
-      toastService.error("Enter a valid email address.");
-      return;
+// Replace handleForgotEmailSubmit with this:
+const handleForgotEmailSubmit = async (e) => {
+  e.preventDefault();
+  if (!forgotEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
+    setErrors({ forgotEmail: "Enter a valid email address." });
+    toastService.error("Enter a valid email address.");
+    return;
+  }
+  setIsLoading(true);
+  
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: forgotEmail }),
+    });
+    const data = await res.json();
+    if (data.resetUrl) {
+      toastService.success("Reset link generated! Opening reset page…");
+      cancelForgot();
+      // Open the reset URL — same tab (since it's local demo)
+      window.location.href = data.resetUrl;
+    } else {
+      toastService.info("If that email exists, a reset link was generated.");
+      cancelForgot();
     }
-    // Show the password reset fields (no API calls, as requested)
-    setForgotState("showResetFields");
-    // clear errors
-    setErrors({});
-    toastService.info("Enter a new password below (this is a local UI demo; no API is called).");
-  };
+  } catch {
+    toastService.error("Network error. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleResetPasswordSubmit = (e) => {
     e.preventDefault();
@@ -288,7 +305,19 @@ export default function Auth() {
               {errors.forgotEmail && <div className="error-msg">{errors.forgotEmail}</div>}
               <div style={{ display: "flex", gap: 8 }}>
                 <button type="submit" className="btn main-btn" disabled={isLoading}>Continue</button>
-                <button type="button" className="btn alt-btn" onClick={cancelForgot} disabled={isLoading}>Cancel</button>
+                <button
+  type="button"
+  className="btn"
+  onClick={cancelForgot}
+  disabled={isLoading}
+  style={{
+    background: "#2563eb",
+    color: "#fff",
+    border: "none"
+  }}
+>
+  Cancel
+</button>
               </div>
             </form>
           ) : forgotState === "showResetFields" ? (
