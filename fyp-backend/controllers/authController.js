@@ -225,7 +225,9 @@ exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required.' });
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const user = await User.findOne({ 
+  email: { $regex: `^${email.trim()}$`, $options: 'i' } 
+});
     if (!user) {
       return res.status(200).json({
         message: 'If that email exists, a reset link has been generated.',
@@ -233,6 +235,14 @@ exports.forgotPassword = async (req, res) => {
       });
     }
 
+   
+if (user.role === 'student' && !isValidStudentEmail(email)) {
+  return res.status(400).json({ error: "Invalid student email format" });
+}
+
+if (['coordinator', 'supervisor', 'admin'].includes(user.role) && !isValidOfficialEmail(email)) {
+  return res.status(400).json({ error: "Invalid official email format" });
+}
     await PasswordResetToken.deleteMany({ userId: user._id, used: false });
 
     const rawToken = crypto.randomBytes(32).toString('hex');
@@ -265,7 +275,9 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 8 characters.' });
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+   const user = await User.findOne({ 
+  email: { $regex: `^${email.trim()}$`, $options: 'i' } 
+});
     if (!user) return res.status(400).json({ error: 'Invalid or expired reset link.' });
 
     const resetRecord = await PasswordResetToken.findOne({
