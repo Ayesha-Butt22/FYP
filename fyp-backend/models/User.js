@@ -34,7 +34,8 @@ const userSchema = new mongoose.Schema({
     match: [/^\+?[\d\s-]{10,15}$/, 'Invalid contact number format'],
     default: null 
   },
-  isProjectHead: { type: Boolean, default: false }
+  isProjectHead: { type: Boolean, default: false },
+  isAlsoCOR: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

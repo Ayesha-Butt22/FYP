@@ -113,6 +113,7 @@ storeUserData(data) {
         mustChangePassword: data.user?.mustChangePassword ? 'true' : 'false',
         isGroupMade: data.user?.isGroupMade ? 'true' : 'false',
         id: data.user?.id,
+        isAlsoCOR: data.user?.isAlsoCOR ? 'true' : 'false',
         IsApproved: data.user?.IsApproved ? 'true' : 'false',
     };
 

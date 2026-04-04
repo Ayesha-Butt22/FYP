@@ -102,6 +102,7 @@ exports.login = async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
+        isAlsoCOR: user.isAlsoCOR,
         mustChangePassword: user.mustChangePassword,
         first_login: user.first_login,
         studentId: user.studentId ? user.studentId : 0,

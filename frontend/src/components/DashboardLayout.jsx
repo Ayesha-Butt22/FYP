@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import styled, { keyframes , css } from "styled-components";
 import {IconButton, Tooltip, Dialog, DialogTitle, DialogContent} from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
+import SwitchAccountIcon from '@mui/icons-material/SwitchAccount';
 import CloseIcon from "@mui/icons-material/Close";
 import Avatar from "@mui/material/Avatar";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
@@ -67,6 +68,7 @@ export default function DashboardLayout({
   const fileInputRef = useRef(null);
   const displayName = localStorage.getItem("name") || roleInfo.name || "User";
   const displayRole = localStorage.getItem("role") || "User";
+  const allowSwitch = localStorage.getItem("isAlsoCOR") || false;
   const email = localStorage.getItem("email");
   const user = getUserInfoFromStorage();
   const [hasNewNotification, setHasNewNotification] = useState(true);
@@ -121,6 +123,17 @@ export default function DashboardLayout({
     setHasNewNotification(false);
   };
 
+  const HandleAccountSwitch = () => {
+      console.log("Account Switching");
+      const role = localStorage.getItem("role");
+      const switchTo= role ==  "coordinator" ? "supervisor" : "coordinator";
+      localStorage.setItem("role", switchTo);
+      localStorage.setItem("activeRole", switchTo);
+      let roles = ["supervisor", "coordinator"];
+      localStorage.setItem("roles", JSON.stringify(roles));
+      window.location.reload();
+  };
+
   return (
     <DashboardLayoutStyled>
       <aside className="sidebar">
@@ -140,12 +153,19 @@ export default function DashboardLayout({
             </li>
           ))}
         </ul>
-        <div className="logout-area">
+        <div className="logout-area" style={{gap : 5}}>
           <Tooltip title="Logout">
             <IconButton onClick={onLogout} size="medium">
               <LogoutIcon />
             </IconButton>
           </Tooltip>
+            {allowSwitch == 'true' && (
+                <Tooltip title="SWITCH ACCOUNT">
+                    <IconButton onClick={HandleAccountSwitch} size="medium">
+                        <SwitchAccountIcon/>
+                    </IconButton>
+                </Tooltip>
+            )}
         </div>
       </aside>
 
@@ -188,7 +208,6 @@ export default function DashboardLayout({
                 onClick={handleAvatarClick}
               />
             </Tooltip>
-            <RoleSwitcher />
             <div className="grid-flow-col">
               <div className="name-text">{displayName}</div>
               <div className="name-text">

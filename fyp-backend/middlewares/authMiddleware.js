@@ -45,6 +45,9 @@ const isStudent = (req, res, next) => {
 };
 
 const isSupervisor = (req, res, next) => {
+  if (req.user && req.user.isAlsoCOR == true) {
+    return next();
+  }
   if (req.user && req.user.role === "supervisor") {
     return next();
   }
@@ -52,6 +55,9 @@ const isSupervisor = (req, res, next) => {
 };
 
 const isCoordinator = (req, res, next) => {
+  if (req.user && req.user.isAlsoCOR == true) {
+    return next();
+  }
   if (req.user && req.user.role === "coordinator") {
     return next();
   }

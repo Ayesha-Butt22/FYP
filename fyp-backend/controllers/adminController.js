@@ -238,6 +238,7 @@ exports.removeCoordinator = async (req, res) => {
 
     // Change role to supervisor
     user.role = "supervisor";
+    user.isAlsoCOR = false;
     await user.save();
     
     const u = user.toObject();
@@ -283,6 +284,7 @@ exports.makeCoordinator = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
     user.role = "coordinator";
+    user.isAlsoCOR = true;
     await user.save();
     return res.json({ message: "User promoted successfully" });
   } catch (err) {
