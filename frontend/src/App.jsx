@@ -15,13 +15,21 @@ import {ConfirmService} from "./components/ConfirmService/ConfirmService.jsx";
 
 import ResetPassword from "./components/Auth/ResetPassword"; // adjust path to match where you saved the file
 
+// CHANGED: ProtectedRoute now checks activeRole against roles[]
+// Falls back to single role for backward compatibility
 function ProtectedRoute({ children, allowedRole }) {
   const user = getUserInfoFromStorage();
   const token = user.token;
-  const role = user.role;
   const mustChangePass = user.mustChangePassword;
-  if (!token || role !== allowedRole) return <Navigate to={`/auth`} replace />;
-  if (mustChangePass === 'true') return <Navigate to={`/user-changepassword`} replace />;
+
+  // Support both old single-role and new multi-role
+  const roles = user.roles?.length > 0 ? user.roles : (user.role ? [user.role] : []);
+  const activeRole = user.activeRole || roles[0] || "";
+
+  if (!token || !roles.includes(allowedRole) || activeRole !== allowedRole) {
+    return <Navigate to="/auth" replace />;
+  }
+  if (mustChangePass === 'true') return <Navigate to="/user-changepassword" replace />;
   return children;
 }
 

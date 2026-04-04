@@ -1,3 +1,4 @@
+//Auth.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../Api/authService";
@@ -89,35 +90,50 @@ export default function Auth() {
   };
 
   // Login
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    // If forgot flow active, do not submit login
-    if (forgotState) return;
-    const validation = validateLogin(loginData);
-    setErrors(validation);
-    if (Object.keys(validation).length > 0) {
-      toastService.error("Please fix the errors and try again.");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const result = await authService.login(loginData);
-      if (result.success) {
-        toastService.success("Login successful! Welcome back.");
-        const userData = authService.getUserData();
-        const dashboardRoute = getDashboardRoute(userData.role);
-        setTimeout(() => { navigate(dashboardRoute); }, 1000);
-      } else {
-        const errorMessage = result.data?.error || result.error || "Login failed";
-        toastService.error(errorMessage);
-      }
-    } catch (error) {
-      toastService.error("Network error. Please check your connection and try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Login
+const handleLogin = async (e) => {
+  e.preventDefault();
+  // If forgot flow active, do not submit login
+  if (forgotState) return;
+  const validation = validateLogin(loginData);
+  setErrors(validation);
+  if (Object.keys(validation).length > 0) {
+    toastService.error("Please fix the errors and try again.");
+    return;
+  }
+  setIsLoading(true);
+  try {
+    const result = await authService.login(loginData);
+    if (result.success) {
+      toastService.success("Login successful! Welcome back.");
+      const userData = authService.getUserData();
 
+      // CHANGED: support roles array; fall back to single role
+      const roles = userData.roles?.length > 0
+        ? userData.roles
+        : (userData.role ? [userData.role] : []);
+
+      // Set activeRole to first role if not already set
+      const existingActive = localStorage.getItem("activeRole");
+      const activeRole = (existingActive && roles.includes(existingActive))
+        ? existingActive
+        : roles[0] || userData.role;
+
+      localStorage.setItem("activeRole", activeRole);
+      localStorage.setItem("roles", JSON.stringify(roles));
+
+      const dashboardRoute = getDashboardRoute(activeRole);
+      setTimeout(() => { navigate(dashboardRoute); }, 1000);
+    } else {
+      const errorMessage = result.data?.error || result.error || "Login failed";
+      toastService.error(errorMessage);
+    }
+  } catch (error) {
+    toastService.error("Network error. Please check your connection and try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
   // Register
   const handleRegister = async (e) => {
     e.preventDefault();

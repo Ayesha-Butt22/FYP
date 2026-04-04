@@ -99,46 +99,58 @@ async getUserByEmail(email) {
         });
     }
 
+    
     // Store user data in localStorage
-    storeUserData(data) {
-        const userInfo = {
-            token: data.token || "demoToken",
-            role: data.user?.role || "user",
-            name: data.user?.name || "null",
-            specialization: data.user?.specialization || "",
-            email: data.user?.email || "",
-            department: data.user.department || "",
-            studentId: data.user?.studentId || "",
-            mustChangePassword: data.user?.mustChangePassword ? 'true' : 'false',
-            isGroupMade: data.user?.isGroupMade ? 'true' : 'false',
-            id: data.user?.id ,
-            IsApproved: data.user?.IsApproved ? 'true' : 'false',
-        };
+storeUserData(data) {
+    const userInfo = {
+        token: data.token || "demoToken",
+        role: data.user?.role || "user",
+        name: data.user?.name || "null",
+        specialization: data.user?.specialization || "",
+        email: data.user?.email || "",
+        department: data.user.department || "",
+        studentId: data.user?.studentId || "",
+        mustChangePassword: data.user?.mustChangePassword ? 'true' : 'false',
+        isGroupMade: data.user?.isGroupMade ? 'true' : 'false',
+        id: data.user?.id,
+        IsApproved: data.user?.IsApproved ? 'true' : 'false',
+    };
 
-        Object.entries(userInfo).forEach(([key, value]) => {
-            if (value) localStorage.setItem(key, value);
-        });
-    }
+    Object.entries(userInfo).forEach(([key, value]) => {
+        if (value) localStorage.setItem(key, value);
+    });
+
+    // CHANGED: store roles array and activeRole
+    const roles = data.user?.roles?.length > 0
+        ? data.user.roles
+        : [data.user?.role || "user"];
+    localStorage.setItem("roles", JSON.stringify(roles));
+    localStorage.setItem("activeRole", roles[0]);
+}
 
     // Clear localStorage
-    clearUserData() {
-        const keys = ['token', 'role', 'name', 'specialization', 'email', 'department', 'studentId', 'IsApproved'];
-        keys.forEach(key => localStorage.removeItem(key));
-    }
+    
+clearUserData() {
+    const keys = ['token', 'role', 'roles', 'activeRole', 'name', 'specialization', 'email', 'department', 'studentId', 'IsApproved'];
+    keys.forEach(key => localStorage.removeItem(key));
+}
 
     // Get user data
-    getUserData() {
-        return {
-            token: localStorage.getItem('token'),
-            role: localStorage.getItem('role'),
-            name: localStorage.getItem('name'),
-            specialization: localStorage.getItem('specialization'),
-            email: localStorage.getItem('email'),
-            department: localStorage.getItem('department'),
-            studentId: localStorage.getItem('studentId'),
-            isApproved: localStorage.getItem('IsApproved'),
-        };
-    }
+   
+getUserData() {
+    return {
+        token: localStorage.getItem('token'),
+        role: localStorage.getItem('role'),
+        roles: JSON.parse(localStorage.getItem('roles') || '[]'),   // CHANGED
+        activeRole: localStorage.getItem('activeRole') || '',        // CHANGED
+        name: localStorage.getItem('name'),
+        specialization: localStorage.getItem('specialization'),
+        email: localStorage.getItem('email'),
+        department: localStorage.getItem('department'),
+        studentId: localStorage.getItem('studentId'),
+        isApproved: localStorage.getItem('IsApproved'),
+    };
+}
 
     // Check if logged in
     isAuthenticated() {
