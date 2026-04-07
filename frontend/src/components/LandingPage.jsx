@@ -677,7 +677,6 @@ const LandingPage = () => {
             {!logedUser ? (
                 <>
                   <Link to="/">Home</Link>
-                  <Link to="/about">About Us</Link>
                   <Link to="/auth">Login</Link>
                   <Link to="/auth">Signup</Link>
                 </>
