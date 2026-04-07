@@ -263,7 +263,7 @@ export default function OverviewStudent({ onTabChange }) {
         <div className="stat-card">
           <div className="stat-icon-circle" style={{ background: "#16a34a" }}><FaCalendarCheck /></div>
           <div className="stat-title">Next Meeting</div>
-          <div className="stat-value-studentonly" style={{ fontSize: "1.2rem" }}>{stats ? stats.nextMeeting : "..."}</div>
+          <div className="stat-value-studentonly" style={{ fontSize: "1.8rem" }}>{stats ? stats.nextMeeting : "..."}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon-circle" style={{ background: "#f43f5e" }}><FaCheckCircle /></div>
