@@ -8,11 +8,11 @@ const getStudentMetaData = require("./getStudentMetaData");
 const ALLOWED_EXT = {
   t01: [".doc", ".docx", ".pdf"],
   t02: [".doc", ".docx", ".pdf"],
-  t03: [".doc", ".docx", ".pdf", ".ppt", ".pptx"],
+  t03: [".ppt", ".pptx"],
   t04: [".doc", ".docx", ".pdf"],
   t05: [".doc", ".docx", ".pdf"],
-  t06: [".doc", ".docx", ".pdf", ".ppt", ".pptx"],
-  t07: [".doc", ".docx", ".pdf", ".ppt", ".pptx"],
+  t06: [".ppt", ".pptx"],
+  t07: [".ppt", ".pptx"],
 };
 
 // Templates

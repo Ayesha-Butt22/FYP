@@ -93,7 +93,10 @@ exports.getEvaluations = async (req, res) => {
                 path: "groupId",
                 match: { isArchived: { $ne: true } }
             })
-            .populate("scheduleId")
+            .populate({
+                path: "scheduleId",
+                populate: { path: "facultyPanels", select: "name email role" }
+            })
             .populate("evaluations.evaluatedBy", "name email role")
             .lean();
 
@@ -111,18 +114,35 @@ exports.getEvaluations = async (req, res) => {
         const sapToNameMap = {};
         studentsInDb.forEach(u => { sapToNameMap[u.studentId] = u.name; });
 
-        const groupIdsForProposals = evaluations.map(d => d.groupId?._id || d.groupId);
-        const proposals = await Proposal.find({ groupId: { $in: groupIdsForProposals } }).select("groupId projectSupervisor").lean();
-        const groupToSupervisorMap = {};
-        proposals.forEach(p => { groupToSupervisorMap[String(p.groupId)] = p.projectSupervisor; });
+        const groupIdsForProposals = evaluations.map(e => e.groupId?._id || e.groupId);
+        const proposals = await Proposal.find({ groupId: { $in: groupIdsForProposals } }).select("groupId projectSupervisor projectTitle").lean();
+        const groupProposalMap = {};
+        proposals.forEach(p => { 
+            groupProposalMap[String(p.groupId)] = {
+                projectTitle: p.projectTitle || "N/A",
+                projectSupervisor: p.projectSupervisor || "N/A"
+            }; 
+        });
 
         const result = evaluations.map(doc => {
             const gid = String(doc.groupId?._id || doc.groupId);
             const assignedPanelSize = doc.scheduleId?.facultyPanels?.length || 0;
+            const proposal = groupProposalMap[gid] || { projectTitle: "N/A", projectSupervisor: "N/A" };
+            
+            // Calculate missing members
+            const submittedBySet = new Set((doc.evaluations || []).map(ev => 
+                String(ev.evaluatedBy?._id || ev.evaluatedBy)
+            ));
+            const missingMembers = (doc.scheduleId?.facultyPanels || [])
+                .filter(m => !submittedBySet.has(String(m._id || m)))
+                .map(m => m.name || m.email || "Unknown Member");
+
             return {
                 ...doc,
                 assignedPanelSize,
-                supervisorEmail: groupToSupervisorMap[gid] || null,
+                missingMembers,
+                project: proposal,
+                supervisorEmail: proposal.projectSupervisor,
                 evaluations: (doc.evaluations || []).map(ev => ({
                     ...ev,
                     students: (ev.students || []).map(s => ({
@@ -135,6 +155,7 @@ exports.getEvaluations = async (req, res) => {
 
         res.status(200).json({ success: true, data: result });
     } catch (err) {
+        console.error("❌ Error in getEvaluations:", err);
         res.status(500).json({ success: false, message: err.message });
     }
 };
@@ -190,18 +211,25 @@ exports.getApprovedEvaluations = async (req, res) => {
         const sapToNameMap = {};
         studentsInDb.forEach(u => { sapToNameMap[u.studentId] = u.name; });
 
-        const groupIdsForProposals = evaluations.map(d => d.groupId?._id || d.groupId);
-        const proposals = await Proposal.find({ groupId: { $in: groupIdsForProposals } }).select("groupId projectSupervisor").lean();
-        const groupToSupervisorMap = {};
-        proposals.forEach(p => { groupToSupervisorMap[String(p.groupId)] = p.projectSupervisor; });
+        const groupIdsForProposals = evaluations.map(e => e.groupId?._id || e.groupId);
+        const proposals = await Proposal.find({ groupId: { $in: groupIdsForProposals } }).select("groupId projectSupervisor projectTitle").lean();
+        const groupProposalMap = {};
+        proposals.forEach(p => { 
+            groupProposalMap[String(p.groupId)] = {
+                projectTitle: p.projectTitle || "N/A",
+                projectSupervisor: p.projectSupervisor || "N/A"
+            }; 
+        });
 
         const result = evaluations.map(doc => {
             const gid = String(doc.groupId?._id || doc.groupId);
             const assignedPanelSize = doc.scheduleId?.facultyPanels?.length || 0;
+            const proposal = groupProposalMap[gid] || { projectTitle: "N/A", projectSupervisor: "N/A" };
             return {
                 ...doc,
                 assignedPanelSize,
-                supervisorEmail: groupToSupervisorMap[gid] || null,
+                project: proposal,
+                supervisorEmail: proposal.projectSupervisor,
                 evaluations: (doc.evaluations || []).map(ev => ({
                     ...ev,
                     students: (ev.students || []).map(s => ({
@@ -214,6 +242,7 @@ exports.getApprovedEvaluations = async (req, res) => {
 
         res.status(200).json({ success: true, data: result });
     } catch (err) {
+        console.error("❌ Error in getEvaluations:", err);
         res.status(500).json({ success: false, message: err.message });
     }
 };
@@ -264,9 +293,14 @@ exports.getStudentEvaluations = async (req, res) => {
         });
 
         // 3️⃣ Map names back and FILTER to only show the requesting student's records
-        const proposals = await Proposal.find({ groupId }).select("groupId projectSupervisor").lean();
-        const groupToSupervisorMap = {};
-        proposals.forEach(p => { groupToSupervisorMap[String(p.groupId)] = p.projectSupervisor; });
+        const proposals = await Proposal.find({ groupId }).select("groupId projectSupervisor projectTitle").lean();
+        const groupProposalMap = {};
+        proposals.forEach(p => { 
+            groupProposalMap[String(p.groupId)] = {
+                projectTitle: p.projectTitle || "N/A",
+                projectSupervisor: p.projectSupervisor || "N/A"
+            }; 
+        });
 
         // Identify the requesting student's SAP ID to filter results
         const matchingMember = ["leader", "member2", "member3"].find(k => group[k]?.email === email);
@@ -275,10 +309,12 @@ exports.getStudentEvaluations = async (req, res) => {
         const result = evaluations.map(doc => {
             const gid = String(doc.groupId?._id || doc.groupId);
             const assignedPanelSize = doc.scheduleId?.facultyPanels?.length || 0;
+            const proposal = groupProposalMap[gid] || { projectTitle: "N/A", projectSupervisor: "N/A" };
             return {
                 ...doc,
                 assignedPanelSize,
-                supervisorEmail: groupToSupervisorMap[gid] || null,
+                project: proposal,
+                supervisorEmail: proposal.projectSupervisor,
                 evaluations: (doc.evaluations || []).map(ev => ({
                     ...ev,
                     students: (ev.students || [])
@@ -320,10 +356,10 @@ exports.approveEvaluation = async (req, res) => {
         const slotMidnight = slotDate ? new Date(slotDate.getFullYear(), slotDate.getMonth(), slotDate.getDate()).getTime() : null;
         const isDatePassed = slotMidnight !== null && todayMidnight > slotMidnight;
 
-        if (!allSubmitted && !isDatePassed) {
+        if (submittedCount === 0) {
             return res.status(400).json({
                 success: false,
-                message: `Publishing blocked: Only ${submittedCount}/${assignedCount} members have submitted. You must wait for all submissions or until the scheduled date passes (${slotDate?.toLocaleDateString()}).`
+                message: "Cannot publish: No evaluations have been submitted yet."
             });
         }
 
@@ -351,6 +387,7 @@ exports.getEvaluationByGroup = async (req, res) => {
 
         res.status(200).json({ success: true, data: evaluation });
     } catch (err) {
+        console.error("❌ Error in getEvaluations:", err);
         res.status(500).json({ success: false, message: err.message });
     }
 };

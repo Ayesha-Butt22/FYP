@@ -399,9 +399,20 @@ const ProposalRow = ({ idea, isExpanded, onToggleExpanded, onOpenStatusModal, ti
         <TableCell sx={TABLE_STYLES.cell} align="center">
           <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
             {idea.status === "pending" && (
-              <Button variant="contained" size="small" onClick={() => onOpenStatusModal(idea.ideaId)}
-                sx={{ fontWeight: 700, bgcolor: "#01337a", color: "#ffffff", textTransform: "none", border: "1px solid #01337a",
-                  "&:hover": { bgcolor: "#ffffff", color: "#01337a", border: "1px solid #01337a" } }}>
+              <Button 
+                variant="contained" 
+                size="small" 
+                onClick={() => onOpenStatusModal(idea.ideaId)}
+                sx={{ 
+                  fontWeight: 700, 
+                  bgcolor: "#01337a", 
+                  color: "#ffffff", 
+                  textTransform: "none", 
+                  border: "2px solid #01337a",
+                  transition: "all 0.3s ease",
+                  "&:hover": { bgcolor: "#ffffff", color: "#01337a", border: "2px solid #01337a" } 
+                }}
+              >
                 Update Status
               </Button>
             )}
@@ -484,8 +495,30 @@ const StatusUpdateModal = ({ open, status, comment, onClose, onStatusChange, onC
       <TextField placeholder="Write feedback for the students..." fullWidth multiline minRows={3} value={comment} onChange={(e) => onCommentChange(e.target.value)} sx={{ mb: 2 }} />
 
       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
-        <Button onClick={onClose} variant="outlined" sx={{ color: "#01337a", borderColor: "#01337a" }}>Cancel</Button>
-        <Button onClick={onSave} variant="contained" sx={{ bgcolor: "#01337a", color: "#ffffff" }}>Save</Button>
+        <Button 
+          onClick={onClose} 
+          variant="outlined" 
+          sx={{ 
+            color: "#01337a", 
+            borderColor: "#01337a", 
+            borderWidth: "2px",
+            "&:hover": { bgcolor: "#ffffff", color: "#01337a", borderColor: "#01337a", borderWidth: "2px" } 
+          }}
+        >
+          Cancel
+        </Button>
+        <Button 
+          onClick={onSave} 
+          variant="contained" 
+          sx={{ 
+            bgcolor: "#01337a", 
+            color: "#ffffff",
+            border: "2px solid #01337a",
+            "&:hover": { bgcolor: "#ffffff", color: "#01337a", border: "2px solid #01337a" } 
+          }}
+        >
+          Save
+        </Button>
       </Box>
     </Box>
   </Modal>

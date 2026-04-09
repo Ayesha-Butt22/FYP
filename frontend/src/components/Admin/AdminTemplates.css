@@ -26,17 +26,27 @@
 }
 
 .st-clear-btn {
-    background: #01337a;
-    color: #fff;
-    padding: 10px 28px;
-    border: none;
-    border-radius: 7px;
-    font-size: 1.3rem;
-    font-weight: 900;
-    letter-spacing: -.2px;
-    box-shadow: 0 2px 10px #01337a22;
-    cursor: pointer;
-    transition: background 0.18s;
+  background: #01337a !important;
+  color: #fff !important;
+  padding: 10px 28px;
+  border: 2px solid #01337a !important;
+  border-radius: 7px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.st-clear-btn:hover {
+  background: #ffffff !important;
+  color: #01337a !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(1, 51, 122, 0.2);
+}
+
+.st-clear-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 

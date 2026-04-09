@@ -217,9 +217,9 @@ export default function FinalResultsConsolidated({ role = "coordinator" }) {
       let remarkText = "—";
       if (r.status === 'Pass') {
         if (r.year.includes('1')) {
-          remarkText = "Congratulations! You are promoted to FYP-2.";
+          remarkText = "Congratulations! You are promoted to FYP-1.";
         } else {
-          remarkText = "Congratulations! You have completed your FYP.";
+          remarkText = "Congratulations! You are promoted to FYP-2.";
         }
       } else if (r.status === 'Fail (Templates Pending)') {
         remarkText = "Failed: Templates Pending.";
@@ -246,7 +246,7 @@ export default function FinalResultsConsolidated({ role = "coordinator" }) {
       else if (r.year === "FYP-2" && !r.isFyp2Approved) resStatus = "Fail (Templates Pending)";
 
       if (resStatus === 'Pass') {
-        remarkText = r.year.includes('1') ? "Congratulations! You are promoted to FYP-2." : "Congratulations! You have completed your FYP.";
+        remarkText = r.year.includes('1') ? "Congratulations! You are promoted to FYP-1." : "Congratulations! You are promoted to FYP-2.";
       } else if (resStatus === 'Fail (Templates Pending)') {
         remarkText = "Failed: Templates Pending.";
       } else if (resStatus === 'Fail' || getGrade(r.finalScore) === 'F') {

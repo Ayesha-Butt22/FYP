@@ -445,7 +445,11 @@ export default function SupervisorEvaluations() {
                 style={{ height: '47px' }}
               >
                 <MenuItem value=""><em>Choose group</em></MenuItem>
-                {groups.map(g => <MenuItem key={g.id} value={g.id}>{g.maskedId}</MenuItem>)}
+                {groups.map(g => (
+                  <MenuItem key={g.id} value={g.id}>
+                    {g.maskedId} - {g.name}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -478,10 +482,19 @@ export default function SupervisorEvaluations() {
               Export CSV
             </Button>
             <Button
-              variant="text"
+              variant="contained"
               size="large"
               startIcon={<RestartAlt />}
               onClick={() => { setSelectedGroup(""); setSelectedMilestone(""); setFormError(""); setSubmitted(false); }}
+              sx={{ 
+                bgcolor: "#01337a", 
+                color: "#ffffff",
+                border: "2px solid #01337a",
+                fontWeight: 700,
+                textTransform: "none",
+                transition: "all 0.3s ease",
+                "&:hover": { bgcolor: "#ffffff", color: "#01337a", border: "2px solid #01337a" } 
+              }}
             >
               Reset form
             </Button>

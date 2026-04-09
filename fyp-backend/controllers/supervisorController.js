@@ -226,7 +226,7 @@ exports.getSupervisorGroups = async (req, res) => {
 
       const users = await User.find(
         { email: { $in: emails } },
-        { name: 1, sapId: 1, _id: 0 }
+        { name: 1, sapId: 1, studentId: 1, _id: 0 }
       );
 
       // Fetch milestone progress (6 in FYP-1 + 2 in FYP-2 = 8 Total)
@@ -251,7 +251,10 @@ exports.getSupervisorGroups = async (req, res) => {
         groupId: (group._id),
         special: proposal.projectSpecialization,
         description: proposal.projectTitle || "No Description",
-        members: users.map(u => ({ name: u.name, sapId: u.sapId || "N/A" })),
+        members: users.map(u => ({ 
+          name: u.name, 
+          sapId: u.studentId || u.sapId || "N/A" 
+        })),
         milestonesTotal: 8,
         milestonesCompleted: completedMilestones,
         status: proposal.projectStatus === 1 ? "Approved" : "Pending"

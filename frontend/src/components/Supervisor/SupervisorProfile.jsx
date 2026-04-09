@@ -1,4 +1,3 @@
-//supervsorProfile.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { FaUserTie, FaEnvelope, FaLightbulb, FaTrash } from "react-icons/fa";
 import { TextField, Button, IconButton } from "@mui/material";
@@ -78,7 +77,7 @@ export default function SupervisorProfile({ supervisorInfo }) {
 
 
   useEffect(() => {
-      const url = localStorage.getItem('imageurl');
+    const url = localStorage.getItem('imageurl');
     if (!url) return;
     setProfilePic(url);
   }, [email]);

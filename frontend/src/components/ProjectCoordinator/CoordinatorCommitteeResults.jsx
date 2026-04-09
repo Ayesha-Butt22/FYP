@@ -4,15 +4,30 @@ import ToastService, { toastService } from "../ToastService/ToastService.jsx";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import "./CommitteeResults.css";
 import {
-  KeyboardArrowDown,
-  KeyboardArrowUp,
   AccessTime,
   Place,
+  Info as InfoIcon,
+  Close as CloseIcon
 } from "@mui/icons-material";
+import {
+  Modal,
+  Box,
+  Typography,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Divider
+} from "@mui/material";
 
 export default function CoordinatorCommitteeResults() {
   const [rows, setRows] = useState([]);
-  const [expanded, setExpanded] = useState({});
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   useEffect(() => {
     const fetchEvaluations = async () => {
@@ -64,15 +79,17 @@ export default function CoordinatorCommitteeResults() {
               rawGroupId: group.groupId || rawGrpLabel,
               week: schedule.week || "N/A",
               fypPart: schedule.fypPart || "",
+              projectTitle: item.project?.projectTitle || "N/A",
               venue: schedule.venue || "Not Assigned",
               slotTime: slot.startTime
-                ? `${new Date(slot.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${new Date(slot.endTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                ? new Date(slot.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
                 : "N/A",
               evaluations,
               createdAt: item.createdAt ? new Date(item.createdAt).toLocaleString() : "N/A",
               isApproved: item.isApprovedByCoordinator,
               supervisorEmail: item.supervisorEmail || null,
               assignedPanelSize: item.assignedPanelSize || 0,
+              missingMembers: item.missingMembers || [],
             };
           });
 
@@ -99,6 +116,8 @@ export default function CoordinatorCommitteeResults() {
               if (row.venue !== deduped[key].venue) {
                 deduped[key].venue = `${deduped[key].venue}, ${row.venue}`;
               }
+              // Sync missing members
+              deduped[key].missingMembers = row.missingMembers || [];
             }
           });
 
@@ -114,9 +133,7 @@ export default function CoordinatorCommitteeResults() {
     fetchEvaluations();
   }, []);
 
-  const toggleExpand = (id) => {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+
 
   const computeFinalMarks = (evaluations) => {
     const numPanels = evaluations.length;
@@ -142,11 +159,11 @@ export default function CoordinatorCommitteeResults() {
       const avgPerf = data.performances.reduce((a, b) => a + b, 0) / data.performances.length;
 
       const cloEvs = evaluations.filter((ev) => ev.cloMarks !== null);
-      // Logic Update: Divide by total panel size, treat missing as 0
-      const totalPanelMembers = evaluations[0]?.scheduleId?.facultyPanels?.length || evaluations[0]?.assignedPanelSize || evaluations.length || 1;
+      // Logic Update: Only count submitted evaluations for the average
+      const submittedPanelCount = evaluations.length || 1;
 
       const sumClo = cloEvs.reduce((sum, ev) => sum + ev.totalCloMarks, 0);
-      const avgClo = sumClo / totalPanelMembers;
+      const avgClo = sumClo / submittedPanelCount;
 
       const finalCloPortion = +(avgClo * 0.5).toFixed(2);
       const finalTotal = finalCloPortion;
@@ -162,12 +179,13 @@ export default function CoordinatorCommitteeResults() {
     });
 
     const cloEvs = evaluations.filter((ev) => ev.cloMarks !== null);
-    const totalPanelMembers = evaluations[0]?.assignedPanelSize || evaluations.length || 1;
+    const submittedPanelCount = evaluations.length || 1;
     const sumClo = cloEvs.reduce((sum, ev) => sum + ev.totalCloMarks, 0);
-    const avgClo = sumClo / totalPanelMembers;
+    const avgClo = sumClo / submittedPanelCount;
     const finalCloMarks = +(avgClo * 0.5).toFixed(2);
 
-    return { students, finalCloMarks, numPanels, assignedPanelSize: totalPanelMembers, hasClo: cloEvs.length > 0 };
+    const totalPanelSize = evaluations[0]?.assignedPanelSize || evaluations.length || 1;
+    return { students, finalCloMarks, numPanels, assignedPanelSize: totalPanelSize, hasClo: cloEvs.length > 0 };
   };
 
   const handlePublish = async (row) => {
@@ -201,12 +219,13 @@ export default function CoordinatorCommitteeResults() {
         <table className="cor-committee-table">
           <thead className="cor-committee-thead">
             <tr>
-              <th style={{ width: "40px" }}></th>
               <th><strong>Week</strong></th>
-              <th><strong>Group #</strong></th>
+              <th><strong>Group ID</strong></th>
               <th><strong>Student Names</strong></th>
+              <th><strong>Project Title</strong></th>
               <th><strong>Venue</strong></th>
               <th><strong>Time</strong></th>
+              <th><strong>Info</strong></th>
               <th><strong>Action</strong></th>
             </tr>
           </thead>
@@ -214,7 +233,7 @@ export default function CoordinatorCommitteeResults() {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan="7" className="cor-committee-empty">
+                <td colSpan="8" className="cor-committee-empty">
                   No evaluations found.
                 </td>
               </tr>
@@ -231,16 +250,7 @@ export default function CoordinatorCommitteeResults() {
                   <React.Fragment key={row.id}>
                     <tr
                       className="cor-committee-row"
-                      onClick={() => toggleExpand(row.id)}
-                      style={{ cursor: "pointer" }}
                     >
-                      <td>
-                        {expanded[row.id] ? (
-                          <KeyboardArrowUp fontSize="small" />
-                        ) : (
-                          <KeyboardArrowDown fontSize="small" />
-                        )}
-                      </td>
                       <td className="cor-week-cell">
                         <span className="cor-week-badge">{row.week}</span>
                         {row.fypPart && (
@@ -249,6 +259,9 @@ export default function CoordinatorCommitteeResults() {
                       </td>
                       <td style={{ fontWeight: 600, color: "#013379" }}>{row.groupId}</td>
                       <td>{allStudentNames}</td>
+                      <td style={{ maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.projectTitle}>
+                        {row.projectTitle}
+                      </td>
                       <td className="cor-venue-cell">
                         <div>
                           <Place fontSize="small" color="primary" />
@@ -260,9 +273,17 @@ export default function CoordinatorCommitteeResults() {
                           <AccessTime fontSize="small" color="secondary" />
                           <span>{row.slotTime}</span>
                         </div>
-                        <div style={{ fontSize: '0.75rem', marginTop: '4px', color: row.evaluations.length < row.assignedPanelSize ? '#f43f5e' : '#16a34a', fontWeight: 600 }}>
-                          {row.evaluations.length} / {row.assignedPanelSize} Submitted
-                        </div>
+                      </td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <IconButton
+                          color="primary"
+                          onClick={() => {
+                            setSelectedRow(row);
+                            setInfoModalOpen(true);
+                          }}
+                        >
+                          <InfoIcon />
+                        </IconButton>
                       </td>
                       <td onClick={(e) => e.stopPropagation()}>
                         <button
@@ -273,87 +294,13 @@ export default function CoordinatorCommitteeResults() {
                         >
                           {row.isApproved ? '✅ Published' : 'Publish'}
                         </button>
+                        {/* {row.missingMembers && row.missingMembers.length > 0 && (
+                          <div style={{ fontSize: '0.65rem', color: '#f43f5e', fontWeight: 700, marginTop: '6px', textAlign: 'center', maxWidth: '120px' }}>
+                            Missing: {row.missingMembers.join(", ")}
+                          </div>
+                        )} */}
                       </td>
                     </tr>
-
-                    {expanded[row.id] && (
-                      <tr>
-                        <td colSpan="7" className="cor-committee-expand">
-                          <div className="cor-committee-expand-content">
-                            <div className="cor-expand-title">
-                              📋 Evaluations by Panel Members ({row.evaluations.length})
-                            </div>
-                            {(row.evaluations || []).map((evalItem, i) => {
-                              const evaluatorName = evalItem.evaluatedBy && typeof evalItem.evaluatedBy === 'object' ? evalItem.evaluatedBy.name : evalItem.evaluatedBy || 'N/A';
-                              return (
-                                <div key={i} className="cor-committee-panel-card">
-                                  <div className="cor-committee-panel-header">
-                                    👤 Panel Member: {evaluatorName}{" "}
-                                    <span className="cor-panel-role">({evalItem.role})</span>
-                                  </div>
-
-                                  {/* Individual marks hidden for Coordinator as per request */}
-
-
-                                  <div className="cor-committee-comments" style={{ margin: '10px 0', padding: '10px', backgroundColor: '#f9fafb', borderRadius: '4px', borderLeft: '4px solid #013379' }}>
-                                    <strong>Comments:</strong> {evalItem.comments}
-                                  </div>
-
-                                  <div className="cor-committee-submitted">
-                                    Submitted at: {evalItem.submittedAt}
-                                  </div>
-                                </div>
-                              );
-                            })}
-
-                            {/* ═══════ FINAL MARKS SUMMARY (× 50%) ═══════ */}
-                            {!/\b4\b/.test(row.week) && (() => {
-                              const fm = computeFinalMarks(row.evaluations || []);
-                              if (!fm) return null;
-                              return (
-                                <div className="cor-final-marks-card">
-                                  <div className="cor-final-marks-header">
-                                    🏆 Final Marks Summary
-                                    {/* <span className="cor-final-marks-rule">
-                                      Formula: Panel Avg (CLO) × 50% = 50 Marks (Committee Grade)
-                                    </span> */}
-                                  </div>
-
-                                  <table className="cor-final-marks-table">
-                                    <thead>
-                                      <tr>
-                                        <th>Student</th>
-                                        <th>Committee Score (/50)</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {fm.students.map((stu, k) => (
-                                        <tr key={k}>
-                                          <td>
-                                            <strong>{stu.name}</strong>
-                                            {stu.sapId && (
-                                              <span style={{ color: "#888", marginLeft: 6, fontSize: "0.82em" }}>({stu.sapId})</span>
-                                            )}
-                                          </td>
-                                          <td className="cor-final-mark cor-final-total" style={{ textAlign: 'center' }}>{stu.finalTotal}</td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-
-                                  {fm.hasClo && (
-                                    <div className="cor-final-clo">
-                                      📊 Panel Average: <strong>{fm.finalCloMarks} / 50</strong>
-                                      <span className="cor-final-clo-note">  (Avg CLO scaled to 50)</span>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
                   </React.Fragment>
                 );
               })
@@ -361,6 +308,176 @@ export default function CoordinatorCommitteeResults() {
           </tbody>
         </table>
       </div>
+
+      <InfoModal
+        open={infoModalOpen}
+        onClose={() => setInfoModalOpen(false)}
+        row={selectedRow}
+        computeFinalMarks={computeFinalMarks}
+      />
     </div>
   );
 }
+
+// ─── Modal Implementation ─────────────────────────────────────────────
+const InfoModal = ({ open, onClose, row, computeFinalMarks }) => {
+  if (!row) return null;
+  const fm = computeFinalMarks(row.evaluations || []);
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box sx={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: { xs: '90%', md: 800 },
+        maxHeight: '90vh',
+        bgcolor: 'background.paper',
+        borderRadius: '12px',
+        boxShadow: 24,
+        p: 0,
+        overflowY: 'auto'
+      }}>
+        {/* Header */}
+        <Box sx={{
+          p: 3,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          bgcolor: '#013379',
+          color: 'white',
+          borderTopLeftRadius: '12px',
+          borderTopRightRadius: '12px',
+          position: 'relative'
+        }}>
+          <Box>
+            <Typography variant="h6" fontWeight="600">
+              📊 Evaluation Summary: {row.groupId}
+            </Typography>
+            <Typography variant="subtitle2" sx={{ opacity: 0.9 }}>
+              Project: {row.projectTitle}
+            </Typography>
+          </Box>
+          <IconButton onClick={onClose} sx={{ color: 'white' }}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ p: 4 }}>
+          {/* Milestone Info */}
+          <Box sx={{ display: 'flex', gap: 4, mb: 3 }}>
+            <Box>
+              <Typography variant="subtitle2" color="textSecondary">Milestone</Typography>
+              <Typography fontWeight="bold">{row.week}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" color="textSecondary">Venue</Typography>
+              <Typography fontWeight="bold">{row.venue}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" color="textSecondary">Submissions</Typography>
+              <Typography fontWeight="bold" color={row.evaluations.length < row.assignedPanelSize ? 'error.main' : 'success.main'}>
+                {row.evaluations.length} / {row.assignedPanelSize}
+              </Typography>
+            </Box>
+          </Box>
+
+          {row.missingMembers && row.missingMembers.length > 0 && (
+            <Box sx={{ mb: 3, p: 2, bgcolor: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '8px' }}>
+              <Typography variant="caption" color="#991b1b" fontWeight="800" sx={{ display: 'block', mb: 0.5 }}>
+                ⚠️ PENDING EVALUATIONS:
+              </Typography>
+              <Typography variant="body2" color="#b91c1c" fontWeight="600" sx={{ mb: 1 }}>
+                {row.missingMembers.join(", ")} - This member has NOT submitted the result.
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#000', fontStyle: 'italic', display: 'block' }}>
+                Note: Their empty slot will not be counted in the final average calculation. Only submitted marks are factored into the result.
+              </Typography>
+            </Box>
+          )}
+
+          <Divider sx={{ mb: 3 }} />
+
+          {/* Student Marks Table */}
+          <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            Individual Results Summary
+          </Typography>
+          {fm ? (
+            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #eee', mb: 4 }}>
+              <Table size="small">
+                <TableHead sx={{ bgcolor: '#f8fafc' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Student Name</TableCell>
+                    {!/week\s*4/i.test(row.week) && (
+                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Committee Score (/50)</TableCell>
+                    )}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {fm.students.map((stu, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <Box>
+                          <Typography variant="body2" fontWeight="600">{stu.name}</Typography>
+                          <Typography variant="caption" color="textSecondary">{stu.sapId}</Typography>
+                        </Box>
+                      </TableCell>
+                      {!/week\s*4/i.test(row.week) && (
+                        <TableCell align="center">
+                          <Typography fontWeight="700" color="#013379">{stu.finalTotal}</Typography>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Typography color="textSecondary" sx={{ mb: 4 }}>No evaluations submitted yet.</Typography>
+          )}
+
+          {!/week\s*4/i.test(row.week) && fm?.hasClo && (
+            <Box sx={{ p: 2, bgcolor: '#eff6ff', borderRadius: '8px', mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="body1" fontWeight="600" color="#1e40af">Panel Average Result (Scaled to 50):</Typography>
+              <Typography variant="h6" fontWeight="800" color="#1e40af">{fm.finalCloMarks} / 50</Typography>
+            </Box>
+          )}
+
+          {/* Detailed Comments */}
+          <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+            💬 Panel Member Feedback
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {row.evaluations.map((ev, i) => (
+              <Box key={i} sx={{ p: 2, border: '1px solid #eee', borderRadius: '8px', bgcolor: '#fcfcfc' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2" fontWeight="700" color="#013379">
+                    {typeof ev.evaluatedBy === 'object' ? ev.evaluatedBy.name : ev.evaluatedBy}
+                  </Typography>
+                </Box>
+                <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                  "{ev.comments}"
+                </Typography>
+                <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
+                  Submitted: {ev.submittedAt}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Footer */}
+        <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px', textAlign: 'right', borderTop: '1px solid #eee' }}>
+          <button
+            className="cor-main-btn"
+            style={{ padding: '8px 24px' }}
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </Box>
+      </Box>
+    </Modal>
+  );
+};

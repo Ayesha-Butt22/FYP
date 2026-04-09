@@ -112,7 +112,7 @@ async removeCoordinator(id) {
         return await this.makeAPICall("admin/stats", {}, { method: "GET" });
     }
 
-     // TOGGLE STUDENT APPROVAL - YE ADD KAREN
+     // TOGGLE STUDENT APPROVALz
     async toggleStudentApproval(id) {
         return await this.makeAPICall(`admin/toggle-approval/${id}`, {}, { method: 'PATCH' });
     }

@@ -103,25 +103,41 @@ form {
 /* ===== SUBMIT BUTTON ===== */
 .cs1-submit {
   padding: 10px 24px;
-  border: none;
+  border: 2px solid #16a34a;
   background: #16a34a;
   color: white;
   border-radius: 10px;
   cursor: pointer;
   font-weight: 700;
   font-size: 15px;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  animation: submit-blink-intense 1.2s infinite ease-in-out;
+}
+
+@keyframes submit-blink-intense {
+  0% { 
+    transform: scale(1); 
+    background: #16a34a; 
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); 
+  }
+  50% { 
+    transform: scale(1.03); 
+    background: #22c55e; 
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); 
+  }
+  100% { 
+    transform: scale(1); 
+    background: #16a34a; 
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); 
+  }
 }
 
 .cs1-submit:hover {
-  background: #15803d;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.cs1-submit:active {
-  transform: translateY(0);
+  background: white !important;
+  color: #16a34a !important;
+  border: 2px solid #16a34a !important;
+  transform: translateY(-2px);
+  animation-play-state: paused;
 }
 
 /* ===== CLOSE BUTTON ===== */
@@ -168,7 +184,7 @@ form {
   line-height: 1.5;
 }
 
-/* ===== OPTIONS GRID ===== */
+/* ===== OPTIONS GRID & COLORED BOXES ===== */
 .cs1-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -176,8 +192,6 @@ form {
 }
 
 .cs1-options label {
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
   border-radius: 12px;
   padding: 16px;
   cursor: pointer;
@@ -188,31 +202,51 @@ form {
   text-align: center;
   font-size: 14px;
   font-weight: 700;
-  color: #334155;
   line-height: 1.4;
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  color: #334155;
+}
+
+/* Coloring Logic based on rank (1-5) - Light to Dark Pro Scheme */
+.cs1-options label:nth-child(1) { --accent: #991b1b; --bg-light: #fff1f2; }
+.cs1-options label:nth-child(2) { --accent: #9a3412; --bg-light: #fff7ed; }
+.cs1-options label:nth-child(3) { --accent: #854d0e; --bg-light: #fffbeb; }
+.cs1-options label:nth-child(4) { --accent: #1e3a8a; --bg-light: #eff6ff; }
+.cs1-options label:nth-child(5) { --accent: #064e3b; --bg-light: #ecfdf5; }
+
+.cs1-options label {
+  background: var(--bg-light);
+  border: 1px solid #e2e8f0;
+  color: var(--accent);
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cs1-options label:hover {
-  background: #f0f9ff;
-  border-color: #06b6d4;
-  transform: translateY(-2px);
+  background: var(--accent) !important;
+  color: white !important;
+  border-color: var(--accent) !important;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .cs1-options input[type="radio"] {
   appearance: none;
   width: 20px;
   height: 20px;
-  border: 2px solid #cbd5e1;
+  border: 2px solid var(--accent);
   border-radius: 50%;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   cursor: pointer;
   position: relative;
   transition: all 0.2s;
+  background: white;
 }
 
 .cs1-options input[type="radio"]:checked {
-  border-color: #06b6d4;
-  background: #06b6d4;
+  border-color: white !important;
+  background: white !important;
 }
 
 .cs1-options input[type="radio"]:checked::after {
@@ -221,16 +255,23 @@ form {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background: white;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
   border-radius: 50%;
 }
 
 .cs1-options label:has(input[type="radio"]:checked) {
-  background: #f0f9ff;
-  border-color: #06b6d4;
-  color: #01337a;
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: white !important;
+  box-shadow: 0 12px 30px rgba(0,0,0, 0.1);
+  transform: scale(1.05);
+}
+
+/* Ensure text visibility */
+.cs1-options label:has(input[type="radio"]:checked) p {
+    color: white !important;
 }
 
 /* ===== OPEN BUTTON ===== */
@@ -238,13 +279,14 @@ form {
   padding: 12px 24px;
   background: #01337a;
   color: white;
-  border: none;
+  border: 2px solid #01337a;
   cursor: pointer;
   border-radius: 10px;
   font-weight: 600;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
 }
 
 .open-btn:hover {
-  background: #06b6d4;
+  background: white;
+  color: #01337a;
 }

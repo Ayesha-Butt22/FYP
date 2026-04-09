@@ -127,10 +127,24 @@
 .milestone-percent-complete { font-weight:800; color:#475569; font-size:14px; margin-top:6px; }
 
 .milestone-toggle-btn {
-  background:var(--main-blue); color:#fff; border:none; border-radius:9px; font-weight:800;
-  padding:8px 20px; font-size:14px; margin-top:18px; cursor:pointer; width:180px;
+  background: var(--main-blue);
+  color: #fff;
+  border: 2px solid var(--main-blue);
+  border-radius: 9px;
+  font-weight: 800;
+  padding: 8px 20px;
+  font-size: 14px;
+  margin-top: 18px;
+  cursor: pointer;
+  width: 180px;
+  transition: all 0.3s ease;
 }
-.milestone-toggle-btn:hover { transform: translateY(-2px); }
+
+.milestone-toggle-btn:hover {
+  background: #fff;
+  color: var(--main-blue);
+  transform: translateY(-2px);
+}
 
 /* timeline table */
 .milestone-timeline-table-wrap { margin-top:18px; border-radius:10px; overflow:hidden; }
@@ -189,20 +203,23 @@
   margin: 14px 0 22px 0;
 }
 .archive-btn {
-  background: #2563eb;
+  background: #01337a;
   color: #ffffff;
-  border: none;
+  border: 2px solid #01337a;
   padding: 10px 22px;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(37,99,235,0.18);
-  transition: background 160ms ease, transform 120ms ease;
+  box-shadow: 0 6px 16px rgba(1, 51, 122, 0.18);
+  transition: all 0.3s ease;
   font-size: 0.95rem;
 }
+
 .archive-btn:hover {
-  background: #1e40af;
+  background: #ffffff;
+  color: #01337a;
   transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(1, 51, 122, 0.25);
 }
 .archived-badge {
   display: inline-block;

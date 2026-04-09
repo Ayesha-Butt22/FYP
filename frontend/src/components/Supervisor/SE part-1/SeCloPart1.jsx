@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./se-clo-part-1.css";
+import ToastService from "../../ToastService/ToastService.jsx";
 
 
 const SeCloPart1 = ({ onMarksSubmit }) => {
@@ -29,6 +30,12 @@ const SeCloPart1 = ({ onMarksSubmit }) => {
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
+    
+    if (Object.keys(selectedMarks).length < 8) {
+      ToastService.warning("Please evaluate all 8 Learning Objectives (LOs) before submitting.");
+      return;
+    }
+
     setIsSubmitted(true);
     setIsOpen(false);
     if (onMarksSubmit) {
@@ -64,7 +71,7 @@ const SeCloPart1 = ({ onMarksSubmit }) => {
                 </div>
 
                 <button
-                  type="button"
+                  type="submit"
                   className="cs1-submit"
                   onClick={handleSubmit}
                 >

@@ -215,6 +215,11 @@ export default function CommitteeEvaluation() {
         return;
       }
 
+      if (!isWeek4 && (!cloMarks || !cloMarks.marks || !cloMarks.marks.lo1)) {
+        ToastService.warning("Required: Please ensure FYP-LO1 is evaluated in the rubric before final submission.");
+        return;
+      }
+
       const students = selectedGroup.members.map((m) => ({
         studentId: m.studentId,
         name: m.name,
@@ -532,7 +537,7 @@ export default function CommitteeEvaluation() {
               <button className="eval-sup-cancel-btn" onClick={handleCancel}>
                 Cancel
               </button>
-              <button className="eval-sup-submit-btn" onClick={handleSubmit} disabled={loading}>
+              <button className={`eval-sup-submit-btn pulsing`} onClick={handleSubmit} disabled={loading}>
                 {loading ? "Submitting…" : "Submit Evaluation"}
               </button>
             </div>

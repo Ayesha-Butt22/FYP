@@ -283,7 +283,12 @@ export default function StudentUploads() {
         if (!fileInputRefs.current[key]) {
             const input = document.createElement("input");
             input.type = "file";
-            input.accept = ".doc,.docx,.ppt,.pptx";
+            // Check if template is PPT related (t03, t06, t07) or specifically t03 as requested
+            if (tplCode === "t03") {
+                input.accept = ".ppt,.pptx";
+            } else {
+                input.accept = ".doc,.docx,.ppt,.pptx";
+            }
             input.onchange = (e) => handleFileSelected(e, tplCode, fypPart);
             fileInputRefs.current[key] = input;
         }
@@ -293,6 +298,16 @@ export default function StudentUploads() {
     const handleFileSelected = async (e, tplCode, fypPart) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        // Strict extension check for t03
+        if (tplCode === "t03") {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext !== "ppt" && ext !== "pptx") {
+                toastService.error("Only PowerPoint files (.ppt, .pptx) are allowed for this template.");
+                e.target.value = null; // reset
+                return;
+            }
+        }
 
         const currentId = localStorage.getItem("studentId") || localStorage.getItem("sapId");
         if (!currentId) {

@@ -180,7 +180,7 @@ export default function SupervisorTemplates () {
           <button 
             className="st-clear-btn" 
             onClick={clearFilters}
-            disabled={loading || selectedDept === "All"}
+            disabled={loading}
           >
             Clear filter
           </button>
@@ -189,7 +189,6 @@ export default function SupervisorTemplates () {
             onClick={refreshTemplates}
             disabled={loading}
             title="Refresh templates"
-              style={{ background: "#01337a" }}  
           >
             ↻ Refresh
           </button>

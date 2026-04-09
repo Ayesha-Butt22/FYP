@@ -133,7 +133,7 @@ const validateForm = (data, isEdit = false) => {
   if (!data.Designation?.trim()) errors.Designation = "Designation is required";
 
   const availableSlots = Number(data["Available_Slots"] || data["Available Slots"]);
-  const bookedSlots = Number(data["Booked_Slots"] || data["Booked Slots"]);
+  const bookedSlots = Number(data["Booked_Slots"] || data["Booked Slots"] || 0);
 
   if (isNaN(availableSlots) || availableSlots < 0) {
     errors.Available_Slots = "Available slots must be a non-negative number";
@@ -147,6 +147,7 @@ const validateForm = (data, isEdit = false) => {
 
   return errors;
 };
+
 
 function splitSpeciality(str) {
   if (!str) return [];

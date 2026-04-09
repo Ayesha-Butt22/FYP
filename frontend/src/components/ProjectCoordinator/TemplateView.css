@@ -53,14 +53,6 @@
   padding: 18px;
   border-radius: 12px;
   box-shadow: 0 26px 80px rgba(1, 51, 122, 0.18);
-  -webkit-transform: translateX(-50%);
-  -moz-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
-  -o-transform: translateX(-50%);
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
 }
 
 .stv-on-time { color: #0b5a3a; font-weight: 800; }
@@ -112,17 +104,22 @@
 }
 
 .st-clear-btn {
-  background: #01337a;
-  color: #fff;
+  background: #01337a !important;
+  color: #fff !important;
   padding: 10px 18px;
-  border: none;
+  border: 2px solid #01337a !important;
   border-radius: 7px;
   font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: -.2px;
+  letter-spacing: -0.2px;
   box-shadow: 0 2px 10px #01337a22;
   cursor: pointer;
-  transition: background 0.18s;
+  transition: all 0.3s ease;
 }
 
-.st-clear-btn:hover { background: #022a57; }
+.st-clear-btn:hover {
+  background: #ffffff !important;
+  color: #01337a !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(1, 51, 122, 0.2);
+}
