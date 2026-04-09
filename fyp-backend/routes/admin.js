@@ -80,6 +80,9 @@ router.post('/make-fyp-incharge/:id', protect, isAdmin, adminController.makeFYPI
 // SYSTEM STATS
 router.get('/stats', protect, isAdmin, adminController.getSystemStats);
 
+// RECENT ACTIVITIES
+router.get('/get-activities', protect, isAdmin, adminController.getRecentActivities);
+
 // PROMOTE TO COORDINATOR
 router.post('/promote/:id', protect, isAdmin, adminController.makeCoordinator);
 

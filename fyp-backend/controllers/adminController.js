@@ -2,14 +2,16 @@ const bcrypt = require('bcryptjs');
 const xlsx = require("xlsx");
 const User = require('../models/User');
 const Group = require('../models/StudentGroup');
+const Proposal = require("../models/StudentProposal");
+const StudentUploadedTemplate = require("../models/StudentUploadedTemplate");
 
 const isValidOfficialEmail = email => /^[a-zA-Z0-9._]+@riphah\.edu\.pk$/.test(email);
 
 // CREATE USER (Admin, Supervisor, Coordinator)
 exports.createUser = async (req, res) => {
   try {
-    const { 
-      name, email, password, role, 
+    const {
+      name, email, password, role,
       department, specialization, availableSlots, bookedSlots,
       gender, contactNumber, designation // ADDED: designation
     } = req.body;
@@ -34,7 +36,7 @@ exports.createUser = async (req, res) => {
       password: hashed,
       role,
       department,
-      designation, 
+      designation,
       specialization,
       availableSlots,
       bookedSlots,
@@ -45,31 +47,31 @@ exports.createUser = async (req, res) => {
     });
 
     // Auto Admin ID
-if (role === 'admin') {
-  // Find last admin
-  const lastAdmin = await User.find({ role: 'admin' })
-    .sort({ createdAt: -1 }) // get the latest
-    .limit(1);
+    if (role === 'admin') {
+      // Find last admin
+      const lastAdmin = await User.find({ role: 'admin' })
+        .sort({ createdAt: -1 }) // get the latest
+        .limit(1);
 
-  let nextId = 1; // default for first admin
+      let nextId = 1; // default for first admin
 
-  if (lastAdmin.length > 0 && lastAdmin[0].studentId) {
-    // Extract the number from last admin ID
-    const lastNum = parseInt(lastAdmin[0].studentId.split('-')[1]);
-    nextId = lastNum + 1;
-  }
+      if (lastAdmin.length > 0 && lastAdmin[0].studentId) {
+        // Extract the number from last admin ID
+        const lastNum = parseInt(lastAdmin[0].studentId.split('-')[1]);
+        nextId = lastNum + 1;
+      }
 
-  // Pad with zeros: adm-001, adm-002, etc.
-  const padded = String(nextId).padStart(3, '0');
-  newUser.studentId = `adm-${padded}`;
-}
+      // Pad with zeros: adm-001, adm-002, etc.
+      const padded = String(nextId).padStart(3, '0');
+      newUser.studentId = `adm-${padded}`;
+    }
     await newUser.save();
     const u = newUser.toObject();
     delete u.password;
 
-    return res.status(201).json({ 
-      message: `${role} created successfully`, 
-      user: u 
+    return res.status(201).json({
+      message: `${role} created successfully`,
+      user: u
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -157,12 +159,12 @@ exports.getAllGroups = async (req, res) => {
 // UPDATE USER
 exports.updateUser = async (req, res) => {
   try {
-    const { 
-      name, email, department, specialization, password, 
+    const {
+      name, email, department, specialization, password,
       availableSlots, bookedSlots, designation, // ADDED: designation
       gender, contactNumber, isProjectHead
     } = req.body;
-    
+
     const user = await User.findById(req.params.id);
 
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -181,11 +183,11 @@ exports.updateUser = async (req, res) => {
     if (typeof availableSlots !== "undefined") user.availableSlots = availableSlots;
 
     if (typeof isProjectHead !== "undefined") {
-      
+
       if (isProjectHead === true) {
         await User.updateMany(
-          { 
-            department: user.department, 
+          {
+            department: user.department,
             isProjectHead: true,
             _id: { $ne: user._id }
           },
@@ -231,7 +233,7 @@ exports.removeCoordinator = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
-    
+
     if (user.role !== "coordinator") {
       return res.status(400).json({ error: "User is not a coordinator" });
     }
@@ -240,13 +242,13 @@ exports.removeCoordinator = async (req, res) => {
     user.role = "supervisor";
     user.isAlsoCOR = false;
     await user.save();
-    
+
     const u = user.toObject();
     delete u.password;
 
-    return res.json({ 
-      message: "Coordinator removed and converted to supervisor successfully", 
-      user: u 
+    return res.json({
+      message: "Coordinator removed and converted to supervisor successfully",
+      user: u
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -259,7 +261,8 @@ exports.getSystemStats = async (req, res) => {
     const totalStudents = await User.countDocuments({ role: "student" });
     const totalSupervisors = await User.countDocuments({ role: "supervisor" });
     const totalCoordinators = await User.countDocuments({ role: "coordinator" });
-    
+    const totalProposals = await require("../models/StudentProposal").countDocuments();
+
     // Only count active (non-archived) groups
     const totalGroups = await Group.countDocuments({ isArchived: { $ne: true } });
 
@@ -269,11 +272,102 @@ exports.getSystemStats = async (req, res) => {
         totalStudents,
         totalSupervisors,
         totalCoordinators,
-        totalGroups
+        totalGroups,
+        totalProposals
       },
     });
   } catch (error) {
     console.error("Error fetching system stats:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+exports.getRecentActivities = async (req, res) => {
+  try {
+    console.log("Admin getRecentActivities API called");
+    const activities = [];
+
+    const recentUsers = await User.find({ role: { $in: ["supervisor", "coordinator"] } })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    recentUsers.forEach(u => {
+      activities.push({
+        type: u.role,
+        text: `Added ${u.role.charAt(0).toUpperCase() + u.role.slice(1)}: ${u.name}`,
+        time: u.createdAt ? new Date(u.createdAt) : new Date()
+      });
+    });
+
+    // 2. Recent Groups (last 5)
+    const recentGroups = await Group.find()
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    recentGroups.forEach(g => {
+      activities.push({
+        type: "group",
+        text: `New Group created: ${g.groupId}`,
+        time: g.createdAt ? new Date(g.createdAt) : new Date()
+      });
+    });
+
+    // 3. Recent Proposals (last 5)
+    const recentProposals = await Proposal.find()
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    recentProposals.forEach(p => {
+      activities.push({
+        type: "proposal",
+        text: `New Proposal: "${p.projectTitle}" submitted`,
+        time: p.createdAt ? new Date(p.createdAt) : new Date()
+      });
+    });
+
+    // 4. Recent Template Uploads (last 5)
+    const recentUploads = await StudentUploadedTemplate.find()
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    recentUploads.forEach(t => {
+      activities.push({
+        type: "upload",
+        text: `File "${t.templateLabel}" uploaded by ${t.studentId}`,
+        time: t.uploadedAt ? new Date(t.uploadedAt) : (t.createdAt ? new Date(t.createdAt) : new Date())
+      });
+    });
+
+    // Sort all combined by time descending
+    activities.sort((a, b) => b.time.getTime() - a.time.getTime());
+
+    // Helper function for time ago (simple version or just return ISO)
+    const timeAgo = (date) => {
+      const now = new Date();
+      const diff = now - date;
+      const seconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+      if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+      if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+      return "Just now";
+    };
+
+    const formattedActivities = activities.slice(0, 10).map(act => ({
+      ...act,
+      time: timeAgo(act.time)
+    }));
+
+    res.status(200).json({
+      success: true,
+      activities: formattedActivities
+    });
+
+  } catch (error) {
+    console.error("Error fetching admin activities:", error);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
@@ -364,7 +458,7 @@ exports.uploadExcelAndCreateUsers = async (req, res) => {
         role: 'supervisor',
         department,
         specialization,
-        designation: designation, 
+        designation: designation,
         availableSlots: availableSlots,
         bookedSlots: bookedSlots || 0,
         mustChangePassword: true,
@@ -415,7 +509,7 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
       'associateprofessor': 2,
       'assistantprofessor': 3,
       'lecturer': 3,
-      'lecturerSr.lecturer':3,
+      'lecturerSr.lecturer': 3,
       'sr.lecturer': 3,
       'srlecturer': 3,
       'juniorlecturer': 2,
@@ -433,7 +527,7 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
     }
 
     if (bookedSlots > availableSlots) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: `Booked slots (${bookedSlots}) cannot exceed available slots (${availableSlots})`
       });
     }
@@ -466,7 +560,7 @@ exports.getSupervisorsForCoordinator = async (req, res) => {
       .select("name email department specialization designation availableSlots bookedSlots")
       .sort({ createdAt: -1 });
 
-    
+
     const DESIGNATION_DEFAULTS = {
       Dean: 0,
       Professor: 1,
@@ -513,8 +607,8 @@ exports.toggleStudentApproval = async (req, res) => {
 
     return res.json({
       success: true,
-      message: student.IsApproved 
-        ? "Student approved successfully" 
+      message: student.IsApproved
+        ? "Student approved successfully"
         : "Student unapproved successfully",
       data: {
         _id: student._id,
@@ -526,9 +620,9 @@ exports.toggleStudentApproval = async (req, res) => {
 
   } catch (err) {
     console.error("Toggle approval error:", err);
-    return res.status(500).json({ 
-      success: false, 
-      error: "Server error" 
+    return res.status(500).json({
+      success: false,
+      error: "Server error"
     });
   }
 };
@@ -537,27 +631,27 @@ exports.toggleStudentApproval = async (req, res) => {
 exports.makeFYPIncharge = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    
+
     if (user.role !== "coordinator") {
       return res.status(400).json({ error: "Only coordinators can be made FYP Incharge" });
     }
 
-    
+
     await User.updateMany(
-      { 
-        department: user.department, 
+      {
+        department: user.department,
         isProjectHead: true,
-        _id: { $ne: id } 
+        _id: { $ne: id }
       },
       { isProjectHead: false }
     );
 
-  
+
     user.isProjectHead = true;
     await user.save();
 

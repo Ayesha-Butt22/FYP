@@ -65,12 +65,8 @@ export default function AdminOverview({ onTabChange }) {
             } catch (error) {
                 console.error("Error fetching recent activities:", error);
                 setApiError(true);
-                // API fail hone par fallback activities
-                setRecentActivities([
-                    { type: "supervisor", text: "Added Supervisor Dr. Ali Raza", time: "1 hour ago" },
-                    { type: "group", text: "Assigned Group G-106 to Supervisor", time: "Yesterday" },
-                    { type: "coordinator", text: "Promoted Ms. Sana as Coordinator", time: "2 days ago" }
-                ]);
+                // API fail hone par ab khali list dikhayenge fallback nahi
+                setRecentActivities([]);
             }
         };
 
@@ -82,7 +78,8 @@ export default function AdminOverview({ onTabChange }) {
         { label: "Total Students", value: stats.totalStudents, icon: <FaUserGraduate />, color: "#2563eb" },
         { label: "Total Groups", value: stats.totalGroups, icon: <FaPeopleGroup />, color: "#f43f5e" },
         { label: "Total Supervisors", value: stats.totalSupervisors, icon: <FaUserPen />, color: "#16a34a" },
-        { label: "Total Coordinators", value: stats.totalCoordinators, icon: <FaUserTie />, color: "#fbc73d" }
+        { label: "Total Coordinators", value: stats.totalCoordinators, icon: <FaUserTie />, color: "#fbc73d" },
+      //  { label: "Total Proposals", value: stats.totalProposals, icon: <FaUserPen />, color: "#8b5cf6" }
     ];
 
     return (
@@ -131,15 +128,19 @@ export default function AdminOverview({ onTabChange }) {
             </div>
 
             <div className="progress-section-gap"></div>
-            <div className="section-chip">Recent Activity {apiError && "(Using Fallback Data)"}</div>
+            <div className="section-chip">Recent Activity {apiError && "(Error Fetching Data)"}</div>
             <div className="activity-list">
                 <div className="timeline">
-                    {recentActivities.map((act, i) => (
-                        <div className="activity-item" key={i}>
-                            {act.text}
-                            <span className="time">{act.time}</span>
-                        </div>
-                    ))}
+                    {recentActivities.length > 0 ? (
+                        recentActivities.map((act, i) => (
+                            <div className="activity-item" key={i}>
+                                {act.text}
+                                <span className="time">{act.time}</span>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="activity-item" style={{opacity: 0.6}}>No recent activity found.</div>
+                    )}
                 </div>
             </div>
             <div className="fyp-tip">
