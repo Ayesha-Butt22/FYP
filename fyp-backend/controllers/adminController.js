@@ -284,7 +284,6 @@ exports.getSystemStats = async (req, res) => {
 
 exports.getRecentActivities = async (req, res) => {
   try {
-    console.log("Admin getRecentActivities API called");
     const activities = [];
 
     const recentUsers = await User.find({ role: { $in: ["supervisor", "coordinator"] } })

@@ -14,6 +14,11 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => {
         const email = (req.body.email || "unknown").replace(/[^a-zA-Z0-9]/g, "_");
         const ext = path.extname(file.originalname) || ".jpg";
+        fs.readdirSync(uploadDir).forEach(existingFile => {
+            if (existingFile.startsWith(email)) {
+                fs.unlinkSync(path.join(uploadDir, existingFile));
+            }
+        });
         cb(null, `${email}${ext}`);
     },
 });
@@ -21,6 +26,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post("/upload", upload.single("profilePic"), (req, res) => {
+
     if (!req.file)
         return res.status(400).json({ message: "No file uploaded" });
 
