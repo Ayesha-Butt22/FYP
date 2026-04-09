@@ -1,10 +1,10 @@
-import React, {useState, useEffect, useCallback} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import DashboardSectionHeader from "../Admin/DashboardSectionHeader.jsx";
 import AppTable from "./AppTable";
 import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
-import {DropdownSingleSelect , DropdownMultiSelect} from "./DropDowns.jsx";
+import { DropdownSingleSelect, DropdownMultiSelect } from "./DropDowns.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 import UploadExcelModal from "../UploadExcelModal";
 
@@ -134,8 +134,7 @@ const validateForm = (data, isEdit = false) => {
 
   const availableSlots = Number(data["Available_Slots"] || data["Available Slots"]);
   const bookedSlots = Number(data["Booked_Slots"] || data["Booked Slots"] || 0);
-
-  if (isNaN(availableSlots) || availableSlots < 0) {
+  if (isNaN(availableSlots) || availableSlots <= 0) {
     errors.Available_Slots = "Available slots must be a non-negative number";
   }
   if (isNaN(bookedSlots) || bookedSlots < 0) {
@@ -148,7 +147,6 @@ const validateForm = (data, isEdit = false) => {
   return errors;
 };
 
-
 function splitSpeciality(str) {
   if (!str) return [];
   return str.split(",").map(s => s.trim()).filter(Boolean);
@@ -160,11 +158,11 @@ function joinSpeciality(arr) {
 
 function FormInput({ label, error, ...props }) {
   return (
-      <div className="form-group">
-        <label>{label} {props.required && <span style={{color: '#f43f5e'}}>*</span>}</label>
-        <input {...props} style={{ borderColor: error ? '#f43f5e' : '#dbdbec' }} />
-        {error && <span className="error-text">{error}</span>}
-      </div>
+    <div className="form-group">
+      <label>{label} {props.required && <span style={{ color: '#f43f5e' }}>*</span>}</label>
+      <input {...props} style={{ borderColor: error ? '#f43f5e' : '#dbdbec' }} />
+      {error && <span className="error-text">{error}</span>}
+    </div>
   );
 }
 
@@ -214,7 +212,7 @@ export default function ManageSupervisors() {
           Department: sup.department || "",
           Speciality: sup.specialization || "",
           "Available Slots": sup.availableSlots || 0,
-          Designation: (sup.designation || "N/A").toUpperCase(),
+          Designation: sup.designation || "N/A",
           "Booked Slots": sup.bookedSlots || 0,
           "Booked": sup.bookedSlots || 0,
           Status: getSupervisorStatus(sup.availableSlots, sup.bookedSlots)
@@ -319,14 +317,14 @@ export default function ManageSupervisors() {
         bookedSlots: updated["Booked Slots"],
         role: 'supervisor',
       };
-      
+
       console.log("Update Payload:", payload);
-      
+
       const res = await adminSupervisorApi.updateSupervisor(id, payload);
       if (res.success) {
         const updatedRows = [...rows];
-        updatedRows[editIndex] = { 
-          ...rows[editIndex], 
+        updatedRows[editIndex] = {
+          ...rows[editIndex],
           ...updated,
           Designation: updated.Designation
         };
@@ -335,7 +333,10 @@ export default function ManageSupervisors() {
         await fetchSupervisors();
         toastService.success('Supervisor updated successfully!');
       } else {
-        toastService.error("Update failed: " + (res.error || res.data?.message || 'Unknown error'));
+        const errorMsg = res.error || 
+                         (res.data && (res.data.message || res.data.error)) || 
+                         'Unknown error';
+        toastService.error("Update failed: " + errorMsg);
       }
     } catch (error) {
       toastService.error("Error updating supervisor: " + error.message);
@@ -378,7 +379,10 @@ export default function ManageSupervisors() {
       await fetchSupervisors();
       toastService.success('Supervisor added successfully!');
     } else {
-      toastService.error("Add failed: " + (res.error || res.data?.message || 'Unknown error'));
+      const errorMsg = res.error || 
+                       (res.data && (res.data.message || res.data.error)) || 
+                       'Unknown error';
+      toastService.error("Add failed: " + errorMsg);
     }
   };
 
@@ -420,243 +424,243 @@ export default function ManageSupervisors() {
   };
 
   return (
-      <>
+    <>
       <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
         <div style={{ flex: sideFormMode ? '2' : '1', transition: 'flex 0.3s ease' }}>
           <DashboardSectionHeader description={"Admins can view the list of supervisors, add new supervisors, update existing supervisor details, and delete supervisors from the system."}>Manage Supervisors</DashboardSectionHeader>
-          
-          <div style={{display: "flex", justifyContent: "right", margin: "20px 0" , gap: "20px"}}>
+
+          <div style={{ display: "flex", justifyContent: "right", margin: "20px 0", gap: "20px" }}>
             <button
-                className="add-supervisor-btn"
-                onClick={openAddForm}
-                disabled={sideFormMode === 'add'}
+              className="add-supervisor-btn"
+              onClick={openAddForm}
+              disabled={sideFormMode === 'add'}
             >
               + Add Supervisor
             </button>
 
             <button
-                className="add-supervisor-btn ml-4"
-                onClick={() => setIsModalOpen(true)}
-                disabled={sideFormMode === 'add'}
+              className="add-supervisor-btn ml-4"
+              onClick={() => setIsModalOpen(true)}
+              disabled={sideFormMode === 'add'}
             >
               + Upload Supervisor
             </button>
           </div>
 
           {loading ? (
-              <div style={{textAlign: "center", padding: 20}}>Loading supervisors...</div>
+            <div style={{ textAlign: "center", padding: 20 }}>Loading supervisors...</div>
           ) : (
-              <div style={{display: 'flex', gap: '5px'}}>
-                <AppTable
-                    headers={headers}
-                    rows={rows}
-                    renderActions={(row, i) => (
+            <div style={{ display: 'flex', gap: '5px' }}>
+              <AppTable
+                headers={headers}
+                rows={rows}
+                renderActions={(row, i) => (
+                  <>
+                    <button
+                      className="table-action-btn"
+                      onClick={() => handleEdit(row, i)}
+                      disabled={sideFormMode && editIndex === i}
+                    >
+                      {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
+                    </button>
+
+                    {!sideFormMode && (
                       <>
                         <button
                           className="table-action-btn"
-                          onClick={() => handleEdit(row, i)}
-                          disabled={sideFormMode && editIndex === i}
+                          style={{ background: "#f43f5e" }}
+                          onClick={() => handleDelete(i)}
                         >
-                          {sideFormMode && editIndex === i ? 'Editing...' : 'Edit'}
+                          Delete
                         </button>
 
-                        {!sideFormMode && (
-                          <>
-                            <button
-                              className="table-action-btn"
-                              style={{ background: "#f43f5e" }}
-                              onClick={() => handleDelete(i)}
-                            >
-                              Delete
-                            </button>
-
-                            <button
-                              className="table-action-btn"
-                              style={{ background: "#013379" }}
-                              onClick={() => handleMakeCoordinator(i)}
-                            >
-                              Make Coordinator
-                            </button>
-                          </>
-                        )}
+                        <button
+                          className="table-action-btn"
+                          style={{ background: "#013379" }}
+                          onClick={() => handleMakeCoordinator(i)}
+                        >
+                          Make Coordinator
+                        </button>
                       </>
                     )}
-                />
-              </div>
+                  </>
+                )}
+              />
+            </div>
           )}
         </div>
         {sideFormMode && (
+          <div style={{
+            flex: '1',
+            minWidth: '400px',
+            maxWidth: '500px',
+            backgroundColor: '#f8f9fa',
+            padding: '20px',
+            borderRadius: '8px',
+            boxShadow: '-2px 0 10px rgba(0,0,0,0.1)',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
             <div style={{
-              flex: '1',
-              minWidth: '400px',
-              maxWidth: '500px',
-              backgroundColor: '#f8f9fa',
-              padding: '20px',
-              borderRadius: '8px',
-              boxShadow: '-2px 0 10px rgba(0,0,0,0.1)',
-              maxHeight: '90vh',
-              overflowY: 'auto'
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '20px',
+              paddingBottom: '10px',
+              borderBottom: '2px solid #e9ecef'
             }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '20px',
-                paddingBottom: '10px',
-                borderBottom: '2px solid #e9ecef'
-              }}>
-                <h3 style={{ margin: 0, color: '#01337a' }}>
-                  {sideFormMode === 'edit' ? 'Edit Supervisor' : 'Add New Supervisor'}
-                </h3>
+              <h3 style={{ margin: 0, color: '#01337a' }}>
+                {sideFormMode === 'edit' ? 'Edit Supervisor' : 'Add New Supervisor'}
+              </h3>
+              <button
+                onClick={resetForm}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#6c757d'
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <FormInput
+                label="Name"
+                name="Name"
+                value={formData.Name}
+                onChange={handleFormChange}
+                type="text"
+                required
+                error={formErrors.Name}
+                placeholder="Enter supervisor name"
+              />
+
+              <FormInput
+                label="Email"
+                name="Email"
+                value={formData.Email}
+                onChange={handleFormChange}
+                type="email"
+                required
+                error={formErrors.Email}
+                placeholder="Enter supervisor email"
+              />
+
+              <div className="form-group">
+                <label>
+                  Department <span style={{ color: '#f43f5e' }}>*</span>
+                </label>
+                <DropdownSingleSelect
+                  value={formData.Department}
+                  options={["CS", "SE", "CA", "CyberSec"]}
+                  onChange={(val) =>
+                    setFormData(prev => ({ ...prev, Department: val }))
+                  }
+                  placeholder="Select Department"
+                />
+                {formErrors.Department && (
+                  <span className="error-text">{formErrors.Department}</span>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>
+                  Speciality <span style={{ color: '#f43f5e' }}>*</span>
+                </label>
+                <DropdownMultiSelect
+                  value={formSpeciality}
+                  options={ALL_SPECIALITIES}
+                  onChange={setFormSpeciality}
+                  placeholder="Select specialities"
+                />
+                {formErrors.Speciality && <span className="error-text">{formErrors.Speciality}</span>}
+              </div>
+
+              <div className="form-group">
+                <label>
+                  Designation <span style={{ color: '#f43f5e' }}>*</span>
+                </label>
+                <DropdownSingleSelect
+                  value={formData.Designation}
+                  options={ALL_DESIGNATIONS}
+                  onChange={handleDesignationChange}
+                  placeholder="Select Designation"
+                />
+                {formErrors.Designation && (
+                  <span className="error-text">{formErrors.Designation}</span>
+                )}
+              </div>
+
+              <FormInput
+                label="Available Slots"
+                name="Available_Slots"
+                value={formData.Available_Slots}
+                onChange={handleFormChange}
+                type="number"
+                min={0}
+                required
+                error={formErrors.Available_Slots}
+              />
+
+              <FormInput
+                label="Booked Slots"
+                name="Booked_Slots"
+                value={formData.Booked_Slots}
+                onChange={handleFormChange}
+                type="number"
+                min={0}
+                required
+                error={formErrors.Booked_Slots}
+              />
+
+              {sideFormMode === 'add' && (
+                <FormInput
+                  label="Password"
+                  name="Password"
+                  value={formData.Password}
+                  onChange={handleFormChange}
+                  type="password"
+                  required
+                  error={formErrors.Password}
+                  placeholder="Enter supervisor password"
+                />
+              )}
+              <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                 <button
-                    onClick={resetForm}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      fontSize: '24px',
-                      cursor: 'pointer',
-                      color: '#6c757d'
-                    }}
+                  type="submit"
+                  className="table-action-btn"
+                  style={{
+                    flex: 1,
+                    fontWeight: 800,
+                    backgroundColor: '#01337a'
+                  }}
                 >
-                  ×
+                  {sideFormMode === 'edit' ? 'Update' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  className="table-action-btn"
+                  style={{
+                    flex: 1,
+                    background: "#6c757d",
+                    fontWeight: 800
+                  }}
+                  onClick={resetForm}
+                >
+                  Cancel
                 </button>
               </div>
-              <form onSubmit={handleSubmit}>
-                <FormInput
-                    label="Name"
-                    name="Name"
-                    value={formData.Name}
-                    onChange={handleFormChange}
-                    type="text"
-                    required
-                    error={formErrors.Name}
-                    placeholder="Enter supervisor name"
-                />
-
-                <FormInput
-                    label="Email"
-                    name="Email"
-                    value={formData.Email}
-                    onChange={handleFormChange}
-                    type="email"
-                    required
-                    error={formErrors.Email}
-                    placeholder="Enter supervisor email"
-                />
-
-                <div className="form-group">
-                  <label>
-                    Department <span style={{color: '#f43f5e'}}>*</span>
-                  </label>
-                  <DropdownSingleSelect
-                      value={formData.Department}
-                      options={["CS", "SE", "CA", "CyberSec"]}
-                      onChange={(val) =>
-                          setFormData(prev => ({...prev, Department: val}))
-                      }
-                      placeholder="Select Department"
-                  />
-                  {formErrors.Department && (
-                      <span className="error-text">{formErrors.Department}</span>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    Speciality <span style={{color: '#f43f5e'}}>*</span>
-                  </label>
-                  <DropdownMultiSelect
-                      value={formSpeciality}
-                      options={ALL_SPECIALITIES}
-                      onChange={setFormSpeciality}
-                      placeholder="Select specialities"
-                  />
-                  {formErrors.Speciality && <span className="error-text">{formErrors.Speciality}</span>}
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    Designation <span style={{color: '#f43f5e'}}>*</span>
-                  </label>
-                  <DropdownSingleSelect
-                      value={formData.Designation}
-                      options={ALL_DESIGNATIONS}
-                      onChange={handleDesignationChange}
-                      placeholder="Select Designation"
-                  />
-                  {formErrors.Designation && (
-                      <span className="error-text">{formErrors.Designation}</span>
-                  )}
-                </div>
-
-                <FormInput
-                    label="Available Slots"
-                    name="Available_Slots"
-                    value={formData.Available_Slots}
-                    onChange={handleFormChange}
-                    type="number"
-                    min={0}
-                    required
-                    error={formErrors.Available_Slots}
-                />
-
-                <FormInput
-                    label="Booked Slots"
-                    name="Booked_Slots"
-                    value={formData.Booked_Slots}
-                    onChange={handleFormChange}
-                    type="number"
-                    min={0}
-                    required
-                    error={formErrors.Booked_Slots}
-                />
-
-                {sideFormMode === 'add' && (
-                    <FormInput
-                        label="Password"
-                        name="Password"
-                        value={formData.Password}
-                        onChange={handleFormChange}
-                        type="password"
-                        required
-                        error={formErrors.Password}
-                        placeholder="Enter supervisor password"
-                    />
-                )}
-                <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
-                  <button
-                      type="submit"
-                      className="table-action-btn"
-                      style={{
-                        flex: 1,
-                        fontWeight: 800,
-                        backgroundColor: '#01337a'
-                      }}
-                  >
-                    {sideFormMode === 'edit' ? 'Update' : 'Save'}
-                  </button>
-                  <button
-                      type="button"
-                      className="table-action-btn"
-                      style={{
-                        flex: 1,
-                        background: "#6c757d",
-                        fontWeight: 800
-                      }}
-                      onClick={resetForm}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+            </form>
+          </div>
         )}
       </div>
 
-        <UploadExcelModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-        />
-      </>
+      <UploadExcelModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 }
