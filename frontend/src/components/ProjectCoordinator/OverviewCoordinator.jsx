@@ -61,9 +61,7 @@ export default function OverviewCoordinator({ onTabChange }) {
         </div>
 
         <div className="banner-meta">
-          <span>Semester: Fall 2025</span>
-          <span style={{ marginLeft: 18 }}>|</span>
-          <span style={{ marginLeft: 18 }}>Date: {new Date().toLocaleDateString()}</span>
+          <span>Date: {new Date().toLocaleDateString()}</span>
         </div>
 
         <div className="quick-links">
@@ -136,10 +134,10 @@ export default function OverviewCoordinator({ onTabChange }) {
           <div>
             <div className="progress-label">
               <span>Overall Progress</span>
-              <span>75%</span>
+              <span>{stats?.overallProgress ?? 0}%</span>
             </div>
             <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `75%`, background: "#2563eb" }} />
+              <div className="progress-fill" style={{ width: `${stats?.overallProgress ?? 0}%`, background: "#2563eb" }} />
             </div>
           </div>
       </div>

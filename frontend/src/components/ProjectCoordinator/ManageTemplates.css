@@ -180,9 +180,12 @@
   z-index: 9999;
 }
 .mt-modal {
-  width: 520px;
+  width: 420px;              /* pehle 520px tha */
+  max-width: 35%;            /* responsive */
+  max-height: 80vh;          /* screen se bahar na jaye */
+  overflow-y: auto;          /* scroll inside modal */
   background: #fff;
-  padding: 18px;
+  padding: 16px;             /* thoda compact */
   border-radius: 10px;
   box-shadow: 0 12px 40px rgba(2,6,23,0.2);
 }

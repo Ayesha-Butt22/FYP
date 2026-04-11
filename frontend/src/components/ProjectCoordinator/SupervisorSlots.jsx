@@ -168,23 +168,13 @@ export default function SupervisorSlots() {
     <>
       <DashboardSectionHeader
         description={
-          "Manage supervisor slots. Available slots are fixed based on designation and are not editable."
+          "Manage supervisor slots. Available slots are fixed based on designation ."
         }
       >
         Supervisor Slots
       </DashboardSectionHeader>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label>
-          <input
-            type="checkbox"
-            checked={viewForCoordinator}
-            onChange={(e) => setViewForCoordinator(e.target.checked)}
-            style={{ marginRight: "5px" }}
-          />
-          Show for Coordinator Integration
-        </label>
-      </div>
+     
 
       <div className="sup-table-card">
         <AppTable headers={headers} rows={rows} renderActions={renderActions} />

@@ -6,19 +6,7 @@ import "../Admin/Modal&Button.css";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 import { toastService } from '../ToastService/ToastService.jsx';
 
-const headers = ["Name", "SAP ID", "Email", "Department", "Batch", "Status", "Actions"];
-
-function formatBatchAsRange(rawBatch) {
-  if (rawBatch == null) return "";
-  const str = String(rawBatch).trim();
-  const yearMatch = str.match(/(20\d{2})/);
-  if (!yearMatch) return str;
-  const startYear = Number(yearMatch[1]);
-  if (isNaN(startYear)) return str;
-  const endYear = startYear + 4;
-  return `${startYear}-${endYear}`;
-}
-
+const headers = ["Name", "SAP ID", "Email", "Department", "Status", "Actions"];
 
 function StatusBadge({ approved }) {
   return (
@@ -40,7 +28,6 @@ function StatusBadge({ approved }) {
 export default function ApprovedStudents() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [batchFilter, setBatchFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
 
   useEffect(() => {
@@ -52,26 +39,14 @@ export default function ApprovedStudents() {
     try {
       const res = await adminSupervisorApi.getStudents();
       if (res.success && Array.isArray(res.data)) {
-        const students = res.data.map((student) => {
-          const rawBatch =
-            student.batch ??
-            student.batchYear ??
-            student.batch_year ??
-            student.year ??
-            student.cohort ??
-            student.batch_code ??
-            "";
-          return {
-            ID: student._id,
-            Name: student.name,
-            "SAP ID": student.studentId,
-            Email: student.email,
-            Department: student.department,
-            RawBatch: rawBatch,
-            Batch: formatBatchAsRange(rawBatch),
-            Approved: student.IsApproved,
-          };
-        });
+        const students = res.data.map((student) => ({
+          ID: student._id,
+          Name: student.name,
+          "SAP ID": student.studentId,
+          Email: student.email,
+          Department: student.department,
+          Approved: student.IsApproved,
+        }));
         setRows(students);
       } else {
         setRows([]);
@@ -85,16 +60,12 @@ export default function ApprovedStudents() {
     }
   };
 
-  const uniqueBatches = Array.from(
-    new Set(rows.map((r) => (r.Batch ? String(r.Batch) : "")).filter(Boolean))
-  );
-
   const displayedRows = rows.filter((r) => {
-    const batchMatch = batchFilter === "All" || String(r.Batch) === String(batchFilter);
-    const statusMatch = statusFilter === "All" || 
+    return (
+      statusFilter === "All" ||
       (statusFilter === "Approved" && r.Approved) ||
-      (statusFilter === "Pending" && !r.Approved);
-    return batchMatch && statusMatch;
+      (statusFilter === "Pending" && !r.Approved)
+    );
   });
 
   const handleToggleApproval = async (idx, currentStatus) => {
@@ -102,19 +73,18 @@ export default function ApprovedStudents() {
     const confirmed = await Confirm(
       `Are you sure you want to ${action} this student?`
     );
-    
+
     if (!confirmed) return;
 
     try {
       const studentId = displayedRows[idx].ID;
       const res = await adminSupervisorApi.toggleStudentApproval(studentId);
-      
+
       if (res.success) {
         toastService.success(res.data.message);
-        
-        
+
         setRows((prev) =>
-          prev.map((r) => 
+          prev.map((r) =>
             r.ID === studentId ? { ...r, Approved: !currentStatus } : r
           )
         );
@@ -132,12 +102,12 @@ export default function ApprovedStudents() {
   return (
     <>
       <DashboardSectionHeader 
-        description={"Admins can view registered students, approve them for portal access, or update their details."}
+        description={"Admins can view registered students and approve them for portal access."}
       >
         Manage Students
       </DashboardSectionHeader>
 
-      {/* Filters + Summary */}
+      {/* Status Filter + Summary */}
       <div style={{ 
         display: "flex", 
         gap: 12, 
@@ -145,29 +115,6 @@ export default function ApprovedStudents() {
         margin: "12px 0 18px",
         flexWrap: 'wrap' 
       }}>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <label style={{ fontWeight: 700, color: "#01337a" }}>Batch:</label>
-          <select
-            value={batchFilter}
-            onChange={(e) => setBatchFilter(e.target.value)}
-            style={{
-              padding: "8px 10px",
-              borderRadius: 8,
-              border: "1px solid #d1d9e6",
-              background: "#fff",
-              fontWeight: 700,
-              minWidth: 160,
-            }}
-          >
-            <option value="All">All batches</option>
-            {uniqueBatches.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <label style={{ fontWeight: 700, color: "#01337a" }}>Status:</label>
           <select
@@ -209,7 +156,6 @@ export default function ApprovedStudents() {
           headers={headers}
           rows={displayedRows.map((row) => ({
             ...row,
-            Batch: row.Batch || "—",
             Status: <StatusBadge approved={row.Approved} />,
             Actions: (
               <button
@@ -218,10 +164,12 @@ export default function ApprovedStudents() {
                   background: row.Approved ? "#f43f5e" : "#10b981",
                   color: "white"
                 }}
-                onClick={() => handleToggleApproval(
-                  displayedRows.findIndex(r => r.ID === row.ID), 
-                  row.Approved
-                )}
+                onClick={() =>
+                  handleToggleApproval(
+                    displayedRows.findIndex(r => r.ID === row.ID),
+                    row.Approved
+                  )
+                }
               >
                 {row.Approved ? "Unapprove" : "Approve"}
               </button>

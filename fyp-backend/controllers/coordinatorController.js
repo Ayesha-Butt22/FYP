@@ -9,7 +9,7 @@ const SupervisorEvaluation = require("../models/SupervisorEvaluation");
 
 exports.getCoordinatorStats = async (req, res) => {
     try {
-        const totalGroups = await Group.countDocuments({ isArchived: { $ne: true } });
+        const totalGroups = await Group.countDocuments();
         const totalSupervisors = await User.countDocuments({ role: "supervisor" });
 
         // Calculate current week
@@ -30,13 +30,38 @@ exports.getCoordinatorStats = async (req, res) => {
         });
         const overdueCount = Math.max(0, totalGroups - recentSubmissions.length);
 
+        let overallProgress = 0;
+        if (totalGroups > 0) {
+            const allGroups = await Group.find({}, "_id");
+            const groupIds = allGroups.map(g => g._id);
+
+            const fyp1Count = await Template.countDocuments({
+                groupId: { $in: groupIds },
+                fypPart: 1,
+                templateCode: { $in: ["t01", "t02", "t03", "t04", "t05", "t07"] },
+                status: "Approved"
+            });
+
+            const fyp2Count = await Template.countDocuments({
+                groupId: { $in: groupIds },
+                fypPart: 2,
+                templateCode: { $in: ["t05", "t06"] },
+                status: "Approved"
+            });
+
+            const totalCompleted = fyp1Count + fyp2Count;
+            const maxPossible = totalGroups * 8;
+            overallProgress = Math.round((totalCompleted / maxPossible) * 100);
+        }
+
         res.json({
             success: true,
             stats: {
                 totalGroups,
                 currentWeek,
                 totalSupervisors,
-                overdueCount
+                overdueCount,
+                overallProgress
             }
         });
     } catch (error) {

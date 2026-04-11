@@ -4,20 +4,6 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 import groupsInfoApi from "../Api/ProjectCoordinator/GroupsInfoApi";
 
 
-const sampleGroups = [
-  {
-    id: "G-101",
-    title: "Smart Parking System",
-    description:
-      "Parking guidance using computer vision to detect available parking spaces and notify drivers in real-time.",
-    tools: ["React", "Node.js", "OpenCV", "MongoDB", "Express"],
-    members: [
-      { name: "Ayesha Butt", sap: "48288", email: "ayesha.butt@riphah.edu.pk" },
-      { name: "Madiha Saeed", sap: "48289", email: "madiha.saeed@riphah.edu.pk" },
-      { name: "Sara Khan", sap: "48290", email: "sara.khan@riphah.edu.pk" },
-    ],
-  },
-];
 
 export default function GroupsGrid() {
   const [groups, setGroups] = useState([]);
