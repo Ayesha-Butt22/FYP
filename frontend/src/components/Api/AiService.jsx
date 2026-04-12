@@ -1,14 +1,15 @@
+//AiService.jsx
 import ToastService from "../ToastService/ToastService.jsx";
 export async function GetTitle(inputTitle) {
     try {
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
-                "Authorization": "Bearer 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",
+                "Authorization": "Bearer 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",
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                model: "mistralai/mistral-7b-instruct",
+               model: "meta-llama/llama-3-8b-instruct",
                 messages: [
                     {
                         role: "system",

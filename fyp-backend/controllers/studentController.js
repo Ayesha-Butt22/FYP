@@ -114,6 +114,7 @@ exports.getStudentStats = async (req, res) => {
 exports.getRecentActivities = async (req, res) => {
   try {
     const email = req.user.email;
+
     const group = await Group.findOne({
       $or: [
         { "leader.email": email },
@@ -122,40 +123,54 @@ exports.getRecentActivities = async (req, res) => {
       ]
     });
 
-    if (!group) return res.json({ success: true, activities: [] });
+    if (!group) {
+      return res.json({ success: true, activities: [] });
+    }
 
     const activities = [];
 
-    // Recent submissions for the whole group
+    // ✅ Recent submissions
     const recentSubmissions = await Template.find({
       groupId: group._id
-    }).sort({ uploadedAt: -1 }).limit(3);
+    })
+      .sort({ uploadedAt: -1, createdAt: -1 }) // fallback sort
+      .limit(3);
 
     for (const sub of recentSubmissions) {
       activities.push({
         type: "feedback",
-        text: `Submitted ${sub.templateLabel}`,
-        time: sub.uploadedAt
+        text: `Submitted ${sub.templateLabel || "template"}`,
+        time: sub.uploadedAt || sub.createdAt || new Date()
       });
     }
 
-    // Recent meetings booked for the group
+    // ✅ Recent meetings (FIXED ObjectId issue)
     const recentMeetings = await MeetingSlot.find({
-      bookedBy: group._id.toString()
-    }).sort({ updatedAt: -1 }).limit(3);
+      bookedBy: group._id   // ❗ important fix (no toString)
+    })
+      .sort({ updatedAt: -1 })
+      .limit(3);
 
     for (const m of recentMeetings) {
       activities.push({
         type: "meeting",
-        text: `Meeting with supervisor ${m.status === 2 ? 'completed' : 'booked'}`,
-        time: m.status === 2 ? m.doneAt : m.updatedAt
+        text: `Meeting with supervisor ${m.status === 2 ? "completed" : "booked"}`,
+        time: m.status === 2
+          ? (m.doneAt || m.updatedAt || new Date())
+          : (m.updatedAt || new Date())
       });
     }
 
+    // ✅ Final sorting + limit
+    const sortedActivities = activities
+      .sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0))
+      .slice(0, 5);
+
     res.json({
       success: true,
-      activities: activities.sort((a,b) => new Date(b.time) - new Date(a.time)).slice(0, 5)
+      activities: sortedActivities
     });
+
   } catch (error) {
     console.error("Error fetching student activities:", error);
     res.status(500).json({ success: false, message: "Server Error" });

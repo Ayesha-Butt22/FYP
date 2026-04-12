@@ -166,7 +166,13 @@ export default function OverviewStudent({ onTabChange }) {
         const resultsData = await resultsRes.json();
 
         if (statsData.success) setStats(statsData.stats);
-        if (activitiesData.success) setActivities(activitiesData.activities || []);
+        console.log("Activities API:", activitiesData);
+
+if (activitiesData.success && Array.isArray(activitiesData.activities)) {
+  setActivities(activitiesData.activities);
+} else {
+  setActivities([]);
+}
         if (resultsData.success) setFypResults(resultsData.data || []);
       } catch (err) {
         console.error("Error fetching overview data:", err);
@@ -320,7 +326,9 @@ export default function OverviewStudent({ onTabChange }) {
           {activities.length > 0 ? activities.map((act, i) => (
             <div className="activity-item" key={i}>
               {act.text}
-              <span className="time">{getTimeAgo(act.time)}</span>
+              <span className="time">
+  {act.time ? getTimeAgo(act.time) : "Just now"}
+</span>
             </div>
           )) : (
             <div className="activity-item">No recent activity</div>

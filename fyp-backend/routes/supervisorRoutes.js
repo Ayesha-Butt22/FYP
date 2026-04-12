@@ -33,8 +33,6 @@ router.put("/groups/:groupId/milestones/:code" , supervisorController.SubmitGrou
 router.post("/evaluations/submit", protect, isSupervisor, supervisorController.submitSupervisorEvaluation);
 router.get("/evaluations/:groupId", protect, isSupervisor, supervisorController.getSupervisorEvaluations);
 router.get("/student-evaluations/:email", protect, supervisorController.getStudentSupervisorEvaluations);
-// -------------------
-// EXISTING ROUTES
-// -------------------
+
 
 module.exports = router;
