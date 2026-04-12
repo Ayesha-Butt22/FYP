@@ -5,33 +5,83 @@ exports.createGroup = async (req, res) => {
   try {
     const { groupId, leader, member2, member3 } = req.body;
 
-    // Validate leader
+    // ================= LEADER =================
     const leaderUser = await User.findOne({ email: leader.email });
-    if (!leaderUser) return res.status(400).json({ error: "Leader email not found in users" });
-    if (leaderUser.isGroupMade) return res.status(400).json({ error: "Leader already has a group" });
+    if (!leaderUser) {
+      return res.status(400).json({ error: "Leader email not found in users" });
+    }
+
+    if (leaderUser.isGroupMade) {
+      return res.status(400).json({ error: "Leader already has a group" });
+    }
+
+    const leaderDept = leaderUser.department;
 
     let member2User, member3User;
+
+    // ================= MEMBER 2 =================
     if (member2?.email) {
       member2User = await User.findOne({ email: member2.email });
-      if (!member2User) return res.status(400).json({ error: "Member2 email not found" });
-      if (member2User.isGroupMade) return res.status(400).json({ error: "Member2 already in a group" });
-    }
-    if (member3?.email) {
-      member3User = await User.findOne({ email: member3.email });
-      if (!member3User) return res.status(400).json({ error: "Member3 email not found" });
-      if (member3User.isGroupMade) return res.status(400).json({ error: "Member3 already in a group" });
+
+      if (!member2User) {
+        return res.status(400).json({ error: "Member2 email not found" });
+      }
+
+      if (member2User.isGroupMade) {
+        return res.status(400).json({ error: "Member2 already in a group" });
+      }
+
+      // ❌ Department mismatch check
+      if (member2User.department !== leaderDept) {
+        return res.status(400).json({
+          error: "Different department: Group cannot be created"
+        });
+      }
     }
 
-    // Create group
+    // ================= MEMBER 3 =================
+    if (member3?.email) {
+      member3User = await User.findOne({ email: member3.email });
+
+      if (!member3User) {
+        return res.status(400).json({ error: "Member3 email not found" });
+      }
+
+      if (member3User.isGroupMade) {
+        return res.status(400).json({ error: "Member3 already in a group" });
+      }
+
+      // ❌ Department mismatch check
+      if (member3User.department !== leaderDept) {
+        return res.status(400).json({
+          error: "Different department: Group cannot be created"
+        });
+      }
+    }
+
+    // ================= CREATE GROUP =================
     const group = new Group({ groupId, leader, member2, member3 });
     await group.save();
 
+    // mark users
     leaderUser.isGroupMade = true;
     await leaderUser.save();
-    if (member2User) { member2User.isGroupMade = true; await member2User.save(); }
-    if (member3User) { member3User.isGroupMade = true; await member3User.save(); }
 
-    return res.status(201).json({ message: "Group created successfully", group });
+    if (member2User) {
+      member2User.isGroupMade = true;
+      await member2User.save();
+    }
+
+    if (member3User) {
+      member3User.isGroupMade = true;
+      await member3User.save();
+    }
+
+    return res.status(201).json({
+      message: "Group created successfully",
+      group
+    });
+
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

@@ -114,57 +114,86 @@ export default function StudentGroup() {
   const generateGroupId = () => `group-${Date.now()}`;
 
   const handleCreateGroup = async () => {
-    setError("");
-    const num = Math.max(1, Math.min(3, Number(numMembers) || 1));
-    for (let i = 0; i < num; ++i) {
-      if (!members[i].sapid && i !== 0) {
-        setError("All SAP IDs must be filled.");
-        toastService.error("All SAP IDs must be filled.");
-        return;
-      }
+  setError("");
+
+  const num = Math.max(1, Math.min(3, Number(numMembers) || 1));
+
+  // validation
+  for (let i = 0; i < num; ++i) {
+    if (!members[i].sapid && i !== 0) {
+      const msg = "All SAP IDs must be filled.";
+      setError(msg);
+      toastService.error(msg);
+      return;
     }
-    const groupObj = {
-      groupId: generateGroupId(),
-      leader: { sapId: members[0].sapid, email: CURRENT_USER_EMAIL },
-      member2: num > 1 ? { sapId: members[1].sapid, email: members[1].email } : undefined,
-      member3: num > 2 ? { sapId: members[2].sapid, email: members[2].email } : undefined,
-    };
+  }
 
-    try {
-      const res = await studentGroupApi.createGroup(groupObj);
-      if (res && res.group) {
-        const newGroup = {
-          members: [
-            { ...groupObj.leader, isLeader: true },
-            ...(groupObj.member2?.sapId ? [{ ...groupObj.member2, isLeader: false }] : []),
-            ...(groupObj.member3?.sapId ? [{ ...groupObj.member3, isLeader: false }] : []),
-          ],
-          leader: groupObj.leader,
-          _id: res.group._id,
-          groupId: res.group.groupId || groupObj.groupId,
-        };
-
-        try {
-          if (res.group._id) localStorage.setItem("groupId", res.group._id);
-          if (res.group.groupId || groupObj.groupId)
-            localStorage.setItem("groupCode", res.group.groupId || groupObj.groupId);
-        } catch (e) {}
-
-        setGroup(newGroup);
-        setOpen(false);
-        setStep(1);
-        setGroupChanged((c) => c + 1);
-        toastService.success("Group created successfully!");
-      } else {
-        setError(res?.error || "Failed to create group.");
-        toastService.error(res?.error || "Failed to create group.");
-      }
-    } catch (err) {
-      setError("Server error. Try again.");
-      toastService.error("Server error. Try again.");
-    }
+  const groupObj = {
+    groupId: generateGroupId(),
+    leader: {
+      sapId: members[0].sapid,
+      email: CURRENT_USER_EMAIL,
+    },
+    member2:
+      num > 1
+        ? { sapId: members[1].sapid, email: members[1].email }
+        : undefined,
+    member3:
+      num > 2
+        ? { sapId: members[2].sapid, email: members[2].email }
+        : undefined,
   };
 
+  try {
+    const res = await studentGroupApi.createGroup(groupObj);
+
+    // ✅ IMPORTANT: backend error handling improved
+    if (res?.error) {
+      setError(res.error);
+      toastService.error(res.error);
+      return;
+    }
+
+    if (res?.group) {
+      const newGroup = {
+        members: [
+          { ...groupObj.leader, isLeader: true },
+          ...(groupObj.member2?.sapId
+            ? [{ ...groupObj.member2, isLeader: false }]
+            : []),
+          ...(groupObj.member3?.sapId
+            ? [{ ...groupObj.member3, isLeader: false }]
+            : []),
+        ],
+        leader: groupObj.leader,
+        _id: res.group._id,
+        groupId: res.group.groupId || groupObj.groupId,
+      };
+
+      setGroup(newGroup);
+      setOpen(false);
+      setStep(1);
+      setGroupChanged((c) => c + 1);
+
+      toastService.success("Group created successfully!");
+      return;
+    }
+
+    const msg = "Failed to create group.";
+    setError(msg);
+    toastService.error(msg);
+
+  } catch (err) {
+    // ✅ REAL BACKEND ERROR (department mismatch will show here)
+    const msg =
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      "Server error. Try again.";
+
+    setError(msg);
+    toastService.error(msg);
+  }
+};
   const handleDeleteGroup = async () => {
     if (!group || !group._id) return;
     const confirmed = await Confirm("Are you sure you want to delete this group?");
