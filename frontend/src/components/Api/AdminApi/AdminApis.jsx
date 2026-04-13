@@ -1,4 +1,3 @@
-//AdminApis.jsx
 const API_BASE_URL = "http://localhost:5000/api";
 
 class AdminApis {
@@ -51,7 +50,7 @@ class AdminApis {
         }
     }
 
-    // --- Students for admin ---
+    // ========== STUDENTS ==========
     async getStudents() {
         return await this.makeAPICall("admin/students", {}, { method: "GET" });
     }
@@ -59,74 +58,134 @@ class AdminApis {
         return await this.makeAPICall("admin/approve-students", { id }, { method: "POST" });
     }
 
-    // --- COORDINATOR CRUD ---
+    // ========== COORDINATOR CRUD ==========
     async createCoordinator(coordinatorData) {
-        return await this.makeAPICall("admin/create", { ...coordinatorData, role: "coordinator" }, { method: "POST" });
+        return await this.makeAPICall("admin/coordinators", coordinatorData, { method: "POST" });
     }
+    
     async getCoordinators() {
         return await this.makeAPICall("admin/coordinators", {}, { method: "GET" });
     }
+    
     async updateCoordinator(id, updates) {
-        return await this.makeAPICall(`admin/${id}`, { ...updates, role: "coordinator" }, { method: "PUT" });
+        return await this.makeAPICall(`admin/coordinators/${id}`, updates, { method: "PUT" });
     }
+    
     async deleteCoordinator(id) {
-        return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
+        return await this.makeAPICall(`admin/coordinators/${id}`, {}, { method: "DELETE" });
     }
 
-   // --- REMOVE COORDINATOR (convert to supervisor) ---
-async removeCoordinator(id) {
-  return await this.makeAPICall(`admin/remove-coordinator/${id}`, {}, { method: 'PATCH' });
-}
+    // ========== REMOVE COORDINATOR (convert to supervisor) ==========
+    async removeCoordinator(id) {
+        return await this.makeAPICall(`admin/coordinators/${id}/remove`, {}, { method: "PUT" });
+    }
 
-    // --- Admin CRUD ---
+    // ========== MAKE FYP INCHARGE (COORDINATOR) ==========
+    async makeFYPIncharge(id) {
+        return await this.makeAPICall(`admin/coordinators/${id}/make-fyp-incharge`, {}, { method: "PUT" });
+    }
+
+    // ========== MAKE FYP HEAD (COORDINATOR) ==========
+    async makeFYPHead(id) {
+        return await this.makeAPICall(`admin/coordinators/${id}/make-fyp-head`, {}, { method: "PUT" });
+    }
+
+    // ========== ADMIN CRUD ==========
     async createAdmin(adminData) {
         return await this.makeAPICall("admin/create", { ...adminData, role: "admin" }, { method: "POST" });
     }
+    
     async getAdmins() {
         return await this.makeAPICall("admin/alladmins", {}, { method: "GET" });
     }
+    
     async updateAdmin(id, updates) {
         return await this.makeAPICall(`admin/${id}`, updates, { method: "PUT" });
     }
+    
     async deleteAdmin(id) {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
 
-    // --- Supervisor CRUD ---
+    // ========== SUPERVISOR CRUD ==========
     async createSupervisor(supervisorData) {
         return await this.makeAPICall("admin/create", { ...supervisorData, role: "supervisor" }, { method: "POST" });
     }
+    
     async getSupervisors() {
         return await this.makeAPICall("admin/supervisors", {}, { method: "GET" });
     }
+    
     async updateSupervisor(id, updates) {
         return await this.makeAPICall(`admin/${id}`, { ...updates, role: "supervisor" }, { method: "PUT" });
     }
+    
     async deleteSupervisor(id) {
         return await this.makeAPICall(`admin/${id}`, {}, { method: "DELETE" });
     }
+    
     async makeCoordinator(id) {
         return await this.makeAPICall(`admin/promote/${id}`, {}, { method: "POST" });
     }
+    
     async getstats() {
         return await this.makeAPICall("admin/stats", {}, { method: "GET" });
     }
+    
     async getRecentActivities() {
         return await this.makeAPICall("admin/get-activities", {}, { method: "GET" });
     }
 
-     // TOGGLE STUDENT APPROVAL - YE ADD KAREN
+    // ========== TOGGLE STUDENT APPROVAL ==========
     async toggleStudentApproval(id) {
-        return await this.makeAPICall(`admin/toggle-approval/${id}`, {}, { method: 'PATCH' });
+        return await this.makeAPICall(`admin/toggle-approval/${id}`, {}, { method: "PATCH" });
     }
-    
-    // MAKE FYP INCHARGE
-async makeFYPIncharge(id) {
-  return await this.makeAPICall(`admin/make-fyp-incharge/${id}`, {}, { method: 'POST' });
-}
-    // --- Utility ---
+
+    // ========== UTILITY ==========
     async getAllUsers() {
         return await this.makeAPICall("admin/all", {}, { method: "GET" });
+    }
+
+    async getAllGroups() {
+        return await this.makeAPICall("admin/all-groups", {}, { method: "GET" });
+    }
+
+    async updateSupervisorSlots(email, designation, bookedSlots) {
+        return await this.makeAPICall("admin/supervisor/update-slots", { email, designation, bookedSlots }, { method: "POST" });
+    }
+
+    async getSupervisorsForCoordinator() {
+        return await this.makeAPICall("admin/supervisors-for-coordinator", {}, { method: "GET" });
+    }
+
+    async uploadExcel(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const token = localStorage.getItem("token");
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/upload-excel`, {
+                method: "POST",
+                headers: {
+                    ...(token && { Authorization: `Bearer ${token}` })
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            return {
+                success: response.ok,
+                data,
+                status: response.status
+            };
+        } catch (error) {
+            console.error("Excel Upload Error:", error);
+            return {
+                success: false,
+                error: error.message,
+                data: null
+            };
+        }
     }
 }
 

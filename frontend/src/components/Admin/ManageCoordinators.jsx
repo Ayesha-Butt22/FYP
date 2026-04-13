@@ -6,7 +6,6 @@ import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 
-
 function FormInput({ label, error, ...props }) {
   return (
     <div className="form-group">
@@ -43,7 +42,7 @@ const validateForm = (data, showPassword) => {
 export default function ManageCoordinators() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sideFormMode, setSideFormMode] = useState(null); // 'add' or 'edit'
+  const [sideFormMode, setSideFormMode] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
   const [formData, setFormData] = useState({
     Name: "",
@@ -53,27 +52,33 @@ export default function ManageCoordinators() {
   });
   const [formErrors, setFormErrors] = useState({});
 
-  
   useEffect(() => {
     const fetchCoordinators = async () => {
       setLoading(true);
       try {
+        console.log("Fetching coordinators...");
         const res = await adminSupervisorApi.getCoordinators();
+        
+        console.log("API Response:", res);
+
         if (res.success) {
           const coordinators = res.data.map(coord => ({
             ID: coord._id,
             Name: coord.name,
             Email: coord.email,
             Department: coord.department || "",
-            isProjectHead: coord.isProjectHead || false // NEW FIELD
+            isProjectHead: coord.isProjectHead || false
           }));
           setRows(coordinators);
+          console.log("Coordinators loaded:", coordinators);
         } else {
+          console.error("API Error:", res);
           setRows([]);
-          toastService.error("Failed to fetch coordinators. Please try again.");
+          toastService.error("Failed to fetch coordinators: " + (res.error || res.data?.message || "Unknown error"));
         }
       } catch (error) {
-        toastService.error("Error fetching coordinators. Please check your connection.");
+        console.error("Fetch Error:", error);
+        toastService.error("Error fetching coordinators: " + error.message);
         setRows([]);
       } finally {
         setLoading(false);
@@ -89,7 +94,6 @@ export default function ManageCoordinators() {
     setEditIndex(null);
   };
 
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validateForm(formData, sideFormMode === 'add');
@@ -112,7 +116,7 @@ export default function ManageCoordinators() {
     setFormData({ 
       Name: row.Name, 
       Email: row.Email, 
-      Department: row.Department.replace(" (Head Coordinator)", ""), // Remove head text when editing
+      Department: row.Department.replace(" (Head Coordinator)", ""),
       Password: "" 
     });
     setFormErrors({});
@@ -142,21 +146,23 @@ export default function ManageCoordinators() {
       if (res.success) {
         toastService.success('Coordinator updated successfully!');
         resetForm();
-        // refetch list
         const refreshed = await adminSupervisorApi.getCoordinators();
-        const updatedCoordinators = refreshed.data.map(coord => ({
-          ID: coord._id, 
-          Name: coord.name, 
-          Email: coord.email, 
-          Department: coord.department || "",
-          isProjectHead: coord.isProjectHead || false
-        }));
-        setRows(updatedCoordinators);
+        if (refreshed.success) {
+          const updatedCoordinators = refreshed.data.map(coord => ({
+            ID: coord._id, 
+            Name: coord.name, 
+            Email: coord.email, 
+            Department: coord.department || "",
+            isProjectHead: coord.isProjectHead || false
+          }));
+          setRows(updatedCoordinators);
+        }
       } else {
         toastService.error("Update failed: " + (res.error || res.data?.message || 'Unknown error'));
       }
     } catch (error) {
-      toastService.error("Error updating coordinator. Please try again.");
+      console.error("Update Error:", error);
+      toastService.error("Error updating coordinator: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -177,19 +183,22 @@ export default function ManageCoordinators() {
         toastService.success('Coordinator added successfully!');
         resetForm();
         const refreshed = await adminSupervisorApi.getCoordinators();
-        const updatedCoordinators = refreshed.data.map(coord => ({
-          ID: coord._id, 
-          Name: coord.name, 
-          Email: coord.email, 
-          Department: coord.department || "",
-          isProjectHead: coord.isProjectHead || false
-        }));
-        setRows(updatedCoordinators);
+        if (refreshed.success) {
+          const updatedCoordinators = refreshed.data.map(coord => ({
+            ID: coord._id, 
+            Name: coord.name, 
+            Email: coord.email, 
+            Department: coord.department || "",
+            isProjectHead: coord.isProjectHead || false
+          }));
+          setRows(updatedCoordinators);
+        }
       } else {
         toastService.error("Add failed: " + (res.error || res.data?.message || 'Unknown error'));
       }
     } catch (error) {
-      toastService.error("Error adding coordinator. Please try again.");
+      console.error("Add Error:", error);
+      toastService.error("Error adding coordinator: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -197,9 +206,8 @@ export default function ManageCoordinators() {
 
   const handleDelete = async (idx) => {
     const confirmed = await Confirm("Are you sure you want to delete this coordinator?");
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
+    
     setLoading(true);
     try {
       const id = rows[idx].ID;
@@ -208,53 +216,51 @@ export default function ManageCoordinators() {
       if (res.success) {
         toastService.success('Coordinator deleted successfully!');
         resetForm();
-        // refetch list
         const refreshed = await adminSupervisorApi.getCoordinators();
-        const updatedCoordinators = refreshed.data.map(coord => ({
-          ID: coord._id, 
-          Name: coord.name, 
-          Email: coord.email, 
-          Department: coord.department || "",
-          isProjectHead: coord.isProjectHead || false
-        }));
-        setRows(updatedCoordinators);
+        if (refreshed.success) {
+          const updatedCoordinators = refreshed.data.map(coord => ({
+            ID: coord._id, 
+            Name: coord.name, 
+            Email: coord.email, 
+            Department: coord.department || "",
+            isProjectHead: coord.isProjectHead || false
+          }));
+          setRows(updatedCoordinators);
+        }
       } else {
         toastService.error("Delete failed: " + (res.error || res.data?.message || 'Unknown error'));
       }
     } catch (error) {
-      toastService.error("Error deleting coordinator. Please try again.");
+      console.error("Delete Error:", error);
+      toastService.error("Error deleting coordinator: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
- 
   const handleRemove = async (idx) => {
     const confirmed = await Confirm("Are you sure you want to remove this coordinator? This will convert them to a supervisor role.");
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
+    
     setLoading(true);
     try {
       const id = rows[idx].ID;
-      // Using updateCoordinator to change role to supervisor
       const res = await adminSupervisorApi.removeCoordinator(id);
       
       if (res.success) {
         toastService.success('Coordinator removed successfully! Converted to supervisor.');
         resetForm();
-        
         setRows(prev => prev.filter((_, index) => index !== idx));
       } else {
         toastService.error("Remove failed: " + (res.error || res.data?.message || 'Unknown error'));
       }
     } catch (error) {
-      toastService.error("Error removing coordinator. Please try again.");
+      console.error("Remove Error:", error);
+      toastService.error("Error removing coordinator: " + error.message);
     } finally {
       setLoading(false);
     }
   };
-
 
   const handleMakeIncharge = async (idx) => {
     const coordinator = rows[idx];
@@ -269,22 +275,59 @@ export default function ManageCoordinators() {
       const res = await adminSupervisorApi.makeFYPIncharge(id);
       
       if (res.success) {
-        toastService.success(res.data.message || "Coordinator is now FYP Incharge!");
-        
-        
+        toastService.success(res.data?.message || "Coordinator is now FYP Incharge!");
         const refreshed = await adminSupervisorApi.getCoordinators();
-        const updatedCoordinators = refreshed.data.map(coord => ({
-          ID: coord._id,
-          Name: coord.name,
-          Email: coord.email,
-          Department: coord.department || "",
-          isProjectHead: coord.isProjectHead || false
-        }));
-        setRows(updatedCoordinators);
+        if (refreshed.success) {
+          const updatedCoordinators = refreshed.data.map(coord => ({
+            ID: coord._id,
+            Name: coord.name,
+            Email: coord.email,
+            Department: coord.department || "",
+            isProjectHead: coord.isProjectHead || false
+          }));
+          setRows(updatedCoordinators);
+        }
       } else {
         toastService.error("Operation failed: " + (res.error || res.data?.message || "Unknown error"));
       }
     } catch (error) {
+      console.error("Make Incharge Error:", error);
+      toastService.error("Network error: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMakeFYPHead = async (idx) => {
+    const coordinator = rows[idx];
+    const confirmed = await Confirm(
+      `Make ${coordinator.Name} the FYP Head for ${coordinator.Department.replace(" (Head Coordinator)", "")} department?`
+    );
+    if (!confirmed) return;
+
+    setLoading(true);
+    try {
+      const id = coordinator.ID;
+      const res = await adminSupervisorApi.makeFYPHead(id);
+      
+      if (res.success) {
+        toastService.success(res.data?.message || "Coordinator is now FYP Head!");
+        const refreshed = await adminSupervisorApi.getCoordinators();
+        if (refreshed.success) {
+          const updatedCoordinators = refreshed.data.map(coord => ({
+            ID: coord._id,
+            Name: coord.name,
+            Email: coord.email,
+            Department: coord.department || "",
+            isProjectHead: coord.isProjectHead || false
+          }));
+          setRows(updatedCoordinators);
+        }
+      } else {
+        toastService.error("Operation failed: " + (res.error || res.data?.message || "Unknown error"));
+      }
+    } catch (error) {
+      console.error("Make FYP Head Error:", error);
       toastService.error("Network error: " + error.message);
     } finally {
       setLoading(false);
@@ -315,6 +358,8 @@ export default function ManageCoordinators() {
 
         {loading ? (
           <div style={{ textAlign: "center", padding: 20 }}>Loading coordinators...</div>
+        ) : rows.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 20, color: '#666' }}>No coordinators found</div>
         ) : (
           <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
             <AppTable
@@ -322,7 +367,6 @@ export default function ManageCoordinators() {
               rows={rows.map(({ Name, Email, Department, isProjectHead }) => ({ 
                 Name, 
                 Email, 
-                
                 Department: isProjectHead ? `${Department.replace(" (Head Coordinator)", "")} (Head Coordinator)` : Department
               }))}
               renderActions={(row, i) => (
@@ -344,7 +388,6 @@ export default function ManageCoordinators() {
                     Delete
                   </button>
 
-                
                   <button
                     className="table-action-btn"
                     style={{ background: "rgb(1 51 122)", color: "#fff", marginLeft: 8 }}
@@ -355,7 +398,6 @@ export default function ManageCoordinators() {
                     Remove Coordinator
                   </button>
 
-             
                   <button
                     className="table-action-btn"
                     style={{ 
@@ -368,6 +410,20 @@ export default function ManageCoordinators() {
                     title={rows[i].isProjectHead ? "Already FYP Incharge" : "Make FYP Incharge"}
                   >
                     {rows[i].isProjectHead ? "FYP Incharge ✓" : "Make FYP Incharge"}
+                  </button>
+
+                  <button
+                    className="table-action-btn"
+                    style={{ 
+                      background: "rgb(34 197 94)", 
+                      color: "#fff", 
+                      marginLeft: 8 
+                    }}
+                    onClick={() => handleMakeFYPHead(i)}
+                    disabled={sideFormMode || loading}
+                    title="Make FYP Head"
+                  >
+                    Make FYP Head
                   </button>
                 </>
               )}

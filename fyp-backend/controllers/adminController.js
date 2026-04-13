@@ -7,13 +7,13 @@ const StudentUploadedTemplate = require("../models/StudentUploadedTemplate");
 
 const isValidOfficialEmail = email => /^[a-zA-Z0-9._]+@riphah\.edu\.pk$/.test(email);
 
-// CREATE USER (Admin, Supervisor, Coordinator)
+// ========== CREATE USER (Admin, Supervisor, Coordinator) ==========
 exports.createUser = async (req, res) => {
   try {
     const {
       name, email, password, role,
       department, specialization, availableSlots, bookedSlots,
-      gender, contactNumber, designation // ADDED: designation
+      gender, contactNumber, designation
     } = req.body;
 
     if (!name || !email || !password || !role)
@@ -48,20 +48,17 @@ exports.createUser = async (req, res) => {
 
     // Auto Admin ID
     if (role === 'admin') {
-      // Find last admin
       const lastAdmin = await User.find({ role: 'admin' })
-        .sort({ createdAt: -1 }) // get the latest
+        .sort({ createdAt: -1 })
         .limit(1);
 
-      let nextId = 1; // default for first admin
+      let nextId = 1;
 
       if (lastAdmin.length > 0 && lastAdmin[0].studentId) {
-        // Extract the number from last admin ID
         const lastNum = parseInt(lastAdmin[0].studentId.split('-')[1]);
         nextId = lastNum + 1;
       }
 
-      // Pad with zeros: adm-001, adm-002, etc.
       const padded = String(nextId).padStart(3, '0');
       newUser.studentId = `adm-${padded}`;
     }
@@ -78,17 +75,23 @@ exports.createUser = async (req, res) => {
   }
 };
 
-// GET COORDINATORS
+// ========== GET COORDINATORS ==========
 exports.getCoordinators = async (req, res) => {
   try {
-    const list = await User.find({ role: 'coordinator' }).select('-password');
-    return res.json(list);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+    const coordinators = await User.find({ role: 'coordinator' }).select('-password');
+    return res.status(200).json({
+      success: true,
+      data: coordinators
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 };
 
-// GET ADMINS
+// ========== GET ADMINS ==========
 exports.getAdmins = async (req, res) => {
   try {
     const list = await User.find({ role: 'admin' })
@@ -100,7 +103,7 @@ exports.getAdmins = async (req, res) => {
   }
 };
 
-// GET SUPERVISORS (DESIGNATION INCLUDED)
+// ========== GET SUPERVISORS (DESIGNATION INCLUDED) ==========
 exports.getSupervisors = async (req, res) => {
   try {
     const list = await User.find({ role: 'supervisor' })
@@ -112,7 +115,7 @@ exports.getSupervisors = async (req, res) => {
   }
 };
 
-// GET ALL STUDENTS
+// ========== GET ALL STUDENTS ==========
 exports.getAllStudents = async (req, res) => {
   try {
     const students = await User.find({ role: "student" }).select('-password');
@@ -122,7 +125,7 @@ exports.getAllStudents = async (req, res) => {
   }
 };
 
-// APPROVE STUDENT
+// ========== APPROVE STUDENT ==========
 exports.approveStudent = async (req, res) => {
   try {
     const { id } = req.body;
@@ -136,7 +139,7 @@ exports.approveStudent = async (req, res) => {
   }
 };
 
-// GET ALL USERS
+// ========== GET ALL USERS ==========
 exports.getAllUsers = async (req, res) => {
   try {
     const list = await User.find({}).select('-password');
@@ -146,7 +149,7 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// GET ALL GROUPS
+// ========== GET ALL GROUPS ==========
 exports.getAllGroups = async (req, res) => {
   try {
     const list = await Group.find({});
@@ -156,12 +159,12 @@ exports.getAllGroups = async (req, res) => {
   }
 };
 
-// UPDATE USER
+// ========== UPDATE USER ==========
 exports.updateUser = async (req, res) => {
   try {
     const {
       name, email, department, specialization, password,
-      availableSlots, bookedSlots, designation, // ADDED: designation
+      availableSlots, bookedSlots, designation,
       gender, contactNumber, isProjectHead
     } = req.body;
 
@@ -178,12 +181,11 @@ exports.updateUser = async (req, res) => {
     if (name && name.trim() !== "") user.name = name;
     if (department) user.department = department;
     if (specialization) user.specialization = specialization;
-    if (designation) user.designation = designation; // ADDED: designation handling
+    if (designation) user.designation = designation;
     if (typeof bookedSlots !== "undefined") user.bookedSlots = bookedSlots;
     if (typeof availableSlots !== "undefined") user.availableSlots = availableSlots;
 
     if (typeof isProjectHead !== "undefined") {
-
       if (isProjectHead === true) {
         await User.updateMany(
           {
@@ -216,7 +218,7 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// DELETE USER
+// ========== DELETE USER ==========
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -228,42 +230,277 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// REMOVE COORDINATOR 
+// ========== REMOVE COORDINATOR (convert to supervisor) ==========
 exports.removeCoordinator = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const { id } = req.params;
 
-    if (user.role !== "coordinator") {
-      return res.status(400).json({ error: "User is not a coordinator" });
+    const coordinator = await User.findByIdAndUpdate(
+      id,
+      { role: 'supervisor', isProjectHead: false },
+      { new: true }
+    ).select('-password');
+
+    if (!coordinator) {
+      return res.status(404).json({
+        success: false,
+        error: 'Coordinator not found'
+      });
     }
 
-    // Change role to supervisor
-    user.role = "supervisor";
-    user.isAlsoCOR = false;
-    await user.save();
-
-    const u = user.toObject();
-    delete u.password;
-
-    return res.json({
-      message: "Coordinator removed and converted to supervisor successfully",
-      user: u
+    return res.status(200).json({
+      success: true,
+      message: 'Coordinator removed and converted to supervisor',
+      data: coordinator
     });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 };
 
+// ========== CREATE NEW COORDINATOR ==========
+exports.createCoordinator = async (req, res) => {
+  try {
+    const { name, email, password, department } = req.body;
 
+    if (!name || !email || !password || !department) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name, email, password and department are required'
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email already exists'
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newCoordinator = new User({
+      name,
+      email,
+      password: hashedPassword,
+      department,
+      role: 'coordinator',
+      isProjectHead: false,
+      mustChangePassword: true,
+      first_login: true
+    });
+
+    await newCoordinator.save();
+
+    const coordinatorData = newCoordinator.toObject();
+    delete coordinatorData.password;
+
+    return res.status(201).json({
+      success: true,
+      message: 'Coordinator created successfully',
+      data: coordinatorData
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// ========== UPDATE COORDINATOR ==========
+exports.updateCoordinator = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, department, password } = req.body;
+
+    const coordinator = await User.findById(id);
+    if (!coordinator) {
+      return res.status(404).json({
+        success: false,
+        error: 'Coordinator not found'
+      });
+    }
+
+    if (email && email !== coordinator.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email already exists'
+        });
+      }
+      coordinator.email = email;
+    }
+
+    if (name) coordinator.name = name;
+    if (department) coordinator.department = department;
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      coordinator.password = await bcrypt.hash(password, salt);
+    }
+
+    await coordinator.save();
+
+    const coordinatorData = coordinator.toObject();
+    delete coordinatorData.password;
+
+    return res.status(200).json({
+      success: true,
+      message: 'Coordinator updated successfully',
+      data: coordinatorData
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// ========== DELETE COORDINATOR ==========
+exports.deleteCoordinator = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const coordinator = await User.findByIdAndDelete(id);
+    if (!coordinator) {
+      return res.status(404).json({
+        success: false,
+        error: 'Coordinator not found'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Coordinator deleted successfully',
+      data: coordinator
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// ========== MAKE FYP INCHARGE ==========
+exports.makeFYPIncharge = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const coordinator = await User.findById(id);
+    if (!coordinator) {
+      return res.status(404).json({
+        success: false,
+        error: 'Coordinator not found'
+      });
+    }
+
+    if (coordinator.role !== 'coordinator') {
+      return res.status(400).json({
+        success: false,
+        error: 'Only coordinators can be made FYP Incharge'
+      });
+    }
+
+    const department = coordinator.department;
+
+    const existingIncharge = await User.findOne({
+      department: department,
+      isProjectHead: true,
+      _id: { $ne: id }
+    });
+
+    if (existingIncharge) {
+      existingIncharge.isProjectHead = false;
+      await existingIncharge.save();
+    }
+
+    coordinator.isProjectHead = true;
+    await coordinator.save();
+
+    const coordinatorData = coordinator.toObject();
+    delete coordinatorData.password;
+
+    return res.status(200).json({
+      success: true,
+      message: `${coordinator.name} is now FYP Incharge for ${department} department`,
+      data: coordinatorData
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// ========== MAKE FYP HEAD ==========
+exports.makeFYPHead = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const coordinator = await User.findById(id);
+    if (!coordinator) {
+      return res.status(404).json({
+        success: false,
+        error: 'Coordinator not found'
+      });
+    }
+
+    if (coordinator.role !== 'coordinator') {
+      return res.status(400).json({
+        success: false,
+        error: 'Only coordinators can be made FYP Head'
+      });
+    }
+
+    const department = coordinator.department;
+
+    const existingHead = await User.findOne({
+      department: department,
+      isProjectHead: true,
+      _id: { $ne: id }
+    });
+
+    if (existingHead) {
+      existingHead.isProjectHead = false;
+      await existingHead.save();
+    }
+
+    coordinator.isProjectHead = true;
+    await coordinator.save();
+
+    const coordinatorData = coordinator.toObject();
+    delete coordinatorData.password;
+
+    return res.status(200).json({
+      success: true,
+      message: `${coordinator.name} is now FYP Head for ${department} department`,
+      data: coordinatorData
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// ========== SYSTEM STATS ==========
 exports.getSystemStats = async (req, res) => {
   try {
     const totalStudents = await User.countDocuments({ role: "student" });
     const totalSupervisors = await User.countDocuments({ role: "supervisor" });
     const totalCoordinators = await User.countDocuments({ role: "coordinator" });
-    const totalProposals = await require("../models/StudentProposal").countDocuments();
-
-    // Only count active (non-archived) groups
+    const totalProposals = await Proposal.countDocuments();
     const totalGroups = await Group.countDocuments({ isArchived: { $ne: true } });
 
     res.status(200).json({
@@ -282,6 +519,7 @@ exports.getSystemStats = async (req, res) => {
   }
 };
 
+// ========== RECENT ACTIVITIES ==========
 exports.getRecentActivities = async (req, res) => {
   try {
     const activities = [];
@@ -298,7 +536,6 @@ exports.getRecentActivities = async (req, res) => {
       });
     });
 
-    // 2. Recent Groups (last 5)
     const recentGroups = await Group.find()
       .sort({ createdAt: -1 })
       .limit(5);
@@ -311,7 +548,6 @@ exports.getRecentActivities = async (req, res) => {
       });
     });
 
-    // 3. Recent Proposals (last 5)
     const recentProposals = await Proposal.find()
       .sort({ createdAt: -1 })
       .limit(5);
@@ -324,7 +560,6 @@ exports.getRecentActivities = async (req, res) => {
       });
     });
 
-    // 4. Recent Template Uploads (last 5)
     const recentUploads = await StudentUploadedTemplate.find()
       .sort({ createdAt: -1 })
       .limit(5);
@@ -337,10 +572,8 @@ exports.getRecentActivities = async (req, res) => {
       });
     });
 
-    // Sort all combined by time descending
     activities.sort((a, b) => b.time.getTime() - a.time.getTime());
 
-    // Helper function for time ago (simple version or just return ISO)
     const timeAgo = (date) => {
       const now = new Date();
       const diff = now - date;
@@ -371,7 +604,7 @@ exports.getRecentActivities = async (req, res) => {
   }
 };
 
-// PROMOTE TO COORDINATOR
+// ========== PROMOTE TO COORDINATOR ==========
 exports.makeCoordinator = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -385,7 +618,7 @@ exports.makeCoordinator = async (req, res) => {
   }
 };
 
-// UPLOAD EXCEL & CREATE SUPERVISORS
+// ========== UPLOAD EXCEL & CREATE SUPERVISORS ==========
 exports.uploadExcelAndCreateUsers = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -481,11 +714,10 @@ exports.uploadExcelAndCreateUsers = async (req, res) => {
   }
 };
 
-// UPDATE SUPERVISOR SLOTS USING EMAIL + DESIGNATION + BOOKED SLOTS
+// ========== UPDATE SUPERVISOR SLOTS USING EMAIL + DESIGNATION + BOOKED SLOTS ==========
 exports.updateSupervisorSlotsByEmail = async (req, res) => {
   try {
     const { email, designation, bookedSlots } = req.body;
-    console.log("here");
 
     if (!email || !designation || bookedSlots === undefined) {
       return res.status(400).json({ error: "Email, designation and bookedSlots are required" });
@@ -501,14 +733,13 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
       return res.status(400).json({ error: "This email does not belong to a supervisor" });
     }
 
-    // Normalize designation keys
     const designationSlotsMap = {
       'dean': 0,
       'professor': 1,
       'associateprofessor': 2,
       'assistantprofessor': 3,
       'lecturer': 3,
-      'lecturerSr.lecturer': 3,
+      'lecturersr.lecturer': 3,
       'sr.lecturer': 3,
       'srlecturer': 3,
       'juniorlecturer': 2,
@@ -531,7 +762,6 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
       });
     }
 
-    // Update supervisor
     user.designation = designation;
     user.availableSlots = availableSlots;
     user.bookedSlots = bookedSlots;
@@ -553,12 +783,12 @@ exports.updateSupervisorSlotsByEmail = async (req, res) => {
   }
 };
 
+// ========== GET SUPERVISORS FOR COORDINATOR ==========
 exports.getSupervisorsForCoordinator = async (req, res) => {
   try {
     const supervisors = await User.find({ role: "supervisor" })
       .select("name email department specialization designation availableSlots bookedSlots")
       .sort({ createdAt: -1 });
-
 
     const DESIGNATION_DEFAULTS = {
       Dean: 0,
@@ -585,8 +815,7 @@ exports.getSupervisorsForCoordinator = async (req, res) => {
   }
 };
 
-
-// TOGGLE STUDENT APPROVAL (Approve / Unapprove)
+// ========== TOGGLE STUDENT APPROVAL ==========
 exports.toggleStudentApproval = async (req, res) => {
   try {
     const { id } = req.params;
@@ -600,7 +829,6 @@ exports.toggleStudentApproval = async (req, res) => {
       return res.status(400).json({ error: "This action is only for students" });
     }
 
-    // Toggle approval
     student.IsApproved = !student.IsApproved;
     await student.save();
 
@@ -623,47 +851,5 @@ exports.toggleStudentApproval = async (req, res) => {
       success: false,
       error: "Server error"
     });
-  }
-};
-
-// MAKE FYP INCHARGE
-exports.makeFYPIncharge = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    if (user.role !== "coordinator") {
-      return res.status(400).json({ error: "Only coordinators can be made FYP Incharge" });
-    }
-
-
-    await User.updateMany(
-      {
-        department: user.department,
-        isProjectHead: true,
-        _id: { $ne: id }
-      },
-      { isProjectHead: false }
-    );
-
-
-    user.isProjectHead = true;
-    await user.save();
-
-    const u = user.toObject();
-    delete u.password;
-
-    return res.json({
-      success: true,
-      message: `${user.name} is now FYP Incharge for ${user.department} department`,
-      user: u
-    });
-
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
   }
 };

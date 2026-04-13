@@ -15,7 +15,7 @@ const validate = (req, res, next) => {
     next();
 };
 
-// CREATE USER (Admin, Supervisor, Coordinator)
+// ========== CREATE USER (Admin, Supervisor, Coordinator) ==========
 router.post(
     '/create',
     protect,
@@ -33,28 +33,47 @@ router.post(
     adminController.createUser
 );
 
+// ========== EXCEL UPLOAD ==========
 router.post("/upload-excel", protect, isAdmin, upload.single("file"), adminController.uploadExcelAndCreateUsers);
 
-// GET COORDINATORS
+// ========== GET COORDINATORS ==========
 router.get('/coordinators', protect, isAdmin, adminController.getCoordinators);
 
-// GET ADMINS
+// ========== CREATE NEW COORDINATOR ==========
+router.post('/coordinators', protect, isAdmin, adminController.createCoordinator);
+
+// ========== UPDATE COORDINATOR ==========
+router.put('/coordinators/:id', protect, isAdmin, adminController.updateCoordinator);
+
+// ========== DELETE COORDINATOR ==========
+router.delete('/coordinators/:id', protect, isAdmin, adminController.deleteCoordinator);
+
+// ========== REMOVE COORDINATOR (convert to supervisor) ==========
+router.put('/coordinators/:id/remove', protect, isAdmin, adminController.removeCoordinator);
+
+// ========== MAKE FYP INCHARGE - COORDINATOR ==========
+router.put('/coordinators/:id/make-fyp-incharge', protect, isAdmin, adminController.makeFYPIncharge);
+
+// ========== MAKE FYP HEAD - COORDINATOR ==========
+router.put('/coordinators/:id/make-fyp-head', protect, isAdmin, adminController.makeFYPHead);
+
+// ========== GET ADMINS ==========
 router.get('/alladmins', protect, isAdmin, adminController.getAdmins);
 
-// GET SUPERVISORS
-router.get('/supervisors',adminController.getSupervisors);
+// ========== GET SUPERVISORS ==========
+router.get('/supervisors', adminController.getSupervisors);
 
-// GET ALL STUDENTS for admin
+// ========== GET ALL STUDENTS for admin ==========
 router.get('/students', protect, isAdmin, adminController.getAllStudents);
 
-// APPROVE STUDENT (admin action, POST with id in body)
+// ========== APPROVE STUDENT (admin action, POST with id in body) ==========
 router.post('/approve-students', protect, isAdmin, adminController.approveStudent);
 
-// GET ALL USERS
+// ========== GET ALL USERS ==========
 router.get('/all', protect, isAdmin, adminController.getAllUsers);
 router.get('/all-groups', protect, isAdmin, adminController.getAllGroups);
 
-// UPDATE USER
+// ========== UPDATE USER ==========
 router.put(
     '/:id',
     protect,
@@ -68,25 +87,25 @@ router.put(
     adminController.updateUser
 );
 
-// DELETE USER
-router.delete('/:id',  adminController.deleteUser);
+// ========== DELETE USER ==========
+router.delete('/:id', protect, isAdmin, adminController.deleteUser);
 
-// REMOVE COORDINATOR (convert to supervisor)
+// ========== REMOVE COORDINATOR (convert to supervisor) - PATCH ==========
 router.patch('/remove-coordinator/:id', protect, isAdmin, adminController.removeCoordinator);
 
-// MAKE FYP INCHARGE
+// ========== MAKE FYP INCHARGE - POST ==========
 router.post('/make-fyp-incharge/:id', protect, isAdmin, adminController.makeFYPIncharge);
 
-// SYSTEM STATS
+// ========== SYSTEM STATS ==========
 router.get('/stats', protect, isAdmin, adminController.getSystemStats);
 
-// RECENT ACTIVITIES
+// ========== RECENT ACTIVITIES ==========
 router.get('/get-activities', protect, isAdmin, adminController.getRecentActivities);
 
-// PROMOTE TO COORDINATOR
+// ========== PROMOTE TO COORDINATOR ==========
 router.post('/promote/:id', protect, isAdmin, adminController.makeCoordinator);
 
-// TOGGLE STUDENT APPROVAL  
+// ========== TOGGLE STUDENT APPROVAL ==========
 router.patch(
   '/toggle-approval/:id',
   protect,
@@ -94,8 +113,10 @@ router.patch(
   adminController.toggleStudentApproval
 );
 
+// ========== SUPERVISOR SLOTS ==========
 router.post("/supervisor/update-slots", adminController.updateSupervisorSlotsByEmail);
 
+// ========== SUPERVISORS FOR COORDINATOR ==========
 router.get("/supervisors-for-coordinator", protect, isAdmin, adminController.getSupervisorsForCoordinator);
 
 module.exports = router;
