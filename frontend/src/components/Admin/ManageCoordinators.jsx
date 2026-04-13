@@ -62,7 +62,7 @@ export default function ManageCoordinators() {
         console.log("API Response:", res);
 
         if (res.success) {
-          const coordinators = res.data.map(coord => ({
+          const coordinators = res.data.data.map(coord => ({
             ID: coord._id,
             Name: coord.name,
             Email: coord.email,
@@ -148,7 +148,7 @@ export default function ManageCoordinators() {
         resetForm();
         const refreshed = await adminSupervisorApi.getCoordinators();
         if (refreshed.success) {
-          const updatedCoordinators = refreshed.data.map(coord => ({
+          const updatedCoordinators = refreshed.data.data.map(coord => ({
             ID: coord._id, 
             Name: coord.name, 
             Email: coord.email, 
@@ -184,7 +184,7 @@ export default function ManageCoordinators() {
         resetForm();
         const refreshed = await adminSupervisorApi.getCoordinators();
         if (refreshed.success) {
-          const updatedCoordinators = refreshed.data.map(coord => ({
+          const updatedCoordinators = refreshed.data.data.map(coord => ({
             ID: coord._id, 
             Name: coord.name, 
             Email: coord.email, 
@@ -218,7 +218,7 @@ export default function ManageCoordinators() {
         resetForm();
         const refreshed = await adminSupervisorApi.getCoordinators();
         if (refreshed.success) {
-          const updatedCoordinators = refreshed.data.map(coord => ({
+          const updatedCoordinators = refreshed.data.data.map(coord => ({
             ID: coord._id, 
             Name: coord.name, 
             Email: coord.email, 
@@ -278,7 +278,7 @@ export default function ManageCoordinators() {
         toastService.success(res.data?.message || "Coordinator is now FYP Incharge!");
         const refreshed = await adminSupervisorApi.getCoordinators();
         if (refreshed.success) {
-          const updatedCoordinators = refreshed.data.map(coord => ({
+          const updatedCoordinators = refreshed.data.data.map(coord => ({
             ID: coord._id,
             Name: coord.name,
             Email: coord.email,
@@ -314,7 +314,7 @@ export default function ManageCoordinators() {
         toastService.success(res.data?.message || "Coordinator is now FYP Head!");
         const refreshed = await adminSupervisorApi.getCoordinators();
         if (refreshed.success) {
-          const updatedCoordinators = refreshed.data.map(coord => ({
+          const updatedCoordinators = refreshed.data.data.map(coord => ({
             ID: coord._id,
             Name: coord.name,
             Email: coord.email,
@@ -414,16 +414,18 @@ export default function ManageCoordinators() {
 
                   <button
                     className="table-action-btn"
-                    style={{ 
-                      background: "rgb(34 197 94)", 
+                    style={{
+                      background:  rows[i].Department == 'all' ? "#6c757d" : "rgb(37 99 235)",
                       color: "#fff", 
                       marginLeft: 8 
                     }}
                     onClick={() => handleMakeFYPHead(i)}
-                    disabled={sideFormMode || loading}
+                    disabled={sideFormMode || loading || rows[i].Department == 'all'}
                     title="Make FYP Head"
                   >
-                    Make FYP Head
+                    {rows[i].isProjectHead
+                    ? (rows[i].Department == 'all' ? 'Already head' : 'Make FYP Head')
+                    : 'Make FYP Head'}
                   </button>
                 </>
               )}

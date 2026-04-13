@@ -465,17 +465,19 @@ exports.makeFYPHead = async (req, res) => {
     const department = coordinator.department;
 
     const existingHead = await User.findOne({
-      department: department,
+      department: "all",
       isProjectHead: true,
       _id: { $ne: id }
     });
 
     if (existingHead) {
       existingHead.isProjectHead = false;
+      existingHead.department = 'none';
       await existingHead.save();
     }
 
     coordinator.isProjectHead = true;
+    coordinator.department = "all";
     await coordinator.save();
 
     const coordinatorData = coordinator.toObject();
