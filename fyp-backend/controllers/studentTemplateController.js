@@ -1,5 +1,6 @@
 const StudentUploadedTemplate = require("../models/StudentUploadedTemplate");
 const User = require("../models/User");
+const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
 const getStudentMetaData = require("./getStudentMetaData");
@@ -55,13 +56,30 @@ exports.uploadTemplate = async (req, res) => {
       return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
-    const student = await User.findOne({ studentId: Number(studentId) });
+    // Find student - support both string and numeric types
+    const student = await User.findOne({
+      $or: [
+        { studentId: studentId },
+        { studentId: String(studentId) },
+        { email: studentId } // fallback for email
+      ]
+    });
+    
     if (!student) return res.status(404).json({ success: false, message: "Student not found" });
 
-    const { group } = await getStudentMetaData({ sapId: studentId });
-    if (!group) return res.status(400).json({ success: false, message: "No group assigned" });
+    // Find group using helper which handles all members (leader, member2, member3)
+    const { group } = await getStudentMetaData({ 
+      sapId: student.studentId || studentId, 
+      email: student.email 
+    });
+    
+    if (!group) return res.status(400).json({ success: false, message: "No group assigned to this student." });
 
     const groupId = group._id;
+
+    if (group.isArchived) {
+      return res.status(400).json({ success: false, message: "This project is archived and read-only." });
+    }
 
     if (!req.file) {
       return res.status(400).json({ success: false, message: "File is required" });
@@ -217,11 +235,30 @@ exports.getStudentInfo = async (req, res) => {
   try {
     const { studentId } = req.params;
 
-    const student = await User.findOne({ studentId: Number(studentId) });
-    if (!student) return res.status(404).json({ success: false, message: "Student not found" });
+    const student = await User.findOne({
+      $or: [
+        { studentId: studentId },
+        { studentId: String(studentId) },
+        { _id: mongoose.Types.ObjectId.isValid(studentId) ? studentId : undefined }
+      ]
+    });
 
-    const { group } = await getStudentMetaData({ sapId: studentId });
-    if (!group) return res.status(404).json({ success: false, message: "Group not found for this student" });
+    if (!student) {
+      return res.status(200).json({ success: false, message: "Student not found" });
+    }
+
+    const { group } = await getStudentMetaData({ sapId: student.studentId || studentId, email: student.email });
+    if (!group) {
+      return res.status(200).json({ 
+        success: true, 
+        data: { 
+          department: student.department || "N/A",
+          groupId: null,
+          displayGroupId: "No Group",
+          noGroup: true 
+        } 
+      });
+    }
 
     res.json({
       success: true,

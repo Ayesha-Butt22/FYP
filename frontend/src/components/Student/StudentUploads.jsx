@@ -1,4 +1,4 @@
-// StudentUploads - Template upload manager (SRS-14.9 / SRS-14.10)
+// StudentUploads -
 import React, { useEffect, useState, useRef } from "react";
 import { Box } from "@mui/material";
 import DashboardSectionHeader from "./DashboardSectionHeader.jsx";
@@ -52,7 +52,7 @@ export default function StudentUploads() {
     const [fypResults, setFypResults] = useState([]);
     const storedDept = localStorage.getItem("department");
 
-    const headers = ["Template", "Due Date", "Status", "Remarks", "Upload Date"];
+    const headers = ["Template", "Reference File", "Due Date", "Status", "Remarks", "Upload Date"];
     const fileInputRefs = useRef({});
     const studentId = localStorage.getItem("studentId") || localStorage.getItem("sapId");
     const studentEmail = localStorage.getItem("email");
@@ -98,32 +98,13 @@ export default function StudentUploads() {
 
     useEffect(() => {
         const loadInitialData = async () => {
-            const currentId = localStorage.getItem("studentId") || localStorage.getItem("sapId");
-            const currentEmail = localStorage.getItem("email");
-
-            if (!currentId && !currentEmail) return;
+            const token = localStorage.getItem("token");
+            if (!token) return;
 
             try {
                 setLoading(true);
-                let data = null;
-                if (currentId) {
-                    try {
-                        data = await TemplateService.getStudentInfo(currentId);
-                    } catch (e) { console.log("ID lookup failed, trying email..."); }
-                }
-
-                // Fallback to finding user by email if ID lookup fails
-                if (!data && currentEmail) {
-                    const profileRes = await fetch(`${API_BASE}/api/auth/user-by-email/${currentEmail}`);
-                    if (profileRes.ok) {
-                        const pData = await profileRes.json();
-                        if (pData.success && pData.user) {
-                            const resolvedId = pData.user.studentId || pData.user.sapId;
-                            if (resolvedId) data = await TemplateService.getStudentInfo(resolvedId);
-                            else if (pData.user._id) data = await TemplateService.getStudentInfo(pData.user._id);
-                        }
-                    }
-                }
+                // Use the authenticated endpoint - works for ALL members (leader or otherwise)
+                const data = await TemplateService.getAuthenticatedStudentInfo();
 
                 if (data) {
                     setStudentInfo(data);
@@ -131,37 +112,39 @@ export default function StudentUploads() {
                     if (dept) await loadUploadedTemplate(dept);
 
                     // --- AUTOMATIC FYP YEAR TRANSITION CHECK ---
-                    if (currentEmail) {
-                        try {
-                            const res = await fetch(`${API_BASE}/api/coordinator/final-results`, {
-                                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-                            });
-                            if (res.ok) {
-                                const rData = await res.json();
-                                if (rData.success) {
-                                    const myResults = rData.data.filter(r => String(r.sapId) === String(currentId));
-                                    setFypResults(myResults);
+                    try {
+                        const res = await fetch(`${API_BASE}/api/coordinator/final-results`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        if (res.ok) {
+                            const rData = await res.json();
+                            if (rData.success) {
+                                // Filter results for the current student
+                                const sapId = data.sapId || localStorage.getItem("studentId");
+                                const myResults = rData.data.filter(r => String(r.sapId) === String(sapId));
+                                setFypResults(myResults);
 
-                                    // Auto check transition
-                                    const fyp1Pass = myResults.find(r => r.year === "FYP-1" && r.status === "Pass");
-                                    if (fyp1Pass) {
-                                        setFypYear(2);
-                                        localStorage.setItem("fypYear", "2");
-                                    }
+                                // Auto check transition
+                                const fyp1Pass = myResults.find(r => r.year === "FYP-1" && r.status === "Pass");
+                                if (fyp1Pass) {
+                                    setFypYear(2);
+                                    localStorage.setItem("fypYear", "2");
                                 }
                             }
-                        } catch (e) { console.warn("Final results fetch failed"); }
+                        }
+                    } catch (e) {
+                        console.warn("Final results fetch failed", e);
                     }
                 }
             } catch (err) {
-                console.error(err);
-                toastService.error("Could not load student info");
+                console.error("Error loading student info:", err);
+                // toastService.error("Could not load student group info");
             } finally {
                 setLoading(false);
             }
         };
         loadInitialData();
-    }, [studentId, studentEmail]);
+    }, []);
 
 
     useEffect(() => {
@@ -232,9 +215,12 @@ export default function StudentUploads() {
         visibleTemplates.forEach((tpl) => {
             const isFyp2Template = tpl.fypPart === 2;
 
-            // Should we show this template row?
-            // Rule: Show FYP-1 always. Show FYP-2 only if fypYear >= 2.
+            // 1. Hardcoded Role check: Skip FYP-2 if student is in FYP-1
             if (isFyp2Template && fypYear < 2) return;
+
+            // 2. COORDINATOR SYNC: Only show if coordinator has uploaded this template for the student's department
+            const coordinatorTemplate = depTemplate.find(dt => dt.template === tpl.code);
+            if (!coordinatorTemplate) return;
 
             const file = allFiles.find(
                 (f) =>
@@ -243,11 +229,9 @@ export default function StudentUploads() {
             );
             const partLabel = isFyp2Template ? "FYP-2" : "FYP-1";
 
-            // Adjust Week for FYP-2 (usually offset or dynamic)
-            // const weekForCalc = isFyp2Template ? tpl.week : tpl.week;
-
             tableRows.push({
                 Template: `${tpl.label} (${partLabel})`,
+                "Reference File": coordinatorTemplate, // Store the coordinator template object for rendering
                 "Due Date": calculateDueDate(semesterStart, tpl.week),
                 Status: file ? file.status : "Upload Pending",
                 Remarks: file ? file.remarks : "N/A",
@@ -256,7 +240,8 @@ export default function StudentUploads() {
                     template: tpl.code,
                     file: file,
                     dueDate: calculateDueDate(semesterStart, tpl.week),
-                    fypPart: tpl.fypPart
+                    fypPart: tpl.fypPart,
+                    coordinatorTemplate: coordinatorTemplate
                 },
             });
         });
@@ -350,13 +335,15 @@ export default function StudentUploads() {
                         Download
                     </button>
                 )}
-                <button
-                    className="mt-btn"
-                    style={{ background: "#10b981", color: "#fff" }}
-                    onClick={() => handleTriggerUpload(row)}
-                >
-                    {file ? "Re-upload" : "Upload"}
-                </button>
+                {!studentInfo?.isArchived && (
+                    <button
+                        className="mt-btn"
+                        style={{ background: "#10b981", color: "#fff" }}
+                        onClick={() => handleTriggerUpload(row)}
+                    >
+                        {file ? "Re-upload" : "Upload"}
+                    </button>
+                )}
             </Box>
         );
     };
@@ -389,7 +376,7 @@ export default function StudentUploads() {
                                 <p style={{ color: '#1e40af' }}>You have passed FYP-1 and ALLtemplates are approved. You are now authorized to upload FYP-2 specific templates (Progress & Final Report).</p>
                             </div>
                         </Box>
-                    ) : studentInfo?.isArchived && (
+                    ) : studentInfo?.isArchived ? (
                         <Box className="completion-message-banner">
                             <span className="completion-icon">🏆</span>
                             <div>
@@ -397,11 +384,25 @@ export default function StudentUploads() {
                                 <p>This project has been moved to the FYP Archive.</p>
                             </div>
                         </Box>
-                    )}
-                    {/* <label>Fyp Year = {fypYear}</label> */}
-                    {!studentInfo?.isArchived && (
-                        <AppTable headers={headers} rows={rows} renderActions={renderActions} />
-                    )}
+                    ) : null}
+                    <AppTable 
+                        headers={headers} 
+                        rows={rows.map(row => ({
+                            ...row,
+                            "Reference File": row["Reference File"] ? (
+                                <button 
+                                    className="st-ref-btn"
+                                    onClick={() => {
+                                        const path = row["Reference File"].filePath;
+                                        window.open(`http://localhost:5000${path.startsWith('/') ? '' : '/'}${path}`, "_blank");
+                                    }}
+                                >
+                                    Download Ref
+                                </button>
+                            ) : "—"
+                        }))} 
+                        renderActions={renderActions} 
+                    />
                 </>
             )}
         </Box>

@@ -153,20 +153,6 @@ export default function DashboardLayout({
             </li>
           ))}
         </ul>
-        <div className="logout-area" style={{gap : 5}}>
-          <Tooltip title="Logout">
-            <IconButton onClick={onLogout} size="medium">
-              <LogoutIcon />
-            </IconButton>
-          </Tooltip>
-            {allowSwitch == 'true' && (
-                <Tooltip title="SWITCH ACCOUNT">
-                    <IconButton onClick={HandleAccountSwitch} size="medium">
-                        <SwitchAccountIcon/>
-                    </IconButton>
-                </Tooltip>
-            )}
-        </div>
       </aside>
 
       <div className="spacer" />
@@ -213,6 +199,21 @@ export default function DashboardLayout({
               <div className="name-text">
                 <span>({displayRole}) </span>
               </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "8px", marginLeft: "12px", borderLeft: "1.5px solid #e2e8f0", paddingLeft: "12px" }}>
+              {allowSwitch === 'true' && (
+                <Tooltip title="Switch Account">
+                  <IconButton onClick={HandleAccountSwitch} size="small" sx={{ color: "#01337a" }}>
+                    <SwitchAccountIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title="Logout">
+                <IconButton onClick={onLogout} size="small" sx={{ color: "#01337a" }}>
+                  <LogoutIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </div>
             <input
               type="file"

@@ -28,7 +28,18 @@ export default class TemplateService {
     return res.data.success ? res.data.data : [];
   }
 
-  // ---------------- GET STUDENT INFO ----------------
+  // ---------------- GET AUTHENTICATED STUDENT INFO ----------------
+  static async getAuthenticatedStudentInfo() {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
+
+    const res = await axios.get(`${API_BASE}/me`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    return res.data.success ? res.data.data : null;
+  }
+
+  // ---------------- GET STUDENT INFO (Legacy/Fallback) ----------------
   static async getStudentInfo(studentId) {
     if (!studentId) throw new Error("Student ID is required.");
     const res = await axios.get(`${API_BASE}/students/${studentId}`);
@@ -39,6 +50,6 @@ export default class TemplateService {
   static buildFileUrl(filePath) {
     if (!filePath) return "";
     if (filePath.startsWith("http")) return filePath;
-    return window.location.origin + "/" + filePath;
+    return "http://localhost:5000/" + filePath; // Hardcoded fallback for local consistency
   }
 }
