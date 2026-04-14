@@ -517,3 +517,61 @@
 .cor-committee-paper::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* ======= MODAL TYPOGRAPHY IMPROVEMENTS ONLY ======= */
+
+/* General modal text */
+.MuiModal-root .MuiTypography-root {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Modal headings */
+.MuiModal-root .MuiTypography-h6 {
+  font-size: 18px !important;
+  line-height: 1.4;
+}
+
+.MuiModal-root .MuiTypography-subtitle1 {
+  font-size: 16px !important;
+  font-weight: 600;
+}
+
+.MuiModal-root .MuiTypography-subtitle2 {
+  font-size: 14.5px;
+}
+
+/* Labels (like Milestone, Venue) */
+.MuiModal-root .MuiTypography-body2 {
+  font-size: 15px;
+}
+
+.MuiModal-root .MuiTypography-caption {
+  font-size: 13.5px;
+}
+
+/* Table text inside modal */
+.MuiModal-root .MuiTableCell-root {
+  font-size: 15px;
+}
+
+.MuiModal-root .MuiTableCell-head {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Strong / bold text refinement */
+.MuiModal-root strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Button text inside modal */
+.MuiModal-root .cor-main-btn {
+  font-size: 15px;
+}
+
+/* Improve spacing readability */
+.MuiModal-root .MuiBox-root {
+  line-height: 1.6;
+}

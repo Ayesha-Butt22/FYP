@@ -167,9 +167,9 @@
     transform: none !important;
 }
 
-/* ════════════════���══════════════════════════════════════════════ */
-/* MODAL OVERLAY - Centered Form Styling */
-/* ═══════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════ */
+/* MODAL OVERLAY */
+/* ════════════════════════════════════════════════════════════════ */
 
 .eval-sup-modal-overlay {
     position: fixed;
@@ -177,8 +177,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background: rgba(1, 51, 122, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     z-index: 999;
     animation: fadeIn 0.3s ease;
 }
@@ -192,33 +193,37 @@
     }
 }
 
-/* Form Container - Centered Modal */
+/* ════════════════════════════════════════════════════════════════ */
+/* CENTERED MODAL FORM */
+/* ════════════════════════════════════════════════════════════════ */
+
+
 .eval-sup-form-container {
     position: fixed;
     top: 50%;
     left: 50%;
-
     transform: translate(-50%, -50%) scale(0.95);
-    opacity: 0;
-    visibility: hidden;   /* 👈 IMPORTANT */
 
+    /* 🔥 SIZE INCREASE */
+    width: 95%;
+    max-width: 1500px;   /* pehle 900px tha */
+    max-height: 95vh;    /* thoda zyada height */
+
+    overflow-y: auto;
     background: white;
     border-radius: 20px;
     padding: 32px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(1, 51, 122, 0.1);
-    border: 2px solid #e8ecf4;
-    z-index: 1000;
-    max-height: 90vh;
-    width: 90%;
-    max-width: 900px;
-    overflow-y: auto;
 
-    animation: modalFadeIn 0.25s ease forwards;
+    box-shadow: 0 25px 60px rgba(1, 51, 122, 0.25);
+    z-index: 1000;
+
+    animation: modalFadeIn 0.3s ease forwards;
 }
+
 @keyframes modalFadeIn {
     from {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.95);
+        transform: translate(-50%, -50%) scale(0.92);
         visibility: hidden;
     }
     to {
@@ -228,7 +233,7 @@
     }
 }
 
-/* Smooth scrollbar styling for the centered form */
+/* Smooth scrollbar styling */
 .eval-sup-form-container::-webkit-scrollbar {
     width: 8px;
 }
@@ -241,11 +246,16 @@
 .eval-sup-form-container::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 10px;
+    transition: all 0.2s ease;
 }
 
 .eval-sup-form-container::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #01337a;
 }
+
+/* ════════════════════════════════════════════════════════════════ */
+/* FORM HEADER */
+/* ════════════════════════════════════════════════════════════════ */
 
 .eval-sup-form-header {
     display: flex;
@@ -275,7 +285,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     font-weight: 300;
     flex-shrink: 0;
 }
@@ -285,6 +295,10 @@
     color: #334155;
     transform: rotate(90deg);
 }
+
+/* ════════════════════════════════════════════════════════════════ */
+/* FORM CONTENT */
+/* ════════════════════════════════════════════════════════════════ */
 
 .eval-sup-form-info {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -297,14 +311,18 @@
 .eval-sup-form-info p {
     margin: 10px 0;
     color: #475569;
-    font-size: 18px;   /* 🔥 increase */
-    line-height: 1.6;  /* readability */
+    font-size: 15px;
+    line-height: 1.6;
 }
 
 .eval-sup-form-info strong {
     color: #1e293b;
     font-weight: 600;
 }
+
+/* ════════════════════════════════════════════════════════════════ */
+/* TABLE STYLING */
+/* ════════════════════════════════════════════════════════════════ */
 
 .eval-sup-table {
     width: 100%;
@@ -390,6 +408,10 @@
     opacity: 1;
 }
 
+/* ════════════════════════════════════════════════════════════════ */
+/* COMMENTS SECTION */
+/* ════════════════════════════════════════════════════════════════ */
+
 .eval-sup-comments {
     margin-top: 28px;
     display: flex;
@@ -414,6 +436,7 @@
     background: #fafbfc;
     color: #334155;
     min-height: 100px;
+    box-sizing: border-box;
 }
 
 .eval-sup-comments textarea:focus {
@@ -426,6 +449,10 @@
 .eval-sup-comments textarea::placeholder {
     color: #94a3b8;
 }
+
+/* ════════════════════════════════════════════════════════════════ */
+/* FORM FOOTER */
+/* ════════════════════════════════════════════════════════════════ */
 
 .eval-sup-form-footer {
     padding-top: 24px;
@@ -456,6 +483,12 @@
     box-shadow: 0 6px 20px rgba(1, 51, 122, 0.4);
 }
 
+.eval-sup-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
 .eval-sup-cancel-btn {
     background: #f1f5f9;
     color: #64748b;
@@ -474,27 +507,9 @@
     border-color: #cbd5e1;
 }
 
-.eval-sup-loading,
-.eval-sup-empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: #94a3b8;
-    font-size: 16px;
-}
-
-.eval-sup-loading::before {
-    content: "⏳";
-    display: block;
-    font-size: 48px;
-    margin-bottom: 16px;
-}
-
-.eval-sup-empty::before {
-    content: "📋";
-    display: block;
-    font-size: 48px;
-    margin-bottom: 16px;
-}
+/* ════════════════════════════════════════════════════════════════ */
+/* NOT ELIGIBLE SECTION */
+/* ════════════════════════════════════════════════════════════════ */
 
 .eval-sup-not-eligible {
     background: #fff5f5;
@@ -548,6 +563,10 @@
     color: #a0aec0 !important;
 }
 
+/* ════════════════════════════════════════════════════════════════ */
+/* ELIGIBILITY INFO */
+/* ════════════════════════════════════════════════════════════════ */
+
 .eval-sup-eligibility-info {
     padding: 12px 18px;
     background: #f8fafc;
@@ -576,6 +595,10 @@
     text-transform: uppercase;
 }
 
+/* ════════════════════════════════════════════════════════════════ */
+/* BUTTON ANIMATION */
+/* ════════════════════════════════════════════════════════════════ */
+
 .eval-sup-submit-btn.pulsing {
     animation: button-pulse 1.5s infinite;
 }
@@ -592,9 +615,35 @@
     }
 }
 
-/* ═══════════════════════════════════════════════════════════════ */
-/* RESPONSIVE DESIGN */
-/* ════════════════════════════════════════════════���══════════════ */
+/* ════════════════════════════════════════════════════════════════ */
+/* LOADING & EMPTY STATES */
+/* ════════════════════════════════════════════════════════════════ */
+
+.eval-sup-loading,
+.eval-sup-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+    font-size: 16px;
+}
+
+.eval-sup-loading::before {
+    content: "⏳";
+    display: block;
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.eval-sup-empty::before {
+    content: "📋";
+    display: block;
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* RESPONSIVE DESIGN - TABLET */
+/* ════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
     .eval-sup-container {
@@ -635,6 +684,10 @@
         width: 100%;
     }
 }
+
+/* ════════════════════════════════════════════════════════════════ */
+/* RESPONSIVE DESIGN - MOBILE */
+/* ════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 480px) {
     .eval-sup-form-container {

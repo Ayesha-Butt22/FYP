@@ -421,7 +421,7 @@ const InfoModal = ({ open, onClose, row, computeFinalMarks }) => {
 
           {/* Student Marks Table - Enhanced */}
           <Typography variant="h6" sx={{ fontSize: '1.35rem', fontWeight: '800', mb: 3, color: '#013379', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-           Individual Results Summary
+            👥 Individual Results Summary
           </Typography>
           {fm ? (
             <TableContainer component={Paper} elevation={0} sx={{ border: '2.5px solid #e8ecf4', mb: 5, borderRadius: '14px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(1, 51, 122, 0.08)' }}>
@@ -473,39 +473,41 @@ const InfoModal = ({ open, onClose, row, computeFinalMarks }) => {
 
           <Divider sx={{ mb: 5, borderColor: '#e8ecf4', borderWidth: '1.5px' }} />
 
-          {/* Detailed Comments */}
-          <Typography variant="h6" sx={{ fontSize: '1.35rem', fontWeight: '800', mb: 3.5, color: '#013379', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          {/* Detailed Comments - ENHANCED FONTS */}
+          <Typography variant="h6" sx={{ fontSize: '1.4rem', fontWeight: '900', mb: 4, color: '#013379', display: 'flex', alignItems: 'center', gap: 1.5 }}>
             💬 Panel Member Feedback
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3.5 }}>
             {row.evaluations.map((ev, i) => (
-              <Box key={i} sx={{ p: 3.5, border: '2px solid #e8ecf4', borderRadius: '14px', bgcolor: '#fcfcfc', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 20px rgba(1, 51, 122, 0.12)', borderColor: '#90caf9', bgcolor: '#ffffff' } }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, gap: 2 }}>
-                  <Box>
-                    <Typography variant="body1" sx={{ fontSize: '1.15rem', fontWeight: '900', color: '#013379', mb: 0.3 }}>
-                      {typeof ev.evaluatedBy === 'object' ? ev.evaluatedBy.name : ev.evaluatedBy}
+              <Box key={i} sx={{ p: 4, border: '2px solid #e8ecf4', borderRadius: '14px', bgcolor: '#fcfcfc', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 20px rgba(1, 51, 122, 0.12)', borderColor: '#90caf9', bgcolor: '#ffffff' } }}>
+                {/* Name and Email */}
+                <Box sx={{ mb: 2.5 }}>
+                  <Typography variant="body1" sx={{ fontSize: '1.25rem', fontWeight: '900', color: '#013379', mb: 0.5 }}>
+                    {typeof ev.evaluatedBy === 'object' ? ev.evaluatedBy.name : ev.evaluatedBy}
+                  </Typography>
+                  {ev.email && (
+                    <Typography variant="body2" sx={{ fontSize: '1rem', color: '#64748b', fontWeight: '600' }}>
+                      {ev.email}
                     </Typography>
-                    {ev.email && (
-                      <Typography variant="body2" sx={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '500' }}>
-                        {ev.email}
-                      </Typography>
-                    )}
-                  </Box>
+                  )}
                 </Box>
                 
-                <Typography variant="body2" sx={{ fontSize: '1.05rem', fontStyle: 'italic', color: '#475569', mb: 2, lineHeight: '1.7' }}>
+                {/* Comments - LARGER FONT */}
+                <Typography variant="body2" sx={{ fontSize: '1.15rem', fontStyle: 'italic', color: '#475569', mb: 2.5, lineHeight: '1.8', fontWeight: '500' }}>
                   "{ev.comments}"
                 </Typography>
 
+                {/* CLO Marks */}
                 {ev.totalCloMarks > 0 && (
-                  <Box sx={{ p: 2, bgcolor: '#eff6ff', borderRadius: '10px', mb: 2, borderLeft: '4px solid #1e40af' }}>
-                    <Typography variant="body2" sx={{ fontSize: '0.95rem', fontWeight: '700', color: '#1e40af', display: 'block' }}>
-                      CLO Marks: <strong sx={{ fontSize: '1.1rem' }}>{ev.totalCloMarks}/100</strong>
+                  <Box sx={{ p: 2.5, bgcolor: '#eff6ff', borderRadius: '10px', mb: 2.5, borderLeft: '4px solid #1e40af' }}>
+                    <Typography variant="body2" sx={{ fontSize: '1.05rem', fontWeight: '750', color: '#1e40af', display: 'block' }}>
+                      CLO Marks: <strong sx={{ fontSize: '1.15rem' }}>{ev.totalCloMarks}/100</strong>
                     </Typography>
                   </Box>
                 )}
 
-                <Typography variant="body2" sx={{ fontSize: '0.9rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                {/* Submitted Date - LARGER FONT */}
+                <Typography variant="body2" sx={{ fontSize: '1rem', color: '#94a3b8', fontStyle: 'italic', fontWeight: '500' }}>
                   ⏱️ Submitted: {ev.submittedAt}
                 </Typography>
               </Box>

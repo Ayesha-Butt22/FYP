@@ -428,9 +428,9 @@ export default function SupervisorEvaluations() {
   return (
     <Box>
       <DashboardSectionHeader
-        description={`Here you can provide evaluations & rubrics. Select a group and names to fill marks, then submit, and see all evaluations.`}
+        description={`Here you can evaluate your assigned groups. Select a group and choose student names to enter marks, then submit your evaluation.`}
       >
-        Evaluation & Rubrics
+        Evaluation 
       </DashboardSectionHeader>
       <Paper className="evaluation-form-paper elevated-card">
         <Grid container spacing={2} alignItems="center">
