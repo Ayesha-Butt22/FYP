@@ -1,4 +1,3 @@
-// CommitteeEvaluation.jsx
 import React, { useEffect, useState } from "react";
 import "./CommitteeEvaluation.css";
 import EvaluationService from "../Api/EvaluationService.jsx";
@@ -396,7 +395,12 @@ export default function CommitteeEvaluation() {
           </div>
         ))}
 
-        {/* ═══════════════ EVALUATION FORM ═══════════════ */}
+        {/* ═══════════════ MODAL OVERLAY ═══════════════ */}
+        {selectedGroup && (
+          <div className="eval-sup-modal-overlay" onClick={handleCancel}></div>
+        )}
+
+        {/* ═══════════════ EVALUATION FORM (CENTERED MODAL) ═══════════════ */}
         {selectedGroup && (
           <div className="eval-sup-form-container">
 
@@ -509,17 +513,11 @@ export default function CommitteeEvaluation() {
               </>
             )}
 
-
-
-
-
             {cloMarks && (
               <div className="eval-sup-clo-captured">
                 ✅ CLO Marks captured: <strong>{cloMarks.total}/100</strong>
               </div>
             )}
-
-
 
             <div className="eval-sup-comments">
               <label>Comments</label>

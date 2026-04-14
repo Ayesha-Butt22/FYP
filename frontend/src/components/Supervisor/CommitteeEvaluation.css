@@ -167,26 +167,84 @@
     transform: none !important;
 }
 
-/* Form Styles Instead of Modal */
-.eval-sup-form-container {
-    background: white;
-    border-radius: 20px;
-    padding: 32px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-    margin-top: 32px;
-    border: 2px solid #e8ecf4;
-    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+/* ════════════════���══════════════════════════════════════════════ */
+/* MODAL OVERLAY - Centered Form Styling */
+/* ═══════════════════════════════════════════════════════════════ */
+
+.eval-sup-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
 }
 
-@keyframes slideUp {
+@keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
     }
+}
+
+/* Form Container - Centered Modal */
+.eval-sup-form-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0;
+    visibility: hidden;   /* 👈 IMPORTANT */
+
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(1, 51, 122, 0.1);
+    border: 2px solid #e8ecf4;
+    z-index: 1000;
+    max-height: 90vh;
+    width: 90%;
+    max-width: 900px;
+    overflow-y: auto;
+
+    animation: modalFadeIn 0.25s ease forwards;
+}
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95);
+        visibility: hidden;
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        visibility: visible;
+    }
+}
+
+/* Smooth scrollbar styling for the centered form */
+.eval-sup-form-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.eval-sup-form-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.eval-sup-form-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.eval-sup-form-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 .eval-sup-form-header {
@@ -219,6 +277,7 @@
     justify-content: center;
     transition: all 0.2s ease;
     font-weight: 300;
+    flex-shrink: 0;
 }
 
 .eval-sup-close-btn:hover {
@@ -236,9 +295,10 @@
 }
 
 .eval-sup-form-info p {
-    margin: 8px 0;
+    margin: 10px 0;
     color: #475569;
-    font-size: 14px;
+    font-size: 18px;   /* 🔥 increase */
+    line-height: 1.6;  /* readability */
 }
 
 .eval-sup-form-info strong {
@@ -340,7 +400,7 @@
     font-weight: 600;
     color: #1e293b;
     margin-bottom: 10px;
-    font-size: 15px;
+    font-size: 18px;
 }
 
 .eval-sup-comments textarea {
@@ -436,35 +496,6 @@
     margin-bottom: 16px;
 }
 
-
-@media (max-width: 768px) {
-    .eval-sup-container {
-        padding: 16px;
-    }
-
-    .eval-sup-slots-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .eval-sup-form-container {
-        padding: 20px;
-        border-radius: 16px;
-    }
-
-    .eval-sup-table {
-        font-size: 13px;
-    }
-
-    .eval-sup-table th,
-    .eval-sup-table td {
-        padding: 10px 8px;
-    }
-
-    .eval-sup-form-header h3 {
-        font-size: 20px;
-    }
-}
-
 .eval-sup-not-eligible {
     background: #fff5f5;
     border: 2px solid #feb2b2;
@@ -551,13 +582,79 @@
 
 @keyframes button-pulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+        box-shadow: 0 0 0 0 rgba(1, 51, 122, 0.7);
     }
     70% {
-        box-shadow: 0 0 0 15px rgba(102, 126, 234, 0);
+        box-shadow: 0 0 0 15px rgba(1, 51, 122, 0);
     }
     100% {
-        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+        box-shadow: 0 0 0 0 rgba(1, 51, 122, 0);
     }
 }
-
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* RESPONSIVE DESIGN */
+/* ════════════════════════════════════════════════���══════════════ */
+
+@media (max-width: 768px) {
+    .eval-sup-container {
+        padding: 16px;
+    }
+
+    .eval-sup-slots-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .eval-sup-form-container {
+        width: 95%;
+        max-width: 95%;
+        padding: 20px;
+        border-radius: 16px;
+        max-height: 95vh;
+    }
+
+    .eval-sup-table {
+        font-size: 13px;
+    }
+
+    .eval-sup-table th,
+    .eval-sup-table td {
+        padding: 10px 8px;
+    }
+
+    .eval-sup-form-header h3 {
+        font-size: 20px;
+    }
+
+    .eval-sup-form-footer {
+        flex-direction: column-reverse;
+    }
+
+    .eval-sup-submit-btn,
+    .eval-sup-cancel-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .eval-sup-form-container {
+        width: 98%;
+        max-width: 98%;
+        padding: 16px;
+        max-height: 98vh;
+    }
+
+    .eval-sup-form-header h3 {
+        font-size: 18px;
+    }
+
+    .eval-sup-form-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .eval-sup-close-btn {
+        align-self: flex-end;
+    }
+}
