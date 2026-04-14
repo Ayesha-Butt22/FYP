@@ -28,6 +28,7 @@
   top: 0;
   z-index: 10;
   background: #013379;
+  font-size: 0.95rem;
 }
 
 .cor-committee-row {
@@ -38,6 +39,7 @@
 .cor-committee-row td {
   padding: 0.75rem 1rem;
   vertical-align: middle;
+  font-size: 0.95rem;
 }
 
 .cor-committee-row:hover {
@@ -205,7 +207,7 @@
 
 /* ======= ACTION BUTTONS ======= */
 .cor-action-btn {
-  padding: 6px 16px;
+  padding: 8px 20px;
   border: none;
   border-radius: 8px;
   font-size: 13px;
@@ -241,10 +243,34 @@
   box-shadow: 0 4px 14px rgba(46, 125, 50, 0.3);
 }
 
+/* ======= MODAL CLOSE BUTTON ======= */
+.cor-modal-close-btn {
+  padding: 14px 36px;
+  background: linear-gradient(135deg, #013379, #0246a5);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(1, 51, 121, 0.3);
+}
+
+.cor-modal-close-btn:hover {
+  background: linear-gradient(135deg, #012a63, #013c88);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(1, 51, 121, 0.4);
+}
+
+.cor-modal-close-btn:active {
+  transform: translateY(0);
+}
+
 /* ======= WEEK & FYP BADGES ======= */
 .cor-week-badge {
   display: inline-block;
-  padding: 3px 10px;
+  padding: 4px 12px;
   background: rgba(1, 51, 121, 0.1);
   color: #013379;
   border-radius: 20px;
@@ -254,19 +280,19 @@
 
 .cor-fyp-badge {
   display: inline-block;
-  padding: 3px 8px;
+  padding: 4px 10px;
   background: #fff3e0;
   color: #e65100;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
-/* Week column: stack badge + fyp badge vertically */
 .cor-week-cell {
   vertical-align: middle;
 }
+
 .cor-week-cell > span {
   display: block;
   width: max-content;
@@ -408,4 +434,86 @@
   color: #5c7fa3;
 }
 
-
+/* ======= RESPONSIVE DESIGN ======= */
+@media (max-width: 768px) {
+  .cor-committee-container {
+    padding: 0.75rem;
+  }
+
+  .cor-committee-paper {
+    max-height: 600px;
+  }
+
+  .cor-committee-row td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .cor-committee-thead th {
+    padding: 0.75rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .cor-action-btn {
+    padding: 6px 16px;
+    font-size: 12px;
+  }
+
+  .cor-committee-expand-content {
+    margin: 1rem 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .cor-committee-student-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .cor-committee-container {
+    padding: 0.5rem;
+  }
+
+  .cor-committee-table {
+    font-size: 0.75rem;
+  }
+
+  .cor-committee-row td {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .cor-committee-thead th {
+    padding: 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .cor-action-btn {
+    padding: 4px 12px;
+    font-size: 10px;
+  }
+
+  .cor-committee-expand-content {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+}
+
+/* ======= SCROLLBAR STYLING ======= */
+.cor-committee-paper::-webkit-scrollbar {
+  width: 10px;
+}
+
+.cor-committee-paper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.cor-committee-paper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.cor-committee-paper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

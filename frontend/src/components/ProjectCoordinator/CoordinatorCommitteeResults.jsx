@@ -294,11 +294,6 @@ export default function CoordinatorCommitteeResults() {
                         >
                           {row.isApproved ? '✅ Published' : 'Publish'}
                         </button>
-                        {/* {row.missingMembers && row.missingMembers.length > 0 && (
-                          <div style={{ fontSize: '0.65rem', color: '#f43f5e', fontWeight: 700, marginTop: '6px', textAlign: 'center', maxWidth: '120px' }}>
-                            Missing: {row.missingMembers.join(", ")}
-                          </div>
-                        )} */}
                       </td>
                     </tr>
                   </React.Fragment>
@@ -331,101 +326,127 @@ const InfoModal = ({ open, onClose, row, computeFinalMarks }) => {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: { xs: '90%', md: 800 },
-        maxHeight: '90vh',
+        width: { xs: '95%', sm: '90%', md: '950px' },
+        maxHeight: '93vh',
         bgcolor: 'background.paper',
-        borderRadius: '12px',
-        boxShadow: 24,
+        borderRadius: '18px',
+        boxShadow: '0 25px 70px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(1, 51, 122, 0.15)',
         p: 0,
         overflowY: 'auto'
       }}>
-        {/* Header */}
+        {/* Header - REDUCED HEIGHT AND PADDING */}
         <Box sx={{
-          p: 3,
+          p: '2rem 3rem',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
-          bgcolor: '#013379',
+          alignItems: 'flex-start',
+          background: 'linear-gradient(135deg, #013379 0%, #0246a5 100%)',
           color: 'white',
-          borderTopLeftRadius: '12px',
-          borderTopRightRadius: '12px',
-          position: 'relative'
+          borderTopLeftRadius: '18px',
+          borderTopRightRadius: '18px',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          boxShadow: '0 6px 20px rgba(1, 51, 122, 0.25)'
         }}>
           <Box>
-            <Typography variant="h6" fontWeight="600">
-              📊 Evaluation Summary: {row.groupId}
+            <Typography variant="h5" sx={{ fontSize: '1.35rem', fontWeight: '800', mb: 0.5 }}>
+              📊 Evaluation Summary
             </Typography>
-            <Typography variant="subtitle2" sx={{ opacity: 0.9 }}>
-              Project: {row.projectTitle}
+            <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: '700', opacity: 0.95, mb: 0 }}>
+              {row.groupId}
+            </Typography>
+            <Typography variant="body2" sx={{ fontSize: '0.95rem', opacity: 0.9, fontWeight: '500', mt: 0.3 }}>
+              {row.projectTitle}
             </Typography>
           </Box>
-          <IconButton onClick={onClose} sx={{ color: 'white' }}>
-            <CloseIcon />
+          <IconButton onClick={onClose} sx={{ color: 'white', mt: -0.5, mr: -1.5 }}>
+            <CloseIcon sx={{ fontSize: '2.2rem' }} />
           </IconButton>
         </Box>
 
-        <Box sx={{ p: 4 }}>
-          {/* Milestone Info */}
-          <Box sx={{ display: 'flex', gap: 4, mb: 3 }}>
-            <Box>
-              <Typography variant="subtitle2" color="textSecondary">Milestone</Typography>
-              <Typography fontWeight="bold">{row.week}</Typography>
+        <Box sx={{ p: 5 }}>
+          {/* Milestone Info - Enhanced Grid */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 5 }}>
+            <Box sx={{ p: 3, bgcolor: '#f0f6ff', borderRadius: '14px', borderLeft: '5px solid #013379', boxShadow: '0 2px 8px rgba(1, 51, 122, 0.1)' }}>
+              <Typography variant="caption" sx={{ fontSize: '0.9rem', fontWeight: '800', color: '#555', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
+                📅 Milestone
+              </Typography>
+              <Typography sx={{ fontSize: '1.5rem', fontWeight: '900', color: '#013379', mt: 1 }}>
+                {row.week}
+              </Typography>
             </Box>
-            <Box>
-              <Typography variant="subtitle2" color="textSecondary">Venue</Typography>
-              <Typography fontWeight="bold">{row.venue}</Typography>
+
+            <Box sx={{ p: 3, bgcolor: '#fff3e0', borderRadius: '14px', borderLeft: '5px solid #ff8f00', boxShadow: '0 2px 8px rgba(255, 143, 0, 0.1)' }}>
+              <Typography variant="caption" sx={{ fontSize: '0.9rem', fontWeight: '800', color: '#555', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
+                📍 Venue
+              </Typography>
+              <Typography sx={{ fontSize: '1.2rem', fontWeight: '700', color: '#e65100', mt: 1 }}>
+                {row.venue}
+              </Typography>
             </Box>
-            <Box>
-              <Typography variant="subtitle2" color="textSecondary">Submissions</Typography>
-              <Typography fontWeight="bold" color={row.evaluations.length < row.assignedPanelSize ? 'error.main' : 'success.main'}>
+
+            <Box sx={{ p: 3, bgcolor: '#f3e5f5', borderRadius: '14px', borderLeft: '5px solid #7b1fa2', boxShadow: '0 2px 8px rgba(123, 31, 162, 0.1)' }}>
+              <Typography variant="caption" sx={{ fontSize: '0.9rem', fontWeight: '800', color: '#555', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
+                ⏰ Slot Time
+              </Typography>
+              <Typography sx={{ fontSize: '1.2rem', fontWeight: '700', color: '#7b1fa2', mt: 1 }}>
+                {row.slotTime}
+              </Typography>
+            </Box>
+
+            <Box sx={{ p: 3, bgcolor: row.evaluations.length < row.assignedPanelSize ? '#fff8e1' : '#e8f5e9', borderRadius: '14px', borderLeft: `5px solid ${row.evaluations.length < row.assignedPanelSize ? '#fbc02d' : '#2e7d32'}`, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+              <Typography variant="caption" sx={{ fontSize: '0.9rem', fontWeight: '800', color: '#555', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
+                ✅ Submissions
+              </Typography>
+              <Typography sx={{ fontSize: '1.5rem', fontWeight: '900', color: row.evaluations.length < row.assignedPanelSize ? '#f57f17' : '#2e7d32', mt: 1 }}>
                 {row.evaluations.length} / {row.assignedPanelSize}
               </Typography>
             </Box>
           </Box>
 
+          {/* Missing Members Alert - SIMPLIFIED */}
           {row.missingMembers && row.missingMembers.length > 0 && (
-            <Box sx={{ mb: 3, p: 2, bgcolor: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '8px' }}>
-              <Typography variant="caption" color="#991b1b" fontWeight="800" sx={{ display: 'block', mb: 0.5 }}>
+            <Box sx={{ mb: 5, p: 3, bgcolor: '#fff5f5', border: '2.5px solid #fecdd3', borderRadius: '14px', boxShadow: '0 4px 12px rgba(229, 62, 62, 0.1)' }}>
+              <Typography variant="body2" sx={{ fontSize: '1.05rem', color: '#991b1b', fontWeight: '900', mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
                 ⚠️ PENDING EVALUATIONS:
               </Typography>
-              <Typography variant="body2" color="#b91c1c" fontWeight="600" sx={{ mb: 1 }}>
-                {row.missingMembers.join(", ")} - This member has NOT submitted the result.
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#000', fontStyle: 'italic', display: 'block' }}>
-                Note: Their empty slot will not be counted in the final average calculation. Only submitted marks are factored into the result.
+              <Typography variant="body1" sx={{ fontSize: '1rem', color: '#b91c1c', fontWeight: '700' }}>
+                {row.missingMembers.join(", ")} - Not submitted yet
               </Typography>
             </Box>
           )}
 
-          <Divider sx={{ mb: 3 }} />
+          <Divider sx={{ mb: 5, borderColor: '#e8ecf4', borderWidth: '1.5px' }} />
 
-          {/* Student Marks Table */}
-          <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            Individual Results Summary
+          {/* Student Marks Table - Enhanced */}
+          <Typography variant="h6" sx={{ fontSize: '1.35rem', fontWeight: '800', mb: 3, color: '#013379', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+           Individual Results Summary
           </Typography>
           {fm ? (
-            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #eee', mb: 4 }}>
-              <Table size="small">
-                <TableHead sx={{ bgcolor: '#f8fafc' }}>
+            <TableContainer component={Paper} elevation={0} sx={{ border: '2.5px solid #e8ecf4', mb: 5, borderRadius: '14px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(1, 51, 122, 0.08)' }}>
+              <Table>
+                <TableHead sx={{ background: 'linear-gradient(135deg, #013379 0%, #0246a5 100%)' }}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Student Name</TableCell>
+                    <TableCell sx={{ fontWeight: '900', fontSize: '1.05rem', color: 'white', py: 2.5 }}>Student Name</TableCell>
+                    <TableCell sx={{ fontWeight: '900', fontSize: '1.05rem', color: 'white', py: 2.5 }}>SAP ID</TableCell>
                     {!/week\s*4/i.test(row.week) && (
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Committee Score (/50)</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: '900', fontSize: '1.05rem', color: 'white', py: 2.5 }}>Committee Score (/50)</TableCell>
                     )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {fm.students.map((stu, i) => (
-                    <TableRow key={i}>
-                      <TableCell>
-                        <Box>
-                          <Typography variant="body2" fontWeight="600">{stu.name}</Typography>
-                          <Typography variant="caption" color="textSecondary">{stu.sapId}</Typography>
-                        </Box>
+                    <TableRow key={i} sx={{ '&:hover': { bgcolor: '#f8fafc' }, transition: 'background 0.2s', borderBottom: '1px solid #e8ecf4' }}>
+                      <TableCell sx={{ fontSize: '1.05rem', fontWeight: '800', color: '#1e293b', py: 2.2 }}>
+                        {stu.name}
+                      </TableCell>
+                      <TableCell sx={{ fontSize: '0.95rem', color: '#64748b', fontWeight: '600', py: 2.2 }}>
+                        {stu.sapId}
                       </TableCell>
                       {!/week\s*4/i.test(row.week) && (
-                        <TableCell align="center">
-                          <Typography fontWeight="700" color="#013379">{stu.finalTotal}</Typography>
+                        <TableCell align="center" sx={{ fontSize: '1.25rem', fontWeight: '900', color: '#013379', py: 2.2 }}>
+                          {stu.finalTotal}
                         </TableCell>
                       )}
                     </TableRow>
@@ -434,33 +455,58 @@ const InfoModal = ({ open, onClose, row, computeFinalMarks }) => {
               </Table>
             </TableContainer>
           ) : (
-            <Typography color="textSecondary" sx={{ mb: 4 }}>No evaluations submitted yet.</Typography>
+            <Typography sx={{ fontSize: '1.05rem', color: '#94a3b8', mb: 5, fontStyle: 'italic' }}>
+              No evaluations submitted yet.
+            </Typography>
           )}
 
           {!/week\s*4/i.test(row.week) && fm?.hasClo && (
-            <Box sx={{ p: 2, bgcolor: '#eff6ff', borderRadius: '8px', mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body1" fontWeight="600" color="#1e40af">Panel Average Result (Scaled to 50):</Typography>
-              <Typography variant="h6" fontWeight="800" color="#1e40af">{fm.finalCloMarks} / 50</Typography>
+            <Box sx={{ p: 3.5, background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)', borderRadius: '14px', mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '2.5px solid #90caf9', boxShadow: '0 6px 16px rgba(26, 115, 232, 0.18)' }}>
+              <Typography variant="body1" sx={{ fontSize: '1.2rem', fontWeight: '800', color: '#1e40af' }}>
+                📈 Panel Average Result (Scaled to 50):
+              </Typography>
+              <Typography variant="h5" sx={{ fontSize: '1.75rem', fontWeight: '950', color: '#1e40af' }}>
+                {fm.finalCloMarks} / 50
+              </Typography>
             </Box>
           )}
 
+          <Divider sx={{ mb: 5, borderColor: '#e8ecf4', borderWidth: '1.5px' }} />
+
           {/* Detailed Comments */}
-          <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+          <Typography variant="h6" sx={{ fontSize: '1.35rem', fontWeight: '800', mb: 3.5, color: '#013379', display: 'flex', alignItems: 'center', gap: 1.5 }}>
             💬 Panel Member Feedback
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {row.evaluations.map((ev, i) => (
-              <Box key={i} sx={{ p: 2, border: '1px solid #eee', borderRadius: '8px', bgcolor: '#fcfcfc' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2" fontWeight="700" color="#013379">
-                    {typeof ev.evaluatedBy === 'object' ? ev.evaluatedBy.name : ev.evaluatedBy}
-                  </Typography>
+              <Box key={i} sx={{ p: 3.5, border: '2px solid #e8ecf4', borderRadius: '14px', bgcolor: '#fcfcfc', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 20px rgba(1, 51, 122, 0.12)', borderColor: '#90caf9', bgcolor: '#ffffff' } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, gap: 2 }}>
+                  <Box>
+                    <Typography variant="body1" sx={{ fontSize: '1.15rem', fontWeight: '900', color: '#013379', mb: 0.3 }}>
+                      {typeof ev.evaluatedBy === 'object' ? ev.evaluatedBy.name : ev.evaluatedBy}
+                    </Typography>
+                    {ev.email && (
+                      <Typography variant="body2" sx={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '500' }}>
+                        {ev.email}
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
-                <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                
+                <Typography variant="body2" sx={{ fontSize: '1.05rem', fontStyle: 'italic', color: '#475569', mb: 2, lineHeight: '1.7' }}>
                   "{ev.comments}"
                 </Typography>
-                <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
-                  Submitted: {ev.submittedAt}
+
+                {ev.totalCloMarks > 0 && (
+                  <Box sx={{ p: 2, bgcolor: '#eff6ff', borderRadius: '10px', mb: 2, borderLeft: '4px solid #1e40af' }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.95rem', fontWeight: '700', color: '#1e40af', display: 'block' }}>
+                      CLO Marks: <strong sx={{ fontSize: '1.1rem' }}>{ev.totalCloMarks}/100</strong>
+                    </Typography>
+                  </Box>
+                )}
+
+                <Typography variant="body2" sx={{ fontSize: '0.9rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                  ⏱️ Submitted: {ev.submittedAt}
                 </Typography>
               </Box>
             ))}
@@ -468,10 +514,9 @@ const InfoModal = ({ open, onClose, row, computeFinalMarks }) => {
         </Box>
 
         {/* Footer */}
-        <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px', textAlign: 'right', borderTop: '1px solid #eee' }}>
+        <Box sx={{ p: 4, bgcolor: '#f8fafc', borderBottomLeftRadius: '18px', borderBottomRightRadius: '18px', textAlign: 'right', borderTop: '2px solid #e8ecf4', position: 'sticky', bottom: 0, boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.05)' }}>
           <button
-            className="cor-main-btn"
-            style={{ padding: '8px 24px' }}
+            className="cor-modal-close-btn"
             onClick={onClose}
           >
             Close
