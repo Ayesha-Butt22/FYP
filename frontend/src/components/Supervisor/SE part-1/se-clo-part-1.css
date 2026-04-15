@@ -189,44 +189,66 @@ form {
 }
 
 /* COLOR THEMES */
+/* ===== PROFESSIONAL COLOR THEMES (UPDATED) ===== */
+
+/* 1 = POOR 🔴 */
 .cs1-options label:nth-child(1) {
-  --accent: #ef4444;
-  --bg-light: #fef2f2;
-  --border: #fecaca;
-}
-.cs1-options label:nth-child(2) {
-  --accent: #f97316;
-  --bg-light: #fff7ed;
-  --border: #fed7aa;
-}
-.cs1-options label:nth-child(3) {
-  --accent: #eab308;
-  --bg-light: #fefce8;
-  --border: #facc15;
-}
-.cs1-options label:nth-child(4) {
-  --accent: #3b82f6;
-  --bg-light: #eff6ff;
-  --border: #93c5fd;
-}
-.cs1-options label:nth-child(5) {
-  --accent: #22c55e;
-  --bg-light: #f0fdf4;
-  --border: #86efac;
+  --accent: #B71C1C;
+  --bg-light: #FFEBEE;
+  --border: #EF9A9A;
 }
 
+/* 2 = BELOW AVERAGE 🟠 */
+.cs1-options label:nth-child(2) {
+  --accent: #E65100;
+  --bg-light: #FFF3E0;
+  --border: #FFB74D;
+}
+
+/* 3 = AVERAGE ⚪ */
+.cs1-options label:nth-child(3) {
+  --accent: #d31313;
+  --bg-light: #ECEFF1;
+  --border: #B0BEC5;
+}
+
+/* 4 = VERY GOOD 🔵 */
+.cs1-options label:nth-child(4) {
+  --accent: #0D47A1;
+  --bg-light: #E3F2FD;
+  --border: #90CAF9;
+}
+
+/* 5 = EXCELLENT 🟢 */
+.cs1-options label:nth-child(5) {
+  --accent: #1B5E20;
+  --bg-light: #E8F5E9;
+  --border: #A5D6A7;
+}
+
+/* APPLY BASE STYLING USING VARIABLES */
 .cs1-options label {
   background: var(--bg-light);
-  border-color: var(--border);
+  border: 2px solid var(--border);
   color: var(--accent);
 }
 
+/* HOVER EFFECT */
+
+
+.cs1-options label {
+  background: var(--bg-light);
+  border: 2px solid var(--border);
+  color: var(--accent);
+}
+
+/* HOVER EFFECT */
+
 .cs1-options label:hover {
-  background: var(--accent);
+  background: orange;  /* teal modern professional hover */
   color: white;
   transform: translateY(-2px);
 }
-
 /* RADIO */
 .cs1-options input[type="radio"] {
   appearance: none;
