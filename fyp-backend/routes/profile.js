@@ -50,7 +50,10 @@ router.get("/:email", (req, res) => {
         }
     }
 
-    res.status(404).json({ message: "Profile picture not found" });
+    // Return a 1x1 transparent PNG instead of 404 to avoid console errors
+    const transparentPng = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=", "base64");
+    res.setHeader("Content-Type", "image/png");
+    return res.status(200).send(transparentPng);
 });
 
 module.exports = router;

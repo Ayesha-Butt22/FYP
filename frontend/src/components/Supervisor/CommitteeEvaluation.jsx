@@ -371,10 +371,6 @@ export default function CommitteeEvaluation() {
                     {bookedByLabel ? (
                       showAsSubmitted ? (
                         <div className="eval-sup-submitted-badge">✅ Submitted</div>
-                      ) : isDatePassed ? (
-                        <div className="eval-sup-submitted-badge" style={{ background: '#f8d7da', color: '#721c24' }}>
-                          ❌ Not Submitted
-                        </div>
                       ) : (
                         <button
                           className="eval-sup-open-btn"
@@ -440,78 +436,70 @@ export default function CommitteeEvaluation() {
             {/* 1. Show standard marks table for non-final weeks (EXCLUDING Week 4) */}
 
             {/* 2. Render appropriate CLO Rubric button based on Eligibility (Robust Week 4 check) */}
-            {finalEvaluationInfo && !/week\s*4/i.test(week) && (
-              <>
-                {(() => {
-                  const currentSlotFypPart = activeSlot?.panel?.fypPart?.toLowerCase() || "fyp-1";
-                  const isFyp2Slot = currentSlotFypPart === "fyp-2";
-                  const isEligibleForFyp2 = finalEvaluationInfo.eligibility?.isEligibleForFyp2;
+            {finalEvaluationInfo && !/week\s*4/i.test(week) && (() => {
+              // Prioritize the Panel's FYP Part for the rubric selection
+              const currentSlotFypPart = (activeSlot?.panel?.fypPart || "fyp-1").toLowerCase();
+              const isFyp2Slot = currentSlotFypPart === "fyp-2";
+              const isEligibleForFyp2 = !!finalEvaluationInfo.eligibility?.isEligibleForFyp2;
+              
+              const effectivePart = (activeSlot?.panel?.fypPart || finalEvaluationInfo?.fypPart || "fyp-1").toLowerCase().replace("-", "");
+              const isPart1 = effectivePart === "fyp1" || effectivePart === "fyp-1" || effectivePart === "part1";
+              const isPart2 = effectivePart === "fyp2" || effectivePart === "fyp-2" || effectivePart === "part2";
 
-                  const effectivePart = finalEvaluationInfo?.fypPart?.toLowerCase() ||
-                    activeSlot?.panel?.fypPart?.toLowerCase() ||
-                    "fyp-1";
+              const deptStr = finalEvaluationInfo.department?.toUpperCase() || "";
 
-                  const deptStr = finalEvaluationInfo.department?.toUpperCase() || "";
+              // Flexible detection: SE/CS
+              const isSE = /SE|SOFTWARE/i.test(deptStr);
+              const isCS = /CS|COMPUTER/i.test(deptStr);
 
-                  // Flexible detection: 
-                  // SE: Match "SE" or "SOFTWARE"
-                  // CS: Match "CS" or "COMPUTER"
-                  // AI: Match "AI" or "ARTIFICIAL"
-                  const isSE = /SE|SOFTWARE/i.test(deptStr);
-                  const isCS = /CS|COMPUTER/i.test(deptStr);
-
-                  // 🚫 If it's an FYP-2 slot but the group is not eligible, show error message
-                  if (isFyp2Slot && !isEligibleForFyp2) {
-                    return (
-                      <div className="eval-sup-not-eligible">
-                        <h4>🚫 Group Not Eligible for FYP-2</h4>
-                        <p>Eligibility requirements have not been met for this group:</p>
-                        <div className="eligibility-checklist">
-                          <div className={`checklist-item ${finalEvaluationInfo.eligibility?.templatesApproved ? 'passed' : 'failed'}`}>
-                            {finalEvaluationInfo.eligibility?.templatesApproved ? "✅" : "❌"} 5 Approved Templates
-                          </div>
-                          <div className={`checklist-item ${finalEvaluationInfo.eligibility?.week4Cleared ? 'passed' : 'failed'}`}>
-                            {finalEvaluationInfo.eligibility?.week4Cleared ? "✅" : "❌"} FYP-1 Week 4 Evaluation Completed
-                          </div>
-                          <div className={`checklist-item ${finalEvaluationInfo.eligibility?.week16Cleared ? 'passed' : 'failed'}`}>
-                            {finalEvaluationInfo.eligibility?.week16Cleared ? "✅" : "❌"} FYP-1 Week 16 Evaluation Completed
-                          </div>
-                        </div>
-                        <p className="eligibility-footer">
-                          Evaluations for FYP-2 (Week 14) are restricted until all Part-1 components are cleared.
-                        </p>
+              // 🚫 If it's an FYP-2 slot but the group is not eligible, show error message
+              if (isFyp2Slot && !isEligibleForFyp2) {
+                return (
+                  <div className="eval-sup-not-eligible">
+                    <h4>🚫 Group Not Eligible for FYP-2</h4>
+                    <p>Eligibility requirements have not been met for this group:</p>
+                    <div className="eligibility-checklist">
+                      <div className={`checklist-item ${finalEvaluationInfo.eligibility?.templatesApproved ? 'passed' : 'failed'}`}>
+                        {finalEvaluationInfo.eligibility?.templatesApproved ? "✅" : "❌"} 5 Approved Templates
                       </div>
-                    );
-                  }
-
-                  return (
-                    <div style={{ marginBottom: '20px' }}>
-                      {/* Status Info (Helps supervisor see which rubric is active) */}
-                      <div className="eval-sup-eligibility-info">
-                        <p>
-                          <strong>Group Status:</strong> {deptStr} | {effectivePart.toUpperCase()}
-                          {isFyp2Slot && isEligibleForFyp2 && <span className="eligible-label">Eligible</span>}
-                        </p>
+                      <div className={`checklist-item ${finalEvaluationInfo.eligibility?.week4Cleared ? 'passed' : 'failed'}`}>
+                        {finalEvaluationInfo.eligibility?.week4Cleared ? "✅" : "❌"} FYP-1 Week 4 Evaluation Completed
                       </div>
-
-                      {isCS && (
-                        <>
-                          {effectivePart === "fyp-1" && <CsCloPart1 group={selectedGroup} onMarksSubmit={handleCloSubmit} />}
-                          {effectivePart === "fyp-2" && <CsCloPart2 group={selectedGroup} onMarksSubmit={handleCloSubmit} />}
-                        </>
-                      )}
-                      {isSE && (
-                        <>
-                          {effectivePart === "fyp-1" && <SeCloPart1 group={selectedGroup} onMarksSubmit={handleCloSubmit} />}
-                          {effectivePart === "fyp-2" && <SeCloPart2 group={selectedGroup} onMarksSubmit={handleCloSubmit} />}
-                        </>
-                      )}
-
+                      <div className={`checklist-item ${finalEvaluationInfo.eligibility?.week16Cleared ? 'passed' : 'failed'}`}>
+                        {finalEvaluationInfo.eligibility?.week16Cleared ? "✅" : "❌"} FYP-1 Week 16 Evaluation Completed
+                      </div>
                     </div>
-                  );
-                })()}
-              </>
-            )}
+                    <p className="eligibility-footer">
+                      Evaluations for FYP-2 (Week 14/16) are restricted until all Part-1 components are cleared.
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <div style={{ marginBottom: '20px' }}>
+                  {/* Status Info (Helps supervisor see which rubric is active) */}
+                  <div className="eval-sup-eligibility-info">
+                    <p>
+                      <strong>Evaluation Target:</strong> {deptStr || "N/A"} | {isPart1 ? "FYP-1 (Week 16)" : "FYP-2 (Week 16)"}
+                    </p>
+                  </div>
+
+                  {isCS && (
+                    <>
+                      {isPart1 && <CsCloPart1 group={selectedGroup} onMarksSubmit={handleCloSubmit} />}
+                      {isPart2 && <CsCloPart2 group={selectedGroup} onMarksSubmit={handleCloSubmit} />}
+                    </>
+                  )}
+                  {isSE && (
+                    <>
+                      {isPart1 && <SeCloPart1 group={selectedGroup} onMarksSubmit={handleCloSubmit} />}
+                      {isPart2 && <SeCloPart2 group={selectedGroup} onMarksSubmit={handleCloSubmit} />}
+                    </>
+                  )}
+                </div>
+              );
+            })()}
 
             {cloMarks && (
               <div className="eval-sup-clo-captured">

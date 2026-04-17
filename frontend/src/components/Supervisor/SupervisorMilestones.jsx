@@ -33,8 +33,8 @@ const calculateDueDate = (semesterStart, weekNumber) => {
     return dueDate;
 };
 
-const initializeMilestones = (backendMilestones = []) => {
-    return TEMPLATE_DEFINITIONS.map((template) => {
+const initializeMilestones = (backendMilestones = [], definitions = TEMPLATE_DEFINITIONS) => {
+    return definitions.map((template) => {
         const backendMilestone = backendMilestones.find((m) => m.code === template.code) || {};
         return {
             code: template.code,
@@ -63,6 +63,22 @@ export default function SupervisorMilestones() {
     });
     const [confirmModal, setConfirmModal] = useState({ open: false, message: "", onConfirm: null });
 
+    const [depTemplates, setDepTemplates] = useState([]);
+    const supervisorDept = localStorage.getItem("department");
+
+    const fetchDepTemplates = async () => {
+        if (!supervisorDept) return;
+        try {
+            const res = await fetch(`http://localhost:5000/api/templates?department=${supervisorDept}`);
+            if (res.ok) {
+                const data = await res.json();
+                setDepTemplates(data.data || []);
+            }
+        } catch (err) {
+            console.error("Error fetching department templates:", err);
+        }
+    };
+
     useEffect(() => {
         const fetchSemesterStart = async () => {
             try {
@@ -75,31 +91,45 @@ export default function SupervisorMilestones() {
             }
         };
         fetchSemesterStart();
+        fetchDepTemplates();
     }, []);
 
+    const filteredDefinitions = useMemo(() => {
+        if (!depTemplates || depTemplates.length === 0) return TEMPLATE_DEFINITIONS;
+        // Only show templates that the coordinator has uploaded for this department
+        return TEMPLATE_DEFINITIONS.filter(def =>
+            depTemplates.some(dt => dt.template === def.code)
+        );
+    }, [depTemplates]);
+
+    const loadGroups = async () => {
+        try {
+            const res = await supervisorService.getSupervisorGroups();
+            const mapped = res.groups.map((g) => ({
+                id: g.groupId,
+                maskedId: g.maskedGroupId,
+                title: g.description,
+                members: g.members,
+                special: g.special,
+                archived: g.status === "Archived" || g.isArchived || false,
+                canArchive: g.canArchive || false,
+                milestonesTotal: 8,
+                milestonesCompleted: g.milestonesCompleted || 0,
+                baseMilestones: initializeMilestones(g.milestones, filteredDefinitions),
+            }));
+            setGroups(mapped);
+        } catch (err) {
+            console.error("Error fetching supervisor groups:", err);
+            toastService.error("Failed to load groups from backend");
+        }
+    };
+
+
     useEffect(() => {
-        const loadGroups = async () => {
-            try {
-                const res = await supervisorService.getSupervisorGroups();
-                const mapped = res.groups.map((g) => ({
-                    id: g.groupId,
-                    maskedId: g.maskedGroupId,
-                    title: g.description,
-                    members: g.members,
-                    special: g.special,
-                    archived: false,
-                    milestonesTotal: g.milestonesTotal || 9,
-                    milestonesCompleted: g.milestonesCompleted || 0,
-                    baseMilestones: initializeMilestones(g.milestones),
-                }));
-                setGroups(mapped);
-            } catch (err) {
-                console.error("Error fetching supervisor groups:", err);
-                toastService.error("Failed to load groups from backend");
-            }
-        };
-        loadGroups();
-    }, []);
+        if (filteredDefinitions.length > 0) {
+            loadGroups();
+        }
+    }, [filteredDefinitions]);
 
     const currentWeekNumber = useMemo(() => {
         if (!semesterStart) return null;
@@ -110,16 +140,16 @@ export default function SupervisorMilestones() {
 
     const activeTemplateIndex = useMemo(() => {
         if (currentWeekNumber == null) return null;
-        let idx = TEMPLATE_DEFINITIONS.reduce(
+        let idx = filteredDefinitions.reduce(
             (acc, t, i) => (t.week <= currentWeekNumber ? i : acc),
             -1
         );
         if (idx === -1) idx = 0;
-        if (currentWeekNumber > TEMPLATE_DEFINITIONS[TEMPLATE_DEFINITIONS.length - 1].week) {
-            idx = TEMPLATE_DEFINITIONS.length - 1;
+        if (currentWeekNumber > filteredDefinitions[filteredDefinitions.length - 1]?.week) {
+            idx = filteredDefinitions.length - 1;
         }
         return idx;
-    }, [currentWeekNumber]);
+    }, [currentWeekNumber, filteredDefinitions]);
 
     const toggleSubmissions = async (groupId) => {
         const isExpanded = expandedGroups[groupId];
@@ -193,7 +223,7 @@ export default function SupervisorMilestones() {
         try {
             const res = await supervisorService.archiveGroup(groupId);
             if (res.success) {
-                setGroups((prev) => prev.filter((g) => g.id !== groupId));
+                setGroups((prev) => prev.map((g) => g.id === groupId ? { ...g, archived: true, canArchive: false } : g));
                 setExpandedGroups((prev) => ({ ...prev, [groupId]: false }));
                 toastService.success(res.message || "Group added to archive");
             } else {
@@ -291,8 +321,8 @@ export default function SupervisorMilestones() {
                     ? "Mark this milestone as Rejected?"
                     : "Mark this milestone as Pending?";
 
-        setConfirmModal({ 
-            open: true, 
+        setConfirmModal({
+            open: true,
             message: confirmMsg,
             onConfirm: executeUpdateStatus
         });
@@ -375,14 +405,14 @@ export default function SupervisorMilestones() {
                         </div>
 
                         <div className="timeline-grid">
-                            {TEMPLATE_DEFINITIONS.map((tpl, i) => {
+                            {filteredDefinitions.map((tpl, i) => {
                                 const due = calculateDueDate(semesterStart, tpl.week);
                                 const completed = currentWeekNumber != null && tpl.week < currentWeekNumber;
                                 const active = activeTemplateIndex === i;
 
                                 return (
                                     <div
-                                        key={tpl.code}
+                                        key={`${tpl.code}-${tpl.year}`}
                                         className={`timeline-card ${completed ? "completed" : ""} ${active ? "active" : ""}`}
                                     >
                                         <div className="card-left">
@@ -465,17 +495,19 @@ export default function SupervisorMilestones() {
                                         </tbody>
                                     </table>
 
-                                    <div className="archive-button-wrap">
-                                        <button className="archive-btn" onClick={() => archiveGroup(group.id)}>
-                                            Add to Archive
-                                        </button>
-                                    </div>
+                                    {group.canArchive && (
+                                        <div className="archive-button-wrap">
+                                            <button className="archive-btn" onClick={() => archiveGroup(group.id)}>
+                                                Add to Archive
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
                             {group.archived && (
-                                <div className="milestone-archived-note">
-                                    This group is archived. Timeline is hidden.
+                                <div className="milestone-archived-note" style={{ color: '#01337a', fontWeight: 'bold' }}>
+                                    Submitted to Archive
                                 </div>
                             )}
                         </div>
@@ -500,7 +532,7 @@ export default function SupervisorMilestones() {
                                 const milestone = milestones[modal.milestoneIndex];
 
                                 // ✅ FIX: find template by milestone.templateCode
-                                const template = TEMPLATE_DEFINITIONS.find(t => t.code === milestone.templateCode);
+                                const template = filteredDefinitions.find(t => t.code === milestone.templateCode);
 
                                 return (
                                     <div className="modal-stack">

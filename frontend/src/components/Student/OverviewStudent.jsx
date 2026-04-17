@@ -166,7 +166,6 @@ export default function OverviewStudent({ onTabChange }) {
         const resultsData = await resultsRes.json();
 
         if (statsData.success) setStats(statsData.stats);
-        console.log("Activities API:", activitiesData);
 
 if (activitiesData.success && Array.isArray(activitiesData.activities)) {
   setActivities(activitiesData.activities);

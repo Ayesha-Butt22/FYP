@@ -68,6 +68,7 @@ export default function SupervisorEvaluations() {
             id: g.groupId,
             maskedId: g.maskedGroupId,
             name: g.description,
+            isArchived: g.isArchived,
             // members may come as objects {name, sapId} — extract just the name string
             members: (g.members || []).map(m =>
               typeof m === "string" ? m : (m.name || m.sapId || "Unknown")
@@ -235,18 +236,25 @@ export default function SupervisorEvaluations() {
         });
       });
 
-      Object.keys(mapping).forEach(studentName => {
-        let studentSum = 0;
-        evaluationsList.forEach(ev => {
-          const stuMatch = ev.students.find(s => s.name === studentName);
-          if (stuMatch) {
-            studentSum += (ev.totalCloMarks || 0);
-          }
-        });
-        const avgCloRaw = studentSum / assignedPanelSize;
-        const commScore = Math.min(50, +(avgCloRaw * 0.5).toFixed(2));
-        mapping[studentName] = commScore;
-      });
+     Object.keys(mapping).forEach(studentName => {
+  let studentSum = 0;
+  let count = 0;
+
+  evaluationsList.forEach(ev => {
+    const stuMatch = ev.students.find(s => s.name === studentName);
+    if (stuMatch) {
+      studentSum += (ev.totalCloMarks || 0);
+      count++;
+    }
+  });
+
+  const avgCloRaw = count > 0 ? studentSum / count : 0;
+
+  // 👉 IMPORTANT LINE (missing in your code)
+  const commScore = Math.min(50, +(avgCloRaw * 0.5).toFixed(2));
+
+  mapping[studentName] = commScore;
+});
     }
     return mapping;
   }, [committeeEval]);
@@ -434,7 +442,7 @@ export default function SupervisorEvaluations() {
       </DashboardSectionHeader>
       <Paper className="evaluation-form-paper elevated-card">
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormControl fullWidth className="evaluation-form-control" variant="filled" size="small">
               <InputLabel>Select Group</InputLabel>
               <Select
@@ -447,14 +455,14 @@ export default function SupervisorEvaluations() {
                 <MenuItem value=""><em>Choose group</em></MenuItem>
                 {groups.map(g => (
                   <MenuItem key={g.id} value={g.id}>
-                    {g.maskedId} - {g.name}
+                    {g.maskedId} - {g.name} {g.isArchived ? "(Archived)" : ""}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormControl fullWidth className="evaluation-form-control" variant="filled" size="small">
               <InputLabel>Select Year</InputLabel>
               <Select
@@ -470,7 +478,7 @@ export default function SupervisorEvaluations() {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={12} md={4} sx={{ textAlign: { xs: "left", md: "right" } }}>
+          <Grid size={{ xs: 12, sm: 12, md: 4 }} sx={{ textAlign: { xs: "left", md: "right" } }}>
 
             <Button
               variant="outlined"
@@ -577,7 +585,7 @@ export default function SupervisorEvaluations() {
                             type="number"
                             size="small"
                             value={scores[idx]}
-                            disabled={!committeeEval || fetchingComm}
+                            disabled={!committeeEval || fetchingComm || groups.find(g => g.id === selectedGroup)?.isArchived}
                             inputProps={{ min: 0, max: item.maxMarks, className: "marks-input" }}
                             onChange={e => handleScoreChange(idx, e.target.value)}
                           />
@@ -586,7 +594,7 @@ export default function SupervisorEvaluations() {
                           <TextField
                             value={feedback[idx]}
                             onChange={e => handleFeedbackChange(idx, e.target.value)}
-                            disabled={!committeeEval || fetchingComm}
+                            disabled={!committeeEval || fetchingComm || groups.find(g => g.id === selectedGroup)?.isArchived}
                             size="small"
                             placeholder="(optional)"
                             inputProps={{ maxLength: 120, className: "feedback-input" }}
@@ -610,16 +618,25 @@ export default function SupervisorEvaluations() {
               </Box>
             </Stack>
             {formError && <Typography color="error" mb={1}>{formError}</Typography>}
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              className="submit-evaluation-btn"
-              onClick={handleSubmit}
-              disabled={loading || !committeeEval || fetchingComm}
-            >
-              {loading ? "Submitting..." : "Submit Evaluation"}
-            </Button>
+            
+            {groups.find(g => g.id === selectedGroup)?.isArchived ? (
+              <Box sx={{ mt: 2, p: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 2, textAlign: 'center' }}>
+                <Typography color="#64748b" fontWeight={700}>
+                  This project is archived. Evaluations are read-only.
+                </Typography>
+              </Box>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                className="submit-evaluation-btn"
+                onClick={handleSubmit}
+                disabled={loading || !committeeEval || fetchingComm}
+              >
+                {loading ? "Submitting..." : "Submit Evaluation"}
+              </Button>
+            )}
           </>
         ) : (
           <Typography color="#666" fontSize={20} my={3}>

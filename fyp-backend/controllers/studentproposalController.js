@@ -100,8 +100,7 @@ exports.getMyProposals = async (req, res) => {
     let proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
       .populate({
         path: "groupId",
-        select: "groupId leader member2 member3",
-        match: { isArchived: { $ne: true } }
+        select: "groupId leader member2 member3"
       })
       .sort({ createdAt: -1 })
       .lean();
@@ -159,8 +158,7 @@ exports.getPendingProposals = async (req, res) => {
     let proposals = await Proposal.find(query)
       .populate({
         path: "groupId",
-        select: "groupId leader member2 member3",
-        match: { isArchived: { $ne: true } }
+        select: "groupId leader member2 member3"
       })
       .sort({ createdAt: -1 })
       .lean();

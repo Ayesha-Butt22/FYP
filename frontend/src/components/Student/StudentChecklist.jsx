@@ -146,8 +146,8 @@ export default function StudentChecklist() {
         const token = localStorage.getItem("token");
         const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-        console.log("🔍 Fetching tasks from /api/tasks...");
-        const res = await axios.get("/api/tasks", config);
+        console.log("🔍 Fetching tasks from http://localhost:5000/api/tasks...");
+        const res = await axios.get("http://localhost:5000/api/tasks", config);
         console.log("📦 Tasks API Response:", res.data);
 
         let fetchedTasks = [];

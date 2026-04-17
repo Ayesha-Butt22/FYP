@@ -19,7 +19,7 @@ exports.submitEvaluation = async (req, res) => {
             return res.status(403).json({ success: false, message: "Evaluation blocked: This group has already been moved to the FYP Archive." });
         }
 
-        // --- Date Pass Check (Strictly Date, Not Time) ---
+        /* --- Date Pass Check (Strictly Date, Not Time) ---
         const scheduleDoc = await PresentationSchedule.findById(scheduleId);
         if (scheduleDoc) {
             const slot = scheduleDoc.slots.id(slotId);
@@ -36,7 +36,7 @@ exports.submitEvaluation = async (req, res) => {
                     });
                 }
             }
-        }
+        } */
 
         let evaluation = await CommitteeEvaluation.findOne({ scheduleId, groupId });
         if (!evaluation) {
@@ -90,8 +90,7 @@ exports.getEvaluations = async (req, res) => {
     try {
         let evaluations = await CommitteeEvaluation.find()
             .populate({
-                path: "groupId",
-                match: { isArchived: { $ne: true } }
+                path: "groupId"
             })
             .populate({
                 path: "scheduleId",
@@ -125,33 +124,39 @@ exports.getEvaluations = async (req, res) => {
         });
 
         const result = evaluations.map(doc => {
-            const gid = String(doc.groupId?._id || doc.groupId);
-            const assignedPanelSize = doc.scheduleId?.facultyPanels?.length || 0;
-            const proposal = groupProposalMap[gid] || { projectTitle: "N/A", projectSupervisor: "N/A" };
-            
-            // Calculate missing members
-            const submittedBySet = new Set((doc.evaluations || []).map(ev => 
-                String(ev.evaluatedBy?._id || ev.evaluatedBy)
-            ));
-            const missingMembers = (doc.scheduleId?.facultyPanels || [])
-                .filter(m => !submittedBySet.has(String(m._id || m)))
-                .map(m => m.name || m.email || "Unknown Member");
+            try {
+                const gid = String(doc.groupId?._id || doc.groupId || "");
+                const assignedPanelSize = doc.scheduleId?.facultyPanels?.length || 0;
+                const proposal = groupProposalMap[gid] || { projectTitle: "N/A", projectSupervisor: "N/A" };
+                
+                // Calculate missing members
+                const submittedBySet = new Set((doc.evaluations || []).map(ev => 
+                    String(ev.evaluatedBy?._id || ev.evaluatedBy || "")
+                ).filter(id => id !== ""));
 
-            return {
-                ...doc,
-                assignedPanelSize,
-                missingMembers,
-                project: proposal,
-                supervisorEmail: proposal.projectSupervisor,
-                evaluations: (doc.evaluations || []).map(ev => ({
-                    ...ev,
-                    students: (ev.students || []).map(s => ({
-                        ...s,
-                        name: sapToNameMap[s.studentId] || s.name || "N/A"
+                const missingMembers = (doc.scheduleId?.facultyPanels || [])
+                    .filter(m => m && !submittedBySet.has(String(m._id || m)))
+                    .map(m => m?.name || m?.email || "Unknown Member");
+
+                return {
+                    ...doc,
+                    assignedPanelSize,
+                    missingMembers,
+                    project: proposal,
+                    supervisorEmail: proposal.projectSupervisor || null,
+                    evaluations: (doc.evaluations || []).map(ev => ({
+                        ...ev,
+                        students: (ev.students || []).map(s => ({
+                            ...s,
+                            name: (s.studentId && sapToNameMap[s.studentId]) || s.name || "N/A"
+                        }))
                     }))
-                }))
-            };
-        });
+                };
+            } catch (err) {
+                console.error("Error mapping individual doc in getEvaluations:", doc?._id, err);
+                return null;
+            }
+        }).filter(r => r !== null);
 
         res.status(200).json({ success: true, data: result });
     } catch (err) {
@@ -190,8 +195,7 @@ exports.getApprovedEvaluations = async (req, res) => {
 
         let evaluations = await CommitteeEvaluation.find(query)
             .populate({
-                path: "groupId",
-                match: { isArchived: { $ne: true } }
+                path: "groupId"
             })
             .populate("scheduleId")
             .populate("evaluations.evaluatedBy", "name email role")

@@ -5,11 +5,14 @@ const ProfileService = {
     async getProfilePic(email) {
         try {
             const res = await fetch(`${BASE_URL}/${email}`);
-            if (!res.ok) throw new Error("Profile picture not found");
+            if (!res.ok) {
+                // Return null silently if file doesn't exist
+                return null;
+            }
             const blob = await res.blob();
             return URL.createObjectURL(blob);
         } catch (err) {
-            console.error("Error fetching profile pic:", err);
+            // Only log actual network/logic errors, not 404s
             return null;
         }
     },

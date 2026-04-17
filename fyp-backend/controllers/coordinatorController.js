@@ -128,7 +128,7 @@ exports.getFinalResults = async (req, res) => {
         const committeeEvals = await CommitteeEvaluation.find()
             .populate("scheduleId")
             .lean();
-        const supervisorEvals = await SupervisorEvaluation.find().lean();
+        const supervisorEvals = await SupervisorEvaluation.find().populate("evaluatedBy", "name email").lean();
 
         const results = [];
 
@@ -168,7 +168,7 @@ exports.getFinalResults = async (req, res) => {
                     s.fypYear?.replace("-", "").toLowerCase() === part.replace("-", "").toLowerCase()
                 );
 
-                if (relevantComm.length > 0 && relevantSup) {
+                if (relevantComm.length > 0 || relevantSup) {
                     members.forEach(member => {
                         let commScore = 0;
                         let supScore = 0;
@@ -183,9 +183,9 @@ exports.getFinalResults = async (req, res) => {
                                 if (stuMatch) studentSum += (ev.totalCloMarks || 0);
                             });
 
-                            // Use assigned size for strictness (missed=0), fallback to actual count
-                            const assignedPanelSize = doc.scheduleId?.facultyPanels?.length || evaluations.length || 1;
-                            const avgCloRaw = studentSum / assignedPanelSize;
+                            // Use actual count of submissions for averaging as requested
+                            const actualSubmissionCount = evaluations.length > 0 ? evaluations.length : 1;
+                            const avgCloRaw = studentSum / actualSubmissionCount;
 
                             // Scale to 50 Marks base
                             const commPortion = +(avgCloRaw * 0.5).toFixed(2);
@@ -218,6 +218,17 @@ exports.getFinalResults = async (req, res) => {
                             }
                         }
 
+                        // Find supervisor remarks for this specific student
+                        let supRemarks = "—";
+                        if (relevantSup) {
+                            const studentRow = (relevantSup.evaluations || []).find(e =>
+                                String(e.studentName || e.name).trim().toLowerCase() === String(member.name).trim().toLowerCase()
+                            );
+                            if (studentRow && studentRow.feedback) {
+                                supRemarks = studentRow.feedback;
+                            }
+                        }
+
                         results.push({
                             groupId: group.groupId,
                             studentName: member.name,
@@ -226,9 +237,14 @@ exports.getFinalResults = async (req, res) => {
                             supervisorMarks: supScore,
                             committeeAverage: commScore,
                             finalScore: total,
-                            remarks: feedback,
+                            remarks: feedback, // General remarks (usually committee)
+                            supervisorRemarks: supRemarks, // Specific supervisor remarks
                             isPublished: relevantComm.length > 0 ? (relevantComm[relevantComm.length - 1].isApprovedByCoordinator || false) : false,
+                            isSupPublished: relevantSup ? (relevantSup.isPublished || false) : false,
                             committeeEvalId: relevantComm.length > 0 ? (relevantComm[relevantComm.length - 1]._id) : null,
+                            supEvalId: relevantSup ? relevantSup._id : null,
+                            supervisorEvaluations: relevantSup ? (relevantSup.evaluations || []) : [],
+                            supervisorName: relevantSup ? (relevantSup.evaluatedBy?.name || "Supervisor") : "N/A",
                             isFyp1Approved: isFyp1Approved,
                             isFyp2Approved: isFyp2Approved,
                             isArchived: group.isArchived || false
@@ -241,6 +257,25 @@ exports.getFinalResults = async (req, res) => {
         res.json({ success: true, data: results });
     } catch (error) {
         console.error("Error in getFinalResults:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+exports.publishSupervisorResult = async (req, res) => {
+    try {
+        const { id } = req.body;
+        if (!id) return res.status(400).json({ success: false, message: "Evaluation ID is required" });
+
+        const evaluation = await SupervisorEvaluation.findById(id);
+        if (!evaluation) return res.status(404).json({ success: false, message: "Evaluation not found" });
+
+        evaluation.isPublished = true;
+        evaluation.publishedAt = new Date();
+        await evaluation.save();
+
+        res.json({ success: true, message: "Supervisor evaluation published successfully" });
+    } catch (error) {
+        console.error("Error in publishSupervisorResult:", error);
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };

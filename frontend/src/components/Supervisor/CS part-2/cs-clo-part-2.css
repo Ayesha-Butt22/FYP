@@ -1,4 +1,4 @@
-/* ===== MODAL OVERLAY ===== */
+/* ===== CS1 MODAL OVERLAY ===== */
 .cs1-modal-overlay {
   position: fixed;
   inset: 0;
@@ -6,28 +6,36 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 16px;
   z-index: 9999;
   backdrop-filter: blur(4px);
 }
 
-/* ===== MODAL BOX ===== */
+/* ===== CS1 MODAL BOX ===== */
 .cs1-modal-box {
   background: white;
   width: 95%;
-  max-width: 1400px;
+  max-width: 1300px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: 14px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   overflow: hidden;
-  animation: modalPop 0.3s ease-out;
+  animation: modalPop 0.25s ease-out;
 }
 
 @keyframes modalPop {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ===== HEADER ===== */
@@ -35,25 +43,25 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 30px;
-  background: #f8fafc;
-  border-bottom: 2px solid #e2e8f0;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .h2 {
-  font-size: 24px;
-  font-weight: 800;
-  color: #01337a;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
   margin: 0;
 }
 
 .cs1-header-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
 }
 
-/* ===== FORM & SCROLL CONTENT ===== */
+/* ===== FORM ===== */
 form {
   flex: 1;
   display: flex;
@@ -64,218 +72,224 @@ form {
 .cs1-form-content {
   flex: 1;
   overflow-y: auto;
-  padding: 30px;
+  padding: 20px;
   background: #ffffff;
 }
 
-/* Custom Scrollbar */
+/* ===== SCROLLBAR ===== */
 .cs1-form-content::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
+
 .cs1-form-content::-webkit-scrollbar-track {
   background: #f1f5f9;
 }
+
 .cs1-form-content::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 5px;
-  border: 2px solid #f1f5f9;
+  border-radius: 4px;
 }
+
 .cs1-form-content::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
 /* ===== TOTAL BOX ===== */
 .cs1-total-top {
-  font-size: 16px;
-  font-weight: 700;
-  color: #01337a;
-  background: #e6f0ff;
-  padding: 8px 16px;
-  border-radius: 10px;
-  border: 1px solid #01337a;
-  white-space: nowrap;
-}
-
-.open-btn {
-  padding: 12px 24px;
-  background: #01337a;
-  color: white;
-  border: 2px solid #01337a;
-  cursor: pointer;
-  border-radius: 10px;
+  font-size: 14px;
   font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.open-btn:hover {
-  background: white;
-  color: #01337a;
+  color: #1e293b;
+  background: #f0f4f8;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
 }
 
 /* ===== SUBMIT BUTTON ===== */
 .cs1-submit {
-  padding: 10px 24px;
-  border: 2px solid #16a34a;
-  background: #16a34a;
+  padding: 8px 18px;
+  border: 2px solid #3b82f6;
+  background: #3b82f6;
   color: white;
-  border-radius: 10px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 15px;
-  transition: all 0.3s ease;
-  animation: submit-blink-intense 1.2s infinite ease-in-out;
-}
-
-@keyframes submit-blink-intense {
-  0% { 
-    transform: scale(1); 
-    background: #16a34a; 
-    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); 
-  }
-  50% { 
-    transform: scale(1.03); 
-    background: #22c55e; 
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); 
-  }
-  100% { 
-    transform: scale(1); 
-    background: #16a34a; 
-    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); 
-  }
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.25s ease;
 }
 
 .cs1-submit:hover {
-  background: white !important;
-  color: #16a34a !important;
-  border: 2px solid #16a34a !important;
-  transform: translateY(-2px);
-  animation-play-state: paused;
+  background: #2563eb;
+  border-color: #2563eb;
+  transform: translateY(-1px);
 }
 
 /* ===== CLOSE BUTTON ===== */
 .cs1-close {
-  font-size: 32px;
+  font-size: 26px;
   cursor: pointer;
-  color: #64748b;
+  color: #94a3b8;
   font-weight: 300;
   line-height: 1;
   transition: color 0.2s;
 }
+
 .cs1-close:hover {
-  color: #ef4444;
+  color: #64748b;
 }
 
-/* ===== LO CARD ===== */
+/* ===== CARD ===== */
 .cs1-card {
   background: #ffffff;
-  padding: 24px;
-  margin-bottom: 24px;
+  padding: 18px;
+  margin-bottom: 18px;
   border: 1px solid #e2e8f0;
-  border-left: 6px solid #06b6d4;
-  border-radius: 12px;
+  border-left: 4px solid #3b82f6;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.cs1-card:hover {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  border-left-color: #2563eb;
 }
 
 .h3 {
-  font-size: 20px;
-  font-weight: 700;
-  color: #01337a;
-  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
 }
 
 .cs1-card p {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 500;
-  color: #475569;
-  margin-bottom: 20px;
+  color: #64748b;
+  margin-bottom: 14px;
   line-height: 1.5;
 }
 
-/* ===== OPTIONS GRID & COLORED BOXES ===== */
+/* ===== OPTIONS GRID ===== */
 .cs1-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
 }
 
+/* ===== BASE LABEL ===== */
 .cs1-options label {
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
+  font-size: 12px;
+  font-weight: 600;
   border: 2px solid #e2e8f0;
-  background: #f8fafc;
-  color: #334155;
+  background: #fff;
+  color: #1e293b;
+  position: relative;
 }
 
-/* Coloring Logic based on rank (1-5) - Light to Dark Pro Scheme */
-.cs1-options label:nth-child(1) { --accent: #991b1b; --bg-light: #fef2f2; }
-.cs1-options label:nth-child(2) { --accent: #9a3412; --bg-light: #fff7ed; }
-.cs1-options label:nth-child(3) { --accent: #854d0e; --bg-light: #fffbeb; }
-.cs1-options label:nth-child(4) { --accent: #1e3a8a; --bg-light: #eff6ff; }
-.cs1-options label:nth-child(5) { --accent: #064e3b; --bg-light: #ecfdf5; }
-
-.cs1-options label {
-  background: var(--bg-light);
-  border: 1px solid #e2e8f0;
-  color: var(--accent);
-  font-weight: 700;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.cs1-options label:hover {
-  background: var(--accent) !important;
-  color: white !important;
-  border-color: var(--accent) !important;
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-
+/* ===== RADIO BUTTON ===== */
 .cs1-options input[type="radio"] {
   appearance: none;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--accent);
+  width: 18px;
+  height: 18px;
+  border: 2px solid #64748b;
   border-radius: 50%;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   cursor: pointer;
-  position: relative;
-  transition: all 0.2s;
   background: white;
+  transition: all 0.2s ease;
 }
 
 .cs1-options input[type="radio"]:checked {
-  border-color: white !important;
-  background: white !important;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-.cs1-options input[type="radio"]:checked::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 10px;
-  height: 10px;
-  background: var(--accent);
-  border-radius: 50%;
-}
-
+/* ===== SELECTED STATE ===== */
 .cs1-options label:has(input[type="radio"]:checked) {
-  background: var(--accent) !important;
-  border-color: var(--accent) !important;
-  color: white !important;
-  box-shadow: 0 12px 30px rgba(0,0,0, 0.1);
-  transform: scale(1.05);
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Ensure text visibility */
-.cs1-options label:has(input[type="radio"]:checked) p {
-    color: white !important;
+/* hover */
+.cs1-options label:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   🔥 AUTO GRADING COLORS (PURE CSS - NO REACT CHANGE)
+   ========================================================= */
+
+/* 🟢 EXCELLENT */
+.cs1-options label:has(input[value="10"]),
+.cs1-options label:has(input[value="20"]),
+.cs1-options label:has(input[value="15"]),
+.cs1-options label:has(input[value="5"]) {
+  background: #E8F5E9;
+  border-color: #A5D6A7;
+  color: #1B5E20;
+}
+
+/* 🔵 VERY GOOD */
+.cs1-options label:has(input[value="8"]),
+.cs1-options label:has(input[value="16"]),
+.cs1-options label:has(input[value="12"]),
+.cs1-options label:has(input[value="4"]) {
+  background: #E3F2FD;
+  border-color: #90CAF9;
+  color: #0D47A1;
+}
+
+/* ⚪ AVERAGE */
+.cs1-options label:has(input[value="7"]),
+.cs1-options label:has(input[value="14"]),
+.cs1-options label:has(input[value="9"]),
+.cs1-options label:has(input[value="3"]) {
+  background: #ECEFF1;
+  border-color: #B0BEC5;
+  color: #37474F;
+}
+
+/* 🟠 BELOW AVERAGE */
+.cs1-options label:has(input[value="6"]),
+.cs1-options label:has(input[value="10"]),
+.cs1-options label:has(input[value="2"]) {
+  background: #FFF3E0;
+  border-color: #FFB74D;
+  color: #E65100;
+}
+
+/* 🔴 POOR */
+.cs1-options label:has(input[value="1.5"]),
+.cs1-options label:has(input[value="1"]),
+.cs1-options label:has(input[value="2"]) {
+  background: #FFEBEE;
+  border-color: #EF9A9A;
+  color: #B71C1C;
+}
+
+/* ===== OPEN BUTTON ===== */
+.open-btn {
+  padding: 10px 18px;
+  background: #3b82f6;
+  color: white;
+  border: 2px solid #3b82f6;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.25s ease;
+}
+
+.open-btn:hover {
+  background: white;
+  color: #3b82f6;
 }

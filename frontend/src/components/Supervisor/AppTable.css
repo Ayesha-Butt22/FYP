@@ -29,7 +29,7 @@
 
 .app-table th {
   color: #fff;
-  font-size: 1.3rem; 
+  font-size: 1.45rem; 
   font-weight: 700;
   letter-spacing: .2px;
   border-right: 1px solid #01337a11;
@@ -37,8 +37,8 @@
 
 .app-table td {
   color: #01337a;
-  font-size: 1.15rem; 
-  font-weight: 500;
+  font-size: 1.3rem; 
+  font-weight: 600;
 }
 
 
@@ -73,8 +73,8 @@
   padding: 7px 18px;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 0.98rem;
+  font-weight: 800;
+  font-size: 1.15rem;
   transition: background 0.18s, color 0.19s;
   margin-right: 8px;
   -webkit-transition: background 0.18s, color 0.19s;

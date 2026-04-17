@@ -83,7 +83,7 @@ export default function DashboardSectionHeader({ children, description, ...props
             <style>{`
                 .section-desc {
                     color: #01337a;
-                    font-size: 22px;;
+                    font-size: 22px;
                     font-weight: 600;
                     background: #f6faff;
                     border-radius: 8px;

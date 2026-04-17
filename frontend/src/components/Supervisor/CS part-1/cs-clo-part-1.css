@@ -20,7 +20,8 @@
   display: flex;
   flex-direction: column;
   border-radius: 14px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   animation: modalPop 0.25s ease-out;
 }
@@ -30,6 +31,7 @@
     transform: scale(0.96);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -59,7 +61,7 @@
   gap: 14px;
 }
 
-/* ===== FORM SCROLL CONTAINER ===== */
+/* ===== FORM ===== */
 form {
   flex: 1;
   display: flex;
@@ -174,8 +176,9 @@ form {
   gap: 12px;
 }
 
+/* ===== BASE LABEL ===== */
 .cs1-options label {
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 12px;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -185,91 +188,92 @@ form {
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  border: 2px solid;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  color: #1e293b;
+  position: relative;
 }
 
-/* COLOR THEMES */
-/* ===== PROFESSIONAL COLOR THEMES (UPDATED) ===== */
-
-/* 1 = POOR 🔴 */
-.cs1-options label:nth-child(1) {
-  --accent: #B71C1C;
-  --bg-light: #FFEBEE;
-  --border: #EF9A9A;
-}
-
-/* 2 = BELOW AVERAGE 🟠 */
-.cs1-options label:nth-child(2) {
-  --accent: #E65100;
-  --bg-light: #FFF3E0;
-  --border: #FFB74D;
-}
-
-/* 3 = AVERAGE ⚪ */
-.cs1-options label:nth-child(3) {
-  --accent: #37474F;
-  --bg-light: #ECEFF1;
-  --border: #B0BEC5;
-}
-
-/* 4 = VERY GOOD 🔵 */
-.cs1-options label:nth-child(4) {
-  --accent: #0D47A1;
-  --bg-light: #E3F2FD;
-  --border: #90CAF9;
-}
-
-/* 5 = EXCELLENT 🟢 */
-.cs1-options label:nth-child(5) {
-  --accent: #1B5E20;
-  --bg-light: #E8F5E9;
-  --border: #A5D6A7;
-}
-
-/* APPLY BASE STYLING USING VARIABLES */
-.cs1-options label {
-  background: var(--bg-light);
-  border: 2px solid var(--border);
-  color: var(--accent);
-}
-
-/* HOVER EFFECT */
-
-
-.cs1-options label {
-  background: var(--bg-light);
-  border: 2px solid var(--border);
-  color: var(--accent);
-}
-
-/* HOVER EFFECT */
-
-.cs1-options label:hover {
-  background: orange;  /* teal modern professional hover */
-  color: white;
-  transform: translateY(-2px);
-}
-/* RADIO */
+/* ===== RADIO BUTTON ===== */
 .cs1-options input[type="radio"] {
   appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--accent);
+  width: 18px;
+  height: 18px;
+  border: 2px solid #64748b;
   border-radius: 50%;
   margin-bottom: 8px;
   cursor: pointer;
   background: white;
+  transition: all 0.2s ease;
 }
 
 .cs1-options input[type="radio"]:checked {
-  box-shadow: inset 0 0 0 3px var(--accent);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-/* CHECKED LABEL */
+/* ===== SELECTED STATE ===== */
 .cs1-options label:has(input[type="radio"]:checked) {
-  background: var(--accent);
-  color: white;
-  transform: scale(1.02);
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* hover */
+.cs1-options label:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   🔥 AUTO GRADING COLORS (PURE CSS - NO REACT CHANGE)
+   ========================================================= */
+
+/* 🟢 EXCELLENT */
+.cs1-options label:has(input[value="10"]),
+.cs1-options label:has(input[value="20"]),
+.cs1-options label:has(input[value="15"]),
+.cs1-options label:has(input[value="5"]) {
+  background: #E8F5E9;
+  border-color: #A5D6A7;
+  color: #1B5E20;
+}
+
+/* 🔵 VERY GOOD */
+.cs1-options label:has(input[value="8"]),
+.cs1-options label:has(input[value="16"]),
+.cs1-options label:has(input[value="12"]),
+.cs1-options label:has(input[value="4"]) {
+  background: #E3F2FD;
+  border-color: #90CAF9;
+  color: #0D47A1;
+}
+
+/* ⚪ AVERAGE */
+.cs1-options label:has(input[value="7"]),
+.cs1-options label:has(input[value="14"]),
+.cs1-options label:has(input[value="9"]),
+.cs1-options label:has(input[value="3"]) {
+  background: #ECEFF1;
+  border-color: #B0BEC5;
+  color: #37474F;
+}
+
+/* 🟠 BELOW AVERAGE */
+.cs1-options label:has(input[value="6"]),
+.cs1-options label:has(input[value="10"]),
+.cs1-options label:has(input[value="2"]) {
+  background: #FFF3E0;
+  border-color: #FFB74D;
+  color: #E65100;
+}
+
+/* 🔴 POOR */
+.cs1-options label:has(input[value="1.5"]),
+.cs1-options label:has(input[value="1"]),
+.cs1-options label:has(input[value="2"]) {
+  background: #FFEBEE;
+  border-color: #EF9A9A;
+  color: #B71C1C;
 }
 
 /* ===== OPEN BUTTON ===== */

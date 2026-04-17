@@ -7,5 +7,6 @@ const router = express.Router();
 router.get("/stats", protect, coordinatorController.getCoordinatorStats);
 router.get("/recent-activities", protect, coordinatorController.getRecentActivities);
 router.get("/final-results", protect, coordinatorController.getFinalResults);
+router.post("/publish-supervisor-result", protect, coordinatorController.publishSupervisorResult);
 
 module.exports = router;

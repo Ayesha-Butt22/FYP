@@ -13,6 +13,8 @@ const supervisorEvaluationSchema = new mongoose.Schema({
     }],
     totalMarks: Number,
     evaluatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    isPublished: { type: Boolean, default: false },
+    publishedAt: { type: Date },
     submittedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 

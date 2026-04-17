@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import ToastService, { toastService } from "../ToastService/ToastService.jsx";
+import { toastService } from "../ToastService/ToastService.jsx";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import "./CommitteeResults.css";
 import {
@@ -154,16 +154,15 @@ export default function CoordinatorCommitteeResults() {
       });
     });
 
+    const cloEvs = evaluations.filter((ev) => ev.cloMarks !== null);
+    const totalPanelSize = evaluations[0]?.assignedPanelSize || evaluations.length || 1;
+
     const students = Object.entries(studentMap).map(([name, data]) => {
       const avgPres = data.presentations.reduce((a, b) => a + b, 0) / data.presentations.length;
       const avgPerf = data.performances.reduce((a, b) => a + b, 0) / data.performances.length;
 
-      const cloEvs = evaluations.filter((ev) => ev.cloMarks !== null);
-      // Logic Update: Only count submitted evaluations for the average
-      const submittedPanelCount = evaluations.length || 1;
-
       const sumClo = cloEvs.reduce((sum, ev) => sum + ev.totalCloMarks, 0);
-      const avgClo = sumClo / submittedPanelCount;
+      const avgClo = sumClo / totalPanelSize;
 
       const finalCloPortion = +(avgClo * 0.5).toFixed(2);
       const finalTotal = finalCloPortion;
@@ -178,13 +177,10 @@ export default function CoordinatorCommitteeResults() {
       };
     });
 
-    const cloEvs = evaluations.filter((ev) => ev.cloMarks !== null);
-    const submittedPanelCount = evaluations.length || 1;
     const sumClo = cloEvs.reduce((sum, ev) => sum + ev.totalCloMarks, 0);
-    const avgClo = sumClo / submittedPanelCount;
+    const avgClo = sumClo / totalPanelSize;
     const finalCloMarks = +(avgClo * 0.5).toFixed(2);
 
-    const totalPanelSize = evaluations[0]?.assignedPanelSize || evaluations.length || 1;
     return { students, finalCloMarks, numPanels, assignedPanelSize: totalPanelSize, hasClo: cloEvs.length > 0 };
   };
 
@@ -501,7 +497,7 @@ const InfoModal = ({ open, onClose, row, computeFinalMarks }) => {
                 {ev.totalCloMarks > 0 && (
                   <Box sx={{ p: 2.5, bgcolor: '#eff6ff', borderRadius: '10px', mb: 2.5, borderLeft: '4px solid #1e40af' }}>
                     <Typography variant="body2" sx={{ fontSize: '1.05rem', fontWeight: '750', color: '#1e40af', display: 'block' }}>
-                      CLO Marks: <strong sx={{ fontSize: '1.15rem' }}>{ev.totalCloMarks}/100</strong>
+                      CLO Marks: <Typography component="span" sx={{ fontSize: '1.15rem', fontWeight: '900' }}>{ev.totalCloMarks}/100</Typography>
                     </Typography>
                   </Box>
                 )}

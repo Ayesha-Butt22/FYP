@@ -22,6 +22,7 @@ import Noticeboard from "../Admin/Noticeboard";
 import TemplateView from "./TemplateView";
 import Profile from "./Profile";
 import CoordinatorCommitteeResults from "./CoordinatorCommitteeResults.jsx";
+import CoordinatorSupervisorResults from "./CoordinatorSupervisorResults.jsx";
 import CoordinatorFinalResults from "./CoordinatorFinalResults.jsx";
 
 const menu = [
@@ -33,6 +34,7 @@ const menu = [
   { label: "Noticeboard", icon: <AnnouncementIcon /> },
   { label: "View Reports", icon: <DescriptionIcon /> },
   { label: "Committee Results", icon: <GroupsIcon /> },
+  { label: "Supervisor Results", icon: <GroupsIcon /> },
   { label: "Final Results", icon: <GroupsIcon /> },
   { label: "FYP Archive", icon: <ArchiveIcon /> },
   { label: "Profile", icon: <PersonIcon /> }
@@ -63,6 +65,7 @@ export default function CoordinatorDashboard() {
     "Noticeboard": <Noticeboard />,
     "View Reports": <TemplateView />,
     "Committee Results": <CoordinatorCommitteeResults />,
+    "Supervisor Results": <CoordinatorSupervisorResults />,
     "Final Results": <CoordinatorFinalResults />,
     "FYP Archive": <SupervisorArchive />,
     "Profile": <Profile />

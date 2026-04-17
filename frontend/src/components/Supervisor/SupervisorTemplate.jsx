@@ -22,9 +22,10 @@ export default function SupervisorTemplates () {
   const [allFiles, setAllFiles] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
+  const supervisorDept = localStorage.getItem("department") || "SE"; 
+  const [selectedDept, setSelectedDept] = useState(supervisorDept);
 
-  const DEPARTMENTS = ["All", "SE", "CS", "CA"];
-  const [selectedDept, setSelectedDept] = useState("All");
+  const DEPARTMENTS = [supervisorDept]; 
 
   const headers = ["Template", "Department", "Filename", "Uploaded At", "Uploaded By"];
 
@@ -160,40 +161,56 @@ export default function SupervisorTemplates () {
         View All Templates
       </DashboardSectionHeader>
 
-      {/* Filters Section */}
-      <Box className="st-controls" sx={{ mb: 2 }}>
-        <div className="st-filter">
-          <label>Filter by Department</label>
-          <select 
-            className="st-dept-select" 
-            value={selectedDept} 
-            onChange={(e) => setSelectedDept(e.target.value)}
-            disabled={loading}
-          >
-            {DEPARTMENTS.map((d) => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
-        </div>
+      {/* Filters Section (Only show if multiple depts exist, hide for fixed supervisor dept) */}
+      {DEPARTMENTS.length > 1 && (
+        <Box className="st-controls" sx={{ mb: 2 }}>
+          <div className="st-filter">
+            <label>Filter by Department</label>
+            <select 
+              className="st-dept-select" 
+              value={selectedDept} 
+              onChange={(e) => setSelectedDept(e.target.value)}
+              disabled={loading}
+            >
+              {DEPARTMENTS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </div>
 
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          <button 
-            className="st-clear-btn" 
-            onClick={clearFilters}
-            disabled={loading}
-          >
-            Clear filter
-          </button>
-          <button 
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+            <button 
+              className="st-clear-btn" 
+              onClick={clearFilters}
+              disabled={loading}
+            >
+              Clear filter
+            </button>
+            <button 
+              className="st-clear-btn"
+              onClick={refreshTemplates}
+              disabled={loading}
+              title="Refresh templates"
+            >
+              ↻ Refresh
+            </button>
+          </div>
+        </Box>
+      )}
+
+      {DEPARTMENTS.length <= 1 && (
+        <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+           <button 
             className="st-clear-btn"
             onClick={refreshTemplates}
             disabled={loading}
             title="Refresh templates"
+            style={{ padding: '8px 16px' }}
           >
-            ↻ Refresh
+            ↻ Refresh Templates
           </button>
-        </div>
-      </Box>
+        </Box>
+      )}
 
       {loading ? (
         <div className="st-loading">Loading templates…</div>

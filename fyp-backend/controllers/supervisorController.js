@@ -8,6 +8,7 @@ const Template = require("../models/StudentUploadedTemplate");
 const MeetingSlot = require("../models/MeetingSlot"); // Use MeetingSlot instead of Meeting
 const SupervisorEvaluation = require("../models/SupervisorEvaluation");
 const CommitteeEvaluation = require("../models/CommitteeEvaluation");
+const mongoose = require("mongoose");
 
 // GET RECENT ACTIVITIES FOR SUPERVISOR
 exports.getRecentActivities = async (req, res) => {
@@ -208,8 +209,7 @@ exports.getSupervisorGroups = async (req, res) => {
 
     const proposals = await Proposal.find({ projectSupervisor: supervisorEmail })
       .populate({
-        path: "groupId",
-        match: { isArchived: { $ne: true } }
+        path: "groupId"
       });
 
     const result = [];
@@ -246,6 +246,17 @@ exports.getSupervisorGroups = async (req, res) => {
 
       const completedMilestones = fyp1Count + fyp2Count;
 
+      // Check if group can be archived (all templates approved + committee results passed)
+      const committeeEvals = await CommitteeEvaluation.find({
+        groupId: group._id,
+        isApprovedByCoordinator: true
+      }).populate("scheduleId");
+
+      const fyp1Passed = committeeEvals.some(e => e.scheduleId?.fypPart?.toLowerCase()?.replace("-", "") === "fyp1");
+      const fyp2Passed = committeeEvals.some(e => e.scheduleId?.fypPart?.toLowerCase()?.replace("-", "") === "fyp2");
+
+      const canArchive = (fyp1Count === 6 && fyp2Count === 2 && fyp1Passed && fyp2Passed);
+
       result.push({
         maskedGroupId: maskGroupId(group.groupId),
         groupId: (group._id),
@@ -257,6 +268,7 @@ exports.getSupervisorGroups = async (req, res) => {
         })),
         milestonesTotal: 8,
         milestonesCompleted: completedMilestones,
+        canArchive: canArchive,
         status: proposal.projectStatus === 1 ? "Approved" : "Pending"
       });
     }
@@ -395,7 +407,24 @@ exports.submitSupervisorEvaluation = async (req, res) => {
 exports.getSupervisorEvaluations = async (req, res) => {
   try {
     const { groupId } = req.params;
-    const evaluations = await SupervisorEvaluation.find({ groupId: String(groupId) })
+    
+    // Check if group is archived first
+    const group = await Group.findOne({ 
+      $or: [{ _id: mongoose.isValidObjectId(groupId) ? groupId : null }, { groupId: String(groupId) }] 
+    });
+
+    const isArchived = group?.isArchived || false;
+    const filter = { groupId: String(groupId) };
+    
+    // If not archived: show only published OR my own evaluations
+    if (!isArchived) {
+      filter.$or = [
+        { isPublished: true },
+        { evaluatedBy: req.user._id }
+      ];
+    }
+
+    const evaluations = await SupervisorEvaluation.find(filter)
       .populate("evaluatedBy", "name email")
       .sort({ createdAt: -1 });
 
@@ -430,7 +459,8 @@ exports.getStudentSupervisorEvaluations = async (req, res) => {
     const officialName = user ? user.name : (requesterMember ? group[requesterMember]?.name : "");
 
     const rawEvaluations = await SupervisorEvaluation.find({
-      groupId: { $in: [String(group._id), String(group.groupId)] }
+      groupId: { $in: [String(group._id), String(group.groupId)] },
+      isPublished: true
     })
       .populate("evaluatedBy", "name email")
       .sort({ createdAt: -1 })

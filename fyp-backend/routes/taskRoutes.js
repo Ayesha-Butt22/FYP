@@ -47,13 +47,14 @@ router.get("/group-members", protect, async (req, res) => {
       });
     }
 
-    console.log("✅ Group found:", group.groupName);
+    console.log("✅ Group object from DB:", JSON.stringify(group));
+    console.log("✅ Group found (ID):", group.groupId || group._id);
     
     // Extract members
     const members = [];
     
     // Leader
-    if (group.leader && group.leader.email) {
+    if (group.leader?.email) {
       members.push({
         display: `${group.leader.name || 'Leader'} (${group.leader.email})`,
         email: group.leader.email,
@@ -62,7 +63,7 @@ router.get("/group-members", protect, async (req, res) => {
     }
 
     // Member 2
-    if (group.member2 && group.member2.email) {
+    if (group.member2?.email) {
       members.push({
         display: `${group.member2.name || 'Member 2'} (${group.member2.email})`,
         email: group.member2.email,
@@ -71,7 +72,7 @@ router.get("/group-members", protect, async (req, res) => {
     }
 
     // Member 3
-    if (group.member3 && group.member3.email) {
+    if (group.member3?.email) {
       members.push({
         display: `${group.member3.name || 'Member 3'} (${group.member3.email})`,
         email: group.member3.email,
@@ -84,7 +85,7 @@ router.get("/group-members", protect, async (req, res) => {
     res.json({
       success: true,
       members: members,
-      groupName: group.groupName || "My Group"
+      groupName: group.groupId || "My Group"
     });
 
   } catch (error) {

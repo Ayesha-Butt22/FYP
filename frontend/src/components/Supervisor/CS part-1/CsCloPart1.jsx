@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "./cs-clo-part-1.css";
-import ToastService from "../../ToastService/ToastService.jsx";
 
 const CsCloPart1 = ({ onMarksSubmit }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,10 +13,6 @@ const CsCloPart1 = ({ onMarksSubmit }) => {
     lo6: 0,
     lo7: 0,
   });
-
-  const checkValidation = () => {
-    return Object.values(marks).every(m => m > 0);
-  };
 
   const loData = [
     {
@@ -128,12 +123,6 @@ const CsCloPart1 = ({ onMarksSubmit }) => {
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
-
-    if (!checkValidation()) {
-      ToastService.warning("Please mark all Learning Objectives (LOs) before submitting.");
-      return;
-    }
-
     setIsSubmitted(true);
     setIsOpen(false);
     if (onMarksSubmit) {
@@ -169,7 +158,7 @@ const CsCloPart1 = ({ onMarksSubmit }) => {
                 </div>
 
                 <button
-                  type="submit"
+                  type="button"
                   className="cs1-submit"
                   onClick={handleSubmit}
                 >

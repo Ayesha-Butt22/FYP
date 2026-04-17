@@ -110,10 +110,6 @@ export default function OverviewSupervisor({ onTabChange }) {
 
                 const msg = `Your Group ${formattedGroupId} has booked a slot from ${formattedStartTime} to ${formattedEndTime} on ${formattedDate}!`;
                 ToastService.success(msg);
-              } else {
-                console.log(
-                    `Skipping toast for ${group.displayId}: slot has already passed.`
-                );
               }
             }
           });

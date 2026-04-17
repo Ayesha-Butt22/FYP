@@ -189,7 +189,7 @@ export default function SupervisorAnalytics() {
             };
 
             return (
-              <Grid item xs={12} md={4} key={maskedId}>
+              <Grid size={{ xs: 12, md: 4 }} key={maskedId}>
                 <Card className="analytics-card" sx={{ height: '100%', borderRadius: 4, transition: 'all 0.3s', '&:hover': { transform: 'translateY(-5px)', boxShadow: '0 8px 30px rgba(0,0,0,0.12)' } }}>
                   <CardContent>
                     <Typography variant="subtitle1" fontWeight={900} color="#01337a" gutterBottom>

@@ -51,6 +51,13 @@ export default function SupervisorWhiteboard() {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
+    // Suppress findDOMNode warning from react-quill
+    const originalError = console.error;
+    console.error = (...args) => {
+      if (typeof args[0] === 'string' && args[0].includes('findDOMNode is deprecated')) return;
+      originalError.apply(console, args);
+    };
+
     const fetchGroupsAndNotes = async () => {
       const data = await fetchSupervisorProposals();
 
@@ -82,7 +89,6 @@ export default function SupervisorWhiteboard() {
       setErrors(errorsInit);
       try {
         const groupedNotes = await SupervisorWhiteboardApi.getAllByGroups();
-        console.log("Fetched grouped notes:", groupedNotes);
 
         setNotesByGroup((prev) => {
           const updated = { ...prev };
@@ -99,6 +105,9 @@ export default function SupervisorWhiteboard() {
     };
 
     fetchGroupsAndNotes();
+    return () => {
+      console.error = originalError;
+    };
   }, []);
 
   const handlePost = async (groupId) => {
