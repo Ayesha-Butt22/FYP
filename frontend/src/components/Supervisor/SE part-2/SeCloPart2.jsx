@@ -39,239 +39,104 @@ const SeCloPart2 = ({ onMarksSubmit }) => {
   return (
     <>
       {isSubmitted ? (
-        <div style={{ padding: "10px", backgroundColor: "#e8f5e9", borderRadius: "5px", border: "1px solid #4caf50", color: "#2e7d32", fontWeight: "bold", textAlign: "center", marginBottom: "15px" }}>
-          Submitted: {total}/100 Marks
+        <div className="scp2-submitted-badge">
+          <span className="scp2-check">✓</span>
+          Submitted &nbsp;—&nbsp; {total} / 100 Marks
         </div>
       ) : (
-        <button className="open-btn" onClick={openModal}>
+        <button className="scp2-open-btn" onClick={openModal}>
           Open Evaluation
         </button>
       )}
 
-
       {isOpen && (
-        <div className="cs1-modal-overlay">
-          <div className="cs1-modal-box">
+        <div className="scp2-modal-overlay">
+          <div className="scp2-modal-box">
 
             {/* HEADER */}
-            <div className="cs1-header">
-              <h2 className="h2">
-                FYP Rubric Evaluation Form (SE - Part 2)
-              </h2>
+            <div className="scp2-header">
+              <div className="scp2-header-left">
+                <div className="scp2-header-tag">SE · Part 2</div>
+                <h2 className="scp2-title">FYP Rubric Evaluation Form</h2>
+              </div>
 
-              <div className="cs1-header-right">
-                <div className="cs1-total-top">
-                  Total: {total} / 100
+              <div className="scp2-header-right">
+                <div className="scp2-total-top">
+                  Total: <strong>{total}</strong> / 100
                 </div>
 
                 <button
                   type="button"
-                  className="cs1-submit"
+                  className="scp2-submit"
                   onClick={handleSubmit}
                 >
                   Submit
                 </button>
 
-                <span className="cs1-close" onClick={closeModal}>
-                  &times;
-                </span>
+                <button type="button" className="scp2-close" onClick={closeModal} aria-label="Close">
+                  &#10005;
+                </button>
               </div>
             </div>
 
-
-            <form>
-              <div className="cs1-form-content">
-                {/* LO1 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO1 (10 Marks)</h3>
-                  <p>
-                    Demonstrate knowledge of mathematics, science, and software engineering fundamentals and processes.
-                  </p>
-                  <div className="cs1-options">
-                    {[2, 5, 7, 8, 10].map((m, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo1"
-                          value={m}
-                          onChange={(e) => handleChange("lo1", e.target.value)}
-                        />
-                        {m === 2 && "Poor understanding of basic software engineering concepts. (0-4 Marks)"}
-                        {m === 5 && "Understanding of basic software engineering is satisfactory. (5 Marks)"}
-                        {m === 7 && "Good understanding of basic software engineering. (7 Marks)"}
-                        {m === 8 && "Excellent understanding of basic software engineering. (8 Marks)"}
-                        {m === 10 && "Outstanding understanding of basic software engineering. (10 Marks)"}
-                      </label>
-                    ))}
-                  </div>
+            {/* ── COLOR LEGEND STRIP ── */}
+            <div className="scp2-legend">
+              <span className="scp2-legend-label">Level Key:</span>
+              {["Poor", "Normal", "Good", "Excellent", "Outstanding"].map((label, idx) => (
+                <div key={idx} className={`scp2-legend-item scp2-legend-item--${idx}`}>
+                  <span className="scp2-legend-dot" />
+                  {label}
                 </div>
+              ))}
+            </div>
 
-                {/* LO2 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO2 (10 Marks)</h3>
-                  <p>
-                    Analyze a problem, identify and define software requirements appropriate to its solution.
-                  </p>
-                  <div className="cs1-options">
-                    {[2, 5, 7, 8, 10].map((m, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo2"
-                          value={m}
-                          onChange={(e) => handleChange("lo2", e.target.value)}
-                        />
-                        {m === 2 && "Lack of appropriate requirements and Market survey is not aligned to project scope. (0-4 Marks)"}
-                        {m === 5 && "Requirements are partially aligned with project scope and market survey is aligned to project scope. (5 Marks)"}
-                        {m === 7 && "Requirements are gathered through appropriate elicitation techniques and market survey is aligned to project scope. (7 Marks)"}
-                        {m === 8 && "Excellent requirement elicitation techniques and market survey is aligned to project scope. (8 Marks)"}
-                        {m === 10 && "Outstanding requirement elicitation techniques and market survey is 100% aligned to project scope. (10 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
 
-                {/* LO3 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO3 (10 Marks)</h3>
-                  <p>
-                    Design and implement software engineering solutions for complex problems, components or processes to meet desired needs.
-                  </p>
-                  <div className="cs1-options">
-                    {[2, 5, 7, 8, 10].map((m, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo3"
-                          value={m}
-                          onChange={(e) => handleChange("lo3", e.target.value)}
-                        />
-                        {m === 2 && "Designs, plans and proposed project is not according to requirements. (0-4 Marks)"}
-                        {m === 5 && "Designs, plans and proposed project is all igened with the requirements. (5 Marks)"}
-                        {m === 7 && "Designs, plans and proposed project is good and all igened with the requirements. (7 Marks)"}
-                        {m === 8 && "Excellent designs, plans and proposed project is according to requirements. (8 Marks)"}
-                        {m === 10 && "Outstanding designs, plans and proposed project is according to requirements. (10 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LO4 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO4 (20 Marks)</h3>
-                  <p>
-                    Evaluate a software engineering solution in a methodical way design and, conduct experiments, analyze and interpret experimental data, and synthesize information to derive valid conclusions.
-                  </p>
-                  <div className="cs1-options">
-                    {[4, 10, 14, 16, 20].map((m, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo4"
-                          value={m}
-                          onChange={(e) => handleChange("lo4", e.target.value)}
-                        />
-                        {m === 4 && "Software Quality Engineering and GUI along with Back-End functionality are poorly applied. (0-8 Marks)"}
-                        {m === 10 && "Software Quality Engineering and GUI along with Back-End functionality is satisfactory. (10 Marks)"}
-                        {m === 14 && "Software Quality Engineering and GUI along with Back-End functionality applied are good. (14 Marks)"}
-                        {m === 16 && "Software Quality Engineering and GUI along with Back-End functionality are excellently applied. (16 Marks)"}
-                        {m === 20 && "Software Quality Engineering and GUI along with Back-End functionality are oustandingly applied. (20 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LO5 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO5 (15 Marks)</h3>
-                  <p>Apply appropriate techniques, resources, and modern software engineering tools to solve complex problems.</p>
-                  <div className="cs1-options">
-                    {[3.5, 8, 11, 13, 15].map((m, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo5"
-                          value={m}
-                          onChange={(e) => handleChange("lo5", e.target.value)}
-                        />
-                        {m === 3.5 && "Poor techniques and no appropriate tools are used. (0-7 Marks)"}
-                        {m === 8 && "Techniques are partially satisfactory but no tools are used. (8 Marks)"}
-                        {m === 11 && "Good techniques are applied and tools are not appropriate. (11 Marks)"}
-                        {m === 13 && "Techniques and tools are used excellently. (13 Marks)"}
-                        {m === 15 && "Techniques and tools are used outstandingly. (15 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LO6 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO6 (15 Marks)</h3>
-                  <p>Work effectively in a team to accomplish a goal.</p>
-                  <div className="cs1-options">
-                    {[3.5, 8, 11, 13, 15].map((m, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo6"
-                          value={m}
-                          onChange={(e) => handleChange("lo6", e.target.value)}
-                        />
-                        {m === 3.5 && "Poor team work. (0-7 Marks)"}
-                        {m === 8 && "Team Work is satisfactory. (8 Marks)"}
-                        {m === 11 && "Good team work. (11 Marks)"}
-                        {m === 13 && "Excellent team work. (13 Marks)"}
-                        {m === 15 && "Outstanding team work. (15 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LO7 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO7 (10 Marks)</h3>
-                  <p>Communicate effectively on complex engineering activities and make effective presentations.</p>
-                  <div className="cs1-options">
-                    {[2, 5, 7, 8, 10].map((m, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo7"
-                          value={m}
-                          onChange={(e) => handleChange("lo7", e.target.value)}
-                        />
-                        {m === 2 && "Poor communication skills. (0-4 Marks)"}
-                        {m === 5 && "Communication skills are satisfactory. (5 Marks)"}
-                        {m === 7 && "Good communication skills. (7 Marks)"}
-                        {m === 8 && "Excellent communication skills. (8 Marks)"}
-                        {m === 10 && "Outstanding communication skills. (10 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LO8 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO8 (10 Marks)</h3>
-                  <p>Demonstrate knowledge of project management principles and techniques.</p>
-                  <div className="cs1-options">
-                    {[2, 5, 7, 8, 10].map((m, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo8"
-                          value={m}
-                          onChange={(e) => handleChange("lo8", e.target.value)}
-                        />
-                        {m === 2 && "Poor knowledge of project management principles and techniques. (0-4 Marks)"}
-                        {m === 5 && "Knowledge of project management principles and techniques is satisfactory. (5 Marks)"}
-                        {m === 7 && "Good knowledge of project management principles and techniques. (7 Marks)"}
-                        {m === 8 && "Excellent knowledge of project management principles and techniques. (8 Marks)"}
-                        {m === 10 && "Outstanding knowledge of project management principles and techniques. (10 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
+            <form onSubmit={handleSubmit}>
+              <div className="scp2-form-content">
+                {[
+                  { id: "lo1", title: "FYP-LO1", max: 10, desc: "Demonstrate knowledge of mathematics, science, and software engineering fundamentals and processes.", opts: [2, 5, 7, 8, 10], labels: ["Poor understanding of basic software engineering concepts. (0-4 Marks)", "Understanding of basic software engineering is satisfactory. (5 Marks)", "Good understanding of basic software engineering. (7 Marks)", "Excellent understanding of basic software engineering. (8 Marks)", "Outstanding understanding of basic software engineering. (10 Marks)"], ranges: ["0-4 Marks", "5 Marks", "7 Marks", "8 Marks", "10 Marks"] },
+                  { id: "lo2", title: "FYP-LO2", max: 10, desc: "Analyze a problem, identify and define software requirements appropriate to its solution.", opts: [2, 5, 7, 8, 10], labels: ["Lack of appropriate requirements and Market survey is not aligned. (0-4 Marks)", "Requirements partially aligned with project scope. (5 Marks)", "Requirements gathered through appropriate techniques. (7 Marks)", "Excellent requirement elicitation techniques. (8 Marks)", "Outstanding requirement elicitation techniques. (10 Marks)"], ranges: ["0-4 Marks", "5 Marks", "7 Marks", "8 Marks", "10 Marks"] },
+                  { id: "lo3", title: "FYP-LO3", max: 10, desc: "Design and implement software engineering solutions for complex problems.", opts: [2, 5, 7, 8, 10], labels: ["Designs not according to requirements. (0-4 Marks)", "Designs aligned with the requirements. (5 Marks)", "Good designs aligned with the requirements. (7 Marks)", "Excellent designs according to requirements. (8 Marks)", "Outstanding designs according to requirements. (10 Marks)"], ranges: ["0-4 Marks", "5 Marks", "7 Marks", "8 Marks", "10 Marks"] },
+                  { id: "lo4", title: "FYP-LO4", max: 20, desc: "Evaluate a software engineering solution and conduct experiments.", opts: [4, 10, 14, 16, 20], labels: ["Software Quality Engineering poorly applied. (0-8 Marks)", "Software Quality Engineering satisfactory. (10 Marks)", "Software Quality Engineering good. (14 Marks)", "Software Quality Engineering excellent. (16 Marks)", "Software Quality Engineering outstanding. (20 Marks)"], ranges: ["0-8 Marks", "10 Marks", "14 Marks", "16 Marks", "20 Marks"] },
+                  { id: "lo5", title: "FYP-LO5", max: 15, desc: "Apply appropriate techniques and modern software engineering tools.", opts: [3.5, 8, 11, 13, 15], labels: ["Poor techniques and no tools used. (0-7 Marks)", "Techniques partially satisfactory but no tools. (8 Marks)", "Good techniques but tools not appropriate. (11 Marks)", "Techniques and tools used excellently. (13 Marks)", "Techniques and tools used outstandingly. (15 Marks)"], ranges: ["0-7 Marks", "8 Marks", "11 Marks", "13 Marks", "15 Marks"] },
+                  { id: "lo6", title: "FYP-LO6", max: 15, desc: "Work effectively in a team to accomplish a goal.", opts: [3.5, 8, 11, 13, 15], labels: ["Poor team work. (0-7 Marks)", "Team Work is satisfactory. (8 Marks)", "Good team work. (11 Marks)", "Excellent team work. (13 Marks)", "Outstanding team work. (15 Marks)"], ranges: ["0-7 Marks", "8 Marks", "11 Marks", "13 Marks", "15 Marks"] },
+                  { id: "lo7", title: "FYP-LO7", max: 10, desc: "Communicate effectively on complex engineering activities.", opts: [2, 5, 7, 8, 10], labels: ["Poor communication skills. (0-4 Marks)", "Communication skills are satisfactory. (5 Marks)", "Good communication skills. (7 Marks)", "Excellent communication skills. (8 Marks)", "Outstanding communication skills. (10 Marks)"], ranges: ["0-4 Marks", "5 Marks", "7 Marks", "8 Marks", "10 Marks"] },
+                  { id: "lo8", title: "FYP-LO8", max: 10, desc: "Demonstrate knowledge of project management principles.", opts: [2, 5, 7, 8, 10], labels: ["Poor knowledge of project management. (0-4 Marks)", "Knowledge is satisfactory. (5 Marks)", "Good knowledge of project management. (7 Marks)", "Excellent knowledge of project management. (8 Marks)", "Outstanding knowledge of project management. (10 Marks)"], ranges: ["0-4 Marks", "5 Marks", "7 Marks", "8 Marks", "10 Marks"] },
+                ].map((lo) => {
+                  const chosen = selectedMarks[lo.id];
+                  return (
+                    <div className={`scp2-card ${chosen !== undefined ? "scp2-card--done" : ""}`} key={lo.id}>
+                      <div className="scp2-card-header">
+                        <div className="scp2-card-meta">
+                          <span className="scp2-lo-badge">{lo.title}</span>
+                          <span className="scp2-max-marks">{lo.max} Marks</span>
+                        </div>
+                        {chosen !== undefined && (
+                          <div className={`scp2-chosen-pill scp2-chosen-pill--${lo.opts.indexOf(chosen)}`}>
+                            Selected: <strong>{chosen}</strong>
+                          </div>
+                        )}
+                      </div>
+                      <p className="scp2-card-desc">{lo.desc}</p>
+                      <div className="scp2-options">
+                        {lo.opts.map((m, i) => (
+                          <label key={i} className={`scp2-option scp2-option--${i} ${chosen === m ? "scp2-option--selected" : ""}`}>
+                            <input
+                              type="radio"
+                              name={lo.id}
+                              value={m}
+                              checked={chosen === m}
+                              onChange={(e) => handleChange(lo.id, e.target.value)}
+                            />
+                            <span className="scp2-level-tag">{["Poor", "Normal", "Good", "Excellent", "Outstanding"][i]}</span>
+                            <span className="scp2-opt-label">{lo.labels[i]}</span>
+                            <span className="scp2-opt-marks">{lo.ranges[i]}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </form>
           </div>

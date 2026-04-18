@@ -143,54 +143,62 @@ const SeCloPart1 = ({ onMarksSubmit }) => {
   return (
     <>
       {isSubmitted ? (
-        <div className="cs1-submitted-badge">
-          <span className="cs1-check">✓</span>
+        <div className="scp1-submitted-badge">
+          <span className="scp1-check">✓</span>
           Submitted &nbsp;—&nbsp; {total} / 100 Marks
         </div>
       ) : (
-        <button className="open-btn" onClick={openModal}>
+        <button className="scp1-open-btn" onClick={openModal}>
           Open Evaluation Form
         </button>
       )}
 
       {isOpen && (
         <div
-          className="cs1-modal-overlay"
+          className="scp1-modal-overlay"
           onClick={(e) => e.target === e.currentTarget && closeModal()}
         >
-          <div className="cs1-modal-box">
+          <div className="scp1-modal-box">
 
             {/* ── HEADER ── */}
-            <div className="cs1-header">
-              <div className="cs1-header-left">
-                <div className="cs1-header-tag">SE · Part 1</div>
-                <h2 className="cs1-title">FYP Rubric Evaluation Form</h2>
+            <div className="scp1-header">
+              <div className="scp1-header-left">
+                <div className="scp1-header-tag">SE · Part 1</div>
+                <h2 className="scp1-title">FYP Rubric Evaluation Form</h2>
               </div>
-              <div className="cs1-header-right">
-                <div className="cs1-progress-wrap">
-                  <span className="cs1-progress-text">{evaluated}/{loData.length} LOs evaluated</span>
-                  <div className="cs1-progress-bar">
-                    <div className="cs1-progress-fill" style={{ width: `${progress}%` }} />
+              <div className="scp1-header-right">
+                <div className="scp1-progress-wrap">
+                  <span className="scp1-progress-text">{evaluated}/{loData.length} LOs evaluated</span>
+                  <div className="scp1-progress-bar">
+                    <div className="scp1-progress-fill" style={{ width: `${progress}%` }} />
                   </div>
                 </div>
-                <div className="cs1-total-top">
+                <div className="scp1-total-top">
                   Total: <strong>{total}</strong> / 100
                 </div>
-                <button type="button" className="cs1-submit" onClick={handleSubmit}>
+                <button 
+                  type="button" 
+                  className="scp1-clear-btn" 
+                  onClick={() => { setSelectedMarks({}); setTotal(0); }}
+                  title="Clear all selections"
+                >
+                  Clear
+                </button>
+                <button type="button" className="scp1-submit" onClick={handleSubmit}>
                   Submit
                 </button>
-                <button type="button" className="cs1-close" onClick={closeModal} aria-label="Close">
+                <button type="button" className="scp1-close" onClick={closeModal} aria-label="Close">
                   &#10005;
                 </button>
               </div>
             </div>
 
             {/* ── COLOR LEGEND STRIP ── */}
-            <div className="cs1-legend">
-              <span className="cs1-legend-label">Level Key:</span>
+            <div className="scp1-legend">
+              <span className="scp1-legend-label">Level Key:</span>
               {LEVEL_LABELS.map((label, idx) => (
-                <div key={idx} className={`cs1-legend-item cs1-legend-item--${idx}`}>
-                  <span className="cs1-legend-dot" />
+                <div key={idx} className={`scp1-legend-item scp1-legend-item--${idx}`}>
+                  <span className="scp1-legend-dot" />
                   {label}
                 </div>
               ))}
@@ -198,36 +206,36 @@ const SeCloPart1 = ({ onMarksSubmit }) => {
 
             {/* ── FORM ── */}
             <form onSubmit={handleSubmit}>
-              <div className="cs1-form-content">
+              <div className="scp1-form-content">
                 {loData.map((lo) => {
                   const chosen = selectedMarks[lo.id];
                   return (
                     <div
-                      className={`cs1-card ${chosen !== undefined ? "cs1-card--done" : ""}`}
+                      className={`scp1-card ${chosen !== undefined ? "scp1-card--done" : ""}`}
                       key={lo.id}
                     >
                       {/* Card header row */}
-                      <div className="cs1-card-header">
-                        <div className="cs1-card-meta">
-                          <span className="cs1-lo-badge">{lo.title}</span>
-                          <span className="cs1-max-marks">{lo.maxMarks} Marks</span>
+                      <div className="scp1-card-header">
+                        <div className="scp1-card-meta">
+                          <span className="scp1-lo-badge">{lo.title}</span>
+                          <span className="scp1-max-marks">{lo.maxMarks} Marks</span>
                         </div>
                         {chosen !== undefined && (
-                          <div className="cs1-chosen-pill">
+                          <div className={`scp1-chosen-pill scp1-chosen-pill--${lo.options.findIndex(o => o.val === chosen)}`}>
                             Selected: <strong>{chosen}</strong>
                           </div>
                         )}
                       </div>
 
-                      <p className="cs1-card-desc">{lo.description}</p>
+                      <p className="scp1-card-desc">{lo.description}</p>
 
                       {/* Options */}
-                      <div className="cs1-options">
+                      <div className="scp1-options">
                         {lo.options.map((opt, idx) => (
                           <label
                             key={idx}
-                            className={`cs1-option cs1-option--${idx} ${
-                              chosen === opt.val ? "cs1-option--selected" : ""
+                            className={`scp1-option scp1-option--${idx} ${
+                              chosen === opt.val ? "scp1-option--selected" : ""
                             }`}
                           >
                             <input
@@ -237,9 +245,9 @@ const SeCloPart1 = ({ onMarksSubmit }) => {
                               checked={chosen === opt.val}
                               onChange={(e) => handleChange(lo.id, e.target.value)}
                             />
-                            <span className="cs1-level-tag">{LEVEL_LABELS[idx]}</span>
-                            <span className="cs1-opt-label">{opt.label}</span>
-                            <span className="cs1-opt-marks">{opt.range}</span>
+                            <span className="scp1-level-tag">{LEVEL_LABELS[idx]}</span>
+                            <span className="scp1-opt-label">{opt.label}</span>
+                            <span className="scp1-opt-marks">{opt.range}</span>
                           </label>
                         ))}
                       </div>

@@ -11,19 +11,9 @@ const CsCloPart2 = ({ onMarksSubmit }) => {
   const closeModal = () => setIsOpen(false);
 
   const handleChange = (loName, value) => {
-    const updatedMarks = {
-      ...selectedMarks,
-      [loName]: parseFloat(value),
-    };
-
+    const updatedMarks = { ...selectedMarks, [loName]: parseFloat(value) };
     setSelectedMarks(updatedMarks);
-
-    const sum = Object.values(updatedMarks).reduce(
-      (acc, val) => acc + val,
-      0
-    );
-
-    setTotal(sum);
+    setTotal(Object.values(updatedMarks).reduce((acc, val) => acc + val, 0));
   };
 
   const handleSubmit = (e) => {
@@ -35,264 +25,209 @@ const CsCloPart2 = ({ onMarksSubmit }) => {
     }
   };
 
+  const loData = [
+    {
+      id: "lo1",
+      title: "FYP-LO1",
+      max: 10,
+      desc: "Demonstrate knowledge of mathematics, science, and computing appropriate to the discipline.",
+      opts: [2, 5, 7, 8, 10],
+      labels: [
+        "Poor background knowledge related to disciplines.",
+        "Background Knowledge is satisfactory.",
+        "Good background knowledge.",
+        "Excellent background knowledge.",
+        "Outstanding background knowledge related to disciplines.",
+      ],
+      ranges: ["0-4 Marks", "5 Marks", "7 Marks", "8 Marks", "10 Marks"],
+    },
+    {
+      id: "lo2",
+      title: "FYP-LO2",
+      max: 10,
+      desc: "Analyze a problem, identify, and define computing requirements appropriate to its solution.",
+      opts: [2, 5, 7, 8, 10],
+      labels: [
+        "Lack of gathering appropriate requirements / Problem statement not identified.",
+        "Requirements partially aligned with project scope.",
+        "Requirements aligned with project scope.",
+        "Requirements clearly identified and aligned.",
+        "Outstanding requirement elicitation aligned with scope.",
+      ],
+      ranges: ["0-4 Marks", "5 Marks", "7 Marks", "8 Marks", "10 Marks"],
+    },
+    {
+      id: "lo3",
+      title: "FYP-LO3",
+      max: 15,
+      desc: "Design and implement complex computing solutions for complex problems.",
+      opts: [3.5, 8, 11, 13, 15],
+      labels: [
+        "Design not according to complex problem identified.",
+        "Design aligned with complex problem identified.",
+        "Good design aligned with complex problem.",
+        "Excellent design according to complex problem.",
+        "Outstanding design according to complex problem.",
+      ],
+      ranges: ["0-7 Marks", "8 Marks", "11 Marks", "13 Marks", "15 Marks"],
+    },
+    {
+      id: "lo4",
+      title: "FYP-LO4",
+      max: 30,
+      desc: "Apply mathematical foundations and algorithmic principles in modeling and system design.",
+      opts: [6, 15, 21, 24, 30],
+      labels: [
+        "No knowledge of mathematical foundation and model not aligned.",
+        "Satisfactory knowledge partially aligned.",
+        "Good knowledge fully aligned.",
+        "Excellent knowledge fully aligned.",
+        "Outstanding knowledge fully aligned.",
+      ],
+      ranges: ["0-12 Marks", "15 Marks", "21 Marks", "24 Marks", "30 Marks"],
+    },
+    {
+      id: "lo5",
+      title: "FYP-LO5",
+      max: 15,
+      desc: "Apply modern tools, techniques and resources to solve complex problems.",
+      opts: [3.5, 8, 11, 13, 15],
+      labels: [
+        "Poor techniques / resources and no appropriate tools.",
+        "Techniques partially satisfactory.",
+        "Good techniques applied.",
+        "Techniques and tools used excellently.",
+        "Outstanding performance using tools.",
+      ],
+      ranges: ["0-7 Marks", "8 Marks", "11 Marks", "13 Marks", "15 Marks"],
+    },
+    {
+      id: "lo6",
+      title: "FYP-LO6",
+      max: 10,
+      desc: "Work effectively in a team to accomplish a goal (Version Control).",
+      opts: [2, 5, 7, 8, 10],
+      labels: [
+        "Poor teamwork.",
+        "Team work is satisfactory.",
+        "Good team work.",
+        "Excellent team work.",
+        "Outstanding teamwork.",
+      ],
+      ranges: ["0-4 Marks", "5 Marks", "7 Marks", "8 Marks", "10 Marks"],
+    },
+    {
+      id: "lo7",
+      title: "FYP-LO7",
+      max: 10,
+      desc: "Communicate effectively in oral and written form on complex computing tasks.",
+      opts: [2, 5, 7, 8, 10],
+      labels: [
+        "Poor communication skills.",
+        "Communication skills are satisfactory.",
+        "Good communication skills.",
+        "Excellent communication skills.",
+        "Outstanding communication skills.",
+      ],
+      ranges: ["0-4 Marks", "5 Marks", "7 Marks", "8 Marks", "10 Marks"],
+    },
+  ];
+
+  const LEVEL_LABELS = ["Poor", "Normal", "Good", "Excellent", "Outstanding"];
 
   return (
     <>
       {isSubmitted ? (
-        <div style={{ padding: "10px", backgroundColor: "#e8f5e9", borderRadius: "5px", border: "1px solid #4caf50", color: "#2e7d32", fontWeight: "bold", textAlign: "center", marginBottom: "15px" }}>
-          Submitted: {total}/100 Marks
+        <div className="csp2-submitted-badge">
+          <span className="csp2-check">✓</span>
+          Submitted &nbsp;—&nbsp; {total} / 100 Marks
         </div>
       ) : (
-        <button className="open-btn" onClick={openModal}>
-          Open Evaluation
+        <button className="csp2-open-btn" onClick={openModal}>
+          Open CS Evaluation
         </button>
       )}
 
       {isOpen && (
-        <div className="cs1-modal-overlay">
-          <div className="cs1-modal-box">
+        <div className="csp2-modal-overlay" onClick={(e) => e.target === e.currentTarget && closeModal()}>
+          <div className="csp2-modal-box">
             {/* HEADER */}
-            <div className="cs1-header">
-              <h2 className="h2">
-                FYP Rubric Evaluation Form (CS - Part 2)
-              </h2>
+            <div className="csp2-header">
+              <div className="csp2-header-left">
+                <div className="csp2-header-tag">CS · Part 2</div>
+                <h2 className="csp2-title">FYP Rubric Evaluation Form</h2>
+              </div>
 
-              <div className="cs1-header-right">
-                <div className="cs1-total-top">
-                  Total: {total} / 100
+              <div className="csp2-header-right">
+                <div className="csp2-total-top">
+                  Total: <strong>{total}</strong> / 100
                 </div>
 
                 <button
                   type="button"
-                  className="cs1-submit"
+                  className="csp2-submit"
                   onClick={handleSubmit}
                 >
                   Submit
                 </button>
 
-                <span className="cs1-close" onClick={closeModal}>
-                  &times;
-                </span>
+                <button type="button" className="csp2-close" onClick={closeModal} aria-label="Close">
+                  &#10005;
+                </button>
               </div>
             </div>
 
-            <form>
-              <div className="cs1-form-content">
-                {/* LO1 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO1 (10 Marks)</h3>
-                  <p>
-                    Demonstrate knowledge of mathematics, science, and computing
-                    appropriate to the discipline.
-                  </p>
-                  <div className="cs1-options">
-                    {[2, 5, 7, 8, 10].map((mark, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo1"
-                          value={mark}
-                          onChange={(e) =>
-                            handleChange("lo1", e.target.value)
-                          }
-                        />
-                        {mark === 2 &&
-                          "Poor background knowledge related to disciplines. (0-4 Marks)"}
-                        {mark === 5 &&
-                          "Background Knowledge is satisfactory. (5 Marks)"}
-                        {mark === 7 && "Good background knowledge. (7 Marks)"}
-                        {mark === 8 &&
-                          "Excellent background knowledge. (8 Marks)"}
-                        {mark === 10 &&
-                          "Outstanding background knowledge related to disciplines. (10 Marks)"}
-                      </label>
-                    ))}
-                  </div>
+            {/* LEVEL KEY */}
+            <div className="csp2-legend">
+              <span className="csp2-legend-label">Level Key:</span>
+              {LEVEL_LABELS.map((label, idx) => (
+                <div key={idx} className={`csp2-legend-item csp2-legend-item--${idx}`}>
+                  <span className="csp2-legend-dot" />
+                  {label}
                 </div>
+              ))}
+            </div>
 
-                {/* LO2 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO2 (10 Marks)</h3>
-                  <p>
-                    Analyze a problem, identify, and define computing requirements appropriate to its solution.
-                  </p>
-                  <div className="cs1-options">
-                    {[2, 5, 7, 8, 10].map((mark, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo2"
-                          value={mark}
-                          onChange={(e) =>
-                            handleChange("lo2", e.target.value)
-                          }
-                        />
-                        {mark === 2 &&
-                          "Lack of gathering appropriate requirements / Problem statement not identified. (0-4 Marks)"}
-                        {mark === 5 &&
-                          "Requirements partially aligned with project scope. (5 Marks)"}
-                        {mark === 7 &&
-                          "Requirements aligned with project scope. (7 Marks)"}
-                        {mark === 8 &&
-                          "Requirements clearly identified and aligned. (8 Marks)"}
-                        {mark === 10 &&
-                          "Outstanding requirement elicitation aligned with scope. (10 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LO3 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO3 (15 Marks)</h3>
-                  <p>
-                    Design and implement complex computing solutions for complex problems.
-                  </p>
-                  <div className="cs1-options">
-                    {[3.5, 8, 11, 13, 15].map((mark, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo3"
-                          value={mark}
-                          onChange={(e) =>
-                            handleChange("lo3", e.target.value)
-                          }
-                        />
-                        {mark === 3.5 &&
-                          "Design not according to complex problem identified. (0-7 Marks)"}
-                        {mark === 8 &&
-                          "Design aligned with complex problem identified. (8 Marks)"}
-                        {mark === 11 &&
-                          "Good design aligned with complex problem. (11 Marks)"}
-                        {mark === 13 &&
-                          "Excellent design according to complex problem. (13 Marks)"}
-                        {mark === 15 &&
-                          "Outstanding design according to complex problem. (15 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LO4 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO4 (30 Marks)</h3>
-                  <p>
-                    Apply mathematical foundations and algorithmic principles in modeling and system design.
-                  </p>
-                  <div className="cs1-options">
-                    {[6, 15, 21, 24, 30].map((mark, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo4"
-                          value={mark}
-                          onChange={(e) =>
-                            handleChange("lo4", e.target.value)
-                          }
-                        />
-                        {mark === 6 &&
-                          "No knowledge of mathematical foundation and model not aligned. (0-12 Marks)"}
-                        {mark === 15 &&
-                          "Satisfactory knowledge partially aligned. (15 Marks)"}
-                        {mark === 21 &&
-                          "Good knowledge fully aligned. (21 Marks)"}
-                        {mark === 24 &&
-                          "Excellent knowledge fully aligned. (24 Marks)"}
-                        {mark === 30 &&
-                          "Outstanding knowledge fully aligned. (30 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LO5 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO5 (15 Marks)</h3>
-                  <p>
-                    Apply modern tools, techniques and resources to solve complex problems.
-                  </p>
-                  <div className="cs1-options">
-                    {[3.5, 8, 11, 13, 15].map((mark, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo5"
-                          value={mark}
-                          onChange={(e) =>
-                            handleChange("lo5", e.target.value)
-                          }
-                        />
-                        {mark === 3.5 &&
-                          "Poor techniques / resources and no appropriate tools. (0-7 Marks)"}
-                        {mark === 8 &&
-                          "Techniques partially satisfactory. (8 Marks)"}
-                        {mark === 11 && "Good techniques applied. (11 Marks)"}
-                        {mark === 13 &&
-                          "Techniques and tools used excellently. (13 Marks)"}
-                        {mark === 15 &&
-                          "Outstanding performance using tools. (15 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LO6 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO6 (10 Marks)</h3>
-                  <p>
-                    Work effectively in a team to accomplish a goal (Version Control).
-                  </p>
-                  <div className="cs1-options">
-                    {[2, 5, 7, 8, 10].map((mark, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo6"
-                          value={mark}
-                          onChange={(e) =>
-                            handleChange("lo6", e.target.value)
-                          }
-                        />
-                        {mark === 2 && "Poor teamwork. (0-4 Marks)"}
-                        {mark === 5 && "Team work is satisfactory. (5 Marks)"}
-                        {mark === 7 && "Good team work. (7 Marks)"}
-                        {mark === 8 && "Excellent team work. (8 Marks)"}
-                        {mark === 10 && "Outstanding teamwork. (10 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* LO7 */}
-                <div className="cs1-card">
-                  <h3 className="h3">FYP-LO7 (10 Marks)</h3>
-                  <p>
-                    Communicate effectively in oral and written form on complex computing tasks.
-                  </p>
-                  <div className="cs1-options">
-                    {[2, 5, 7, 8, 10].map((mark, i) => (
-                      <label key={i}>
-                        <input
-                          type="radio"
-                          name="lo7"
-                          value={mark}
-                          onChange={(e) =>
-                            handleChange("lo7", e.target.value)
-                          }
-                        />
-                        {mark === 2 && "Poor communication skills. (0-4 Marks)"}
-                        {mark === 5 &&
-                          "Communication skills are satisfactory. (5 Marks)"}
-                        {mark === 7 && "Good communication skills. (7 Marks)"}
-                        {mark === 8 &&
-                          "Excellent communication skills. (8 Marks)"}
-                        {mark === 10 &&
-                          "Outstanding communication skills. (10 Marks)"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
+            <form onSubmit={handleSubmit}>
+              <div className="csp2-form-content">
+                {loData.map((lo) => {
+                  const chosen = selectedMarks[lo.id];
+                  return (
+                    <div className={`csp2-card ${chosen !== undefined ? "csp2-card--done" : ""}`} key={lo.id}>
+                      <div className="csp2-card-header">
+                        <div className="csp2-card-meta">
+                          <span className="csp2-lo-badge">{lo.title}</span>
+                          <span className="csp2-max-marks">{lo.max} Marks</span>
+                        </div>
+                        {chosen !== undefined && (
+                          <div className={`csp2-chosen-pill csp2-chosen-pill--${lo.opts.indexOf(chosen)}`}>
+                            Selected: <strong>{chosen}</strong>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <p className="csp2-card-desc">{lo.desc}</p>
+                      
+                      <div className="csp2-options">
+                        {lo.opts.map((val, idx) => (
+                          <label key={idx} className={`csp2-option csp2-option--${idx} ${chosen === val ? "csp2-option--selected" : ""}`}>
+                            <input
+                              type="radio"
+                              name={lo.id}
+                              value={val}
+                              checked={chosen === val}
+                              onChange={(e) => handleChange(lo.id, e.target.value)}
+                              required
+                            />
+                            <span className="csp2-level-tag">{LEVEL_LABELS[idx]}</span>
+                            <span className="csp2-opt-label">{lo.labels[idx]}</span>
+                            <span className="csp2-opt-marks">{lo.ranges[idx]}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </form>
           </div>
