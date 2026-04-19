@@ -15,15 +15,14 @@ const API_BASE = "http://localhost:5000";
 
 // ─── Template definitions ─────────────────────
 const TEMPLATE_DEFINITIONS = [
-  { code: "t01", label: "Template-01: Project Team List",           week: 1  },
-  { code: "t02", label: "Template-02: Initial Proposal",            week: 2  },
-  { code: "t03", label: "Template-03: Proposal Presentation",       week: 4  },
-  { code: "t04", label: "Template-04: Proposal & Plan",             week: 6  },
-  { code: "t05", label: "Template-05: Progress Presentation",       week: 13 },
-  { code: "t06", label: "Template-06: Complete Project Report",     week: 24 },
-  { code: "t07", label: "Template-07: Final Presentation",          week: 26 },
-  { code: "t08", label: "Template-08: Complete Final Presentation", week: 28 },
-  { code: "t09", label: "Template-09: Complete Documentation",      week: 30 },
+  { code: "t01", label: "Template 01: Project Team List (FYP-I)", week: 1 },
+  { code: "t02", label: "Template 02: Initial Proposal (FYP-I)", week: 2 },
+  { code: "t03", label: "Template 03: Proposal Presentation (FYP-I)", week: 4 },
+  { code: "t04", label: "Template 04: Proposal & Planning (FYP-I)", week: 6 },
+  { code: "t05", label: "Template 05: Progress Presentation (FYP-I)", week: 13 },
+  { code: "t06", label: "Template 06: Complete Project Report (FYP-II)", week: 24 },
+  { code: "t07", label: "Template 07: Final Presentation (FYP-II)", week: 26 },
+  { code: "t08", label: "Template 08: Final Documentation (FYP-II)", week: 30 },
 ];
 
 // ─── Token helper ─────────────────────────────
@@ -184,14 +183,12 @@ useEffect(() => {
   }
 
   const feedbackData = uploadedTemplates
-    .filter((t) => t.supervisorRemarks && t.supervisorRemarks.trim() !== "")
-    .map((t) => ({
-      project: studentInfo?.projectTitle || "FYP",
-      milestone: t.label,
-      feedback: t.supervisorRemarks,
-      evaluatedOn: t.uploadedAt,
-    }));
-
+  .filter((t) => t.supervisorRemarks && t.supervisorRemarks.trim() !== "")
+  .map((t) => ({
+    milestone: t.label,
+    feedback: t.supervisorRemarks,
+    evaluatedOn: t.uploadedAt,
+  }));
   setSupervisorFeedbacks(feedbackData);
   setLoadingFeedback(false);
 }, [uploadedTemplates, studentInfo]);
@@ -269,15 +266,14 @@ useEffect(() => {
   };
 
   const feedbackTable = {
-    headers: ["Project", "Milestone", "Feedback", "Evaluated On"],
-    rows: supervisorFeedbacks.map((fb) => ({
-      "Project":      fb.project    || "—",
-      "Milestone":    fb.milestone  || "—",
-      "Feedback":     fb.feedback   || "—",
-      "Evaluated On": fb.evaluatedOn ? fmtDate(fb.evaluatedOn) : "—",
-      __meta: fb,
-    })),
-  };
+  headers: ["Milestone", "Feedback", "Evaluated On"],
+  rows: supervisorFeedbacks.map((fb) => ({
+    "Milestone":    fb.milestone  || "—",
+    "Feedback":     fb.feedback   || "—",
+    "Evaluated On": fb.evaluatedOn ? fmtDate(fb.evaluatedOn) : "—",
+    __meta: fb,
+  })),
+};
 
   // ── Export PDF ─────────────────────────────
   async function exportPDF() {
