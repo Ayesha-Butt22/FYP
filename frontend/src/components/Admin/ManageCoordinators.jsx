@@ -341,7 +341,10 @@ export default function ManageCoordinators() {
 
   return (
     <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
-      <div style={{ flex: sideFormMode ? '2' : '1', transition: 'flex 0.3s ease' }}>
+      {/* ── TABLE SIDE ─────────────────────────────────────────────────────────
+          FIX: Use minWidth:0 so the flex child can shrink below its content
+          width. The table itself gets horizontal scroll so buttons never wrap. */}
+      <div style={{ flex: 1, minWidth: 0 }}>
         <DashboardSectionHeader description={"Admins can view the list of coordinators, add new coordinators, update existing coordinator details, and delete coordinators from the system."}>
           Manage Project Coordinators
         </DashboardSectionHeader>
@@ -361,7 +364,9 @@ export default function ManageCoordinators() {
         ) : rows.length === 0 ? (
           <div style={{ textAlign: "center", padding: 20, color: '#666' }}>No coordinators found</div>
         ) : (
-          <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+          /* FIX: overflowX:'auto' lets the table scroll horizontally instead of
+             squishing columns / wrapping buttons when the side panel opens. */
+          <div style={{ maxHeight: '70vh', overflowY: 'auto', overflowX: 'auto' }}>
             <AppTable
               headers={headers}
               rows={rows.map(({ Name, Email, Department, isProjectHead }) => ({ 
@@ -370,9 +375,18 @@ export default function ManageCoordinators() {
                 Department: isProjectHead ? `${Department.replace(" (Head Coordinator)", "")} (Head Coordinator)` : Department
               }))}
               renderActions={(row, i) => (
-                <>
+                /* FIX: flex container with nowrap keeps all buttons in one row.
+                   Each button has whiteSpace:'nowrap' + flexShrink:0 so it
+                   never collapses or breaks its label onto a second line. */
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'nowrap',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}>
                   <button
                     className="table-action-btn"
+                    style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
                     onClick={() => handleEdit(rows[i], i)}
                     disabled={sideFormMode && editIndex === i || loading}
                   >
@@ -381,7 +395,7 @@ export default function ManageCoordinators() {
 
                   <button
                     className="table-action-btn"
-                    style={{ background: "#f43f5e", marginLeft: 8 }}
+                    style={{ background: "#f43f5e", whiteSpace: 'nowrap', flexShrink: 0 }}
                     onClick={() => handleDelete(i)}
                     disabled={sideFormMode || loading}
                   >
@@ -390,7 +404,7 @@ export default function ManageCoordinators() {
 
                   <button
                     className="table-action-btn"
-                    style={{ background: "rgb(1 51 122)", color: "#fff", marginLeft: 8 }}
+                    style={{ background: "rgb(1 51 122)", color: "#fff", whiteSpace: 'nowrap', flexShrink: 0 }}
                     onClick={() => handleRemove(i)}
                     disabled={sideFormMode || loading}
                     title="Remove Coordinator (Convert to Supervisor)"
@@ -402,8 +416,9 @@ export default function ManageCoordinators() {
                     className="table-action-btn"
                     style={{ 
                       background: rows[i].isProjectHead ? "#6c757d" : "rgb(37 99 235)", 
-                      color: "#fff", 
-                      marginLeft: 8 
+                      color: "#fff",
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
                     }}
                     onClick={() => handleMakeIncharge(i)}
                     disabled={sideFormMode || loading || rows[i].isProjectHead}
@@ -415,9 +430,10 @@ export default function ManageCoordinators() {
                   <button
                     className="table-action-btn"
                     style={{
-                      background:  rows[i].Department == 'all' ? "#6c757d" : "rgb(37 99 235)",
-                      color: "#fff", 
-                      marginLeft: 8 
+                      background: rows[i].Department == 'all' ? "#6c757d" : "rgb(37 99 235)",
+                      color: "#fff",
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
                     }}
                     onClick={() => handleMakeFYPHead(i)}
                     disabled={sideFormMode || loading || rows[i].Department == 'all'}
@@ -427,7 +443,7 @@ export default function ManageCoordinators() {
                     ? (rows[i].Department == 'all' ? 'Already head' : 'Make FYP Head')
                     : 'Make FYP Head'}
                   </button>
-                </>
+                </div>
               )}
             />
           </div>
@@ -436,7 +452,7 @@ export default function ManageCoordinators() {
 
       {sideFormMode && (
         <div style={{
-          flex: '1',
+          flex: '0 0 360px',       /* FIX: fixed width, never grows/shrinks */
           minWidth: '340px',
           maxWidth: '400px',
           backgroundColor: '#f8f9fa',

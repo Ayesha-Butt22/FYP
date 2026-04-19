@@ -43,7 +43,7 @@ export default function StudentWhiteboard() {
   return (
     <Box className="student-whiteboard-root" aria-live="polite">
       <DashboardSectionHeader description="Read instructions from your supervisor. Check this regularly for updates and action items.">
-        Supervisor Instructions
+        Whiteboard
       </DashboardSectionHeader>
 
       <Stack spacing={2} sx={{ mt: 2 }}>

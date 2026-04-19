@@ -348,7 +348,7 @@ if (activitiesData.success && Array.isArray(activitiesData.activities)) {
         aria-labelledby="supervisor-notes-dialog"
       >
         <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pr: 1 }}>
-          <span style={{ fontWeight: 800, color: "#01337a" }}>Supervisor Instructions</span>
+          <span style={{ fontWeight: 700, color: "#01337a" , fontSize:"28px" }}>whiteboard</span>
           <IconButton aria-label="close" onClick={() => setWhiteboardOpen(false)} size="large">
             <CloseIcon />
           </IconButton>
