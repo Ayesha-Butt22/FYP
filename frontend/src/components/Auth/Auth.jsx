@@ -21,23 +21,19 @@ export default function Auth() {
   const query = useQuery();
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState("register"); // initial UI state uses classes to show login/register panes
+  const [mode, setMode] = useState("register");
   const [registerData, setRegisterData] = useState({});
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // NEW: forgot-password UI state (stays on same page, doesn't call APIs)
-  // forgotState: null | "askEmail" | "showResetFields"
   const [forgotState, setForgotState] = useState(null);
   const [forgotEmail, setForgotEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
-  // Only student registration allowed
   const selectedRole = "student";
 
-  // Handle field changes
   const clearFieldError = useCallback((fieldName) => {
     setErrors(prev => {
       if (prev[fieldName]) {
@@ -59,7 +55,6 @@ export default function Auth() {
     clearFieldError(fieldName);
   }, [clearFieldError]);
 
-  // Dashboard route
   const getDashboardRoute = (role) => {
     const routes = {
       admin: "/dashboard/admin",
@@ -70,7 +65,6 @@ export default function Auth() {
     return routes[role] || "/dashboard";
   };
 
-  // Validate registration fields
   const validateRegister = (data) => {
     const errs = {};
     if (!data.name?.trim()) errs.name = "Name is required.";
@@ -81,7 +75,6 @@ export default function Auth() {
     return errs;
   };
 
-  // Validate login fields
   const validateLogin = (data) => {
     const errs = {};
     if (!data.email) errs.email = "Please enter your email.";
@@ -89,52 +82,47 @@ export default function Auth() {
     return errs;
   };
 
-
-  // Login
-const handleLogin = async (e) => {
-  e.preventDefault();
-  // If forgot flow active, do not submit login
-  if (forgotState) return;
-  const validation = validateLogin(loginData);
-  setErrors(validation);
-  if (Object.keys(validation).length > 0) {
-    toastService.error("Please fix the errors and try again.");
-    return;
-  }
-  setIsLoading(true);
-  try {
-    const result = await authService.login(loginData);
-    if (result.success) {
-      toastService.success("Login successful! Welcome back.");
-      const userData = authService.getUserData();
-
-      // CHANGED: support roles array; fall back to single role
-      const roles = userData.roles?.length > 0
-        ? userData.roles
-        : (userData.role ? [userData.role] : []);
-
-      // Set activeRole to first role if not already set
-      const existingActive = localStorage.getItem("activeRole");
-      const activeRole = (existingActive && roles.includes(existingActive))
-        ? existingActive
-        : roles[0] || userData.role;
-
-      localStorage.setItem("activeRole", activeRole);
-      localStorage.setItem("roles", JSON.stringify(roles));
-
-      const dashboardRoute = getDashboardRoute(activeRole);
-      setTimeout(() => { navigate(dashboardRoute); }, 1000);
-    } else {
-      const errorMessage = result.data?.error || result.error || "Login failed";
-      toastService.error(errorMessage);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (forgotState) return;
+    const validation = validateLogin(loginData);
+    setErrors(validation);
+    if (Object.keys(validation).length > 0) {
+      toastService.error("Please fix the errors and try again.");
+      return;
     }
-  } catch (error) {
-    toastService.error("Network error. Please check your connection and try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
-  // Register
+    setIsLoading(true);
+    try {
+      const result = await authService.login(loginData);
+      if (result.success) {
+        toastService.success("Login successful! Welcome back.");
+        const userData = authService.getUserData();
+
+        const roles = userData.roles?.length > 0
+          ? userData.roles
+          : (userData.role ? [userData.role] : []);
+
+        const existingActive = localStorage.getItem("activeRole");
+        const activeRole = (existingActive && roles.includes(existingActive))
+          ? existingActive
+          : roles[0] || userData.role;
+
+        localStorage.setItem("activeRole", activeRole);
+        localStorage.setItem("roles", JSON.stringify(roles));
+
+        const dashboardRoute = getDashboardRoute(activeRole);
+        setTimeout(() => { navigate(dashboardRoute); }, 1000);
+      } else {
+        const errorMessage = result.data?.error || result.error || "Login failed";
+        toastService.error(errorMessage);
+      }
+    } catch (error) {
+      toastService.error("Network error. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     const validation = validateRegister(registerData);
@@ -145,18 +133,13 @@ const handleLogin = async (e) => {
     }
     setIsLoading(true);
     try {
-      const payload = {
-        ...registerData,
-        role: "student"
-      };
+      const payload = { ...registerData, role: "student" };
       const result = await authService.register(payload);
       if (result.success) {
         toastService.success("Registration successful! Please login with your credentials.");
         setRegisterData({});
         setMode("login");
-        setTimeout(() => {
-          navigate("/auth");
-        }, 1500);
+        setTimeout(() => { navigate("/auth"); }, 1500);
       } else {
         const errorMessage = result.data?.error || result.error || "Registration failed";
         if (errorMessage.toLowerCase().includes("email") && errorMessage.toLowerCase().includes("exists")) {
@@ -174,7 +157,6 @@ const handleLogin = async (e) => {
     }
   };
 
-  // Student registration fields (department rendered as a dropdown)
   const renderStudentFields = () => (
     <>
       {STUDENT_FIELDS.map(field => (
@@ -189,7 +171,7 @@ const handleLogin = async (e) => {
                 onChange={e => handleRegisterChange("department", e.target.value)}
                 disabled={isLoading}
                 style={{
-                  width: "100%",
+                  width: "85%",
                   padding: "14px 18px",
                   borderRadius: "8px",
                   border: "1.5px solid var(--input-border)",
@@ -215,7 +197,6 @@ const handleLogin = async (e) => {
                 value={registerData[field.name] || ""}
                 onChange={e => handleRegisterChange(field.name, e.target.value)}
                 disabled={isLoading}
-                style={{ paddingRight: field.type === "password" ? "16px" : "16px" }}
               />
               {errors[field.name] && (
                 <div className="error-msg">{errors[field.name]}</div>
@@ -227,13 +208,9 @@ const handleLogin = async (e) => {
     </>
   );
 
-  // ---- Forgot password flow (local UI only) ----
   const openForgot = () => {
-    // show the "Enter your email address" step
     setForgotState("askEmail");
-    // ensure login pane visible
     setMode("login");
-    // clear previous values
     setForgotEmail("");
     setNewPassword("");
     setConfirmNewPassword("");
@@ -247,42 +224,39 @@ const handleLogin = async (e) => {
     setConfirmNewPassword("");
     setErrors({});
   };
-// Replace handleForgotEmailSubmit with this:
-const handleForgotEmailSubmit = async (e) => {
-  e.preventDefault();
-  if (!forgotEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
-    setErrors({ forgotEmail: "Enter a valid email address." });
-    toastService.error("Enter a valid email address.");
-    return;
-  }
-  setIsLoading(true);
-  
-  try {
-    const res = await fetch("http://localhost:5000/api/auth/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: forgotEmail }),
-    });
-    const data = await res.json();
-    if (data.resetUrl) {
-      toastService.success("Reset link generated! Opening reset page…");
-      cancelForgot();
-      // Open the reset URL — same tab (since it's local demo)
-      window.location.href = data.resetUrl;
-    } else {
-      toastService.info("If that email exists, a reset link was generated.");
-      cancelForgot();
+
+  const handleForgotEmailSubmit = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
+      setErrors({ forgotEmail: "Enter a valid email address." });
+      toastService.error("Enter a valid email address.");
+      return;
     }
-  } catch {
-    toastService.error("Network error. Please try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+    setIsLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      const data = await res.json();
+      if (data.resetUrl) {
+        toastService.success("Reset link generated! Opening reset page…");
+        cancelForgot();
+        window.location.href = data.resetUrl;
+      } else {
+        toastService.info("If that email exists, a reset link was generated.");
+        cancelForgot();
+      }
+    } catch {
+      toastService.error("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleResetPasswordSubmit = (e) => {
     e.preventDefault();
-    // validate new password entries locally
     const errs = {};
     if (!newPassword || newPassword.length < 8) errs.newPassword = "Password must be at least 8 characters.";
     if (newPassword !== confirmNewPassword) errs.confirmNewPassword = "Passwords do not match.";
@@ -291,9 +265,7 @@ const handleForgotEmailSubmit = async (e) => {
       toastService.error("Please fix the errors before submitting.");
       return;
     }
-    // Do NOT call any API (user request). Just show confirmation and reset UI.
     toastService.success("Password fields accepted. (No API call made — demo only.)");
-    // Reset forgot flow and keep user on login pane
     setForgotState(null);
     setForgotEmail("");
     setNewPassword("");
@@ -303,10 +275,12 @@ const handleForgotEmailSubmit = async (e) => {
   return (
     <>
       <div className={`auth-container${mode === "register" ? " active" : ""}`}>
+
+        {/* ── LOGIN / FORGOT pane ── */}
         <div className="form-box login">
-          {/* If forgotState active, we still show login pane but render forgot UI above the login form */}
           {forgotState === "askEmail" ? (
-            <form onSubmit={handleForgotEmailSubmit} noValidate>
+            /* Step 1: ask for email */
+            <form className="forgot-form" onSubmit={handleForgotEmailSubmit} noValidate>
               <h1>Forgot Password</h1>
               <div className="input-box">
                 <input
@@ -320,24 +294,24 @@ const handleForgotEmailSubmit = async (e) => {
               </div>
               {errors.forgotEmail && <div className="error-msg">{errors.forgotEmail}</div>}
               <div style={{ display: "flex", gap: 8 }}>
-                <button type="submit" className="btn main-btn" disabled={isLoading}>Continue</button>
+                <button type="submit" className="btn main-btn" disabled={isLoading}>
+                  Continue
+                </button>
                 <button
-  type="button"
-  className="btn"
-  onClick={cancelForgot}
-  disabled={isLoading}
-  style={{
-    background: "#2563eb",
-    color: "#fff",
-    border: "none"
-  }}
->
-  Cancel
-</button>
+                  type="button"
+                  className="btn"
+                  onClick={cancelForgot}
+                  disabled={isLoading}
+                  style={{ background: "#2563eb", color: "#fff", border: "none" }}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
+
           ) : forgotState === "showResetFields" ? (
-            <form onSubmit={handleResetPasswordSubmit} noValidate>
+            /* Step 2: enter new password */
+            <form className="reset-form" onSubmit={handleResetPasswordSubmit} noValidate>
               <h1>Reset Password</h1>
               <div className="input-box">
                 <input
@@ -359,13 +333,24 @@ const handleForgotEmailSubmit = async (e) => {
                 />
                 {errors.confirmNewPassword && <div className="error-msg">{errors.confirmNewPassword}</div>}
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button type="submit" className="btn main-btn" disabled={isLoading}>Reset Password</button>
-                <button type="button" className="btn alt-btn" onClick={cancelForgot} disabled={isLoading}>Cancel</button>
+              <div className="forgot-btn-group">
+                <button type="submit" className="btn main-btn small-btn" disabled={isLoading}>
+                  Reset Password
+                </button>
+                <button
+                  type="button"
+                  className="btn alt-btn small-btn"
+                  onClick={cancelForgot}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
+
           ) : (
-            <form onSubmit={handleLogin} noValidate>
+            /* Default: login form */
+            <form className="login-form" onSubmit={handleLogin} noValidate>
               <h1>Sign in to Portal</h1>
               <div className="input-box">
                 <input
@@ -393,15 +378,10 @@ const handleForgotEmailSubmit = async (e) => {
               </div>
               {errors.password && <div className="error-msg">{errors.password}</div>}
 
-              <button
-                type="submit"
-                className="btn main-btn"
-                disabled={isLoading}
-              >
-                {isLoading ? "SIGNING IN..." : "SIGN IN"}
-              </button>
+              <button type="submit" className="small-width-btn btn main-btn " disabled={isLoading}>
+  {isLoading ? "SIGNING IN..." : "SIGN IN"}
+</button>
 
-              {/* NEW: Forgot password link - opens local forgot flow on same page */}
               <div style={{ marginTop: 12, textAlign: "center" }}>
                 <button
                   type="button"
@@ -417,9 +397,10 @@ const handleForgotEmailSubmit = async (e) => {
           )}
         </div>
 
+        {/* ── REGISTER pane ── */}
         <div className="form-box register">
           <div className="register-content">
-            <form onSubmit={handleRegister} noValidate>
+            <form className="register-form" onSubmit={handleRegister} noValidate>
               <h1>Student Registration</h1>
               <div style={{
                 background: "#e0e7ff",
@@ -436,26 +417,19 @@ const handleForgotEmailSubmit = async (e) => {
                 This registration is <b>only available for students</b>.
               </div>
               {renderStudentFields()}
-              <button
-                type="submit"
-                className="btn main-btn"
-                disabled={isLoading}
-              >
-                {isLoading ? "REGISTERING..." : "REGISTER"}
-              </button>
+              <button type="submit" className="btn main-btn register-btn" disabled={isLoading}>
+  {isLoading ? "REGISTERING..." : "REGISTER"}
+</button>
             </form>
           </div>
         </div>
 
+        {/* ── Toggle overlay ── */}
         <div className="toggle-box">
           <div className="toggle-panel toggle-left">
             <h1>Hello, Welcome!</h1>
             <p>Don't have an account?</p>
-            <button
-              className="btn alt-btn"
-              onClick={() => setMode("register")}
-              disabled={isLoading}
-            >
+            <button className="btn alt-btn" onClick={() => setMode("register")} disabled={isLoading}>
               Register
             </button>
           </div>
@@ -471,6 +445,7 @@ const handleForgotEmailSubmit = async (e) => {
             </button>
           </div>
         </div>
+
       </div>
     </>
   );

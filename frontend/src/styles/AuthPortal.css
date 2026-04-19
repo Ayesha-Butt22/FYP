@@ -43,7 +43,7 @@ body {
   margin: 0 0 10px 0;
   font-weight: 700;
   text-align: left;
-  color: #23233b;
+  color: #01337a;
   letter-spacing: -1.2px;
 }
 .auth-container p {
@@ -122,7 +122,7 @@ body {
 }
 .input-box input,
 .input-box select {
-  width: 100%;
+  width: 85%;
   padding: 14px 48px 14px 18px;
   background: var(--input-bg);
   border-radius: var(--input-radius);
@@ -144,7 +144,7 @@ body {
 /* Input icon and show button */
 .input-icon {
   position: absolute;
-  right: 18px;
+  right: 90px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 1.21rem;
@@ -367,3 +367,63 @@ body {
     animation: none !important;
   }
 }
+.login-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #eef4fc;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.register-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #eef4fc;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.forgot-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #eef4fc!important;
+  padding: 20px;
+  border-radius: 10px;
+}
+.reset-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #eef4fc;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+
+.login-form,
+.register-form,
+.forgot-form ,
+.reset-form{
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
+}
+
+.small-width-btn {
+  width: 60%;
+  display: block;
+  margin: 20px auto 0 auto; /* center horizontally + top spacing */
+}
+.register-btn {
+  width: 60%;
+  display: block;
+  margin: 20px auto 0 auto; /* top spacing + center */
+}
+
