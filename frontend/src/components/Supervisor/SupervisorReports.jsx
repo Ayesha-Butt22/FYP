@@ -29,42 +29,16 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 
 // ----- Dummy Data Removed -----
 
-
-// Template name mapping
-const getTemplateName = (milestoneName) => {
-  switch (milestoneName) {
-    case "Proposal":
-      return "Template-02: Initial Proposal (MS Word)";
-    case "SRS":
-      return "Template-04: Proposal & Plan (MS Word)";
-    case "Design":
-      return "Template-07: Progress Presentation (MS PowerPoint)";
-    case "Report":
-      return "Template-05: Project Report (MS Word)";
-    case "Defense":
-      return "Template-06: Final Presentation (MS PowerPoint)";
-    default:
-      return "Template-01: Project Team (MS Word)";
-  }
-};
-
-// Week mapping
-const getWeek = (milestoneName) => {
-  switch (milestoneName) {
-    case "Proposal":
-      return "Week 1";
-    case "SRS":
-      return "Week 2";
-    case "Design":
-      return "Week 4";
-    case "Report":
-      return "Week 6";
-    case "Defense":
-      return "13th Week before Final Exams";
-    default:
-      return "Week After Finals";
-  }
-};
+const TEMPLATE_DEFINITIONS = [
+    { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1, fypPart: 1 },
+    { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2, fypPart: 1 },
+    { code: "t03", label: "Template-03: Proposal Presentation (PPT)", week: 4, fypPart: 1 },
+    { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6, fypPart: 1 },
+    { code: "t05", label: "Template-05: Project Report (MS Word)", week: 8, fypPart: 1 },
+    { code: "t07", label: "Template-07: Final Presentation (PPT)", week: 15, fypPart: 1 },
+    { code: "t05", label: "FYP-2: Template-05: Project Report (MS Word)", week: 13, fypPart: 2 },
+    { code: "t06", label: "FYP-2: Template-06: Complete Project Report (PPT)", week: 14, fypPart: 2 }
+];
 
 // Status color coding
 const statusColor = (status) =>
@@ -119,14 +93,20 @@ export default function SupervisorReports() {
 
         setGroupData({
           ...group,
-          milestones: submissions.map(s => ({
-            name: s.templateLabel,
-            week: s.week,
-            status: s.status,
-            feedback: s.supervisorRemarks || "-",
-            score: 0, // No scores in submission model yet
-            max: 0
-          }))
+          milestones: TEMPLATE_DEFINITIONS.map(def => {
+            const s = submissions.find(sub => 
+               sub.templateCode === def.code && 
+               (sub.fypPart === def.fypPart || (!sub.fypPart && def.fypPart === 1))
+            );
+            return {
+              name: def.label,
+              week: def.week,
+              status: s ? s.status : "Pending",
+              feedback: s ? s.supervisorRemarks || "-" : "-",
+              score: 0,
+              max: 0
+            };
+          })
         });
       } catch (err) {
         console.error("Failed to load group details:", err);
@@ -160,7 +140,7 @@ export default function SupervisorReports() {
       startY: 36,
       // Milestone column removed as requested; include Week & Template & Status & Feedback
       head: [["Week", "Template", "Status", "Feedback"]],
-      body: group.milestones.map((m) => [getWeek(m.name), getTemplateName(m.name), m.status, m.feedback || "-"]),
+      body: group.milestones.map((m) => [`Week ${m.week}`, m.name, m.status, m.feedback || "-"]),
     });
     doc.text(`Total Score: ${groupScore}/${groupMax}`, 14, doc.lastAutoTable.finalY + 10);
     doc.save(`GroupReport_${group.maskedId}.pdf`);
@@ -171,8 +151,8 @@ export default function SupervisorReports() {
     if (!group) return;
     const ws = XLSX.utils.json_to_sheet(
       group.milestones.map((m) => ({
-        Week: getWeek(m.name),
-        Template: getTemplateName(m.name),
+        Week: `Week ${m.week}`,
+        Template: m.name,
         Status: m.status,
         Feedback: m.feedback || "-",
       }))
@@ -184,7 +164,7 @@ export default function SupervisorReports() {
 
   return (
     <Box mx="auto" py={3} mr={0} ml={0} pt={0}>
-      <DashboardSectionHeader description={"Here you can see preview evaluation & rubrics. Select \"Particular Group\" to view and respected group record will be displayed "}>Evaluation Report</DashboardSectionHeader>
+      <DashboardSectionHeader description={"Here you can see preview evaluation & rubrics. Select \"Particular Group\" to view and respective group record will be displayed."}>Evaluation Report</DashboardSectionHeader>
 
       <Paper className="reports-paper">
         <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
@@ -277,9 +257,7 @@ export default function SupervisorReports() {
                     <Typography variant="h2" sx={{ fontWeight: 900 }}>{percent}%</Typography>
                   </Box>
 
-                  <Typography variant="h6" fontWeight="700" sx={{ mt: 2, color: '#013379' }}>
-                    Total Academic Score: {groupScore} / {groupMax}
-                  </Typography>
+                  
                 </Box>
 
                 <Box sx={{ p: 2, bgcolor: '#f8fafc', textAlign: 'right', borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px', borderTop: '1px solid #eee' }}>
@@ -324,8 +302,8 @@ export default function SupervisorReports() {
               <TableBody>
                 {group.milestones.map((m, idx) => (
                   <TableRow key={idx}>
-                    <TableCell>{getWeek(m.name)}</TableCell>
-                    <TableCell>{getTemplateName(m.name)}</TableCell>
+                    <TableCell>Week {m.week}</TableCell>
+                    <TableCell>{m.name}</TableCell>
                     <TableCell>
                       <Chip
                         label={m.status}
@@ -334,7 +312,7 @@ export default function SupervisorReports() {
                         className="report-status-chip"
                       />
                     </TableCell>
-                    <TableCell>{m.feedback || <span className="feedback-missing">-</span>}</TableCell>
+                    <TableCell style={{ wordBreak: 'break-word', maxWidth: '300px' }}>{m.feedback || <span className="feedback-missing">-</span>}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

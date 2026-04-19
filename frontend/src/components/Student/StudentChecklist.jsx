@@ -21,17 +21,16 @@ import TemplateService from "../Api/TemplateService.jsx";
 
 const PREVIEW_ROW_LIMIT = 3;
 
-// Template definitions with week mapping
+// Template definitions with week mapping - Synchronized with StudentUploads
 const TEMPLATE_DEFINITIONS = [
-  { code: "t01", label: "Template-01: Project Team List", week: 1 },
-  { code: "t02", label: "Template-02: Initial Proposal", week: 2 },
-  { code: "t03", label: "Template-03: Proposal Presentation", week: 4 },
-  { code: "t04", label: "Template-04: Proposal & Plan", week: 6 },
-  { code: "t05", label: "Template-05: Progress Presentation", week: 13 },
-  { code: "t06", label: "Template-06: Complete Project Report", week: 24 },
-  { code: "t07", label: "Template-07: Final Presentation", week: 26 },
-  { code: "t08", label: "Template-08: Complete Final Presentation", week: 28 },
-  { code: "t09", label: "Template-09: Complete Documentation", week: 30 },
+  { code: "t01", label: "Template-01: Project Team List", week: 1, fypPart: 1 },
+  { code: "t02", label: "Template-02: Initial Proposal", week: 2, fypPart: 1 },
+  { code: "t03", label: "Template-03: Proposal Presentation", week: 4, fypPart: 1 },
+  { code: "t04", label: "Template-04: Proposal & Plan", week: 6, fypPart: 1 },
+  { code: "t05", label: "Template-05: Project Report (Part-1)", week: 16, fypPart: 1 },
+  { code: "t07", label: "Template-07: Final Presentation", week: 16, fypPart: 1 },
+  { code: "t05", label: "Template-05: Project Report (Part-2)", week: 13, fypPart: 2 },
+  { code: "t06", label: "Template-06: Complete Project Report", week: 14, fypPart: 2 },
 ];
 
 function StatusChip({ status }) {
@@ -39,10 +38,10 @@ function StatusChip({ status }) {
   if (s === "approved" || s === "completed" || s === "active") {
     return <Chip label={status} className="chip chip-success" size="small" />;
   }
-  if (s === "overdue" || s === "expired") {
+  if (s === "overdue" || s === "expired" || s === "rejected") {
     return <Chip label={status} className="chip chip-danger" size="small" />;
   }
-  if (s === "in progress" || s === "under review") {
+  if (s === "in progress" || s === "under review" || s === "submitted") {
     return <Chip label={status} className="chip chip-info" size="small" />;
   }
   return <Chip label={status} className="chip chip-warning" size="small" />;
@@ -65,6 +64,7 @@ export default function StudentChecklist() {
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [semesterStart, setSemesterStart] = useState(null);
   const [studentInfo, setStudentInfo] = useState(null);
+  const [fypYear, setFypYear] = useState(1);
 
   // Whiteboard notices state
   const [notices, setNotices] = useState([]);
@@ -95,16 +95,19 @@ export default function StudentChecklist() {
   // Fetch Student Info
   useEffect(() => {
     const loadStudentInfo = async () => {
-      if (!studentId) return;
       try {
-        const data = await TemplateService.getStudentInfo(studentId);
+        const data = await TemplateService.getAuthenticatedStudentInfo();
         setStudentInfo(data);
+        
+        // Check transition or localStorage
+        const storedYear = parseInt(localStorage.getItem("fypYear") || "1");
+        setFypYear(storedYear);
       } catch (err) {
         console.error("Error loading student info:", err);
       }
     };
     loadStudentInfo();
-  }, [studentId]);
+  }, []);
 
   // Fetch Templates
   useEffect(() => {
@@ -112,17 +115,16 @@ export default function StudentChecklist() {
       if (!studentInfo?.groupId) return;
       
       try {
-        console.log("🔍 Fetching templates for group:", studentInfo.groupId);
+        setLoadingTemplates(true);
         const files = await TemplateService.getFiles(studentInfo.groupId);
         
-        console.log("📦 Templates Response:", files);
-
         const normalized = files.map((f) => ({
           code: f.templateCode,
           label: f.templateLabel || `Template ${f.templateCode}`,
           status: f.status || "Pending",
-          uploadedAt: new Date(f.uploadedAt).toLocaleDateString(),
+          uploadedAt: f.uploadedAt ? new Date(f.uploadedAt).toLocaleDateString() : "-",
           week: f.week,
+          fypPart: Number(f.fypPart || 1)
         }));
 
         setTemplates(normalized);
@@ -241,16 +243,25 @@ export default function StudentChecklist() {
     fetchNotes();
   }, [email]);
 
-  // Prepare template rows with due dates
-  const templateRows = TEMPLATE_DEFINITIONS.map((tpl) => {
-    const uploaded = templates.find((t) => t.code === tpl.code);
-    return {
-      label: tpl.label,
-      dueDate: calculateDueDate(semesterStart, tpl.week),
-      status: uploaded ? uploaded.status : "Pending",
-      uploadedAt: uploaded ? uploaded.uploadedAt : "—",
-    };
-  });
+  // Prepare template rows with due dates - Filtered by current FYP year
+  const templateRows = TEMPLATE_DEFINITIONS
+    .filter(tpl => {
+      if (tpl.fypPart === 2 && fypYear < 2) return false;
+      return true;
+    })
+    .map((tpl) => {
+      const uploaded = templates.find((t) => 
+        t.code === tpl.code && 
+        Number(t.fypPart) === Number(tpl.fypPart)
+      );
+      
+      return {
+        label: `${tpl.label} (${tpl.fypPart === 2 ? 'FYP-2' : 'FYP-1'})`,
+        dueDate: calculateDueDate(semesterStart, tpl.week),
+        status: uploaded ? uploaded.status : "Pending",
+        uploadedAt: uploaded ? uploaded.uploadedAt : "—",
+      };
+    });
 
   const templatesPreview = templateRows.slice(0, PREVIEW_ROW_LIMIT);
   const tasksPreview = tasks.slice(0, PREVIEW_ROW_LIMIT);
@@ -361,7 +372,7 @@ export default function StudentChecklist() {
           <Box className="checklist-header">
             <Typography className="checklist-title">Template Submission</Typography>
             <Typography variant="body2" className="checklist-count">
-              {templates.length} uploaded / {TEMPLATE_DEFINITIONS.length} total
+              {templateRows.filter(r => r.status !== 'Pending').length} uploaded / {templateRows.length} total
             </Typography>
           </Box>
 

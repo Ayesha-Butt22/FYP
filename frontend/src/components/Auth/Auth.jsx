@@ -89,7 +89,7 @@ export default function Auth() {
     return errs;
   };
 
-  // Login
+
   // Login
 const handleLogin = async (e) => {
   e.preventDefault();
