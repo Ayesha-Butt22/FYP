@@ -136,7 +136,6 @@ export default function Noticeboard() {
       </button>
       <button
         className="table-action-btn"
-        style={{ background: "#f43f5e" }}
         onClick={() => handleDelete(row)}
       >
         Delete
@@ -145,7 +144,7 @@ export default function Noticeboard() {
   );
 
   return (
-    <div className="nb-root">
+    <div className="noticeboard-header">
       <DashboardSectionHeader description="Post important announcements in one centralized space.">
         Noticeboard
       </DashboardSectionHeader>

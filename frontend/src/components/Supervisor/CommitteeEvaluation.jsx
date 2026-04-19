@@ -333,6 +333,7 @@ export default function CommitteeEvaluation() {
                 const bookedByLabel = slot.bookedBy
                   ? maskGroupId(String(slot.bookedBy?.groupId || slot.bookedBy?._id || slot.bookedBy))
                   : null;
+                const isGroupArchived = slot.bookedBy?.isArchived;
 
                 // ── Enhanced deduplication check ──
                 // If this faculty already submitted for this specific SLOT
@@ -365,7 +366,9 @@ export default function CommitteeEvaluation() {
                     </div>
 
                     {bookedByLabel && (
-                      <div className="eval-sup-booked-group">{bookedByLabel}</div>
+                      <div className="eval-sup-booked-group">
+                        {bookedByLabel} {isGroupArchived && <span style={{fontSize: "0.85em", color: "#64748b"}}>(Archived)</span>}
+                      </div>
                     )}
 
                     {bookedByLabel ? (
@@ -441,7 +444,7 @@ export default function CommitteeEvaluation() {
               const currentSlotFypPart = (activeSlot?.panel?.fypPart || "fyp-1").toLowerCase();
               const isFyp2Slot = currentSlotFypPart === "fyp-2";
               const isEligibleForFyp2 = !!finalEvaluationInfo.eligibility?.isEligibleForFyp2;
-              
+
               const effectivePart = (activeSlot?.panel?.fypPart || finalEvaluationInfo?.fypPart || "fyp-1").toLowerCase().replace("-", "");
               const isPart1 = effectivePart === "fyp1" || effectivePart === "fyp-1" || effectivePart === "part1";
               const isPart2 = effectivePart === "fyp2" || effectivePart === "fyp-2" || effectivePart === "part2";
@@ -481,7 +484,7 @@ export default function CommitteeEvaluation() {
                   {/* Status Info (Helps supervisor see which rubric is active) */}
                   <div className="eval-sup-eligibility-info">
                     <p>
-                      <strong>Evaluation Target:</strong> {deptStr || "N/A"} | {isPart1 ? "FYP-1 (Week 16)" : "FYP-2 (Week 16)"}
+                      <strong>Evaluation Target:</strong> {deptStr || "N/A"} | {isPart1 ? "FYP-1 (Week 16)" : "FYP-2 (Week 14)"}
                     </p>
                   </div>
 

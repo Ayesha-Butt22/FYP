@@ -8,40 +8,40 @@
   --scp1-font-base: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   /* Level colors */
-  --scp1-poor-bg:        #fff5f5;
-  --scp1-poor-border:    #feb2b2;
-  --scp1-poor-text:      #c53030;
-  --scp1-poor-sel-bg:    #dc2626;
-  --scp1-poor-sel-bd:    #991b1b;
-  --scp1-poor-sel-text:  #ffffff;
+  --scp1-poor-bg: #fff5f5;
+  --scp1-poor-border: #feb2b2;
+  --scp1-poor-text: #c53030;
+  --scp1-poor-sel-bg: #dc2626;
+  --scp1-poor-sel-bd: #991b1b;
+  --scp1-poor-sel-text: #ffffff;
 
-  --scp1-norm-bg:        #fffaf0;
-  --scp1-norm-border:    #fbd38d;
-  --scp1-norm-text:      #9c4221;
-  --scp1-norm-sel-bg:    #ea580c;
-  --scp1-norm-sel-bd:    #9a3412;
-  --scp1-norm-sel-text:  #ffffff;
+  --scp1-norm-bg: #fffaf0;
+  --scp1-norm-border: #fbd38d;
+  --scp1-norm-text: #9c4221;
+  --scp1-norm-sel-bg: #ea580c;
+  --scp1-norm-sel-bd: #9a3412;
+  --scp1-norm-sel-text: #ffffff;
 
-  --scp1-good-bg:        #ebf8ff;
-  --scp1-good-border:    #90cdf4;
-  --scp1-good-text:      #2c5282;
-  --scp1-good-sel-bg:    #2563eb;
-  --scp1-good-sel-bd:    #1e40af;
-  --scp1-good-sel-text:  #ffffff;
+  --scp1-good-bg: #ebf8ff;
+  --scp1-good-border: #90cdf4;
+  --scp1-good-text: #2c5282;
+  --scp1-good-sel-bg: #2563eb;
+  --scp1-good-sel-bd: #1e40af;
+  --scp1-good-sel-text: #ffffff;
 
-  --scp1-exc-bg:         #faf5ff;
-  --scp1-exc-border:     #d6bcfa;
-  --scp1-exc-text:       #553c9a;
-  --scp1-exc-sel-bg:     #7c3aed;
-  --scp1-exc-sel-bd:     #5b21b6;
-  --scp1-exc-sel-text:   #ffffff;
+  --scp1-exc-bg: #faf5ff;
+  --scp1-exc-border: #d6bcfa;
+  --scp1-exc-text: #553c9a;
+  --scp1-exc-sel-bg: #7c3aed;
+  --scp1-exc-sel-bd: #5b21b6;
+  --scp1-exc-sel-text: #ffffff;
 
-  --scp1-out-bg:         #f0fff4;
-  --scp1-out-border:     #9ae6b4;
-  --scp1-out-text:       #22543d;
-  --scp1-out-sel-bg:     #059669;
-  --scp1-out-sel-bd:     #065f46;
-  --scp1-out-sel-text:   #ffffff;
+  --scp1-out-bg: #f0fff4;
+  --scp1-out-border: #9ae6b4;
+  --scp1-out-text: #22543d;
+  --scp1-out-sel-bg: #059669;
+  --scp1-out-sel-bd: #065f46;
+  --scp1-out-sel-text: #ffffff;
 }
 
 /* Modal Overlay */
@@ -75,8 +75,15 @@
 }
 
 @keyframes scp1Pop {
-  from { transform: scale(0.96) translateY(30px); opacity: 0; }
-  to   { transform: scale(1)    translateY(0);    opacity: 1; }
+  from {
+    transform: scale(0.96) translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Header */
@@ -179,7 +186,12 @@
   font-weight: 700;
   transition: all 0.2s;
 }
-.scp1-clear-btn:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+
+.scp1-clear-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
 
 .scp1-submit {
   padding: 12px 28px;
@@ -193,7 +205,12 @@
   transition: all 0.2s;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
-.scp1-submit:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4); }
+
+.scp1-submit:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+}
 
 .scp1-close {
   width: 42px;
@@ -208,7 +225,12 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-.scp1-close:hover { background: #f1f5f9; color: #0f172a; transform: rotate(90deg); }
+
+.scp1-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  transform: rotate(90deg);
+}
 
 /* Form */
 form {
@@ -229,9 +251,19 @@ form {
 }
 
 /* Scrollbar */
-.scp1-form-content::-webkit-scrollbar { width: 8px; }
-.scp1-form-content::-webkit-scrollbar-track { background: #f8fafc; }
-.scp1-form-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f8fafc; }
+.scp1-form-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scp1-form-content::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.scp1-form-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  border: 2px solid #f8fafc;
+}
 
 /* Card */
 .scp1-card {
@@ -243,19 +275,34 @@ form {
   transition: all 0.3s ease;
   min-height: min-content;
 }
-.scp1-card:hover { transform: translateX(4px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04); border-color: #d1d5db; }
+
+.scp1-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  border-color: #d1d5db;
+}
 
 /* Indicator bar */
 .scp1-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; width: 6px; height: 100%;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
   background: #e2e8f0;
   border-radius: 20px 0 0 20px;
   transition: background 0.3s;
 }
-.scp1-card--done { border-color: #bfdbfe; background: #fcfdfe; }
-.scp1-card--done::before { background: #3b82f6; }
+
+.scp1-card--done {
+  border-color: #bfdbfe;
+  background: #fcfdfe;
+}
+
+.scp1-card--done::before {
+  background: #3b82f6;
+}
 
 /* Card Header */
 .scp1-card-header {
@@ -266,7 +313,11 @@ form {
   gap: 16px;
 }
 
-.scp1-card-meta { display: flex; align-items: center; gap: 12px; }
+.scp1-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
 .scp1-lo-badge {
   font-size: 13px;
@@ -294,12 +345,37 @@ form {
   border-radius: 10px;
   border: 2px solid;
 }
+
 /* Levels */
-.scp1-chosen-pill--0 { background: var(--scp1-poor-bg); border-color: var(--scp1-poor-border); color: var(--scp1-poor-text); }
-.scp1-chosen-pill--1 { background: var(--scp1-norm-bg); border-color: var(--scp1-norm-border); color: var(--scp1-norm-text); }
-.scp1-chosen-pill--2 { background: var(--scp1-good-bg); border-color: var(--scp1-good-border); color: var(--scp1-good-text); }
-.scp1-chosen-pill--3 { background: var(--scp1-exc-bg); border-color: var(--scp1-exc-border); color: var(--scp1-exc-text); }
-.scp1-chosen-pill--4 { background: var(--scp1-out-bg); border-color: var(--scp1-out-border); color: var(--scp1-out-text); }
+.scp1-chosen-pill--0 {
+  background: var(--scp1-poor-bg);
+  border-color: var(--scp1-poor-border);
+  color: var(--scp1-poor-text);
+}
+
+.scp1-chosen-pill--1 {
+  background: var(--scp1-norm-bg);
+  border-color: var(--scp1-norm-border);
+  color: var(--scp1-norm-text);
+}
+
+.scp1-chosen-pill--2 {
+  background: var(--scp1-good-bg);
+  border-color: var(--scp1-good-border);
+  color: var(--scp1-good-text);
+}
+
+.scp1-chosen-pill--3 {
+  background: var(--scp1-exc-bg);
+  border-color: var(--scp1-exc-border);
+  color: var(--scp1-exc-text);
+}
+
+.scp1-chosen-pill--4 {
+  background: var(--scp1-out-bg);
+  border-color: var(--scp1-out-border);
+  color: var(--scp1-out-text);
+}
 
 /* Description */
 .scp1-card-desc {
@@ -320,12 +396,32 @@ form {
   width: 100%;
 }
 
-@media (max-width: 1100px) { .scp1-options { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 768px)  { .scp1-options { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px)  { .scp1-options { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) {
+  .scp1-options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .scp1-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .scp1-options {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* Hide Radio */
-.scp1-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.scp1-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
 
 .scp1-option {
   border-radius: 16px;
@@ -340,7 +436,11 @@ form {
   gap: 12px;
   position: relative;
 }
-.scp1-option:hover { transform: translateY(-4px); filter: brightness(0.98); }
+
+.scp1-option:hover {
+  transform: translateY(-4px);
+  filter: brightness(0.98);
+}
 
 .scp1-level-tag {
   font-size: 12px;
@@ -352,7 +452,12 @@ form {
   background: rgba(0, 0, 0, 0.05);
 }
 
-.scp1-opt-label { font-size: 15px; font-weight: 600; line-height: 1.4; color: inherit; }
+.scp1-opt-label {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: inherit;
+}
 
 .scp1-opt-marks {
   display: block;
@@ -365,20 +470,75 @@ form {
 }
 
 /* Color Levels Implementation */
-.scp1-option--0 { background: var(--scp1-poor-bg); border-color: var(--scp1-poor-border); color: var(--scp1-poor-text); }
-.scp1-option--0.scp1-option--selected { background: var(--scp1-poor-sel-bg); border-color: var(--scp1-poor-sel-bd); color: var(--scp1-poor-sel-text); box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4); transform: scale(1.04); }
+.scp1-option--0 {
+  background: var(--scp1-poor-bg);
+  border-color: var(--scp1-poor-border);
+  color: var(--scp1-poor-text);
+}
 
-.scp1-option--1 { background: var(--scp1-norm-bg); border-color: var(--scp1-norm-border); color: var(--scp1-norm-text); }
-.scp1-option--1.scp1-option--selected { background: var(--scp1-norm-sel-bg); border-color: var(--scp1-norm-sel-bd); color: var(--scp1-norm-sel-text); box-shadow: 0 8px 20px rgba(234, 88, 12, 0.4); transform: scale(1.04); }
+.scp1-option--0.scp1-option--selected {
+  background: var(--scp1-poor-sel-bg);
+  border-color: var(--scp1-poor-sel-bd);
+  color: var(--scp1-poor-sel-text);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+  transform: scale(1.04);
+}
 
-.scp1-option--2 { background: var(--scp1-good-bg); border-color: var(--scp1-good-border); color: var(--scp1-good-text); }
-.scp1-option--2.scp1-option--selected { background: var(--scp1-good-sel-bg); border-color: var(--scp1-good-sel-bd); color: var(--scp1-good-sel-text); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); transform: scale(1.04); }
+.scp1-option--1 {
+  background: var(--scp1-norm-bg);
+  border-color: var(--scp1-norm-border);
+  color: var(--scp1-norm-text);
+}
 
-.scp1-option--3 { background: var(--scp1-exc-bg); border-color: var(--scp1-exc-border); color: var(--scp1-exc-text); }
-.scp1-option--3.scp1-option--selected { background: var(--scp1-exc-sel-bg); border-color: var(--scp1-exc-sel-bd); color: var(--scp1-exc-sel-text); box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4); transform: scale(1.04); }
+.scp1-option--1.scp1-option--selected {
+  background: var(--scp1-norm-sel-bg);
+  border-color: var(--scp1-norm-sel-bd);
+  color: var(--scp1-norm-sel-text);
+  box-shadow: 0 8px 20px rgba(234, 88, 12, 0.4);
+  transform: scale(1.04);
+}
 
-.scp1-option--4 { background: var(--scp1-out-bg); border-color: var(--scp1-out-border); color: var(--scp1-out-text); }
-.scp1-option--4.scp1-option--selected { background: var(--scp1-out-sel-bg); border-color: var(--scp1-out-sel-bd); color: var(--scp1-out-sel-text); box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4); transform: scale(1.04); }
+.scp1-option--2 {
+  background: var(--scp1-good-bg);
+  border-color: var(--scp1-good-border);
+  color: var(--scp1-good-text);
+}
+
+.scp1-option--2.scp1-option--selected {
+  background: var(--scp1-good-sel-bg);
+  border-color: var(--scp1-good-sel-bd);
+  color: var(--scp1-good-sel-text);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+  transform: scale(1.04);
+}
+
+.scp1-option--3 {
+  background: var(--scp1-exc-bg);
+  border-color: var(--scp1-exc-border);
+  color: var(--scp1-exc-text);
+}
+
+.scp1-option--3.scp1-option--selected {
+  background: var(--scp1-exc-sel-bg);
+  border-color: var(--scp1-exc-sel-bd);
+  color: var(--scp1-exc-sel-text);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+  transform: scale(1.04);
+}
+
+.scp1-option--4 {
+  background: var(--scp1-out-bg);
+  border-color: var(--scp1-out-border);
+  color: var(--scp1-out-text);
+}
+
+.scp1-option--4.scp1-option--selected {
+  background: var(--scp1-out-sel-bg);
+  border-color: var(--scp1-out-sel-bd);
+  color: var(--scp1-out-sel-text);
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+  transform: scale(1.04);
+}
 
 /* Legend Key */
 .scp1-legend {
@@ -392,22 +552,80 @@ form {
   flex-wrap: wrap;
 }
 
-.scp1-legend-label { font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
+.scp1-legend-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
 
-.scp1-legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 2px solid; }
+.scp1-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 2px solid;
+}
 
-.scp1-legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.scp1-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
 
-.scp1-legend-item--0 { background: var(--scp1-poor-bg); border-color: var(--scp1-poor-border); color: var(--scp1-poor-text); }
-.scp1-legend-item--0 .scp1-legend-dot { background: var(--scp1-poor-sel-bg); }
-.scp1-legend-item--1 { background: var(--scp1-norm-bg); border-color: var(--scp1-norm-border); color: var(--scp1-norm-text); }
-.scp1-legend-item--1 .scp1-legend-dot { background: var(--scp1-norm-sel-bg); }
-.scp1-legend-item--2 { background: var(--scp1-good-bg); border-color: var(--scp1-good-border); color: var(--scp1-good-text); }
-.scp1-legend-item--2 .scp1-legend-dot { background: var(--scp1-good-sel-bg); }
-.scp1-legend-item--3 { background: var(--scp1-exc-bg); border-color: var(--scp1-exc-border); color: var(--scp1-exc-text); }
-.scp1-legend-item--3 .scp1-legend-dot { background: var(--scp1-exc-sel-bg); }
-.scp1-legend-item--4 { background: var(--scp1-out-bg); border-color: var(--scp1-out-border); color: var(--scp1-out-text); }
-.scp1-legend-item--4 .scp1-legend-dot { background: var(--scp1-out-sel-bg); }
+.scp1-legend-item--0 {
+  background: var(--scp1-poor-bg);
+  border-color: var(--scp1-poor-border);
+  color: var(--scp1-poor-text);
+}
+
+.scp1-legend-item--0 .scp1-legend-dot {
+  background: var(--scp1-poor-sel-bg);
+}
+
+.scp1-legend-item--1 {
+  background: var(--scp1-norm-bg);
+  border-color: var(--scp1-norm-border);
+  color: var(--scp1-norm-text);
+}
+
+.scp1-legend-item--1 .scp1-legend-dot {
+  background: var(--scp1-norm-sel-bg);
+}
+
+.scp1-legend-item--2 {
+  background: var(--scp1-good-bg);
+  border-color: var(--scp1-good-border);
+  color: var(--scp1-good-text);
+}
+
+.scp1-legend-item--2 .scp1-legend-dot {
+  background: var(--scp1-good-sel-bg);
+}
+
+.scp1-legend-item--3 {
+  background: var(--scp1-exc-bg);
+  border-color: var(--scp1-exc-border);
+  color: var(--scp1-exc-text);
+}
+
+.scp1-legend-item--3 .scp1-legend-dot {
+  background: var(--scp1-exc-sel-bg);
+}
+
+.scp1-legend-item--4 {
+  background: var(--scp1-out-bg);
+  border-color: var(--scp1-out-border);
+  color: var(--scp1-out-text);
+}
+
+.scp1-legend-item--4 .scp1-legend-dot {
+  background: var(--scp1-out-sel-bg);
+}
 
 /* Open Button */
 .scp1-open-btn {
@@ -422,7 +640,11 @@ form {
   transition: all 0.3s;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
-.scp1-open-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.4); }
+
+.scp1-open-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.4);
+}
 
 /* Badge */
 .scp1-submitted-badge {

@@ -101,7 +101,7 @@
 .mt-btn.primary:hover:not(:disabled) {
   background: #fff;
   color: var(--main-blue);
-  border: 2px solid #fff;
+  border: 2px solid var(--main-blue);
   transform: translateY(-2px);
 }
 
@@ -113,12 +113,14 @@
 
 
 .mt-btn.cancel {
-  background: #6c757d;
-  color: #fff;
+  background: #fff;
+  color: var(--main-blue);
+  border: 2px solid var(--main-blue);
 }
 
 .mt-btn.cancel:hover {
-  background: #5a6268;
+  background: var(--main-blue);
+  color: #fff;
   font-size: 1.3rem;
 }
 

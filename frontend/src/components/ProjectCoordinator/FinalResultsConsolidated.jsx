@@ -70,6 +70,9 @@ export default function FinalResultsConsolidated({ role = "coordinator" }) {
         if (res.data.success) {
           let data = res.data.data;
 
+          // Only show results if supervisor evaluation marks are published, OR if the group is archived
+          data = data.filter(r => r.isSupPublished || r.isArchived);
+
           const storageEmail = String(localStorage.getItem("email") || "").toLowerCase().trim();
           let storageSap = String(localStorage.getItem("studentId") || loggedSapId || "").trim();
           if (storageSap === "0" || storageSap === "undefined") storageSap = "";
@@ -82,7 +85,7 @@ export default function FinalResultsConsolidated({ role = "coordinator" }) {
               const belongsToStudent = (storageSap && rSap === storageSap) || (storageEmail && rEmail === storageEmail);
 
               // Only show if results are published by coordinator (either committee or supervisor)
-              return belongsToStudent && (r.isPublished || r.isSupPublished);
+              return belongsToStudent && (r.isPublished || r.isSupPublished || r.isArchived);
             });
           } else if (userRole.includes("supervisor")) {
             const supRes = await axios.get("http://localhost:5000/api/supervisor/groups", {

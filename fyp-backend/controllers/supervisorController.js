@@ -260,6 +260,7 @@ exports.getSupervisorGroups = async (req, res) => {
       result.push({
         maskedGroupId: maskGroupId(group.groupId),
         groupId: (group._id),
+        isArchived: group.isArchived || false,
         special: proposal.projectSpecialization,
         description: proposal.projectTitle || "No Description",
         members: users.map(u => ({ 

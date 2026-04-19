@@ -170,13 +170,6 @@ export default function SupervisorEvaluations() {
 
               if (!groupMatch || !partMatch) return false;
 
-              // Explicit milestone mapping
-              const week = ev.scheduleId?.week || "";
-              if (selectedMilestone.toLowerCase() === "fyp1") {
-                return /week\s*16/i.test(week);
-              } else if (selectedMilestone.toLowerCase() === "fyp2") {
-                return /week\s*14/i.test(week);
-              }
               return true;
             });
             setCommitteeEval(found || null);
@@ -382,7 +375,12 @@ export default function SupervisorEvaluations() {
       .map(ev => {
         const group = groups.find(g => g.id === ev.groupId);
         return {
-          "Group#": group ? group.maskedId : (ev.groupId || ""),
+          "Group#": group ? (
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              {group.maskedId}
+              {group.isArchived && <span style={{ fontSize: "0.85em", color: "#64748b" }}>(Archived)</span>}
+            </span>
+          ) : (ev.groupId || ""),
           "Year": ev.fypYear,
           "Student Marks": <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{ev.studentMarks}</span>,
           "Group Total": <strong>{ev.totalMarks}</strong>,
@@ -585,7 +583,7 @@ export default function SupervisorEvaluations() {
                             type="number"
                             size="small"
                             value={scores[idx]}
-                            disabled={!committeeEval || fetchingComm || groups.find(g => g.id === selectedGroup)?.isArchived}
+                            disabled={!committeeEval || fetchingComm}
                             inputProps={{ min: 0, max: item.maxMarks, className: "marks-input" }}
                             onChange={e => handleScoreChange(idx, e.target.value)}
                           />
@@ -594,7 +592,7 @@ export default function SupervisorEvaluations() {
                           <TextField
                             value={feedback[idx]}
                             onChange={e => handleFeedbackChange(idx, e.target.value)}
-                            disabled={!committeeEval || fetchingComm || groups.find(g => g.id === selectedGroup)?.isArchived}
+                            disabled={!committeeEval || fetchingComm}
                             size="small"
                             placeholder="(optional)"
                             inputProps={{ maxLength: 120, className: "feedback-input" }}
@@ -619,13 +617,6 @@ export default function SupervisorEvaluations() {
             </Stack>
             {formError && <Typography color="error" mb={1}>{formError}</Typography>}
             
-            {groups.find(g => g.id === selectedGroup)?.isArchived ? (
-              <Box sx={{ mt: 2, p: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 2, textAlign: 'center' }}>
-                <Typography color="#64748b" fontWeight={700}>
-                  This project is archived. Evaluations are read-only.
-                </Typography>
-              </Box>
-            ) : (
               <Button
                 variant="contained"
                 color="primary"
@@ -636,7 +627,6 @@ export default function SupervisorEvaluations() {
               >
                 {loading ? "Submitting..." : "Submit Evaluation"}
               </Button>
-            )}
           </>
         ) : (
           <Typography color="#666" fontSize={20} my={3}>

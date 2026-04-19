@@ -62,16 +62,16 @@
 }
 
 .app-table td .table-action-btn {
-  background: #2563eb;
-  color: #fff;
-  border: none;
+  background: #fff;
+  color: #01337a;
+  border: 2px solid #01337a;
   outline: none;
-  padding: 7px 18px;
+  padding: 5px 16px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 700;
   font-size: 0.98rem;
-  transition: background 0.18s, color 0.19s;
+  transition: background 0.18s, color 0.19s, border-color 0.19s;
   margin-right: 8px;
 }
 .app-table td .table-action-btn:last-child {
