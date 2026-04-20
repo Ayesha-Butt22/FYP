@@ -104,7 +104,7 @@ export default function ResetPassword() {
           </button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} noValidate>
+       <form className="reset-form-login" onSubmit={handleSubmit} noValidate>
           <h1>Reset Password</h1>
 
           {/* Email Info Box */}
