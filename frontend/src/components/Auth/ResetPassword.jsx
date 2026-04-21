@@ -75,151 +75,151 @@ export default function ResetPassword() {
   };
 
   return (
-  <div className="auth-container">
-    <div className="form-box login">
-      {expired ? (
-        <div style={{ width: "100%" }}>
-          <h1 style={{ color: "#dc2626" }}>Link Expired</h1>
+    <div className="auth-container">
+      <div className="form-box login">
+        {expired ? (
+          <div style={{ width: "100%" }}>
+            <h1 style={{ color: "#dc2626" }}>Link Expired</h1>
 
-          <div
-            style={{
-              background: "#fef2f2",
-              border: "1.5px solid #fecaca",
-              borderRadius: "10px",
-              padding: "14px",
-              marginTop: "10px",
-              marginBottom: "20px",
-              color: "#7f1d1d",
-              fontWeight: "500",
-            }}
-          >
-            This reset link has expired. Please request a new one.
-          </div>
-
-          <button
-            className="btn main-btn"
-            onClick={() => navigate("/auth")}
-          >
-            Back to Login
-          </button>
-        </div>
-      ) : (
-       <form className="reset-form-login" onSubmit={handleSubmit} noValidate>
-          <h1>Reset Password</h1>
-
-          {/* Email Info Box */}
-          <div
-            style={{
-              background: "#e0e7ff",
-              border: "1.5px solid #2563eb55",
-              borderRadius: "10px",
-              padding: "12px 16px",
-              marginBottom: "15px",
-              fontSize: "0.95rem",
-              color: "#1e3a8a",
-              fontWeight: "500",
-            }}
-          >
-            Resetting for: <b>{decodeURIComponent(email || "")}</b>
-          </div>
-
-          {/* Countdown Box */}
-          <div
-            style={{
-              display: "block",
-              textAlign: "center",
-              background: secondsLeft < 60 ? "#fef2f2" : "#eff6ff",
-              color: secondsLeft < 60 ? "#dc2626" : "#2563eb",
-              borderRadius: "8px",
-              padding: "8px 12px",
-              fontWeight: "700",
-              fontSize: "0.95rem",
-              marginBottom: "18px",
-              border: `1.5px solid ${
-                secondsLeft < 60 ? "#fecaca" : "#bfdbfe"
-              }`,
-            }}
-          >
-            ⏱ Link expires in {formatTime(secondsLeft)}
-          </div>
-
-          {/* New Password */}
-          <div className="input-box">
-            <input
-              type="password"
-              placeholder="New Password"
-              value={newPassword}
-              onChange={(e) => {
-                setNewPassword(e.target.value);
-                setErrors((p) => ({ ...p, newPassword: undefined }));
-              }}
-              disabled={isLoading}
-            />
-            <span className="input-icon">🔒</span>
-          </div>
-          {errors.newPassword && (
-            <div className="error-msg">{errors.newPassword}</div>
-          )}
-
-          {/* Confirm Password */}
-          <div className="input-box">
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                setErrors((p) => ({
-                  ...p,
-                  confirmPassword: undefined,
-                }));
-              }}
-              disabled={isLoading}
-            />
-            <span className="input-icon">🔒</span>
-          </div>
-          {errors.confirmPassword && (
-            <div className="error-msg">{errors.confirmPassword}</div>
-          )}
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="btn main-btn"
-            disabled={isLoading}
-          >
-            {isLoading ? "RESETTING..." : "RESET PASSWORD"}
-          </button>
-
-          {/* Back Link */}
-          <div style={{ marginTop: "14px", textAlign: "center" }}>
-            <button
-              type="button"
-              className="btn link-btn"
-              onClick={() => navigate("/auth")}
+            <div
               style={{
-                background: "transparent",
-                border: "none",
-                color: "#2563eb",
-                cursor: "pointer",
-                fontWeight: "600",
+                background: "#fef2f2",
+                border: "1.5px solid #fecaca",
+                borderRadius: "10px",
+                padding: "14px",
+                marginTop: "10px",
+                marginBottom: "20px",
+                color: "#7f1d1d",
+                fontWeight: "500",
               }}
             >
-              ← Back to Login
+              This reset link has expired. Please request a new one.
+            </div>
+
+            <button
+              className="btn main-btn"
+              onClick={() => navigate("/auth")}
+            >
+              Back to Login
             </button>
           </div>
-        </form>
-      )}
-    </div>
+        ) : (
+          <form className="reset-form-login" onSubmit={handleSubmit} noValidate>
+            <h1>Reset Password</h1>
 
-    {/* OPTIONAL RIGHT PANEL (same feel as login/register) */}
-    <div className="toggle-box">
-      <div className="toggle-panel toggle-left">
-        <h1>Password Reset</h1>
-    <p style={{ fontSize: "0.85rem", color: "white", margin: "6px 0 12px 0", lineHeight: 1.4 }}>
-  Enter a new secure password to regain access to your account.
-</p>
+            {/* Email Info Box */}
+            <div
+              style={{
+                background: "#e0e7ff",
+                border: "1.5px solid #2563eb55",
+                borderRadius: "10px",
+                padding: "12px 16px",
+                marginBottom: "15px",
+                fontSize: "0.95rem",
+                color: "#1e3a8a",
+                fontWeight: "500",
+              }}
+            >
+              Resetting for: <b>{decodeURIComponent(email || "")}</b>
+            </div>
+
+            {/* Countdown Box */}
+            <div
+              style={{
+                display: "block",
+                textAlign: "center",
+                background: secondsLeft < 60 ? "#fef2f2" : "#eff6ff",
+                color: secondsLeft < 60 ? "#dc2626" : "#2563eb",
+                borderRadius: "8px",
+                padding: "8px 12px",
+                fontWeight: "700",
+                fontSize: "0.95rem",
+                marginBottom: "18px",
+                border: `1.5px solid ${secondsLeft < 60 ? "#fecaca" : "#bfdbfe"
+                  }`,
+              }}
+            >
+              ⏱ Link expires in {formatTime(secondsLeft)}
+            </div>
+
+            {/* New Password */}
+            <div className="input-box">
+              <input
+                type="password"
+                placeholder="New Password"
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  setErrors((p) => ({ ...p, newPassword: undefined }));
+                }}
+                disabled={isLoading}
+              />
+              <span className="input-icon">🔒</span>
+            </div>
+            {errors.newPassword && (
+              <div className="error-msg">{errors.newPassword}</div>
+            )}
+
+            {/* Confirm Password */}
+            <div className="input-box">
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setErrors((p) => ({
+                    ...p,
+                    confirmPassword: undefined,
+                  }));
+                }}
+                disabled={isLoading}
+              />
+              <span className="input-icon">🔒</span>
+            </div>
+            {errors.confirmPassword && (
+              <div className="error-msg">{errors.confirmPassword}</div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="btn main-btn"
+              disabled={isLoading}
+            >
+              {isLoading ? "RESETTING..." : "RESET PASSWORD"}
+            </button>
+
+            {/* Back Link */}
+            <div style={{ marginTop: "14px", textAlign: "center" }}>
+              <button
+                type="button"
+                className="btn link-btn"
+                onClick={() => navigate("/auth")}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#2563eb",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                ← Back to Login
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {/* OPTIONAL RIGHT PANEL (same feel as login/register) */}
+      <div className="toggle-box">
+        <div className="toggle-panel toggle-left">
+          <h1>Password Reset</h1>
+          <p style={{ fontSize: "0.85rem", color: "white", margin: "6px 0 12px 0", lineHeight: 1.4 }}>
+            Enter a new secure password to regain access to your account.
+          </p>
+        </div>
       </div>
     </div>
-  </div>
-)};
+  )
+};

@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authService } from "../Api/authService";
+import { authService } from "../Api/authService.jsx";
 import { toastService } from "../ToastService/ToastService.jsx";
 import "../../styles/AuthPortal.css";
 import getUserInfoFromStorage from "./UserInfo.jsx";

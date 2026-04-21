@@ -30,25 +30,27 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 // ----- Dummy Data Removed -----
 
 const TEMPLATE_DEFINITIONS = [
-    { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1, fypPart: 1 },
-    { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2, fypPart: 1 },
-    { code: "t03", label: "Template-03: Proposal Presentation (PPT)", week: 4, fypPart: 1 },
-    { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6, fypPart: 1 },
-    { code: "t05", label: "Template-05: Project Report (MS Word)", week: 8, fypPart: 1 },
-    { code: "t07", label: "Template-07: Final Presentation (PPT)", week: 15, fypPart: 1 },
-    { code: "t05", label: "FYP-2: Template-05: Project Report (MS Word)", week: 13, fypPart: 2 },
-    { code: "t06", label: "FYP-2: Template-06: Complete Project Report (PPT)", week: 14, fypPart: 2 }
+  { code: "t01", label: "Template-01: Project Team List (MS Word)", week: 1, fypPart: 1 },
+  { code: "t02", label: "Template-02: Initial Proposal (MS Word)", week: 2, fypPart: 1 },
+  { code: "t03", label: "Template-03: Proposal Presentation (PPT)", week: 4, fypPart: 1 },
+  { code: "t04", label: "Template-04: Proposal & Plan (MS Word)", week: 6, fypPart: 1 },
+  { code: "t05", label: "Template-05: Project Report (MS Word)", week: 8, fypPart: 1 },
+  { code: "t07", label: "Template-07: Final Presentation (PPT)", week: 15, fypPart: 1 },
+  { code: "t05", label: "FYP-2: Template-05: Project Report (MS Word)", week: 13, fypPart: 2 },
+  { code: "t06", label: "FYP-2: Template-06: Complete Project Report (PPT)", week: 14, fypPart: 2 }
 ];
 
 // Status color coding
 const statusColor = (status) =>
-  status === "Completed"
+  status === "Approved" || status === "Completed"
     ? "success"
-    : status === "In Progress"
-    ? "info"
-    : status === "Pending"
-    ? "info"
-    : "default";
+    : status === "Rejected"
+      ? "error"
+      : status === "In Progress"
+        ? "info"
+        : status === "Pending"
+          ? "warning"
+          : "default";
 
 export default function SupervisorReports() {
   const [groups, setGroups] = useState([]);
@@ -94,9 +96,9 @@ export default function SupervisorReports() {
         setGroupData({
           ...group,
           milestones: TEMPLATE_DEFINITIONS.map(def => {
-            const s = submissions.find(sub => 
-               sub.templateCode === def.code && 
-               (sub.fypPart === def.fypPart || (!sub.fypPart && def.fypPart === 1))
+            const s = submissions.find(sub =>
+              sub.templateCode === def.code &&
+              (sub.fypPart === def.fypPart || (!sub.fypPart && def.fypPart === 1))
             );
             return {
               name: def.label,
@@ -124,7 +126,7 @@ export default function SupervisorReports() {
   const total = 8; // Project has 8 main milestones
   const percent = Math.round((completed / total) * 100);
   const pending = Math.max(0, total - completed);
-  
+
   const groupScore = group ? group.milestones.reduce((sum, m) => sum + (m.score || 0), 0) : 0;
   const groupMax = group ? group.milestones.reduce((sum, m) => sum + (m.max || 0), 0) : 0;
 
@@ -175,7 +177,7 @@ export default function SupervisorReports() {
               label="Select Group"
               onChange={(e) => setSelectedGroupId(e.target.value)}
               size="small"
-              style={{ height: '60px'}}
+              style={{ height: '60px' }}
             >
               {groups.map((g) => (
                 <MenuItem key={g.id} value={g.id}>
@@ -184,16 +186,16 @@ export default function SupervisorReports() {
               ))}
             </Select>
           </FormControl>
-          
+
           {group && (
-             <Button 
-                variant="contained" 
-                startIcon={<InfoIcon />} 
-                onClick={() => setSummaryModalOpen(true)}
-                sx={{ height: '60px', bgcolor: '#013379', '&:hover': { bgcolor: '#012a64' } }}
-             >
-               View Summary
-             </Button>
+            <Button
+              variant="contained"
+              startIcon={<InfoIcon />}
+              onClick={() => setSummaryModalOpen(true)}
+              sx={{ height: '60px', bgcolor: '#013379', '&:hover': { bgcolor: '#012a64' } }}
+            >
+              View Summary
+            </Button>
           )}
         </Stack>
 
@@ -211,7 +213,7 @@ export default function SupervisorReports() {
                 bgcolor: 'white', borderRadius: '16px', boxShadow: 24, p: 0
               }}>
                 {/* Header */}
-                <Box sx={{ 
+                <Box sx={{
                   p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                   bgcolor: '#013379', color: 'white', borderTopLeftRadius: '16px', borderTopRightRadius: '16px'
                 }}>
@@ -257,7 +259,9 @@ export default function SupervisorReports() {
                     <Typography variant="h2" sx={{ fontWeight: 900 }}>{percent}%</Typography>
                   </Box>
 
-                  
+                  {/* <Typography variant="h6" fontWeight="700" sx={{ mt: 2, color: '#013379' }}>
+                    Total Academic Score: {groupScore} / {groupMax}
+                  </Typography> */}
                 </Box>
 
                 <Box sx={{ p: 2, bgcolor: '#f8fafc', textAlign: 'right', borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px', borderTop: '1px solid #eee' }}>
@@ -266,13 +270,13 @@ export default function SupervisorReports() {
               </Box>
             </Modal>
 
-            
+
             {/* Export Buttons */}
             <div className="report-export-btns">
               <Button
                 variant="contained"
                 color="primary"
-                startIcon={<PictureAsPdf/>}
+                startIcon={<PictureAsPdf />}
                 onClick={handleExportPDF}
                 className="export-btn"
               >
@@ -281,7 +285,7 @@ export default function SupervisorReports() {
               <Button
                 variant="outlined"
                 color="success"
-                startIcon={<TableView/>}
+                startIcon={<TableView />}
                 onClick={handleExportExcel}
                 className="export-btn"
               >
@@ -308,7 +312,7 @@ export default function SupervisorReports() {
                       <Chip
                         label={m.status}
                         color={statusColor(m.status)}
-                        style={{ width : '150px' , fontSize: '18px' }}
+                        style={{ width: '150px', fontSize: '18px' }}
                         className="report-status-chip"
                       />
                     </TableCell>

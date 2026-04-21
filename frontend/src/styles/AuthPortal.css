@@ -130,7 +130,7 @@ body {
 
 .input-box input,
 .input-box select {
-  width: 85%;
+  width: 100%;
   padding: 14px 48px 14px 18px;
   background: var(--input-bg);
   border-radius: var(--input-radius);
@@ -156,7 +156,7 @@ body {
 
 .input-icon {
   position: absolute;
-  right: 90px;
+  right: 5px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 1.21rem;
@@ -476,7 +476,8 @@ body {
 /* ── All form wrappers — identical style ── */
 .login-form,
 .register-form,
-.forgot-form {
+.forgot-form,
+.reset-form {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -489,18 +490,7 @@ body {
   margin: auto;
 }
 
-/* Reset Password Form (Login side) - Specificity Boost */
-.form-box .reset-form-login {
-  flex: 0 1 auto;
-  align-self: center;
-  width: 100%;
-  max-width: 440px;
-  background: rgba(238, 244, 252, 0.95);
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(1, 51, 122, 0.08);
-  margin-top: 10px;
-}
+
 
 .reset-info-box {
   margin-bottom: 25px;
@@ -575,12 +565,13 @@ body {
 }
 
 .reset-form-login .input-box input {
-  width: 100% !important; /* Override the global 85% width */
+  width: 90% !important;
+  /* Override the global 85% width */
 }
 
 /* Fix icon position for 100% width override */
 .reset-form-login .input-box .input-icon {
-  right: 18px;
+  right: 76px;
 }
 
 /* Buttons alignment inside reset form */
