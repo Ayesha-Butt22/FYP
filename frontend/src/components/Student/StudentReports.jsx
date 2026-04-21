@@ -291,10 +291,13 @@ export default function StudentReports() {
   // ── Export PDF ─────────────────────────────
   async function exportPDF() {
     try {
-      const [{ default: jsPDF }, html2canvas] = await Promise.all([
-        import("jspdf").then((m) => m.default || m),
-        import("html2canvas").then((m) => m.default || m),
+      const [jspdfModule, html2canvasModule] = await Promise.all([
+        import("jspdf"),
+        import("html2canvas"),
       ]);
+
+      const jsPDF = jspdfModule.jsPDF || jspdfModule.default;
+      const html2canvas = html2canvasModule.default || html2canvasModule;
       const node = reportRef.current;
       if (!node) { callToast("Nothing to export", "error"); return; }
       const canvas = await html2canvas(node, { scale: 2 });
