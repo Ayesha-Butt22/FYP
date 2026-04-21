@@ -15,14 +15,14 @@ const API_BASE = "http://localhost:5000";
 
 // ─── Template definitions ─────────────────────
 const TEMPLATE_DEFINITIONS = [
-  { code: "t01", label: "Template 01: Project Team List (FYP-I)", week: 1 },
-  { code: "t02", label: "Template 02: Initial Proposal (FYP-I)", week: 2 },
-  { code: "t03", label: "Template 03: Proposal Presentation (FYP-I)", week: 4 },
-  { code: "t04", label: "Template 04: Proposal & Planning (FYP-I)", week: 6 },
-  { code: "t05", label: "Template 05: Progress Presentation (FYP-I)", week: 13 },
-  { code: "t06", label: "Template 06: Complete Project Report (FYP-II)", week: 24 },
-  { code: "t07", label: "Template 07: Final Presentation (FYP-II)", week: 26 },
-  { code: "t08", label: "Template 08: Final Documentation (FYP-II)", week: 30 },
+  { code: "t01", label: "Template-01: Project Team List", week: 1, part: 1 },
+  { code: "t02", label: "Template-02: Initial Proposal", week: 2, part: 1 },
+  { code: "t03", label: "Template-03: Proposal Presentation", week: 4, part: 1 },
+  { code: "t04", label: "Template-04: Project Proposal & Plan", week: 6, part: 1 },
+  { code: "t05", label: "Template-05: Project Report (First 5 Chap)", week: 16, part: 1 },
+  { code: "t07", label: "Template-07: Progress Presentation", week: 16, part: 1 },
+  { code: "t05", label: "Template-05: Complete Project Report", week: 13, part: 2 },
+  { code: "t06", label: "Template-06: Final Presentation", week: 14, part: 2 },
 ];
 
 // ─── Token helper ─────────────────────────────
@@ -37,7 +37,7 @@ const getToken = () => {
       const obj = JSON.parse(localStorage.getItem(key) || "{}");
       const tok = obj?.token || obj?.accessToken || obj?.data?.token || obj?.user?.token;
       if (tok) return tok;
-    } catch {}
+    } catch { }
   }
   return "";
 };
@@ -47,7 +47,7 @@ function callToast(message, type = "success") {
   try {
     if (toastService) {
       if (type === "success" && typeof toastService.success === "function") { toastService.success(message); return; }
-      if (type === "error"   && typeof toastService.error   === "function") { toastService.error(message);   return; }
+      if (type === "error" && typeof toastService.error === "function") { toastService.error(message); return; }
       if (typeof toastService.show === "function") { toastService.show(message, { type }); return; }
       if (typeof toastService === "function") { toastService(message); return; }
     }
@@ -86,22 +86,22 @@ function Skeleton({ height = 18, width = "100%", radius = 6 }) {
 // ─── Main Component ───────────────────────────
 export default function StudentReports() {
   const studentEmail = localStorage.getItem("email");
-  const studentId    = localStorage.getItem("studentId");
-  const storedDept   = localStorage.getItem("department");
-  const reportRef    = useRef();
+  const studentId = localStorage.getItem("studentId");
+  const storedDept = localStorage.getItem("department");
+  const reportRef = useRef();
 
   // ── State ──────────────────────────────────
-  const [loadingTemplates,  setLoadingTemplates]  = useState(true);
-  const [loadingMeetings,   setLoadingMeetings]   = useState(true);
-  const [loadingFeedback,   setLoadingFeedback]   = useState(true);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const [loadingMeetings, setLoadingMeetings] = useState(true);
+  const [loadingTasks, setLoadingTasks] = useState(true);
 
-  const [semesterStart,         setSemesterStart]         = useState(null);
-  const [studentInfo,           setStudentInfo]           = useState(null);
-  const [depTemplate,           setDepTemplate]           = useState([]);
-  const [uploadedTemplates,     setUploadedTemplates]     = useState([]);
+  const [semesterStart, setSemesterStart] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [studentInfo, setStudentInfo] = useState(null);
+  const [depTemplate, setDepTemplate] = useState([]);
+  const [uploadedTemplates, setUploadedTemplates] = useState([]);
   const [presentationSchedules, setPresentationSchedules] = useState([]);
-  const [meetings,              setMeetings]              = useState([]);
-  const [supervisorFeedbacks,   setSupervisorFeedbacks]   = useState([]);
+  const [meetings, setMeetings] = useState([]);
 
   // ── 1. Semester start ──────────────────────
   useEffect(() => {
@@ -127,7 +127,7 @@ export default function StudentReports() {
 
   // ── 3. Presentation schedules ──────────────
   useEffect(() => {
-    axios.get(`${API_BASE}/api/deadline/presentation`)
+    axios.get(`${API_BASE}/api/deadlineSchedule/get`)
       .then((r) => { if (r.data.success) setPresentationSchedules(r.data.data || []); })
       .catch((e) => console.error("Schedules:", e));
   }, []);
@@ -139,11 +139,12 @@ export default function StudentReports() {
     TemplateService.getFiles(studentInfo.groupId)
       .then((files) => {
         setUploadedTemplates(files.map((f) => ({
-          code:              f.templateCode,
-          label:             f.templateLabel || `Template ${f.templateCode}`,
-          status:            f.status || "Pending",
-          uploadedAt:        f.uploadedAt,
-          week:              f.week,
+          code: f.templateCode,
+          label: f.templateLabel || `Template ${f.templateCode}`,
+          status: f.status || "Pending",
+          uploadedAt: f.uploadedAt,
+          week: f.week,
+          fypPart: f.fypPart, // Added part
           supervisorRemarks: f.supervisorRemarks || "",
         })));
       })
@@ -159,11 +160,11 @@ export default function StudentReports() {
       .then((r) => {
         if (r.data.success && Array.isArray(r.data.meetings)) {
           setMeetings(r.data.meetings.map((m) => ({
-            id:          m._id,
-            meetingDate: m.date || "—",
+            id: m._id,
+            meetingDate: m.date ? fmtDate(m.date) : "—", // Format date here
             meetingTime: m.time || "—",
-            supervisor:  m.supervisorEmail ? m.supervisorEmail.split("@")[0] : "Unknown",
-            status:      m.status === 2 ? "Done" : m.status === 1 ? "Booked" : "Available",
+            supervisor: m.supervisorEmail ? m.supervisorEmail.split("@")[0] : "Unknown",
+            status: m.status === 2 ? "Done" : m.status === 1 ? "Booked" : "Available",
           })));
         } else {
           setMeetings([]);
@@ -173,30 +174,27 @@ export default function StudentReports() {
       .finally(() => setLoadingMeetings(false));
   }, [studentEmail]);
 
-  // ── 6. Supervisor feedback ─────────────────
-  // ── NEW: Supervisor feedback from templates ──
-useEffect(() => {
-  if (!uploadedTemplates.length) {
-    setSupervisorFeedbacks([]);
-    setLoadingFeedback(false);
-    return;
-  }
+  // ── 6. Tasks ───────────────────────────────
+  useEffect(() => {
+    const token = getToken();
+    if (!token) return;
+    setLoadingTasks(true);
+    axios.get(`${API_BASE}/api/tasks`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then((r) => {
+        setTasks(r.data.success ? r.data.tasks : []);
+      })
+      .catch((e) => { console.error("Tasks:", e); setTasks([]); })
+      .finally(() => setLoadingTasks(false));
+  }, []);
 
-  const feedbackData = uploadedTemplates
-  .filter((t) => t.supervisorRemarks && t.supervisorRemarks.trim() !== "")
-  .map((t) => ({
-    milestone: t.label,
-    feedback: t.supervisorRemarks,
-    evaluatedOn: t.uploadedAt,
-  }));
-  setSupervisorFeedbacks(feedbackData);
-  setLoadingFeedback(false);
-}, [uploadedTemplates, studentInfo]);
+
 
   // ── Presentation due date helper ───────────
   const getPresentationDueDate = (week) => {
     const schedule = presentationSchedules.find((s) => {
-      if (week === 4  && s.week === "Week 4") return true;
+      if (week === 4 && s.week === "Week 4") return true;
       if (week === 13 && s.week === "13th Week before Final Exams") return true;
       return false;
     });
@@ -217,40 +215,63 @@ useEffect(() => {
     return TEMPLATE_DEFINITIONS
       .filter((tpl) => depCodes.includes(tpl.code))
       .map((tpl) => {
-        const uploaded = uploadedTemplates.find((t) => t.code === tpl.code);
-        const dueDate  = (tpl.code === "t03" || tpl.code === "t05")
+        // Find by code AND part
+        const uploaded = uploadedTemplates.find((t) =>
+          t.code === tpl.code &&
+          Number(t.fypPart) === Number(tpl.part)
+        );
+
+        const dueDate = (tpl.code === "t03" || tpl.code === "t05")
           ? getPresentationDueDate(tpl.week)
           : calculateDueDate(semesterStart, tpl.week);
+
         return {
-          code:    tpl.code,
-          name:    tpl.label,
-          status:  uploaded?.status || "Pending",
+          code: tpl.code,
+          name: tpl.label,
+          week: tpl.week,
+          part: tpl.part === 1 ? "FYP-1" : "FYP-2",
+          status: uploaded?.status || "Pending",
           dueDate,
           remarks: uploaded?.supervisorRemarks || "—",
+          evaluatedOn: uploaded?.uploadedAt || null, // Capture evaluation/upload date
         };
       });
   }, [depTemplate, uploadedTemplates, semesterStart, presentationSchedules]);
 
   // ── Summary ────────────────────────────────
   const summary = useMemo(() => ({
-    approved:         milestoneRows.filter((m) => m.status?.toLowerCase() === "approved").length,
-    underReview:      milestoneRows.filter((m) => m.status?.toLowerCase() === "under review").length,
-    pending:          milestoneRows.filter((m) => m.status?.toLowerCase() === "pending").length,
-    doneMeetings:     meetings.filter((m) => m.status === "Done").length,
+    approved: milestoneRows.filter((m) => m.status?.toLowerCase() === "approved").length,
+    underReview: milestoneRows.filter((m) => m.status?.toLowerCase() === "under review").length,
+    pending: milestoneRows.filter((m) => m.status?.toLowerCase() === "pending").length,
+    doneMeetings: meetings.filter((m) => m.status === "Done").length,
     upcomingMeetings: meetings.filter((m) => m.status === "Booked").length,
-    totalMeetings:    meetings.length,
-    feedbackCount:    supervisorFeedbacks.length,
-  }), [milestoneRows, meetings, supervisorFeedbacks]);
+    totalMeetings: meetings.length,
+    tasksDone: tasks.filter(t => t.progress === 100).length,
+    tasksTotal: tasks.length
+  }), [milestoneRows, meetings, tasks]);
 
   // ── Table definitions ──────────────────────
   const milestonesTable = {
-    headers: ["Template Name", "Due Date", "Status", "Remarks"],
+    headers: ["Milestone Name", "Part", "Week", "Deadline", "Evaluated On", "Status", "Supervisor Remarks"],
     rows: milestoneRows.map((m) => ({
-      "Template Name": m.name    || "—",
-      "Due Date":      m.dueDate || "—",
-      "Status":        m.status  || "—",
-      "Remarks":       m.remarks || "—",
+      "Milestone Name": m.name || "—",
+      "Part": m.part || "—",
+      "Week": `Wk-${m.week}`,
+      "Deadline": m.dueDate || "—",
+      "Evaluated On": m.evaluatedOn ? fmtDate(m.evaluatedOn) : "—", // Map the date here
+      "Status": m.status || "—",
+      "Supervisor Remarks": m.remarks || "—",
       __meta: m,
+    })),
+  };
+
+  const tasksTable = {
+    headers: ["Task Title", "Assignee", "Progress"],
+    rows: tasks.map((t) => ({
+      "Task Title": t.title || "—",
+      "Assignee": t.assignedTo || "—",
+      "Progress": `${t.progress || 0}%`,
+      __meta: t,
     })),
   };
 
@@ -258,22 +279,14 @@ useEffect(() => {
     headers: ["Meeting Date", "Time", "Supervisor", "Status"],
     rows: meetings.map((m) => ({
       "Meeting Date": m.meetingDate || "—",
-      "Time":         m.meetingTime || "—",
-      "Supervisor":   m.supervisor  || "—",
-      "Status":       m.status      || "—",
+      "Time": m.meetingTime || "—",
+      "Supervisor": m.supervisor || "—",
+      "Status": m.status || "—",
       __meta: m,
     })),
   };
 
-  const feedbackTable = {
-  headers: ["Milestone", "Feedback", "Evaluated On"],
-  rows: supervisorFeedbacks.map((fb) => ({
-    "Milestone":    fb.milestone  || "—",
-    "Feedback":     fb.feedback   || "—",
-    "Evaluated On": fb.evaluatedOn ? fmtDate(fb.evaluatedOn) : "—",
-    __meta: fb,
-  })),
-};
+
 
   // ── Export PDF ─────────────────────────────
   async function exportPDF() {
@@ -284,12 +297,12 @@ useEffect(() => {
       ]);
       const node = reportRef.current;
       if (!node) { callToast("Nothing to export", "error"); return; }
-      const canvas  = await html2canvas(node, { scale: 2 });
+      const canvas = await html2canvas(node, { scale: 2 });
       const imgData = canvas.toDataURL("image/png");
-      const pdf     = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
-      const pw      = pdf.internal.pageSize.getWidth();
-      const iw      = pw - 40;
-      const ih      = (canvas.height * iw) / canvas.width;
+      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const pw = pdf.internal.pageSize.getWidth();
+      const iw = pw - 40;
+      const ih = (canvas.height * iw) / canvas.width;
       pdf.addImage(imgData, "PNG", 20, 20, iw, ih);
       pdf.save(`FYP-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
       callToast("PDF exported", "success");
@@ -303,30 +316,35 @@ useEffect(() => {
   async function exportExcel() {
     try {
       const XLSX = await import("xlsx");
-      const wb   = XLSX.utils.book_new();
+      const wb = XLSX.utils.book_new();
 
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-        ["Template Name", "Due Date", "Status", "Remarks"],
-        ...milestoneRows.map((m) => [m.name, m.dueDate, m.status, m.remarks]),
+        ["Milestone Name", "Part", "Week", "Deadline", "Evaluated On", "Status", "Remarks"],
+        ...milestoneRows.map((m) => [
+          m.name,
+          m.part,
+          `Week-${m.week}`,
+          m.dueDate,
+          m.evaluatedOn ? fmtDate(m.evaluatedOn) : "—",
+          m.status,
+          m.remarks
+        ]),
       ]), "Templates");
+
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+        ["Task Title", "Assignee", "Progress"],
+        ...tasks.map((t) => [t.title, t.assignedTo, `${t.progress}%`]),
+      ]), "Tasks");
 
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
         ["Meeting Date", "Time", "Supervisor", "Status"],
         ...meetings.map((m) => [m.meetingDate, m.meetingTime, m.supervisor, m.status]),
       ]), "Meetings");
 
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-        ["Project", "Milestone", "Feedback", "Evaluated On"],
-        ...supervisorFeedbacks.map((fb) => [
-          fb.project, fb.milestone, fb.feedback,
-          fb.evaluatedOn ? fmtDate(fb.evaluatedOn) : "—",
-        ]),
-      ]), "Feedback");
-
       const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      const blob  = new Blob([wbout], { type: "application/octet-stream" });
-      const url   = URL.createObjectURL(blob);
-      const a     = Object.assign(document.createElement("a"), {
+      const blob = new Blob([wbout], { type: "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const a = Object.assign(document.createElement("a"), {
         href: url,
         download: `FYP-Report-${new Date().toISOString().slice(0, 10)}.xlsx`,
       });
@@ -383,7 +401,7 @@ useEffect(() => {
           <Divider sx={{ my: 1 }} />
           {loadingTemplates ? (
             <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-              {[1,2,3].map((i) => (
+              {[1, 2, 3].map((i) => (
                 <Box key={i} sx={{ width: 180 }}>
                   <Skeleton height={14} />
                   <Skeleton height={20} />
@@ -405,9 +423,9 @@ useEffect(() => {
                 </Typography>
               </Box>
               <Box className="report-card">
-                <label>Supervisor Feedback</label>
+                <label>Tasks</label>
                 <Typography className="report-card-value">
-                  {summary.feedbackCount} comment{summary.feedbackCount !== 1 ? "s" : ""}
+                  {summary.tasksDone} completed &bull; {summary.tasksTotal} total
                 </Typography>
               </Box>
             </Box>
@@ -418,7 +436,7 @@ useEffect(() => {
         <Paper className="report-table-wrap" elevation={0}>
           <label style={{ fontWeight: 700, color: "#01337a" }}>Templates &amp; Milestones</label>
           {loadingTemplates ? (
-            [1,2,3].map((i) => <Skeleton key={i} height={32} radius={4} />)
+            [1, 2, 3].map((i) => <Skeleton key={i} height={32} radius={4} />)
           ) : milestoneRows.length === 0 ? (
             <Typography sx={{ color: "#94a3b8", fontSize: 13, mt: 1 }}>
               Koi template nahi mila.
@@ -428,11 +446,25 @@ useEffect(() => {
           )}
         </Paper>
 
+        {/* ── Tasks Table ── */}
+        <Paper className="report-table-wrap" elevation={0}>
+          <label style={{ fontWeight: 700, color: "#01337a" }}>Tasks</label>
+          {loadingTasks ? (
+            [1, 2, 3].map((i) => <Skeleton key={i} height={32} radius={4} />)
+          ) : tasks.length === 0 ? (
+            <Typography sx={{ color: "#94a3b8", fontSize: 13, mt: 1 }}>
+              Koi task assign nahi hua abhi.
+            </Typography>
+          ) : (
+            <AppTable headers={tasksTable.headers} rows={tasksTable.rows} />
+          )}
+        </Paper>
+
         {/* ── Meetings Table ── */}
         <Paper className="report-table-wrap" elevation={0}>
           <label style={{ fontWeight: 700, color: "#01337a" }}>Meetings</label>
           {loadingMeetings ? (
-            [1,2].map((i) => <Skeleton key={i} height={32} radius={4} />)
+            [1, 2].map((i) => <Skeleton key={i} height={32} radius={4} />)
           ) : meetings.length === 0 ? (
             <Typography sx={{ color: "#94a3b8", fontSize: 13, mt: 1 }}>
               Koi meeting book nahi hui abhi.
@@ -442,19 +474,7 @@ useEffect(() => {
           )}
         </Paper>
 
-        {/* ── Supervisor Feedback Table ── */}
-        <Paper className="report-table-wrap" elevation={0}>
-          <label style={{ fontWeight: 700, color: "#01337a" }}>Supervisor Feedback</label>
-          {loadingFeedback ? (
-            [1,2].map((i) => <Skeleton key={i} height={32} radius={4} />)
-          ) : supervisorFeedbacks.length === 0 ? (
-            <Typography sx={{ color: "#94a3b8", fontSize: 13, mt: 1 }}>
-              Abhi koi supervisor feedback nahi aya.
-            </Typography>
-          ) : (
-            <AppTable headers={feedbackTable.headers} rows={feedbackTable.rows} />
-          )}
-        </Paper>
+
 
       </div>
     </Box>
