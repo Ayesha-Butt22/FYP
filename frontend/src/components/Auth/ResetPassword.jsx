@@ -186,6 +186,12 @@ export default function ResetPassword() {
               type="submit"
               className="btn main-btn"
               disabled={isLoading}
+               style={{
+    width: "65%",
+    marginRight: "auto",
+    marginTop: "12px",
+    display: "block"
+  }}
             >
               {isLoading ? "RESETTING..." : "RESET PASSWORD"}
             </button>
@@ -197,12 +203,20 @@ export default function ResetPassword() {
                 className="btn link-btn"
                 onClick={() => navigate("/auth")}
                 style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#2563eb",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                }}
+    width: "100%",
+    marginRight: "auto",
+    marginTop: "12px",
+    display: "block",
+    background: "#2563eb",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "600",
+    borderRadius: "10px",
+    padding: "14px 22px",
+    fontSize: "1.05rem",
+    boxSizing: "border-box"
+  }}
               >
                 ← Back to Login
               </button>

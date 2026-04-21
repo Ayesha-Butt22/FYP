@@ -189,7 +189,7 @@ export default function Auth() {
                 onChange={e => handleRegisterChange("department", e.target.value)}
                 disabled={isLoading}
                 style={{
-                  width: "100%",
+                  width: "90%",
                   padding: "14px 18px",
                   borderRadius: "8px",
                   border: "1.5px solid var(--input-border)",
@@ -337,7 +337,21 @@ export default function Auth() {
               </div>
             </form>
           ) : forgotState === "showResetFields" ? (
-            <form className="reset-form-login" onSubmit={handleResetPasswordSubmit} noValidate>
+            <form
+  className="reset-form-login"
+  onSubmit={handleResetPasswordSubmit}
+  noValidate
+ style={{
+  background: "#eef4fc",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  width: "100%",
+  height: "100%",
+  padding: "40px 20px"
+}}
+>
               <h1>Reset Password</h1>
               <div className="input-box">
                 <input
@@ -360,7 +374,19 @@ export default function Auth() {
                 {errors.confirmNewPassword && <div className="error-msg">{errors.confirmNewPassword}</div>}
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button type="submit" className="btn main-btn" disabled={isLoading}>Reset Password</button>
+                <button
+  type="submit"
+  className="btn main-btn"
+  disabled={isLoading}
+  style={{
+    width: "60%",
+    marginRight: "auto",
+    marginTop: "12px",
+    display: "block"
+  }}
+>
+  Reset Password
+</button>
                 <button type="button" className="btn alt-btn" onClick={cancelForgot} disabled={isLoading}>Cancel</button>
               </div>
             </form>
@@ -398,12 +424,17 @@ export default function Auth() {
               {errors.password && <div className="error-msg">{errors.password}</div>}
 
               <button
-                type="submit"
-                className="btn main-btn"
-                disabled={isLoading}
-              >
-                {isLoading ? "SIGNING IN..." : "SIGN IN"}
-              </button>
+  type="submit"
+  className="btn main-btn"
+  disabled={isLoading}
+  style={{
+    width: "62%",
+    margin: "12px auto 0 auto",
+    display: "block"
+  }}
+>
+  {isLoading ? "SIGNING IN..." : "SIGN IN"}
+</button>
 
               {/* NEW: Forgot password link - opens local forgot flow on same page */}
               <div style={{ marginTop: 12, textAlign: "center" }}>
@@ -441,12 +472,18 @@ export default function Auth() {
               </div>
               {renderStudentFields()}
               <button
-                type="submit"
-                className="btn main-btn"
-                disabled={isLoading}
-              >
-                {isLoading ? "REGISTERING..." : "REGISTER"}
-              </button>
+  type="submit"
+  className="btn main-btn"
+  disabled={isLoading}
+  style={{
+    width: "65%",
+    marginRight: "auto",
+    marginTop: "12px",
+    display: "block"
+  }}
+>
+  {isLoading ? "REGISTERING..." : "REGISTER"}
+</button>
             </form>
           </div>
         </div>
