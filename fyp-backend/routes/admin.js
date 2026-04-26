@@ -1,3 +1,4 @@
+//routes//admin.js
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { protect, isAdmin } = require('../middlewares/authMiddleware');

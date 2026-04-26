@@ -294,7 +294,7 @@ export default function ManageTemplates() {
 
   return (
     <div className="mt-root">
-      <DashboardSectionHeader description={"Here you can upload templates for each department so students can easily download them through their portal."}>
+      <DashboardSectionHeader description={"Here you can upload templates for each department so admin , supervisors and students  can easily download them through their portal."}>
         Manage Templates
       </DashboardSectionHeader>
 

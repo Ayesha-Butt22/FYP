@@ -1,3 +1,4 @@
+//Admin/manageSupervisor
 import React, { useState, useEffect, useCallback } from "react";
 import DashboardSectionHeader from "../Admin/DashboardSectionHeader.jsx";
 import AppTable from "./AppTable";
@@ -308,16 +309,14 @@ export default function ManageSupervisors() {
       const id = rows[editIndex].ID;
 
       const payload = {
-        name: updated.Name,
-        email: updated.Email,
-        department: updated.Department,
-        designation: updated.Designation,
-        specialization: updated.Speciality,
-        availableSlots: updated["Available Slots"],
-        bookedSlots: updated["Booked Slots"],
-        role: 'supervisor',
-      };
-
+  name: updated.Name,
+  email: updated.Email,
+  department: updated.Department,
+  designation: updated.Designation,
+  specialization: updated.Speciality,
+  bookedSlots: updated["Booked Slots"], // only this
+  role: 'supervisor',
+};
       console.log("Update Payload:", payload);
 
       const res = await adminSupervisorApi.updateSupervisor(id, payload);
@@ -348,16 +347,15 @@ export default function ManageSupervisors() {
   const handleAdd = async () => {
     setLoading(true);
     const payload = {
-      name: formData.Name,
-      email: formData.Email,
-      password: formData.Password,
-      role: "supervisor",
-      department: formData.Department,
-      designation: formData.Designation, // FIXED: Added designation
-      specialization: joinSpeciality(formSpeciality),
-      availableSlots: formData.Available_Slots,
-      bookedSlots: formData.Booked_Slots,
-    };
+  name: formData.Name,
+  email: formData.Email,
+  password: formData.Password,
+  role: "supervisor",
+  department: formData.Department,
+  designation: formData.Designation,
+  specialization: joinSpeciality(formSpeciality),
+  bookedSlots: formData.Booked_Slots,
+};
 
     console.log("Create Supervisor Payload:", payload); // Debug log
 
@@ -593,17 +591,13 @@ export default function ManageSupervisors() {
                 )}
               </div>
 
-              <FormInput
-                label="Available Slots"
-                name="Available_Slots"
-                value={formData.Available_Slots}
-                onChange={handleFormChange}
-                type="number"
-                min={0}
-                required
-                error={formErrors.Available_Slots}
-              />
-
+             <FormInput
+  label="Available Slots"
+  name="Available_Slots"
+  value={formData.Available_Slots}
+  type="number"
+  disabled
+/>
               <FormInput
                 label="Booked Slots"
                 name="Booked_Slots"

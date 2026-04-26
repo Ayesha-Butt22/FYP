@@ -1,3 +1,4 @@
+//adminCOntroller 
 const bcrypt = require('bcryptjs');
 const xlsx = require("xlsx");
 const User = require('../models/User');
@@ -109,7 +110,21 @@ exports.getSupervisors = async (req, res) => {
     const list = await User.find({ role: 'supervisor' })
       .select('name email department specialization availableSlots bookedSlots designation')
       .sort({ createdAt: -1 });
-    return res.json(list);
+
+    const enriched = await Promise.all(
+      list.map(async (sup) => {
+        const bookedCount = await Proposal.countDocuments({
+          projectSupervisor: { $regex: new RegExp(`^${sup.email}$`, 'i') }
+        });
+
+        return {
+          ...sup.toObject(),
+          bookedSlots: bookedCount
+        };
+      })
+    );
+
+    return res.json(enriched);
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

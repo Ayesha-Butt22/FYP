@@ -128,8 +128,8 @@ export default function TemplateView() {
   // ─── RENDER ────────────────────────────────────────────────────────────────
   return (
     <Box mx="auto" py={3}>
-      <DashboardSectionHeader description="Coordinator View">
-        View Reports / Templates
+      <DashboardSectionHeader description="Monitor student groups, supervisors, and milestone submissions with status tracking and feedback.">
+        View Reports 
       </DashboardSectionHeader>
 
       {/* ── Loading / Error ── */}
