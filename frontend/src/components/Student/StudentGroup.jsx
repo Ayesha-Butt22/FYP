@@ -220,7 +220,7 @@ export default function StudentGroup() {
   return (
     <>
       <DashboardSectionHeader
-        description="Here you can create your FYP group and add your team members. Once your group is created, you can view all team members and their details here."
+        description="Create your FYP group and add team members."
       >
         My Group
       </DashboardSectionHeader>

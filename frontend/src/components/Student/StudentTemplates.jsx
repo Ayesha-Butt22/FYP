@@ -151,7 +151,7 @@ export default function StudentTemplates() {
   return (
     <Box sx={{ pb: 3 }}>
       <DashboardSectionHeader 
-        description={`Here you can view and download the templates provided by your department.`}
+        description={`Here you can view and download the templates provided by your Project Coordinator.`}
       >
         View Templates
       </DashboardSectionHeader>

@@ -166,7 +166,7 @@ export default function SupervisorReports() {
 
   return (
     <Box mx="auto" py={3} mr={0} ml={0} pt={0}>
-      <DashboardSectionHeader description={"Here you can see preview evaluation & rubrics. Select \"Particular Group\" to view and respective group record will be displayed."}>Evaluation Report</DashboardSectionHeader>
+      <DashboardSectionHeader description={"Here you can see report . Select \"Particular Group\" to view and respective group record will be displayed."}>Evaluation Report</DashboardSectionHeader>
 
       <Paper className="reports-paper">
         <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>

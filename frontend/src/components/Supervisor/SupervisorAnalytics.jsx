@@ -167,10 +167,8 @@ export default function SupervisorAnalytics() {
           </Card>
         </Box>
 
-        {/* Individual Group Trends (Performance Scores) */}
-        <Typography variant="h6" color="#01337a" fontWeight={900} sx={{ mt: 5, mb: 3 }}>
-          📈 Milestone Performance Trends
-        </Typography>
+      
+        
         <Grid container spacing={3}>
           {Object.entries(groupPerformanceSummaries).map(([maskedId, trends]) => {
             const chartData = {

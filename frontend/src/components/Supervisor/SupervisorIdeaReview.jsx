@@ -272,9 +272,7 @@ export default function SupervisorIdeaReview() {
   if (loading) {
     return (
       <>
-        <DashboardSectionHeader description="Here you can review FYP group ideas and proposals.">
-          FYP Idea & Proposal Review
-        </DashboardSectionHeader>
+       
         <Box display="flex" justifyContent="center" sx={{ mt: 6 }}>
           <CircularProgress />
         </Box>
@@ -283,11 +281,13 @@ export default function SupervisorIdeaReview() {
   }
 
   // combined list — pending first (to show timers), then other proposals
-  const combinedIdeas = [...pendingIdeas, ...ideas.filter(a => !pendingIdeas.some(p => p.ideaId === a.ideaId))];
-
+  const combinedIdeas = [
+  ...pendingIdeas.filter(p => (timerCountdowns[p.ideaId] ?? 0) > 0),
+  ...ideas.filter(a => !pendingIdeas.some(p => p.ideaId === a.ideaId))
+];
   return (
     <>
-      <DashboardSectionHeader description="Here you can review FYP group ideas and proposals. Pending proposals show a countdown timer.">
+      <DashboardSectionHeader description="Here you can review FYP group ideas and proposals.">
         FYP Idea & Proposal Review
       </DashboardSectionHeader>
 

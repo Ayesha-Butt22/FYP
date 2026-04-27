@@ -157,7 +157,7 @@ export default function SupervisorGroups() {
 
   return (
     <div className="supervisor-page-container">
-      <DashboardSectionHeader description="View and manage your assigned groups.">My Groups</DashboardSectionHeader>
+      <DashboardSectionHeader description="View your assigned groups.">My Groups</DashboardSectionHeader>
       <div className="supervisor-group-cards-row">
         {assignedGroups.map(group => (
           <div className="supervisor-group-card" key={group._id || group.groupId}>
