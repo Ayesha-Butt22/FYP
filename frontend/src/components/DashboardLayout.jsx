@@ -12,6 +12,7 @@ import ProfileService from "./Api/ProfileService.jsx";
 import getUserInfoFromStorage from "./Auth/UserInfo.jsx";
 import StudentNoticeboard from "./Student/StudentNoticeboard.jsx";
 import {useNavigate} from "react-router-dom";
+import { formatRoleLabel } from "../utils/roleLabel.js";
 
 
 const fadeIn = keyframes`
@@ -67,7 +68,11 @@ export default function DashboardLayout({
   const [profilePic, setProfilePic] = useState(null);
   const fileInputRef = useRef(null);
   const displayName = localStorage.getItem("name") || roleInfo.name || "User";
-  const displayRole = localStorage.getItem("role") || "User";
+  const displayRole = formatRoleLabel({
+    role: localStorage.getItem("role") || "User",
+    department: localStorage.getItem("department") || "",
+    isProjectHead: localStorage.getItem("isProjectHead") === "true",
+  });
   const allowSwitch = localStorage.getItem("isAlsoCOR") || false;
   const email = localStorage.getItem("email");
   const user = getUserInfoFromStorage();

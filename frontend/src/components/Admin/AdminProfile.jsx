@@ -4,6 +4,7 @@ import { User, Mail, Phone, Eye, EyeOff, Camera } from 'lucide-react';
 import DashboardSectionHeader from './DashboardSectionHeader';
 import { authService } from '../Api/AuthService';
 import './AdminProfile.css';
+import { formatRoleLabel } from "../../utils/roleLabel.js";
 
 export default function AdminProfile() {
   const timeoutRef = useRef(null);
@@ -50,7 +51,13 @@ export default function AdminProfile() {
           const u = res.data.user;
           setAdminData({
             name: u.name || 'Admin',
-            role: u.role || 'Admin',
+            role: formatRoleLabel({
+              role: u.role || "Admin",
+              department: u.department || "",
+              isProjectHead: !!u.isProjectHead,
+              isFYPHead: !!u.isFYPHead,
+              isFYPIncharge: !!u.isFYPIncharge,
+            }),
             email: u.email || 'admin@riphah.edu.pk',
             contact: u.contactNumber || '+92 300 1234567',
             avatar: u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'Admin')}&size=200&background=0891b2&color=fff&bold=true&font-size=0.4`

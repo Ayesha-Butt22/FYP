@@ -5,6 +5,7 @@ import adminSupervisorApi from "../Api/AdminApi/AdminApis.jsx";
 import "../Admin/Modal&Button.css";
 import { toastService } from '../ToastService/ToastService.jsx';
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
+import { formatRoleLabel } from "../../utils/roleLabel.js";
 
 function FormInput({ label, error, ...props }) {
   return (
@@ -16,7 +17,26 @@ function FormInput({ label, error, ...props }) {
   );
 }
 
-const headers = ["Name", "Email", "Department"];
+const headers = ["Name", "Email", "Department", "Role"];
+
+const normalizeDepartment = (department = "") => department.trim().toLowerCase();
+const formatDepartmentLabel = (department = "") => department?.trim() || "N/A";
+
+const mapCoordinator = (coord) => {
+  const normalizedDept = normalizeDepartment(coord.department || "");
+  const isFYPHead = normalizedDept === "all" && !!coord.isProjectHead;
+  const isFYPIncharge = normalizedDept !== "all" && !!coord.isProjectHead;
+
+  return {
+    ID: coord._id,
+    Name: coord.name,
+    Email: coord.email,
+    Department: coord.department || "",
+    isProjectHead: coord.isProjectHead || false,
+    isFYPHead,
+    isFYPIncharge,
+  };
+};
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,7 +51,11 @@ const validateForm = (data, showPassword) => {
   } else if (!validateEmail(data.Email)) {
     errors.Email = "Invalid email format";
   }
-  if (!data.Department?.trim()) errors.Department = "Department is required";
+  if (!data.Department?.trim()) {
+    errors.Department = "Department is required";
+  } else if (normalizeDepartment(data.Department) === "all") {
+    errors.Department = "Department cannot be 'All'. Use actual department name.";
+  }
   if (showPassword) {
     if (!data.Password?.trim()) errors.Password = "Password is required";
     if (data.Password && data.Password.length < 6) errors.Password = "Password must be at least 6 characters";
@@ -52,6 +76,38 @@ export default function ManageCoordinators() {
   });
   const [formErrors, setFormErrors] = useState({});
 
+  const inchargeByDepartment = useMemo(() => {
+    const departmentMap = new Map();
+    rows.forEach((row) => {
+      const deptKey = normalizeDepartment(row.Department);
+      if (row.isFYPIncharge && deptKey) {
+        departmentMap.set(deptKey, row);
+      }
+    });
+    return departmentMap;
+  }, [rows]);
+
+  const currentFYPHead = useMemo(
+    () => rows.find((row) => row.isFYPHead) || null,
+    [rows]
+  );
+
+  const fypInchargeRows = useMemo(
+    () =>
+      rows
+        .filter((row) => row.isFYPIncharge)
+        .sort((a, b) => a.Department.localeCompare(b.Department)),
+    [rows]
+  );
+
+  const refreshCoordinators = async () => {
+    const refreshed = await adminSupervisorApi.getCoordinators();
+    if (refreshed.success) {
+      const updatedCoordinators = (refreshed.data?.data || []).map(mapCoordinator);
+      setRows(updatedCoordinators);
+    }
+  };
+
   useEffect(() => {
     const fetchCoordinators = async () => {
       setLoading(true);
@@ -62,13 +118,7 @@ export default function ManageCoordinators() {
         console.log("API Response:", res);
 
         if (res.success) {
-          const coordinators = res.data.data.map(coord => ({
-            ID: coord._id,
-            Name: coord.name,
-            Email: coord.email,
-            Department: coord.department || "",
-            isProjectHead: coord.isProjectHead || false
-          }));
+          const coordinators = (res.data?.data || []).map(mapCoordinator);
           setRows(coordinators);
           console.log("Coordinators loaded:", coordinators);
         } else {
@@ -146,17 +196,7 @@ export default function ManageCoordinators() {
       if (res.success) {
         toastService.success('Coordinator updated successfully!');
         resetForm();
-        const refreshed = await adminSupervisorApi.getCoordinators();
-        if (refreshed.success) {
-          const updatedCoordinators = refreshed.data.data.map(coord => ({
-            ID: coord._id, 
-            Name: coord.name, 
-            Email: coord.email, 
-            Department: coord.department || "",
-            isProjectHead: coord.isProjectHead || false
-          }));
-          setRows(updatedCoordinators);
-        }
+        await refreshCoordinators();
       } else {
         toastService.error("Update failed: " + (res.error || res.data?.message || 'Unknown error'));
       }
@@ -182,17 +222,7 @@ export default function ManageCoordinators() {
       if (res.success) {
         toastService.success('Coordinator added successfully!');
         resetForm();
-        const refreshed = await adminSupervisorApi.getCoordinators();
-        if (refreshed.success) {
-          const updatedCoordinators = refreshed.data.data.map(coord => ({
-            ID: coord._id, 
-            Name: coord.name, 
-            Email: coord.email, 
-            Department: coord.department || "",
-            isProjectHead: coord.isProjectHead || false
-          }));
-          setRows(updatedCoordinators);
-        }
+        await refreshCoordinators();
       } else {
         toastService.error("Add failed: " + (res.error || res.data?.message || 'Unknown error'));
       }
@@ -216,17 +246,7 @@ export default function ManageCoordinators() {
       if (res.success) {
         toastService.success('Coordinator deleted successfully!');
         resetForm();
-        const refreshed = await adminSupervisorApi.getCoordinators();
-        if (refreshed.success) {
-          const updatedCoordinators = refreshed.data.data.map(coord => ({
-            ID: coord._id, 
-            Name: coord.name, 
-            Email: coord.email, 
-            Department: coord.department || "",
-            isProjectHead: coord.isProjectHead || false
-          }));
-          setRows(updatedCoordinators);
-        }
+        await refreshCoordinators();
       } else {
         toastService.error("Delete failed: " + (res.error || res.data?.message || 'Unknown error'));
       }
@@ -264,8 +284,23 @@ export default function ManageCoordinators() {
 
   const handleMakeIncharge = async (idx) => {
     const coordinator = rows[idx];
+    const departmentKey = normalizeDepartment(coordinator.Department);
+    const existingIncharge = inchargeByDepartment.get(departmentKey);
+
+    if (!departmentKey || departmentKey === "all") {
+      toastService.error("Coordinator must belong to a valid department to become FYP Incharge.");
+      return;
+    }
+
+    if (existingIncharge && existingIncharge.ID !== coordinator.ID) {
+      toastService.error(
+        `FYP Incharge already assigned for ${coordinator.Department} department (${existingIncharge.Name}).`
+      );
+      return;
+    }
+
     const confirmed = await Confirm(
-      `Make ${coordinator.Name} the FYP Incharge for ${coordinator.Department.replace(" (Head Coordinator)", "")} department?`
+      `Make ${coordinator.Name} the FYP Incharge for ${coordinator.Department} department?`
     );
     if (!confirmed) return;
 
@@ -276,19 +311,12 @@ export default function ManageCoordinators() {
       
       if (res.success) {
         toastService.success(res.data?.message || "Coordinator is now FYP Incharge!");
-        const refreshed = await adminSupervisorApi.getCoordinators();
-        if (refreshed.success) {
-          const updatedCoordinators = refreshed.data.data.map(coord => ({
-            ID: coord._id,
-            Name: coord.name,
-            Email: coord.email,
-            Department: coord.department || "",
-            isProjectHead: coord.isProjectHead || false
-          }));
-          setRows(updatedCoordinators);
-        }
+        await refreshCoordinators();
       } else {
-        toastService.error("Operation failed: " + (res.error || res.data?.message || "Unknown error"));
+        const backendMessage = res.error || res.data?.message || "Unknown error";
+        toastService.error(
+          `Cannot assign FYP Incharge for ${formatDepartmentLabel(coordinator.Department)}: ${backendMessage}`
+        );
       }
     } catch (error) {
       console.error("Make Incharge Error:", error);
@@ -300,8 +328,15 @@ export default function ManageCoordinators() {
 
   const handleMakeFYPHead = async (idx) => {
     const coordinator = rows[idx];
+    if (currentFYPHead && currentFYPHead.ID !== coordinator.ID) {
+      toastService.error(
+        `FYP Head is already assigned to ${currentFYPHead.Name}. Only one global FYP Head is allowed.`
+      );
+      return;
+    }
+
     const confirmed = await Confirm(
-      `Make ${coordinator.Name} the FYP Head for ${coordinator.Department.replace(" (Head Coordinator)", "")} department?`
+      `Make ${coordinator.Name} the global FYP Head?`
     );
     if (!confirmed) return;
 
@@ -312,19 +347,10 @@ export default function ManageCoordinators() {
       
       if (res.success) {
         toastService.success(res.data?.message || "Coordinator is now FYP Head!");
-        const refreshed = await adminSupervisorApi.getCoordinators();
-        if (refreshed.success) {
-          const updatedCoordinators = refreshed.data.data.map(coord => ({
-            ID: coord._id,
-            Name: coord.name,
-            Email: coord.email,
-            Department: coord.department || "",
-            isProjectHead: coord.isProjectHead || false
-          }));
-          setRows(updatedCoordinators);
-        }
+        await refreshCoordinators();
       } else {
-        toastService.error("Operation failed: " + (res.error || res.data?.message || "Unknown error"));
+        const backendMessage = res.error || res.data?.message || "Unknown error";
+        toastService.error(`Cannot assign global FYP Head: ${backendMessage}`);
       }
     } catch (error) {
       console.error("Make FYP Head Error:", error);
@@ -359,6 +385,8 @@ export default function ManageCoordinators() {
           </button>
         </div>
 
+        
+
         {loading ? (
           <div style={{ textAlign: "center", padding: 20 }}>Loading coordinators...</div>
         ) : rows.length === 0 ? (
@@ -369,10 +397,16 @@ export default function ManageCoordinators() {
           <div style={{ maxHeight: '70vh', overflowY: 'auto', overflowX: 'auto' }}>
             <AppTable
               headers={headers}
-              rows={rows.map(({ Name, Email, Department, isProjectHead }) => ({ 
+              rows={rows.map(({ Name, Email, Department, isFYPHead, isFYPIncharge }) => ({
                 Name, 
                 Email, 
-                Department: isProjectHead ? `${Department.replace(" (Head Coordinator)", "")} (Head Coordinator)` : Department
+                Department: formatDepartmentLabel(Department),
+                Role: formatRoleLabel({
+                  role: "Coordinator",
+                  department: Department,
+                  isFYPHead,
+                  isFYPIncharge,
+                }),
               }))}
               renderActions={(row, i) => (
                 /* FIX: flex container with nowrap keeps all buttons in one row.
@@ -415,33 +449,57 @@ export default function ManageCoordinators() {
                   <button
                     className="table-action-btn"
                     style={{ 
-                      background: rows[i].isProjectHead ? "#6c757d" : "rgb(37 99 235)", 
+                      background: rows[i].isFYPIncharge ? "#6c757d" : "rgb(37 99 235)",
                       color: "#fff",
                       whiteSpace: 'nowrap',
                       flexShrink: 0,
                     }}
                     onClick={() => handleMakeIncharge(i)}
-                    disabled={sideFormMode || loading || rows[i].isProjectHead}
-                    title={rows[i].isProjectHead ? "Already FYP Incharge" : "Make FYP Incharge"}
+                    disabled={
+                      sideFormMode ||
+                      loading ||
+                      rows[i].isFYPHead ||
+                      (inchargeByDepartment.get(normalizeDepartment(rows[i].Department))?.ID &&
+                        inchargeByDepartment.get(normalizeDepartment(rows[i].Department))?.ID !== rows[i].ID)
+                    }
+                    title={
+                      rows[i].isFYPHead
+                        ? "FYP Head cannot be made department incharge"
+                        : rows[i].isFYPIncharge
+                          ? "Already FYP Incharge"
+                          : inchargeByDepartment.get(normalizeDepartment(rows[i].Department))?.ID &&
+                            inchargeByDepartment.get(normalizeDepartment(rows[i].Department))?.ID !== rows[i].ID
+                            ? `FYP Incharge already exists for ${formatDepartmentLabel(rows[i].Department)}`
+                          : "Make FYP Incharge"
+                    }
                   >
-                    {rows[i].isProjectHead ? "FYP Incharge ✓" : "Make FYP Incharge"}
+                    {rows[i].isFYPIncharge ? "FYP Incharge ✓" : "Make FYP Incharge"}
                   </button>
 
                   <button
                     className="table-action-btn"
                     style={{
-                      background: rows[i].Department == 'all' ? "#6c757d" : "rgb(37 99 235)",
+                      background: rows[i].isFYPHead ? "#6c757d" : "rgb(37 99 235)",
                       color: "#fff",
                       whiteSpace: 'nowrap',
                       flexShrink: 0,
                     }}
                     onClick={() => handleMakeFYPHead(i)}
-                    disabled={sideFormMode || loading || rows[i].Department == 'all'}
-                    title="Make FYP Head"
+                    disabled={
+                      sideFormMode ||
+                      loading ||
+                      rows[i].isFYPHead ||
+                      (currentFYPHead && currentFYPHead.ID !== rows[i].ID)
+                    }
+                    title={
+                      rows[i].isFYPHead
+                        ? "Already FYP Head"
+                        : currentFYPHead && currentFYPHead.ID !== rows[i].ID
+                          ? `Global FYP Head already assigned to ${currentFYPHead.Name}`
+                          : "Make global FYP Head"
+                    }
                   >
-                    {rows[i].isProjectHead
-                    ? (rows[i].Department == 'all' ? 'Already head' : 'Make FYP Head')
-                    : 'Make FYP Head'}
+                    {rows[i].isFYPHead ? "FYP Head ✓" : "Make FYP Head"}
                   </button>
                 </div>
               )}

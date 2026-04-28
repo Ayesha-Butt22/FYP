@@ -5,6 +5,7 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 import { authService } from "../Api/AuthService";
 import "./StudentProfile.css";
 import {FaUserTie} from "react-icons/fa";
+import { formatRoleLabel } from "../../utils/roleLabel.js";
 
 export default function StudentProfile() {
   const timeoutRef = useRef(null);
@@ -98,7 +99,13 @@ export default function StudentProfile() {
             name: u.name,
             email: u.email,
             sapId: u.studentId || "N/A",
-            role: u.role || "Student",
+            role: formatRoleLabel({
+              role: u.role || "Student",
+              department: u.department || "",
+              isProjectHead: !!u.isProjectHead,
+              isFYPHead: !!u.isFYPHead,
+              isFYPIncharge: !!u.isFYPIncharge,
+            }),
             department: u.department || "N/A",
             fypYear: u.fypYear || "2024-2025",
             avatar:

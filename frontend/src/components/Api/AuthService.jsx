@@ -115,6 +115,7 @@ storeUserData(data) {
         id: data.user?.id,
         isAlsoCOR: data.user?.isAlsoCOR ? 'true' : 'false',
         IsApproved: data.user?.IsApproved ? 'true' : 'false',
+        isProjectHead: data.user?.isProjectHead ? 'true' : 'false',
     };
 
     Object.entries(userInfo).forEach(([key, value]) => {
@@ -132,7 +133,7 @@ storeUserData(data) {
     // Clear localStorage
     
 clearUserData() {
-    const keys = ['token', 'role', 'roles', 'activeRole', 'name', 'specialization', 'email', 'department', 'studentId', 'IsApproved'];
+    const keys = ['token', 'role', 'roles', 'activeRole', 'name', 'specialization', 'email', 'department', 'studentId', 'IsApproved', 'isProjectHead'];
     keys.forEach(key => localStorage.removeItem(key));
 }
 
@@ -150,6 +151,7 @@ getUserData() {
         department: localStorage.getItem('department'),
         studentId: localStorage.getItem('studentId'),
         isApproved: localStorage.getItem('IsApproved'),
+        isProjectHead: localStorage.getItem('isProjectHead'),
     };
 }
 

@@ -5,6 +5,7 @@ import DashboardSectionHeader from './DashboardSectionHeader';
 import { authService } from '../Api/AuthService';
 import './Profile.css';
 import {FaUserTie} from "react-icons/fa";
+import { formatRoleLabel } from "../../utils/roleLabel.js";
 
 export default function Profile() {
   const timeoutRef = useRef(null);
@@ -48,7 +49,11 @@ export default function Profile() {
           const u = res.data.user;
           setProfile({
             name: u.name,
-            role: u.role || "Project Coordinator",
+            role: formatRoleLabel({
+              role: u.role || "Project Coordinator",
+              department: u.department || "",
+              isProjectHead: !!u.isProjectHead,
+            }),
             department: u.department || "N/A",
             email: u.email,
             avatar: u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=200&background=0891b2&color=fff&bold=true&font-size=0.4`

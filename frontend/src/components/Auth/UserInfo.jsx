@@ -11,6 +11,7 @@ const getUserInfoFromStorage = () => ({
     studentId: localStorage.getItem("studentId") || "",
     mustChangePassword: localStorage.getItem("mustChangePassword"),
     IsApproved: localStorage.getItem("IsApproved"),
+    isProjectHead: localStorage.getItem("isProjectHead"),
 });
 
 export default getUserInfoFromStorage;

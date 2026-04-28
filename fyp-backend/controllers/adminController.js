@@ -426,6 +426,12 @@ exports.makeFYPIncharge = async (req, res) => {
     }
 
     const department = coordinator.department;
+    if (!department || department.trim() === "" || department === "all") {
+      return res.status(400).json({
+        success: false,
+        error: "A valid department is required to assign FYP Incharge"
+      });
+    }
 
     const existingIncharge = await User.findOne({
       department: department,
@@ -434,8 +440,10 @@ exports.makeFYPIncharge = async (req, res) => {
     });
 
     if (existingIncharge) {
-      existingIncharge.isProjectHead = false;
-      await existingIncharge.save();
+      return res.status(409).json({
+        success: false,
+        error: `FYP Incharge already exists for ${department} department`
+      });
     }
 
     coordinator.isProjectHead = true;
@@ -478,17 +486,18 @@ exports.makeFYPHead = async (req, res) => {
     }
 
     const department = coordinator.department;
-
     const existingHead = await User.findOne({
+      role: "coordinator",
       department: "all",
       isProjectHead: true,
       _id: { $ne: id }
     });
 
     if (existingHead) {
-      existingHead.isProjectHead = false;
-      existingHead.department = 'none';
-      await existingHead.save();
+      return res.status(409).json({
+        success: false,
+        error: "FYP Head already exists in the system"
+      });
     }
 
     coordinator.isProjectHead = true;
