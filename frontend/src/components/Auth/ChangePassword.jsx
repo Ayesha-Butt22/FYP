@@ -123,22 +123,38 @@ export default function ChangePassword() {
                                 onChange={(e) => handleChange("oldPassword", e.target.value)}
                                 disabled={isLoading}
                             />
-                            <span className="input-icon" role="img" aria-label="lock">🔑</span>
+                            <span
+  className="input-icon"
+  role="img"
+  aria-label="lock"
+  style={{
+    position: "absolute",
+    right: "calc(10% + 12px)",
+    top: "50%",
+    transform: "translateY(-50%)",
+    fontSize: "1.21rem",
+    color: "#b4bcd6",
+    padding: "50px"
+  }}
+>
+  🔑
+</span>
                             <button
-                                type="button"
-                                className="show-btn"
-                                tabIndex={-1}
-                                onClick={() => setShowPwd((p) => ({...p, old: !p.old}))}
-                                disabled={isLoading}
-                                style={{
-                                    position: "absolute",
-                                    right: 10,
-                                    top: "50%",
-                                    transform: "translateY(-50%)"
-                                }}
-                            >
-                                {showPwd.old ? "Hide" : "Show"}
-                            </button>
+  type="button"
+  className="show-btn"
+  tabIndex={-1}
+  onClick={() => setShowPwd((p) => ({ ...p, old: !p.old }))}
+  disabled={isLoading}
+  style={{
+    position: "absolute",
+    right: "10px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    padding: "50px"
+  }}
+>
+  {showPwd.old ? "Hide" : "Show"}
+</button>
                         </div>
                         {errors.oldPassword && (
                             <div className="error-msg">{errors.oldPassword}</div>
@@ -154,22 +170,38 @@ export default function ChangePassword() {
                                 onChange={(e) => handleChange("newPassword", e.target.value)}
                                 disabled={isLoading}
                             />
-                            <span className="input-icon" role="img" aria-label="lock">🔒</span>
+                           <span
+  className="input-icon"
+  role="img"
+  aria-label="lock"
+  style={{
+    position: "absolute",
+    right: "calc(10% + 12px)",
+    top: "50%",
+    transform: "translateY(-50%)",
+    fontSize: "1.21rem",
+    color: "#b4bcd6",
+    padding: "50px"
+  }}
+>
+  🔒
+</span>
                             <button
-                                type="button"
-                                className="show-btn"
-                                tabIndex={-1}
-                                onClick={() => setShowPwd((p) => ({...p, new: !p.new}))}
-                                disabled={isLoading}
-                                style={{
-                                    position: "absolute",
-                                    right: 10,
-                                    top: "50%",
-                                    transform: "translateY(-50%)"
-                                }}
-                            >
-                                {showPwd.new ? "Hide" : "Show"}
-                            </button>
+  type="button"
+  className="show-btn"
+  tabIndex={-1}
+  onClick={() => setShowPwd((p) => ({ ...p, new: !p.new }))}
+  disabled={isLoading}
+  style={{
+    position: "absolute",
+    right: "10px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    padding: "50px"
+  }}
+>
+  {showPwd.new ? "Hide" : "Show"}
+</button>
                         </div>
                         {errors.newPassword && (
                             <div className="error-msg">{errors.newPassword}</div>
