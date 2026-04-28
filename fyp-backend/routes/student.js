@@ -1,3 +1,4 @@
+//routes//student.js
 const express = require("express");
 const { protect } = require("../middlewares/authMiddleware");
 const studentController = require("../controllers/studentController");

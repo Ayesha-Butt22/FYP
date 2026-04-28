@@ -1,3 +1,4 @@
+//studentController 
 const User = require("../models/User");
 const Group = require("../models/StudentGroup");
 const Proposal = require("../models/StudentProposal");
@@ -34,10 +35,29 @@ exports.getAvailableSupervisors = async (req, res) => {
     const supervisors = await User.find(query)
         .select("name department specialization availableSlots bookedSlots email");
 
+    // Count real booked slots from proposals for each supervisor
+    const enriched = await Promise.all(
+      supervisors.map(async (sup) => {
+        const bookedCount = await Proposal.countDocuments({
+          projectSupervisor: { $regex: new RegExp(`^${sup.email}$`, 'i') }
+        });
+        return {
+          ...sup.toObject(),
+          bookedSlots: bookedCount
+        };
+      })
+    );
+
+    // Only return supervisors who still have remaining slots
+    const available = enriched.filter(sup => {
+      const remaining = (sup.availableSlots || 0) - (sup.bookedSlots || 0);
+      return remaining > 0;
+    });
+
     res.status(200).json({
       success: true,
-      count: supervisors.length,
-      data: supervisors,
+      count: available.length,
+      data: available,
     });
   } catch (error) {
     console.error("Error fetching supervisors:", error);
