@@ -58,6 +58,18 @@ export default function SupervisorEvaluations() {
   const [evalSearch, setEvalSearch] = useState("");
   const [evalMilestoneFilter, setEvalMilestoneFilter] = useState("All");
 
+  const normalizeText = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+
+  const normalizeFypPart = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[\s_-]/g, "");
+
   /* ── Load Groups ── */
   useEffect(() => {
     const loadGroups = async () => {
@@ -162,17 +174,73 @@ export default function SupervisorEvaluations() {
       const fetchComm = async () => {
         try {
           setFetchingComm(true);
-          const res = await axios.get(`http://localhost:5000/api/committee-evaluation/onlyApproved?supervisor=${email}`);
-          if (res.data.success) {
-            const found = res.data.data.find(ev => {
-              const groupMatch = String(ev.groupId?._id || ev.groupId) === String(selectedGroup);
-              const partMatch = ev.scheduleId?.fypPart?.replace("-", "").toLowerCase() === selectedMilestone.toLowerCase();
+          const res = await axios.get(
+            `http://localhost:5000/api/committee-evaluation/onlyApproved?supervisor=${encodeURIComponent(email || "")}`
+          );
+          console.log("[SupervisorEvaluations] committee API response:", res.data);
 
-              if (!groupMatch || !partMatch) return false;
+          if (res.data.success && Array.isArray(res.data.data)) {
+            const selectedGroupId = String(selectedGroup);
+            const selectedPart = normalizeFypPart(selectedMilestone);
 
-              return true;
+            const sameGroup = res.data.data.filter((ev) => {
+              const groupIdFromApi = String(ev?.groupId?._id || ev?.groupId || "");
+              return groupIdFromApi === selectedGroupId;
             });
-            setCommitteeEval(found || null);
+
+            const partMatched = sameGroup.filter(
+              (ev) =>
+                normalizeFypPart(ev?.scheduleId?.fypPart) === selectedPart ||
+                normalizeFypPart(ev?.fypPart) === selectedPart
+            );
+
+            // Prefer finalized entries where CLO totals are present (e.g., Week 16/14).
+            const withCloData = partMatched.filter((ev) =>
+              (ev?.evaluations || []).some((x) => (x?.totalCloMarks || 0) > 0 || x?.cloMarks)
+            );
+
+            // Pick latest record if multiple exist.
+            const sortByNewest = (a, b) =>
+              new Date(b?.createdAt || b?.updatedAt || 0).getTime() -
+              new Date(a?.createdAt || a?.updatedAt || 0).getTime();
+
+            const found =
+              [...withCloData].sort(sortByNewest)[0] ||
+              [...partMatched].sort(sortByNewest)[0] ||
+              [...sameGroup].sort(sortByNewest)[0] ||
+              null;
+
+            if (!found) {
+              console.warn("[SupervisorEvaluations] No committee record found for selected group/year.", {
+                selectedGroup,
+                selectedMilestone,
+              });
+            } else {
+              const hasCloData = (found?.evaluations || []).some(
+                (x) => (x?.totalCloMarks || 0) > 0 || x?.cloMarks
+              );
+              if (!hasCloData) {
+                console.warn("[SupervisorEvaluations] Matched record has no CLO totals, committee marks may show 0.", {
+                  matchedId: found?._id,
+                  week: found?.scheduleId?.week,
+                  fypPart: found?.scheduleId?.fypPart,
+                });
+              }
+              console.log("[SupervisorEvaluations] matched committee record:", {
+                matchedId: found?._id,
+                week: found?.scheduleId?.week,
+                fypPart: found?.scheduleId?.fypPart,
+                studentNames: (found?.evaluations || [])
+                  .flatMap((x) => x?.students || [])
+                  .map((s) => s?.name),
+                totalCloMarks: (found?.evaluations || []).map((x) => x?.totalCloMarks || 0),
+              });
+            }
+
+            setCommitteeEval(found);
+          } else {
+            console.warn("[SupervisorEvaluations] committee API success=false or invalid data array.");
+            setCommitteeEval(null);
           }
         } catch (err) {
           console.error("Error fetching committee eval:", err);
@@ -219,38 +287,38 @@ export default function SupervisorEvaluations() {
     let mapping = {};
     if (committeeEval) {
       const evaluationsList = committeeEval.evaluations || [];
-      const assignedPanelSize = committeeEval.scheduleId?.facultyPanels?.length || evaluationsList.length || 1;
 
       evaluationsList.forEach(ev => {
         (ev.students || []).forEach(s => {
-          if (!mapping[s.name]) {
-            mapping[s.name] = 0;
+          const key = normalizeText(s.name);
+          if (!mapping[key]) {
+            mapping[key] = 0;
           }
         });
       });
 
-     Object.keys(mapping).forEach(studentName => {
-  let studentSum = 0;
-  let count = 0;
+      Object.keys(mapping).forEach(studentName => {
+        let studentSum = 0;
+        let count = 0;
 
-  evaluationsList.forEach(ev => {
-    const stuMatch = ev.students.find(s => s.name === studentName);
-    if (stuMatch) {
-      studentSum += (ev.totalCloMarks || 0);
-      count++;
-    }
-  });
+        evaluationsList.forEach(ev => {
+          const stuMatch = (ev.students || []).find(s => normalizeText(s.name) === studentName);
+          if (stuMatch) {
+            studentSum += (ev.totalCloMarks || 0);
+            count++;
+          }
+        });
 
-  const avgCloRaw = count > 0 ? studentSum / count : 0;
-
-  // 👉 IMPORTANT LINE (missing in your code)
-  const commScore = Math.min(50, +(avgCloRaw * 0.5).toFixed(2));
-
-  mapping[studentName] = commScore;
-});
+        const avgCloRaw = count > 0 ? studentSum / count : 0;
+        const commScore = Math.min(50, +(avgCloRaw * 0.5).toFixed(2));
+        mapping[studentName] = commScore;
+      });
     }
     return mapping;
   }, [committeeEval]);
+
+  const getCommitteeScoreForStudent = (studentName) =>
+    committeeMarksByStudent[normalizeText(studentName)];
 
   const handleSubmit = async () => {
     if (!selectedGroup || !selectedMilestone) {
@@ -270,7 +338,7 @@ export default function SupervisorEvaluations() {
 
       for (let i = 0; i < scores.length; i++) {
         const stuName = rubric[i].studentName;
-        const commScore = committeeMarksByStudent[stuName];
+        const commScore = getCommitteeScoreForStudent(stuName);
         if (commScore !== undefined) {
           const supScore = Number(scores[i]);
           const diff = Math.abs(supScore - commScore);
@@ -575,7 +643,7 @@ export default function SupervisorEvaluations() {
                           {item.studentName}
                         </TableCell>
                         <TableCell sx={{ fontWeight: 700, color: '#16a34a' }}>
-                          {committeeEval ? (committeeMarksByStudent[item.studentName] ?? "N/A") : "N/A"}
+                          {committeeEval ? (getCommitteeScoreForStudent(item.studentName) ?? "N/A") : "N/A"}
                         </TableCell>
                         <TableCell>{item.maxMarks}</TableCell>
                         <TableCell>

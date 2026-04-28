@@ -287,7 +287,9 @@ export default function CommitteeEvaluation() {
   if (!facultyData)
     return (
       <>
-        
+        <DashboardSectionHeader description="Here you can provide evaluations & rubrics. Select a group and fill marks, then submit, and see all evaluations.">
+          Evaluation & Rubrics
+        </DashboardSectionHeader>
         <div style={{ padding: '20px', color: '#666', textAlign: 'center' }}>
           You are not assigned to any active evaluation panel right now.
         </div>
@@ -297,8 +299,8 @@ export default function CommitteeEvaluation() {
   // ─── Main render ──────────────────────────────────────────────────────────
   return (
     <>
-      <DashboardSectionHeader description="Committee members can evaluate student groups and submit overall performance evaluations">
-       Committe Evaluation
+      <DashboardSectionHeader description="Here you can provide evaluations & rubrics. Select a group and fill marks, then submit, and see all evaluations.">
+        Evaluation & Rubrics
       </DashboardSectionHeader>
 
       <div className="eval-sup-container">
