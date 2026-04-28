@@ -207,20 +207,20 @@ export default function StudentIdeaProposal({ onTabChange }) {
   const fetchSupervisors = async () => {
     try {
       const response = await studentsSupervisorApi.getSupervisorOnSpeciality(formData.speciality);
-      const normalized = sortSupervisorsByName(
-        extractSupervisorList(response?.data).map(normalizeSupervisor)
-      ).filter(
+      const allFromApi = extractSupervisorList(response);
+      const normalized = sortSupervisorsByName(allFromApi.map(normalizeSupervisor));
+      const filtered = normalized.filter(
         (supervisor) =>
           hasAvailableSlots(supervisor) &&
           matchesAnySpecialization(supervisor, formData.speciality)
       );
 
-      if (!normalized.length) {
+      if (!filtered.length) {
         ToastService.error("No supervisor available for selected speciality!");
         return;
       }
 
-      setSupervisors(normalized);
+      setSupervisors(filtered);
       setIsModalOpen(true);
     } catch (error) {
       ToastService.error("Error fetching supervisors. Please try again.");

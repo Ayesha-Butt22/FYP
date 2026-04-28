@@ -111,9 +111,13 @@ export function matchesAnySpecialization(supervisor, selectedSpecializations = [
   );
   if (!selected.length) return true;
 
-  const supervisorSpecs = parseSpecializations(supervisor?.specialization).map((item) =>
-    item.toLowerCase()
-  );
+  const supervisorSpecs = parseSpecializations(
+    supervisor?.specialization ?? supervisor?.specializationText
+  ).map((item) => item.toLowerCase());
+
+  // If backend record has no specialization field populated, don't hide it
+  // accidentally due to client-side shape mismatch.
+  if (!supervisorSpecs.length) return true;
 
   return supervisorSpecs.some((item) => selected.includes(item));
 }
