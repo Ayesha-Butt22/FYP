@@ -10,6 +10,13 @@ import {
   createProposal,
   deleteProposal,
 } from "../Api/Proposals/proposalApi.jsx";
+import {
+  extractSupervisorList,
+  normalizeSupervisor,
+  sortSupervisorsByName,
+  hasAvailableSlots,
+  matchesAnySpecialization,
+} from "../../utils/supervisorData.js";
 import "./StudentIdeaProposal.css";
 
 const ALL_SPECIALITIES = [
@@ -200,11 +207,20 @@ export default function StudentIdeaProposal({ onTabChange }) {
   const fetchSupervisors = async () => {
     try {
       const response = await studentsSupervisorApi.getSupervisorOnSpeciality(formData.speciality);
-      if (!response?.data?.length) {
+      const normalized = sortSupervisorsByName(
+        extractSupervisorList(response?.data).map(normalizeSupervisor)
+      ).filter(
+        (supervisor) =>
+          hasAvailableSlots(supervisor) &&
+          matchesAnySpecialization(supervisor, formData.speciality)
+      );
+
+      if (!normalized.length) {
         ToastService.error("No supervisor available for selected speciality!");
         return;
       }
-      setSupervisors(response.data);
+
+      setSupervisors(normalized);
       setIsModalOpen(true);
     } catch (error) {
       ToastService.error("Error fetching supervisors. Please try again.");
@@ -457,7 +473,7 @@ const SupervisorModal = ({ supervisors, onClose, onSelect, isSelecting }) => (
       <h2 className="modal-title">Available Supervisors</h2>
       <div className="supervisor-list">
         {supervisors.map((supervisor) => (
-          <SupervisorCard key={supervisor._id} supervisor={supervisor} onSelect={() => onSelect(supervisor)} isSelecting={isSelecting} />
+          <SupervisorCard key={supervisor.id || supervisor.email} supervisor={supervisor} onSelect={() => onSelect(supervisor)} isSelecting={isSelecting} />
         ))}
       </div>
     </div>
@@ -475,7 +491,7 @@ const SupervisorCard = ({ supervisor, onSelect, isSelecting }) => {
           <strong>Department:</strong> {supervisor.department}
         </p>
         <p>
-          <strong>Specialization:</strong> {supervisor.specialization}
+          <strong>Specialization:</strong> {supervisor.specializationText || "N/A"}
         </p>
         <p>
           <strong>Slots:</strong> <span className="slots">{remainingSlots} remaining</span>

@@ -8,6 +8,11 @@ import { toastService } from '../ToastService/ToastService.jsx';
 import { DropdownSingleSelect, DropdownMultiSelect } from "./DropDowns.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
 import UploadExcelModal from "../UploadExcelModal";
+import {
+  extractSupervisorList,
+  normalizeSupervisor,
+  sortSupervisorsByName,
+} from "../../utils/supervisorData.js";
 
 const ALL_SPECIALITIES = [
   "AI", "ML", "Web", "Cloud", "Data Science", "Networks", "Security", "IoT", "Embedded", "Software Engineering"
@@ -206,17 +211,19 @@ export default function ManageSupervisors() {
     try {
       const res = await adminSupervisorApi.getSupervisors();
       if (res.success) {
-        const supervisors = res.data.map(sup => ({
-          ID: sup._id,
+        const supervisors = sortSupervisorsByName(
+          extractSupervisorList(res.data).map(normalizeSupervisor)
+        ).map((sup) => ({
+          ID: sup.id,
           Name: sup.name,
           Email: sup.email,
-          Department: sup.department || "",
-          Speciality: sup.specialization || "",
-          "Available Slots": sup.availableSlots || 0,
+          Department: sup.department,
+          Speciality: sup.specializationText,
+          "Available Slots": sup.availableSlots,
           Designation: sup.designation || "N/A",
-          "Booked Slots": sup.bookedSlots || 0,
-          "Booked": sup.bookedSlots || 0,
-          Status: getSupervisorStatus(sup.availableSlots, sup.bookedSlots)
+          "Booked Slots": sup.bookedSlots,
+          Booked: sup.bookedSlots,
+          Status: getSupervisorStatus(sup.availableSlots, sup.bookedSlots),
         }));
         setRows(supervisors);
       } else {

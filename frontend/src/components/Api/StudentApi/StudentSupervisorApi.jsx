@@ -21,7 +21,8 @@ class StudentsSupervisorApi {
         }
     }
     async getSupervisorOnSpeciality(spec) {
-        return await this.makeAPICall(`/supervisors/${encodeURIComponent(spec)}`, {}, { method: "GET" });
+        const specializationParam = Array.isArray(spec) ? spec.join(",") : spec;
+        return await this.makeAPICall(`/supervisors/${encodeURIComponent(specializationParam || "")}`, {}, { method: "GET" });
     }
 
 }

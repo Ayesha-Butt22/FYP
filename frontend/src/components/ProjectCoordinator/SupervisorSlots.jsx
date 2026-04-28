@@ -4,8 +4,13 @@ import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "./AppTable";
 import { toastService } from "../ToastService/ToastService.jsx";
 import { Confirm } from "../ConfirmService/ConfirmService.jsx";
-import axios from "axios";
+import { adminSupervisorApi } from "../Api/AdminApi/AdminApis.jsx";
 import "./SupervisorSlots.css";
+import {
+  extractSupervisorList,
+  normalizeSupervisor,
+  sortSupervisorsByName,
+} from "../../utils/supervisorData.js";
 
 const DESIGNATION_DEFAULTS = {
   Dean: 0,
@@ -18,47 +23,32 @@ const DESIGNATION_DEFAULTS = {
   "Teaching Fellow": 1,
 };
 
-const STORAGE_KEY = "pc_supervisor_slots";
-
 export default function SupervisorSlots() {
   const [supervisors, setSupervisors] = useState([]);
   const [editing, setEditing] = useState(null);
-  const [viewForCoordinator, setViewForCoordinator] = useState(false); // toggle new API
-
  
   useEffect(() => {
     const fetchSupervisors = async () => {
       try {
-        const url = "http://localhost:5000/api/admin/supervisors";
+        const coordinatorRes = await adminSupervisorApi.getSupervisorsForCoordinator();
+        const payload = coordinatorRes.success
+          ? coordinatorRes.data
+          : (await adminSupervisorApi.getSupervisors()).data;
 
-        const { data } = await axios.get(url);
-
-        const supArray = Array.isArray(data)
-            ? data
-            : data?.data ?? [];
-
-        setSupervisors(supArray);
+        setSupervisors(
+          sortSupervisorsByName(extractSupervisorList(payload).map(normalizeSupervisor))
+        );
       } catch (err) {
-        console.warn("Failed to fetch supervisors", err);
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) setSupervisors(JSON.parse(raw));
+        toastService.error("Failed to fetch supervisors");
       }
     };
     fetchSupervisors();
-  }, [viewForCoordinator]);
-
-  const saveToStorage = (updated) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch (err) {
-      console.error("Failed to save supervisor slots to localStorage", err);
-    }
-  };
+  }, []);
 
   const openEdit = (sup) => {
-    const defaultSlots = DESIGNATION_DEFAULTS[sup.designation] ?? 0;
+    const defaultSlots = DESIGNATION_DEFAULTS[sup.designation] ?? sup.availableSlots ?? 0;
     setEditing({
-      id: sup._id || sup.id,
+      id: sup.id,
       name: sup.name,
       email: sup.email,
       designation: sup.designation || "",
@@ -73,10 +63,10 @@ export default function SupervisorSlots() {
     const ok = await Confirm(`Are you sure you want to delete ${sup.name}?`);
     if (!ok) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/${sup._id}`);
-      const updated = supervisors.filter((s) => s._id !== sup._id);
+      const res = await adminSupervisorApi.deleteSupervisor(sup.id);
+      if (!res.success) throw new Error(res.error || "Delete failed");
+      const updated = supervisors.filter((s) => s.id !== sup.id);
       setSupervisors(updated);
-      saveToStorage(updated);
       toastService.success("Supervisor deleted");
     } catch (err) {
       toastService.error("Failed to delete supervisor");
@@ -102,28 +92,30 @@ export default function SupervisorSlots() {
     }
 
     try {
-      const { data } = await axios.post("http://localhost:5000/api/admin/supervisor/update-slots", {
-        email: editing.email,
-        designation: editing.designation,
-        bookedSlots: booked,
-      });
-
-      const updated = supervisors.map((s) =>
-        s._id === data.data._id
-          ? {
-              ...s,
-              bookedSlots: data.data.bookedSlots,
-              availableSlots: data.data.availableSlots,
-              designation: data.data.designation,
-            }
-          : s
+      const res = await adminSupervisorApi.updateSupervisorSlots(
+        editing.email,
+        editing.designation,
+        booked
       );
+
+      if (!res.success) {
+        throw new Error(res.error || res.data?.error || "Failed to update supervisor");
+      }
+
+      const refreshedRes = await adminSupervisorApi.getSupervisorsForCoordinator();
+      const payload = refreshedRes.success
+        ? refreshedRes.data
+        : (await adminSupervisorApi.getSupervisors()).data;
+
+      const updated = sortSupervisorsByName(
+        extractSupervisorList(payload).map(normalizeSupervisor)
+      );
+
       setSupervisors(updated);
-      saveToStorage(updated);
       setEditing(null);
       toastService.success("Supervisor slots updated successfully");
     } catch (err) {
-      const message = err.response?.data?.error || "Failed to update supervisor";
+      const message = err.message || err.response?.data?.error || "Failed to update supervisor";
       toastService.error(message);
     }
   };
@@ -140,8 +132,8 @@ export default function SupervisorSlots() {
   const rows = Array.isArray(supervisors)
     ? supervisors.map((s) => ({
         Name: <strong className="sup-name">{s.name}</strong>,
-        Department: s.department,
-        Speciality: s.specialization || s.speciality,
+        Department: s.department || "—",
+        Speciality: s.specializationText || "—",
         Designation: s.designation || "—",
         "Available Slots": s.availableSlots,
         "Booked Slots": s.bookedSlots,
@@ -156,11 +148,9 @@ export default function SupervisorSlots() {
         <button className="table-action-btn" onClick={() => openEdit(sup)}>
           Edit
         </button>
-        {!viewForCoordinator && (
-          <button className="table-action-btn delete" onClick={() => handleDelete(sup)}>
-            Delete
-          </button>
-        )}
+        <button className="table-action-btn delete" onClick={() => handleDelete(sup)}>
+          Delete
+        </button>
       </>
     );
   };
@@ -174,8 +164,6 @@ export default function SupervisorSlots() {
       >
         Supervisor Slots
       </DashboardSectionHeader>
-
-     
 
       <div className="sup-table-card">
         <AppTable headers={headers} rows={rows} renderActions={renderActions} />
