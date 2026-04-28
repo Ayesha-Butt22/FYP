@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./cs-clo-part-1.css";
+import ToastService from "../../ToastService/ToastService.jsx";
 
 const CsCloPart1 = ({ onMarksSubmit }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -113,6 +114,12 @@ const CsCloPart1 = ({ onMarksSubmit }) => {
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
+    if (Object.keys(marks).length < loData.length) {
+      ToastService.warning(
+        `Please evaluate all ${loData.length} Learning Objectives (LOs) before submitting.`
+      );
+      return;
+    }
     setIsSubmitted(true);
     setIsOpen(false);
     if (onMarksSubmit) {
