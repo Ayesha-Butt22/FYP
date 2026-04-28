@@ -1,3 +1,4 @@
+//ManageTemplate 
 import React, { useEffect, useRef, useState } from "react";
 import DashboardSectionHeader from "./DashboardSectionHeader";
 import AppTable from "../Admin/AppTable.jsx";
