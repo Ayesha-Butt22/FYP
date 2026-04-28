@@ -9,6 +9,34 @@ const StudentUploadedTemplate = require("../models/StudentUploadedTemplate");
 const isValidOfficialEmail = email => /^[a-zA-Z0-9._]+@riphah\.edu\.pk$/.test(email);
 
 // ========== CREATE USER (Admin, Supervisor, Coordinator) ==========
+const DESIGNATION_SLOTS = {
+  "dean": 0,
+  "professor": 1,
+  "associate professor": 2,
+  "associateprofessor": 2,
+  "assistant professor": 3,
+  "assistantprofessor": 3,
+  "lecturer": 3,
+  "sr lecturer": 3,
+  "sr.lecturer": 3,
+  "srlecturer": 3,
+  "lecturer/sr lecturer": 3,
+  "junior lecturer": 2,
+  "juniorlecturer": 2,
+  "research associate": 1,
+  "researchassociate": 1,
+  "research assistant": 1,
+  "researchassistant": 1,
+  "teaching fellow": 1,
+  "teachingfellow": 1,
+};
+
+const normalizeDesignation = (designation) => {
+  return designation.toLowerCase().replace(/\s+/g, " ").trim();
+};
+
+
+// ========== CREATE USER (Admin, Supervisor, Coordinator) ==========
 exports.createUser = async (req, res) => {
   try {
     const {
@@ -31,6 +59,13 @@ exports.createUser = async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
+    let availableSlotsMaping = 0;
+
+    if (role === "supervisor" && designation) {
+      const key = normalizeDesignation(designation);
+      availableSlotsMaping = DESIGNATION_SLOTS[key] ?? 0;
+    }
+
     const newUser = new User({
       name,
       email,
@@ -39,7 +74,7 @@ exports.createUser = async (req, res) => {
       department,
       designation,
       specialization,
-      availableSlots,
+      availableSlots: availableSlotsMaping,
       bookedSlots,
       gender: gender ? gender.toLowerCase() : null,
       contactNumber: contactNumber || null,

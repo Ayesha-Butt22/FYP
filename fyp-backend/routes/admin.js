@@ -89,7 +89,7 @@ router.put(
 );
 
 // ========== DELETE USER ==========
-router.delete('/:id', protect, isAdmin, adminController.deleteUser);
+router.delete('/:id', protect, adminController.deleteUser);
 
 // ========== REMOVE COORDINATOR (convert to supervisor) - PATCH ==========
 router.patch('/remove-coordinator/:id', protect, isAdmin, adminController.removeCoordinator);
