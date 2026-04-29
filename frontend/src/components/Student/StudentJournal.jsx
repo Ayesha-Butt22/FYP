@@ -90,7 +90,7 @@ export default function StudentJournal() {
 
   return (
     <Box>
-      <DashboardSectionHeader description="Monthly project diary collecting meetings, completed tasks, milestone submissions and templates. Export to PDF for portfolio.">
+      <DashboardSectionHeader description="Monthly project diary collecting meetings, completed tasks, milestone submissions and templates.">
         FYP Journey Journal
       </DashboardSectionHeader>
 
