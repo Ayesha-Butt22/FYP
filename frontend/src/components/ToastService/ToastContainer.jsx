@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toastService } from './toastService';
+import { toastService } from './ToastService';
 import './Toast.css';
 
 const ToastContainer = () => {

@@ -1,7 +1,7 @@
 //Auth.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { authService } from "../Api/authService.jsx";
+import { authService } from "../Api/AuthService.jsx";
 import { toastService } from "../ToastService/ToastService.jsx";
 import "../../styles/AuthPortal.css";
 
