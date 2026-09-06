@@ -32,7 +32,7 @@ export default function Tasks() {
       setLoading(true);
       const token = localStorage.getItem("token");
       
-      const response = await fetch("http://localhost:5000/api/tasks/group-members", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/tasks/group-members`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -74,7 +74,7 @@ export default function Tasks() {
     try {
       const token = localStorage.getItem("token");
       
-      const response = await fetch("http://localhost:5000/api/tasks", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/tasks`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -109,7 +109,7 @@ export default function Tasks() {
     try {
       const token = localStorage.getItem("token");
       
-      const response = await fetch("http://localhost:5000/api/tasks/create", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/tasks/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -177,7 +177,7 @@ export default function Tasks() {
     try {
       const token = localStorage.getItem("token");
       
-      const response = await fetch(`http://localhost:5000/api/tasks/${selectedTaskId}/update`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/tasks/${selectedTaskId}/update`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

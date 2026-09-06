@@ -21,7 +21,7 @@ export default function OverviewSupervisor({ onTabChange }) {
       try {
         setLoading(true);
         // Fetch stats
-        const statsRes = await fetch("http://localhost:5000/api/supervisor/stats", {
+        const statsRes = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/supervisor/stats`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         
@@ -35,7 +35,7 @@ export default function OverviewSupervisor({ onTabChange }) {
         if (statsData.success) setStats(statsData.stats);
 
         // Fetch activities
-        const actRes = await fetch("http://localhost:5000/api/supervisor/recent-activities", {
+        const actRes = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/supervisor/recent-activities`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         
@@ -61,7 +61,7 @@ export default function OverviewSupervisor({ onTabChange }) {
       const email = localStorage.getItem('email');
       if (!email) return false;
       try {
-        const response = await fetch(`http://localhost:5000/api/evaluation/checkFaculty`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/evaluation/checkFaculty`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

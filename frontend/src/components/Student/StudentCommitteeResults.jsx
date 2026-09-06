@@ -21,7 +21,7 @@ export default function StudentCommitteeResults() {
     const fetchEvaluations = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/committee-evaluation/student/${email}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/committee-evaluation/student/${email}`);
         if (res.data.success) {
           setEvals(res.data.data || []);
         }

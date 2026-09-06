@@ -25,7 +25,7 @@ export default function StudentJournal() {
     }
 
     setLoading(true);
-    fetch(`http://localhost:5000/api/journal?email=${studentEmail}`)
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/journal?email=${studentEmail}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.months) setGroupedByMonth(data.months);

@@ -51,7 +51,7 @@ export default function CoordinatorSupervisorResults() {
   const fetchResults = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/coordinator/final-results", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/coordinator/final-results`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       if (res.data.success) {
@@ -75,7 +75,7 @@ export default function CoordinatorSupervisorResults() {
       return;
     }
     try {
-      const res = await axios.post("http://localhost:5000/api/coordinator/publish-supervisor-result", { id: supEvalId }, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/coordinator/publish-supervisor-result`, { id: supEvalId }, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       if (res.data.success) {

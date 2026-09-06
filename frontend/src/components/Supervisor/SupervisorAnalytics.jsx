@@ -49,10 +49,10 @@ export default function SupervisorAnalytics() {
         const headers = { Authorization: `Bearer ${token}` };
 
         // Fetch Groups for Progress
-        const groupsRes = await axios.get("http://localhost:5000/api/supervisor/groups", { headers });
+        const groupsRes = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/supervisor/groups`, { headers });
         
         // Fetch Performance (Scores)
-        const performanceRes = await axios.get("http://localhost:5000/api/coordinator/final-results", { headers });
+        const performanceRes = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/coordinator/final-results`, { headers });
 
         if (groupsRes.data.success) {
           setGroupData(groupsRes.data.groups);

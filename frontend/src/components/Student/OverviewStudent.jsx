@@ -82,7 +82,7 @@ export default function OverviewStudent({ onTabChange }) {
     }
     const checkSlotBooking = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/deadlineSchedule/getSlots/${studentEmail}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/deadlineSchedule/getSlots/${studentEmail}`);
         const data = await res.json();
 
         if (!data.success) {
@@ -156,9 +156,9 @@ export default function OverviewStudent({ onTabChange }) {
         const headers = { "Authorization": `Bearer ${token}` };
 
         const [statsRes, activitiesRes, resultsRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/student/stats`, { headers }),
-          fetch(`http://localhost:5000/api/student/recent-activities`, { headers }),
-          fetch(`http://localhost:5000/api/coordinator/final-results`, { headers })
+          fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/student/stats`, { headers }),
+          fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/student/recent-activities`, { headers }),
+          fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/coordinator/final-results`, { headers })
         ]);
 
         const statsData = await statsRes.json();

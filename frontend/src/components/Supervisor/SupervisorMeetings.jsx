@@ -23,7 +23,7 @@ import "./SupervisorMeetings.css";
 import { toastService } from "../ToastService/ToastService.jsx";
 
 /* ================= CONFIG ================= */
-const API = "http://localhost:5000/api/meetings";
+const API = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/meetings`;
 
 
 /* ================= HELPERS ================= */

@@ -1,5 +1,5 @@
 // src/Api/PresentationService.jsx
-const API_BASE_URL = "http://localhost:5000/api/deadlineSchedule";
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/deadlineSchedule`;
 
 const PresentationService = {
   async getPresentation(week, fypPart) {

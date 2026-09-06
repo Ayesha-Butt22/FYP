@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5000/api/groups";
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/groups`;
 
 class StudentGroupApi {
     async makeAPICall(endpoint, payload = {}, options = {}) {

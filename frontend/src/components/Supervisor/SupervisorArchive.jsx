@@ -59,7 +59,7 @@ const toggleTech = (id) => {
     const loadProjects = async () => {
         try {
             setLoading(true);
-            const res = await fetch("http://localhost:5000/api/archive");
+            const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/archive`);
             const data = await res.json();
             if (data.success) {
                 setProjects(data.data);

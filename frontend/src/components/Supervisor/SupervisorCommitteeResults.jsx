@@ -48,7 +48,7 @@ export default function SupervisorCommitteeResults() {
     const fetchEvaluations = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/committee-evaluation/onlyApproved?supervisor=${encodeURIComponent(email)}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/committee-evaluation/onlyApproved?supervisor=${encodeURIComponent(email)}`);
         if (res.data.success && Array.isArray(res.data.data)) {
           const groupedData = {};
           res.data.data.forEach((item) => {

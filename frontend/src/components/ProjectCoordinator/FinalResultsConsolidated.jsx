@@ -64,7 +64,7 @@ export default function FinalResultsConsolidated({ role = "coordinator" }) {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:5000/api/coordinator/final-results", {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/coordinator/final-results`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         if (res.data.success) {
@@ -88,7 +88,7 @@ export default function FinalResultsConsolidated({ role = "coordinator" }) {
               return belongsToStudent && (r.isPublished || r.isSupPublished || r.isArchived);
             });
           } else if (userRole.includes("supervisor")) {
-            const supRes = await axios.get("http://localhost:5000/api/supervisor/groups", {
+            const supRes = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/supervisor/groups`, {
               headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             });
             if (supRes.data && supRes.data.success) {
@@ -170,7 +170,7 @@ export default function FinalResultsConsolidated({ role = "coordinator" }) {
     }
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/committee-evaluation/approve", { id: committeeEvalId }, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/committee-evaluation/approve`, { id: committeeEvalId }, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       if (res.data.success) {

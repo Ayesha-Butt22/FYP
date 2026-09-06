@@ -1,7 +1,7 @@
 // TemplateService.jsx
 import axios from "axios";
 
-const API_BASE = "http://localhost:5000/api/student-templates";
+const API_BASE = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/student-templates`;
 
 export default class TemplateService {
   // ---------------- UPLOAD FILE ----------------
@@ -50,6 +50,6 @@ export default class TemplateService {
   static buildFileUrl(filePath) {
     if (!filePath) return "";
     if (filePath.startsWith("http")) return filePath;
-    return "http://localhost:5000/" + filePath; // Hardcoded fallback for local consistency
+    return `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/` + filePath; // Hardcoded fallback for local consistency
   }
 }

@@ -10,7 +10,7 @@ import SeCloPart2 from "./SE part-2/SeCloPart2.jsx";
 import SlotBookingModal from "../Student/Modal/SlotsBookingModal.jsx";
 
 // Centralized API configuration for this component
-const BACKEND_URL = "http://localhost:5000";
+const BACKEND_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000");
 const API_BASE = `${BACKEND_URL}/api/committee-evaluation`;
 
 export default function CommitteeEvaluation() {

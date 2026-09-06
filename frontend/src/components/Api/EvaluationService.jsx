@@ -24,7 +24,7 @@ function getApiBase() {
   }
 
   // 4) Fallback to localhost
-  return "http://localhost:5000/api/evaluation";
+  return `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/evaluation`;
 }
 
 const API_BASE = getApiBase();

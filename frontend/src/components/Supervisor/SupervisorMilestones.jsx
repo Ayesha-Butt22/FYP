@@ -69,7 +69,7 @@ export default function SupervisorMilestones() {
     const fetchDepTemplates = async () => {
         if (!supervisorDept) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/templates?department=${supervisorDept}`);
+            const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/templates?department=${supervisorDept}`);
             if (res.ok) {
                 const data = await res.json();
                 setDepTemplates(data.data || []);
@@ -553,7 +553,7 @@ export default function SupervisorMilestones() {
                                             <div className="stack-value">
                                                 {milestone.uploadedFile?.url ? (
                                                     <div>
-                                                        <a href={`http://localhost:5000/${milestone.uploadedFile.url}`} target="_blank" rel="noreferrer" className="link-inline">
+                                                        <a href={`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${milestone.uploadedFile.url}`} target="_blank" rel="noreferrer" className="link-inline">
                                                             {milestone.uploadedFile.name || "View uploaded file"}
                                                         </a>
                                                         {milestone.uploadedFile.uploadedAt && (

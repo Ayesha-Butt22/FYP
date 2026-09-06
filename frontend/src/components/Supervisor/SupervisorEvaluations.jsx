@@ -175,7 +175,7 @@ export default function SupervisorEvaluations() {
         try {
           setFetchingComm(true);
           const res = await axios.get(
-            `http://localhost:5000/api/committee-evaluation/onlyApproved?supervisor=${encodeURIComponent(email || "")}`
+            `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/committee-evaluation/onlyApproved?supervisor=${encodeURIComponent(email || "")}`
           );
           console.log("[SupervisorEvaluations] committee API response:", res.data);
 

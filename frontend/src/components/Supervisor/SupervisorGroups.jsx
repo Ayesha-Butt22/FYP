@@ -8,7 +8,7 @@ import "./SupervisorGroups.css";
 // ─── Logic ───
 async function fetchGroupSubmissions(groupId) {
   try {
-    const res = await fetch(`http://localhost:5000/api/supervisor/group/${groupId}/submissions`);
+    const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/supervisor/group/${groupId}/submissions`);
     const data = await res.json();
     return data.submissions || [];
   } catch {

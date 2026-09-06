@@ -83,7 +83,7 @@ export default function StudentChecklist() {
   useEffect(() => {
     const loadSemesterStart = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/semester-start");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/semester-start`);
         setSemesterStart(res.data?.date || null);
       } catch (err) {
         console.error("Error loading semester start:", err);
@@ -149,7 +149,7 @@ export default function StudentChecklist() {
         const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
         console.log("🔍 Fetching tasks from http://localhost:5000/api/tasks...");
-        const res = await axios.get("http://localhost:5000/api/tasks", config);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/tasks`, config);
         console.log("📦 Tasks API Response:", res.data);
 
         let fetchedTasks = [];

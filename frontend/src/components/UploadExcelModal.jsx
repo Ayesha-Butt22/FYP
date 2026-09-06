@@ -25,7 +25,7 @@ const UploadExcelModal = ({ isOpen, onClose }) => {
         try {
             setStatus("Uploading...");
             const token = localStorage.getItem("token");
-            const response = await fetch("http://localhost:5000/api/admin/upload-excel", {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/admin/upload-excel`, {
                 method: "POST",
                 headers: {
                     ...(token && { Authorization: `Bearer ${token}` }),

@@ -78,14 +78,14 @@ export default function StudentDashboard() {
     const checkArchivedStatus = async () => {
       if (!user?.email) return;
       try {
-        const res = await fetch(`http://localhost:5000/api/auth/user-by-email/${user.email}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/auth/user-by-email/${user.email}`);
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.user) {
             // Actually, let's fetch my profile info which should have isArchived from my group
             const sapId = data.user.studentId || data.user.sapId;
             if (sapId) {
-                const sInfo = await fetch(`http://localhost:5000/api/templates/student/${sapId}`);
+                const sInfo = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/templates/student/${sapId}`);
                 if (sInfo.ok) {
                     const info = await sInfo.json();
                     if (info.isArchived) {

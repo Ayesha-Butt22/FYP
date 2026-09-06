@@ -5,7 +5,7 @@ import AppTable from "./AppTable.jsx";
 import { toastService } from "../ToastService/ToastService.jsx";
 import "./SupervisorTemplates.css";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = (import.meta.env.VITE_API_URL || "http://localhost:5000");
 
 const TEMPLATES = [
   { id: "t01", label: "Template-01: Project Team (MS Word)" },

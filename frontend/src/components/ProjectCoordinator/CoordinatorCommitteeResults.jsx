@@ -32,7 +32,7 @@ export default function CoordinatorCommitteeResults() {
   useEffect(() => {
     const fetchEvaluations = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/committee-evaluation");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/committee-evaluation`);
         if (res.data.success && Array.isArray(res.data.data)) {
           // Group items by (groupId + scheduleId) to aggregate panel evaluations for a specific milestone
           const groupedData = {};
@@ -190,7 +190,7 @@ export default function CoordinatorCommitteeResults() {
       return;
     }
     try {
-      const res = await axios.post(`http://localhost:5000/api/committee-evaluation/approve`, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/committee-evaluation/approve`, {
         id: row.id,
       });
       if (res.data.success) {

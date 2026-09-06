@@ -16,7 +16,7 @@ import "./StudentMeetings.css";
 import { toastService } from "../ToastService/ToastService.jsx";
 
 /* ================= CONFIG ================= */
-const API_BASE = "http://localhost:5000/api/meetings";
+const API_BASE = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/meetings`;
 
 /* ================= HELPERS ================= */
 const formatDate = (d) =>

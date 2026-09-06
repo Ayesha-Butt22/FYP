@@ -29,8 +29,8 @@ export default function OverviewCoordinator({ onTabChange }) {
         const headers = { "Authorization": `Bearer ${token}` };
 
         const [statsRes, activitiesRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/coordinator/stats`, { headers }),
-          fetch(`http://localhost:5000/api/coordinator/recent-activities`, { headers })
+          fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/coordinator/stats`, { headers }),
+          fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/coordinator/recent-activities`, { headers })
         ]);
 
         if (statsRes.ok) {

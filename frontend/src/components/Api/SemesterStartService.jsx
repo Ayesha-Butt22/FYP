@@ -1,5 +1,5 @@
 //components/Api/SemesterStartService.js
-const API = "http://localhost:5000/api/semester-start";
+const API = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/semester-start`;
 
 const SemesterStartService = {
   async getDate() {

@@ -37,7 +37,7 @@ const TEMPLATE_DEFINITIONS = [
     { code: "t06", label: "Template-06: Complete Project Report (PPT)", week: 14, fypPart: 2 },
 ];
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = (import.meta.env.VITE_API_URL || "http://localhost:5000");
 
 export default function StudentUploads() {
     const [allFiles, setAllFiles] = useState([]);
@@ -394,7 +394,7 @@ export default function StudentUploads() {
                                     className="st-ref-btn"
                                     onClick={() => {
                                         const path = row["Reference File"].filePath;
-                                        window.open(`http://localhost:5000${path.startsWith('/') ? '' : '/'}${path}`, "_blank");
+                                        window.open(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}${path.startsWith('/') ? '' : '/'}${path}`, "_blank");
                                     }}
                                 >
                                     Download Ref

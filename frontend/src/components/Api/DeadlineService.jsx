@@ -1,5 +1,5 @@
 //DeadlineService.jsx
-const BASE_URL = "http://localhost:5000/api/deadline/getdeadline";
+const BASE_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/deadline/getdeadline`;
 
 const DeadLineService = {
     async getDeadLines(session) {
