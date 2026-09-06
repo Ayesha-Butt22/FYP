@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { User, Mail, Phone, Eye, EyeOff, Camera } from 'lucide-react';
 import DashboardSectionHeader from './DashboardSectionHeader';
 import { authService } from '../Api/AuthService';
-import './AdminProfile.css';
+import './Adminprofile.css';
 import { formatRoleLabel } from "../../utils/roleLabel.js";
 
 export default function AdminProfile() {
